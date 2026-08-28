@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Para onde você quer voar?</h1>
+        <p>Descubra destinos incríveis, compare hospedagens e leia avaliações de outros viajantes.</p>
+        <form class="busca" action="{% url 'destinations:lista' %}" method="get">
+            <input type="text" name="q" placeholder="Busque por cidade, país ou palavra-chave...">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+</section>
+
+{% if destaques %}
+<section class="secao">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>⭐ Destinos em destaque</h2>
+            <a href="{% url 'destinations:lista' %}">Ver todos →</a>
+        </div>
+        <div class="grade">
+            {% for destino in destaques %}
+                {% include 'destinations/_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="secao">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Adicionados recentemente</h2>
+            <a href="{% url 'destinations:lista' %}">Ver todos →</a>
+        </div>
+        {% if recentes %}
+        <div class="grade">
+            {% for destino in recentes %}
+                {% include 'destinations/_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="vazio">Nenhum destino cadastrado ainda. Entre no <a href="/admin/">admin</a> para adicionar o primeiro!</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

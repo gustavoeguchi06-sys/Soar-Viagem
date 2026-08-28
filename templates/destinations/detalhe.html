@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ destino.nome }} — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem{% endblock %}
+{% block topbar_class %}{% endblock %}
+{% block estilos_legado %}{% endblock %}
+
+{% block content %}
+{# ===================== HERO ===================== #}
+<section class="hero">
+    <img class="hero__foto" id="heroFoto" src="{{ viagem.fotos.0 }}" alt="{{ destino.nome }}">
+    <button class="seta seta--esq" type="button" data-hero="-1" aria-label="Foto anterior">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+    </button>
+    <button class="seta seta--dir" type="button" data-hero="1" aria-label="Próxima foto">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+    </button>
+
+    <div class="hero__conteudo">
+        <div class="wrap">
+            <div class="migalhas">
+                <a href="{% url 'destinations:home' %}">Home</a> <span class="sep">›</span>
+                <a href="{% url 'destinations:lista' %}">Viagens</a> <span class="sep">›</span>
+                <a href="{% url 'destinations:lista' %}">{{ viagem.regiao }}</a> <span class="sep">›</span>
+                <a href="{% url 'destinations:lista' %}">{{ viagem.curto }}</a> <span class="sep">›</span>
+                <span class="atual">{{ destino.nome }}</span>
+            </div>
+
+            <span class="selo-exp">{{ viagem.selo }}</span>
+            <h1>{{ destino.nome }}</h1>
+            <p class="hero__sub">{{ viagem.subtitulo }}</p>
+
+            <div class="hero__meta">
+                <div class="meta-item">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                    <div><b>{{ viagem.periodo }}</b><small>{{ viagem.mes_ano }}</small></div>
+                </div>
+                <div class="meta-item">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>
+                    <div><b>{{ viagem.dias }}</b><small>{{ viagem.noites }}</small></div>
+                </div>
+                <div class="meta-item">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-pin"></use></svg>
+                    <div><b>{{ viagem.estado }}</b><small>{{ destino.pais }}</small></div>
+                </div>
+                <div class="meta-item">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-grupo"></use></svg>
+                    <div><b>Viagem</b><small>em grupo</small></div>
+                </div>
+            </div>
+
+            <div class="nota">
+                <span class="estrelas-ouro">
+                    {% for cheia in viagem.estrelas %}
+                    <svg class="ic-f {% if not cheia %}vazia{% endif %}" viewBox="0 0 24 24"><use href="#ic-estrela"></use></svg>
+                    {% endfor %}
+                </span>
+                <b>{{ viagem.nota }}</b>
+                <span>({{ viagem.total_avaliacoes }} avaliações)</span>
+            </div>
+
+            <div class="hero__thumbs">
+                {% for foto in viagem.thumbs %}
+                <button type="button" class="{% if forloop.first %}ativo{% endif %}" data-foto="{{ foto }}">
+                    <img src="{{ foto }}" alt="Foto {{ forloop.counter }} de {{ destino.nome }}">
+                </button>
+                {% endfor %}
+                <button type="button" class="mais" data-foto="{{ viagem.fotos.0 }}">
+                    <span><b>+{{ viagem.mais_fotos }}</b>fotos</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ===================== ABAS ===================== #}
+<nav class="abas" id="abas">
+    <div class="wrap abas__inner">
+        <a href="#sobre" class="ativa">Sobre a viagem</a>
+        <a href="#roteiro">Roteiro</a>
+        <a href="#incluso">Incluso / Não incluso</a>
+        <a href="#hospedagem">Hospedagem</a>
+        <a href="#informacoes">Informações</a>
+        <a href="#faq">FAQ</a>
+        <a href="#avaliacoes">Avaliações</a>
+    </div>
+</nav>
+
+<div class="wrap conteudo">
+    <div class="grade-viagem">
+        {# ---------- coluna principal ---------- #}
+        <div id="sobre">
+            <div class="servicos">
+                {% for s in viagem.servicos %}
+                <div class="servico">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#{{ s.icone }}"></use></svg>
+                    <b>{{ s.titulo }}<br>{{ s.sub }}</b>
+                </div>
+                {% endfor %}
+            </div>
+
+            <section class="bloco">
+                <h2 class="bloco__titulo">Destaques da viagem</h2>
+                <div class="destaques">
+                    {% for d in viagem.destaques %}
+                    <div class="destaque-item">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                        <span>{{ d }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="bloco" id="roteiro">
+                <h2 class="bloco__titulo">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                    Roteiro resumido
+                </h2>
+                <div class="roteiro" id="roteiroLista">
+                    {% for dia in viagem.roteiro %}
+                    <details class="dia">
+                        <summary>
+                            <img class="dia__foto" src="{{ dia.foto }}" alt="{{ dia.titulo }}">
+                            <span class="dia__texto">
+                                <b>{{ dia.titulo }}</b>
+                                <small>{{ dia.resumo }}</small>
+                            </span>
+                            <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
+                        </summary>
+                        <div class="dia__corpo">{{ dia.detalhe }}</div>
+                    </details>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn--contorno btn--bloco btn-roteiro" id="verRoteiro">
+                    Ver roteiro completo
+                </button>
+            </section>
+        </div>
+
+        {# ---------- card de reserva ---------- #}
+        <aside class="lateral" id="reservar">
+            <div class="reserva">
+                <span class="selo-disp">Disponível</span>
+                <p class="reserva__label">A partir de</p>
+                <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
+                <p class="reserva__pp">por pessoa</p>
+
+                <div class="pagamentos">
+                    <b>Formas de pagamento</b>
+                    <div class="pagamentos__lista">
+                        <div class="pgto">
+                            <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cartao"></use></svg>
+                            <span><b>Até 12x</b><small>no cartão</small></span>
+                        </div>
+                        <div class="pgto">
+                            <svg class="ic" viewBox="0 0 24 24"><use href="#ic-boleto"></use></svg>
+                            <span><b>Boleto</b><small>bancário</small></span>
+                        </div>
+                        <div class="pgto">
+                            <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-pix"></use></svg>
+                            <span><b>PIX</b><small>com desconto</small></span>
+                        </div>
+                    </div>
+                </div>
+
+                <a class="btn btn--verde btn--bloco" href="https://wa.me/5511999999999?text=Quero+reservar+{{ destino.nome|urlencode }}"
+                   target="_blank" rel="noopener">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                    Reservar agora
+                </a>
+                <a class="btn btn--contorno btn--bloco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
+                    <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
+                    Falar com a Soar
+                </a>
+
+                <div class="reserva__divisor"></div>
+
+                <div class="saida">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                    <div>
+                        <b>Próxima saída</b>
+                        <small>{{ viagem.proxima_saida }}</small>
+                    </div>
+                </div>
+
+                <div class="vagas">
+                    <span>Vagas disponíveis</span>
+                    <span class="pill-vagas">{{ viagem.vagas }} vagas</span>
+                </div>
+
+                <div class="acomodacoes">
+                    <b>Escolha sua acomodação</b>
+                    {% for a in viagem.acomodacoes %}
+                    <label class="acom">
+                        <input type="radio" name="acomodacao" value="{{ a.chave }}"
+                               {% if a.padrao %}checked{% endif %}>
+                        <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small></span>
+                        <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="ajuda">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-fone"></use></svg>
+                <div>
+                    <b>Dúvidas?</b>
+                    <small>Nosso time está pronto para te ajudar!</small>
+                </div>
+                <a class="ajuda__whats" href="https://wa.me/5511999999999" target="_blank" rel="noopener"
+                   aria-label="Falar no WhatsApp">
+                    <svg class="ic-f" viewBox="0 0 24 24" style="width:18px;height:18px"><use href="#ic-whats"></use></svg>
+                </a>
+            </div>
+        </aside>
+    </div>
+
+    {# ===================== HOSPEDAGEM + GALERIA ===================== #}
+    <div class="duo">
+        <section class="painel" id="hospedagem">
+            <h3 class="painel__titulo">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cama"></use></svg>
+                Hospedagem
+            </h3>
+            <div class="hosp-galeria">
+                <div class="hosp-principal">
+                    <img id="hospFoto" src="{{ viagem.hospedagem.fotos.0 }}" alt="{{ viagem.hospedagem.nome }}">
+                    <button class="seta seta--esq" type="button" data-hosp="-1" aria-label="Foto anterior">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                    </button>
+                    <button class="seta seta--dir" type="button" data-hosp="1" aria-label="Próxima foto">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                    </button>
+                    <div class="hosp-legenda">
+                        <b>{{ viagem.hospedagem.nome }}</b>
+                        <small>{{ viagem.hospedagem.sub }}</small>
+                    </div>
+                </div>
+                <div class="hosp-mini">
+                    {% for f in viagem.hospedagem.miniaturas %}
+                    <img src="{{ f }}" alt="Quarto da {{ viagem.hospedagem.nome }}">
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="comodidades">
+                {% for c in viagem.hospedagem.comodidades %}
+                <span class="comodidade">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#{{ c.icone }}"></use></svg>
+                    {{ c.nome }}
+                </span>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="painel" id="galeria">
+            <h3 class="painel__titulo">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-imagem"></use></svg>
+                Galeria
+            </h3>
+            <div class="galeria-grade">
+                {% for f in viagem.galeria %}
+                <a href="{{ f }}" target="_blank" rel="noopener">
+                    <img src="{{ f }}" alt="Foto de {{ destino.nome }}">
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    {# ===================== DEPOIMENTOS ===================== #}
+    <section class="depoimentos" id="avaliacoes">
+        <div class="depoimentos__grade">
+            <div>
+                <h2>Quem já viajou,<br>recomenda!</h2>
+                <a class="depoimentos__link" href="#form-avaliacao">Ver todas avaliações →</a>
+            </div>
+            <div class="carrossel">
+                <button class="carrossel__setas" type="button" data-depo="-1" aria-label="Anterior">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                </button>
+                <div class="trilho" id="trilhoDepo">
+                    {% for d in viagem.depoimentos %}
+                    <article class="depo">
+                        <div class="depo__topo">
+                            <img src="{{ d.avatar }}" alt="{{ d.nome }}">
+                            <div>
+                                <b>{{ d.nome }}</b>
+                                <small>{{ d.local }}</small>
+                            </div>
+                        </div>
+                        <span class="estrelas-ouro">
+                            {% for cheia in d.estrelas %}
+                            <svg class="ic-f {% if not cheia %}vazia{% endif %}" viewBox="0 0 24 24"><use href="#ic-estrela"></use></svg>
+                            {% endfor %}
+                        </span>
+                        <p>“{{ d.texto }}”</p>
+                        {% if d.foto %}<img class="depo__foto" src="{{ d.foto }}" alt="Foto da viagem">{% endif %}
+                    </article>
+                    {% endfor %}
+                </div>
+                <button class="carrossel__setas" type="button" data-depo="1" aria-label="Próximo">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    {# ===================== INCLUSO / INFORMAÇÕES / FAQ ===================== #}
+    <div class="roteiro bloco">
+        <details class="dia" id="incluso">
+            <summary>
+                <span class="dia__texto" style="padding-left:8px">
+                    <b>Incluso / Não incluso</b>
+                    <small>O que está contemplado no valor da viagem.</small>
+                </span>
+                <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
+            </summary>
+            <div class="dia__corpo" style="padding-left:22px">
+                <div class="destaques" style="grid-template-columns:1fr 1fr">
+                    {% for i in viagem.incluso %}
+                    <div class="destaque-item">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                        <span>{{ i }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </details>
+
+        <details class="dia" id="informacoes">
+            <summary>
+                <span class="dia__texto" style="padding-left:8px">
+                    <b>Informações importantes</b>
+                    <small>Documentos, bagagem, clima e condicionamento físico.</small>
+                </span>
+                <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
+            </summary>
+            <div class="dia__corpo" style="padding-left:22px">
+                {% for i in viagem.informacoes %}<p>• {{ i }}</p>{% endfor %}
+            </div>
+        </details>
+
+        <details class="dia" id="faq">
+            <summary>
+                <span class="dia__texto" style="padding-left:8px">
+                    <b>FAQ</b>
+                    <small>Perguntas frequentes sobre a expedição.</small>
+                </span>
+                <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
+            </summary>
+            <div class="dia__corpo" style="padding-left:22px">
+                {% for p in viagem.faq %}
+                <p><b style="color:var(--preto)">{{ p.pergunta }}</b><br>{{ p.resposta }}</p>
+                {% endfor %}
+            </div>
+        </details>
+    </div>
+
+    {# ===================== FORMULÁRIO DE AVALIAÇÃO ===================== #}
+    <div class="form-avaliacao" id="form-avaliacao">
+        <h3>Deixe sua avaliação</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-grade">
+                <div class="campo">
+                    <label for="{{ form.nome_autor.id_for_label }}">{{ form.nome_autor.label }}</label>
+                    {{ form.nome_autor }}
+                    {% for erro in form.nome_autor.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
+                </div>
+                <div class="campo">
+                    <label for="{{ form.nota.id_for_label }}">{{ form.nota.label }}</label>
+                    {{ form.nota }}
+                    {% for erro in form.nota.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
+                </div>
+                <div class="campo campo--full">
+                    <label for="{{ form.comentario.id_for_label }}">{{ form.comentario.label }}</label>
+                    {{ form.comentario }}
+                    {% for erro in form.comentario.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
+                </div>
+                <div class="campo campo--full">
+                    <label for="{{ form.foto.id_for_label }}">{{ form.foto.label }}</label>
+                    {{ form.foto }}
+                    {% for erro in form.foto.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn--verde" style="margin-top:16px">Publicar avaliação</button>
+        </form>
+    </div>
+</div>
+
+{# ===================== CHAMADA FINAL ===================== #}
+<section class="cta-final">
+    <img class="cta-final__foto" src="{% static 'img/cta-van.svg' %}" alt="">
+    <div class="wrap cta-final__inner">
+        <div>
+            <h2>Pronto para viver essa experiência?</h2>
+            <p>Garanta sua vaga e venha descobrir {{ viagem.curto }} com a Soar.</p>
+        </div>
+        <div class="cta-final__botoes">
+            <a class="btn btn--verde" href="#reservar">Reservar agora</a>
+            <a class="btn btn--branco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
+                <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
+                Falar com a Soar
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/viagem.js' %}" defer></script>
+{% endblock %}

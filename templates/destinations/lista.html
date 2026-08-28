@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Destinos — Soar{% endblock %}
+
+{% block content %}
+<section class="secao">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Todos os destinos</h2>
+        </div>
+
+        <form class="busca" method="get" style="max-width: 520px; margin-bottom: 22px;">
+            <input type="text" name="q" value="{{ busca }}" placeholder="Busque por cidade, país ou palavra-chave...">
+            <button type="submit">Buscar</button>
+        </form>
+
+        <div class="filtros">
+            <a class="filtro {% if not continente_ativo %}ativo{% endif %}"
+               href="{% url 'destinations:lista' %}{% if busca %}?q={{ busca }}{% endif %}">Todos</a>
+            {% for codigo, nome in continentes %}
+            <a class="filtro {% if continente_ativo == codigo %}ativo{% endif %}"
+               href="?continente={{ codigo }}{% if busca %}&q={{ busca }}{% endif %}">{{ nome }}</a>
+            {% endfor %}
+        </div>
+
+        {% if destinos %}
+        <div class="grade">
+            {% for destino in destinos %}
+                {% include 'destinations/_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="vazio">Nenhum destino encontrado{% if busca %} para "{{ busca }}"{% endif %}. 😕</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

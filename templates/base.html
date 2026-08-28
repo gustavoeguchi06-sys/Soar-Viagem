@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Soar Operadora — viagens em grupo pelo Brasil{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {# style.css veste as páginas antigas; a de viagem usa só o viagem.css #}
+    {% block estilos_legado %}<link rel="stylesheet" href="{% static 'css/style.css' %}">{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/viagem.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% include 'partials/_icones.html' %}
+
+<header class="topbar {% block topbar_class %}topbar--solido{% endblock %}">
+    <div class="wrap topbar__inner">
+        <a href="{% url 'destinations:home' %}" class="marca">
+            <svg class="marca__logo" width="34" height="30" viewBox="0 0 34 30" fill="none" aria-hidden="true">
+                <path d="M2 9.5C8.5 3 24 1.5 32 6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M6.5 13.5c5-4 15.5-5 21 -1.6" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".65"/>
+            </svg>
+            <span>
+                <span class="marca__nome">SOAR</span>
+                <small class="marca__sub">OPERADORA</small>
+            </span>
+        </a>
+
+        <nav class="topnav">
+            <a href="{% url 'destinations:lista' %}">Viagens</a>
+            <a href="{% url 'destinations:lista' %}">Destinos</a>
+            <a href="{% url 'destinations:lista' %}">Experiências</a>
+            <a href="{% url 'destinations:lista' %}">Calendário</a>
+            <a href="{% url 'destinations:home' %}">Guia Soar</a>
+            <a href="{% url 'destinations:home' %}">Sobre a Soar</a>
+            <a href="{% url 'destinations:home' %}">B2B</a>
+        </nav>
+
+        <div class="topbar__acoes">
+            <a class="btn-whats-circ" href="https://wa.me/5511999999999" target="_blank" rel="noopener"
+               aria-label="Falar com a Soar no WhatsApp">
+                <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
+            </a>
+            <a class="btn btn--verde" href="#reservar">Reservar agora</a>
+        </div>
+    </div>
+</header>
+
+{% if messages %}
+<div class="avisos">
+    {% for message in messages %}
+    <div class="aviso">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="rodape">
+    <div class="wrap">
+        <div class="rodape__grade">
+            <div>
+                <h4>Soar Operadora</h4>
+                <p>Viagens em grupo pelos destinos mais bonitos do Brasil, com roteiro cuidado,
+                   guias especializados e atendimento próximo do começo ao fim.</p>
+            </div>
+            <div>
+                <h4>Viagens</h4>
+                <ul>
+                    <li><a href="{% url 'destinations:lista' %}">Todos os destinos</a></li>
+                    <li><a href="{% url 'destinations:lista' %}">Expedições</a></li>
+                    <li><a href="{% url 'destinations:lista' %}">Calendário de saídas</a></li>
+                    <li><a href="{% url 'destinations:lista' %}">Experiências</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>A Soar</h4>
+                <ul>
+                    <li><a href="{% url 'destinations:home' %}">Sobre a Soar</a></li>
+                    <li><a href="{% url 'destinations:home' %}">Guia Soar</a></li>
+                    <li><a href="{% url 'destinations:home' %}">B2B / Agentes</a></li>
+                    <li><a href="/admin/">Área administrativa</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Fale com a gente</h4>
+                <ul>
+                    <li><a href="https://wa.me/5511999999999" target="_blank" rel="noopener">WhatsApp</a></li>
+                    <li><a href="mailto:contato@soaroperadora.com.br">contato@soaroperadora.com.br</a></li>
+                    <li><a href="tel:+551130000000">(11) 3000-0000</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="rodape__base">
+            <span>© {% now "Y" %} Soar Operadora — todos os direitos reservados.</span>
+            <span>CNPJ 00.000.000/0001-00 · Cadastur 00.000000.00-0</span>
+        </div>
+    </div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
