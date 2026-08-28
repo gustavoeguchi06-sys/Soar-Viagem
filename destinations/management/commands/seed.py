@@ -15,6 +15,28 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dados = [
             {
+                'nome': 'Alter do Chão', 'slug': 'alter-do-chao', 'pais': 'Brasil', 'continente': 'AM',
+                'descricao': 'O Caribe amazônico: praias de areia branca que surgem na seca do rio '
+                             'Tapajós, água doce e transparente, a famosa Ilha do Amor e o pôr do sol '
+                             'mais bonito do Pará. A vila reúne floresta, cultura ribeirinha e um '
+                             'ritmo tranquilo a 30 km de Santarém.',
+                'preco_medio_diaria': 596, 'melhor_epoca': 'Agosto a janeiro (seca do Tapajós)',
+                'destaque': True,
+                'hospedagens': [
+                    ('Pousada Vila Amazônia', 'pousada', 420, 'A duas quadras da Ilha do Amor, com '
+                                                              'piscina, rede na varanda e café da manhã regional.'),
+                    ('Hotel Beira Tapajós', 'hotel', 560, 'Quartos com vista para o rio e '
+                                                          'deck próprio para o pôr do sol.'),
+                ],
+                'avaliacoes': [
+                    ('Mariana S.', 5, 'Lugar incrível! A Soar cuidou de tudo nos mínimos detalhes.'),
+                    ('Bruno C.', 5, 'A Ilha do Amor no fim da tarde é uma das coisas mais bonitas '
+                                    'que já vi no Brasil.'),
+                    ('Letícia A.', 5, 'Passeio de voadeira no Lago Verde valeu cada centavo. '
+                                      'Guia local excelente!'),
+                ],
+            },
+            {
                 'nome': 'Jalapão/TO', 'slug': 'jalapao', 'pais': 'Brasil', 'continente': 'AM',
                 'descricao': 'Uma aventura no coração do Brasil: fervedouros de água cristalina onde é '
                              'impossível afundar, dunas alaranjadas com o pôr do sol mais bonito do '
