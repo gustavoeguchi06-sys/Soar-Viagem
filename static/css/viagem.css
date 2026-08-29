@@ -287,14 +287,6 @@ body.pagina-viagem {
                     letter-spacing: -.02em; color: var(--preto); line-height: 1.05; }
 .reserva__pp { font-size: .85rem; color: var(--tinta-suave); margin-bottom: 13px; }
 
-.pagamentos { background: var(--fundo-suave); border-radius: var(--r-md); padding: 12px 11px; margin-bottom: 14px; }
-.pagamentos > b { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 9px; }
-.pagamentos__lista { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.pgto { display: flex; align-items: center; gap: 7px; }
-.pgto .ic, .pgto .ic-f { width: 19px; height: 19px; color: var(--verde-escuro); }
-.pgto b { display: block; font-size: .74rem; font-weight: 700; line-height: 1.2; }
-.pgto small { display: block; font-size: .68rem; color: var(--tinta-suave); line-height: 1.2; }
-
 .reserva .btn { padding: 12px 20px; }
 .reserva .btn + .btn { margin-top: 9px; }
 
@@ -498,7 +490,6 @@ body.pagina-viagem {
 @media (max-width: 520px) {
     .servicos { grid-template-columns: repeat(2, 1fr); }
     .destaques { grid-template-columns: 1fr; }
-    .pagamentos__lista { grid-template-columns: 1fr; gap: 10px; }
     .hero__thumbs button { width: 96px; height: 64px; }
     .hero__thumbs .mais { width: 76px; height: 64px; }
     .cta-final__botoes { flex-direction: column; width: 100%; }
@@ -556,4 +547,6 @@ body:not(.pagina-viagem) .hero { background: linear-gradient(135deg, #0d4f31 0%,
 body:not(.pagina-viagem) .busca button,
 body:not(.pagina-viagem) .selo-destaque { background: var(--verde); }
 body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color: var(--verde); }
-body:not(.pagina-viagem) a { color: var(--verde); }
+/* :where() derruba a especificidade para 0-0-1: o link comum fica verde, mas
+   quem tem cor propria (.btn--verde, .filtro.ativo...) continua mandando. */
+:where(body:not(.pagina-viagem)) a { color: var(--verde); }

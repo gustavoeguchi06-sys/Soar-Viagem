@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <section class="hero">
@@ -27,6 +28,24 @@
     </div>
 </section>
 {% endif %}
+
+{# ===== Soar 60+ ===== #}
+<section class="secao secao--sem-topo">
+    <div class="container">
+        <div class="soar60">
+            <img class="soar60__foto" src="{% static 'img/soar-60.svg' %}" alt="">
+            <div class="soar60__conteudo">
+                <span class="soar60__selo">Soar 60+</span>
+                <h2>Viajar não tem idade.</h2>
+                <p>Viagens pensadas para quem quer conhecer novos lugares com conforto,
+                   segurança e companhia.</p>
+                <a class="btn btn--verde"
+                   href="https://wa.me/5511999999999?text=Quero+conhecer+as+viagens+Soar+60%2B"
+                   target="_blank" rel="noopener">Conheça as viagens 60+</a>
+            </div>
+        </div>
+    </div>
+</section>
 
 <section class="secao">
     <div class="container">

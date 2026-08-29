@@ -2,7 +2,7 @@
 """Conteúdo editorial da página de viagem.
 
 A página de detalhe (o "front" da expedição) mostra bem mais coisas do que os
-campos do model — roteiro, acomodações, formas de pagamento, FAQ...  Aqui ficam
+campos do model — roteiro, acomodações, FAQ...  Aqui ficam
 esses textos: um bloco padrão que serve para qualquer destino e ajustes por
 destino (chave = slug), fáceis de editar depois.
 """
@@ -61,8 +61,6 @@ INFORMACOES = [
 FAQ = [
     {'pergunta': 'Preciso ter experiência para fazer essa viagem?',
      'resposta': 'Não. O roteiro é pensado para todos os níveis, com caminhadas curtas e ritmo tranquilo.'},
-    {'pergunta': 'Como funciona o pagamento?',
-     'resposta': 'Em até 12x no cartão, boleto bancário ou PIX com desconto. A vaga é confirmada com a entrada.'},
     {'pergunta': 'Posso viajar sozinho(a)?',
      'resposta': 'Sim! Boa parte do grupo viaja sozinha. Na acomodação dupla dividimos o quarto com alguém do mesmo gênero.'},
     {'pergunta': 'E se eu precisar cancelar?',

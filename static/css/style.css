@@ -215,6 +215,54 @@ img { max-width: 100%; display: block; }
     padding: 28px 0; margin-top: 40px; text-align: center; font-size: 0.9rem;
 }
 
+/* ===== Soar 60+ =====
+   As cores verdes vem das variaveis do viagem.css, que e carregado em todas
+   as paginas pelo base.html. */
+.secao--sem-topo { padding-top: 0; }
+
+.soar60 {
+    position: relative; overflow: hidden; border-radius: 18px;
+    background: var(--verde-escuro, #0d4f31); color: #fff;
+    min-height: 340px; display: flex; align-items: flex-end;
+}
+.soar60__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.soar60::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(100deg, rgba(9, 34, 24, .92) 0%, rgba(9, 34, 24, .74) 42%,
+                                rgba(9, 34, 24, .12) 78%);
+}
+.soar60__conteudo {
+    position: relative; z-index: 2; max-width: 540px;
+    padding: clamp(22px, 4vw, 40px);
+}
+.soar60__selo {
+    display: inline-block; background: rgba(255, 255, 255, .16); color: #fff;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: 6px;
+    font-size: .7rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    padding: 6px 13px; margin-bottom: 14px;
+}
+.soar60 h2 {
+    color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800;
+    font-size: clamp(1.65rem, 4.2vw, 2.5rem); letter-spacing: -.02em; margin-bottom: 10px;
+}
+.soar60 p {
+    font-size: clamp(.95rem, 2.2vw, 1.08rem); color: rgba(255, 255, 255, .9);
+    max-width: 430px; margin-bottom: 20px;
+}
+
+@media (max-width: 760px) {
+    .soar60 { min-height: 300px; }
+    /* sem espaco para a foto ao lado, o degrade cobre o card inteiro */
+    .soar60::after { background: linear-gradient(180deg, rgba(9, 34, 24, .45) 0%,
+                                                 rgba(9, 34, 24, .88) 46%, rgba(9, 34, 24, .95) 100%); }
+    .soar60__conteudo { max-width: none; }
+    .soar60 p { max-width: none; }
+}
+
+@media (max-width: 480px) {
+    .soar60 .btn { width: 100%; }
+}
+
 /* ===== Responsivo ===== */
 @media (max-width: 640px) {
     .hospedagem { flex-direction: column; }
