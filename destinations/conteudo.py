@@ -2,14 +2,9 @@
 """Conteúdo editorial da página de viagem.
 
 A página de detalhe (o "front" da expedição) mostra bem mais coisas do que os
-campos do model — calendário de embarque, pacotes de acomodação, itens
-opcionais, roteiro, FAQ...  Aqui ficam esses textos: um bloco padrão que serve
-para qualquer destino e ajustes por destino (chave = slug), fáceis de editar
-depois.
-
-A aba "Escolha sua viagem" é interativa: o dicionário `dados` devolvido no fim
-vai para o JavaScript (via `json_script`) e alimenta o calendário, a troca de
-pacote e o cálculo do total.
+campos do model — roteiro, acomodações, formas de pagamento, FAQ...  Aqui ficam
+esses textos: um bloco padrão que serve para qualquer destino e ajustes por
+destino (chave = slug), fáceis de editar depois.
 """
 from django.templatetags.static import static
 
@@ -30,52 +25,13 @@ FOTOS_HOSPEDAGEM = ['img/pousada.svg', 'img/quarto-1.svg', 'img/quarto-2.svg',
 
 AVATARES = ['img/avatar-1.svg', 'img/avatar-2.svg', 'img/avatar-3.svg']
 
-# --------------------------------------------------------------------------- #
-# Abas do miolo da página (a barra logo abaixo do hero)
-# --------------------------------------------------------------------------- #
-ABAS = [
-    {'chave': 'viagem', 'icone': 'ic-mala', 'rotulo': 'Escolha sua viagem'},
-    {'chave': 'destino', 'icone': 'ic-mapa', 'rotulo': 'Sobre o destino'},
-    {'chave': 'incluso', 'icone': 'ic-mochila', 'rotulo': 'O que está incluso'},
-    {'chave': 'roteiro', 'icone': 'ic-doc', 'rotulo': 'Roteiro'},
-    {'chave': 'hospedagens', 'icone': 'ic-cama', 'rotulo': 'Hospedagens'},
-    {'chave': 'informacoes', 'icone': 'ic-info', 'rotulo': 'Informações'},
-    {'chave': 'avaliacoes', 'icone': 'ic-estrela-c', 'rotulo': 'Avaliações'},
-]
-
-# --------------------------------------------------------------------------- #
-# Blocos padrão (valem para qualquer destino)
-# --------------------------------------------------------------------------- #
-DURACOES = [
-    {'chave': '4d', 'rotulo': '4 dias / 3 noites', 'padrao': True},
-    {'chave': '5d', 'rotulo': '5 dias / 4 noites', 'padrao': False},
-    {'chave': '6d', 'rotulo': '6 dias / 5 noites', 'padrao': False},
-]
-
-INCLUSO_ITENS = [
-    {'icone': 'ic-onibus', 'nome': 'Transporte executivo'},
-    {'icone': 'ic-hotel', 'nome': 'Hospedagem selecionada'},
-    {'icone': 'ic-cafe', 'nome': 'Café da manhã'},
-    {'icone': 'ic-ticket', 'nome': 'Passeios e entradas'},
-    {'icone': 'ic-guia', 'nome': 'Guia local'},
-    {'icone': 'ic-escudo', 'nome': 'Seguro viagem'},
-]
-
-PAGAMENTOS = [
-    {'icone': 'ic-cartao', 'preenchido': False, 'nome': '10x sem juros no cartão'},
-    {'icone': 'ic-boleto', 'preenchido': False, 'nome': 'Boleto bancário'},
-    {'icone': 'ic-pix', 'preenchido': True, 'nome': 'PIX com desconto'},
-]
-
-CONFIANCA = [
-    {'icone': 'ic-whats', 'preenchido': True, 'titulo': 'Dúvidas?',
-     'sub': 'Fale com nosso time no WhatsApp'},
-    {'icone': 'ic-relogio', 'preenchido': False, 'titulo': 'Atendimento',
-     'sub': 'Segunda a sexta, das 9h às 18h'},
-    {'icone': 'ic-mala', 'preenchido': False, 'titulo': 'Embarque',
-     'sub': 'Diversos pontos em São Paulo'},
-    {'icone': 'ic-cadeado', 'preenchido': False, 'titulo': 'Reserva segura',
-     'sub': 'Ambiente 100% protegido'},
+SERVICOS = [
+    {'icone': 'ic-onibus', 'titulo': 'Transporte', 'sub': 'confortável'},
+    {'icone': 'ic-cama', 'titulo': 'Hospedagem', 'sub': 'selecionada'},
+    {'icone': 'ic-guia', 'titulo': 'Guias', 'sub': 'especializados'},
+    {'icone': 'ic-escudo', 'titulo': 'Seguro', 'sub': 'viagem'},
+    {'icone': 'ic-camera', 'titulo': 'Passeios', 'sub': 'inclusos'},
+    {'icone': 'ic-coracao', 'titulo': 'Atendimento', 'sub': 'próximo'},
 ]
 
 COMODIDADES = [
@@ -86,34 +42,12 @@ COMODIDADES = [
 ]
 
 INCLUSO = [
-    'Transporte executivo durante toda a viagem',
-    'Hospedagem selecionada com café da manhã',
+    'Transporte durante toda a viagem',
+    'Hospedagem com café da manhã',
     'Guias locais especializados',
     'Passeios e ingressos do roteiro',
     'Seguro viagem',
     'Grupo acompanhado por anfitrião Soar',
-]
-
-NAO_INCLUSO = [
-    'Passagem aérea até o destino',
-    'Almoços, jantares e bebidas',
-    'Passeios marcados como opcionais',
-    'Gastos pessoais e gorjetas',
-]
-
-OPCIONAIS = [
-    {'chave': 'traslado', 'nome': 'Traslado particular (Aeroporto / Hotel)',
-     'unidade': 'Por trecho', 'preco': 120,
-     'info': 'Carro exclusivo para você, com motorista aguardando no desembarque.'},
-    {'chave': 'passeio', 'nome': 'Passeio de barco ao pôr do sol',
-     'unidade': 'Por pessoa', 'preco': 120,
-     'info': 'Saída no fim da tarde, com bebida a bordo e retorno após o pôr do sol.'},
-    {'chave': 'jantar', 'nome': 'Jantar especial com culinária regional',
-     'unidade': 'Por pessoa', 'preco': 150,
-     'info': 'Menu de três tempos preparado com ingredientes da região.'},
-    {'chave': 'seguro', 'nome': 'Seguro viagem premium (cobertura ampliada)',
-     'unidade': 'Por pessoa', 'preco': 60,
-     'info': 'Amplia as coberturas médicas, de bagagem e de cancelamento.'},
 ]
 
 INFORMACOES = [
@@ -128,14 +62,11 @@ FAQ = [
     {'pergunta': 'Preciso ter experiência para fazer essa viagem?',
      'resposta': 'Não. O roteiro é pensado para todos os níveis, com caminhadas curtas e ritmo tranquilo.'},
     {'pergunta': 'Como funciona o pagamento?',
-     'resposta': 'Em até 10x sem juros no cartão, boleto bancário ou PIX com desconto. '
-                 'A vaga é confirmada com a entrada.'},
+     'resposta': 'Em até 12x no cartão, boleto bancário ou PIX com desconto. A vaga é confirmada com a entrada.'},
     {'pergunta': 'Posso viajar sozinho(a)?',
-     'resposta': 'Sim! Boa parte do grupo viaja sozinha. Na acomodação dupla dividimos o quarto '
-                 'com alguém do mesmo gênero.'},
+     'resposta': 'Sim! Boa parte do grupo viaja sozinha. Na acomodação dupla dividimos o quarto com alguém do mesmo gênero.'},
     {'pergunta': 'E se eu precisar cancelar?',
-     'resposta': 'Cancelamentos com até 30 dias da saída têm reembolso conforme as condições '
-                 'gerais do contrato.'},
+     'resposta': 'Cancelamentos com até 30 dias da saída têm reembolso conforme as condições gerais do contrato.'},
 ]
 
 # --------------------------------------------------------------------------- #
@@ -143,40 +74,24 @@ FAQ = [
 # --------------------------------------------------------------------------- #
 POR_DESTINO = {
     'alter-do-chao': {
-        'selo': 'Alter do Chão - PA',
+        'selo': 'Expedição',
         'subtitulo': 'O paraíso amazônico te espera',
-        'regiao': 'Pará',
+        'regiao': 'Norte',
         'estado': 'Pará',
+        'periodo': '15 a 18',
+        'mes_ano': 'Maio 2027',
+        'dias': '4 dias',
+        'noites': '3 noites',
+        'proxima_saida': '15 a 18 de Maio de 2027',
+        'vagas': 14,
         'nota': '4,9',
         'total_avaliacoes': 128,
+        'preco_base': 2980,
         'mais_fotos': 28,
-        'embarque_cidade': 'São Paulo - SP',
-        'data_sugerida': [2027, 5, 15],
+        'hospedagem_nome': 'Pousada Vila Amazônia',
+        'hospedagem_sub': 'A duas quadras da Ilha do Amor',
         'fotos': ['img/alter-1.svg', 'img/alter-2.svg', 'img/alter-3.svg',
                   'img/alter-4.svg', 'img/alter-5.svg', 'img/alter-por-do-sol.svg'],
-        'promo_foto': 'img/alter-por-do-sol.svg',
-        'promo_titulo': 'Quer uma experiência ainda mais completa?',
-        'promo_texto': 'Conheça nossos pacotes de 5 e 6 dias com roteiros exclusivos!',
-        'precos': {
-            'duplo': {'4d': 2980, '5d': 3480, '6d': 3980},
-            'triplo': {'4d': 2780, '5d': 3250, '6d': 3720},
-            'single': {'4d': 4280, '5d': 4980, '6d': 5680},
-        },
-        'opcionais': [
-            {'chave': 'traslado', 'nome': 'Traslado particular (Aeroporto de Santarém / Hotel)',
-             'unidade': 'Por trecho', 'preco': 120,
-             'info': 'Carro exclusivo para você, com motorista aguardando no desembarque '
-                     'do aeroporto de Santarém.'},
-            {'chave': 'voadeira', 'nome': 'Passeio de voadeira ao Lago Verde',
-             'unidade': 'Por pessoa', 'preco': 120,
-             'info': 'Volta de voadeira pelo Lago Verde, com parada para banho nas praias de areia branca.'},
-            {'chave': 'jantar', 'nome': 'Jantar especial com culinária regional',
-             'unidade': 'Por pessoa', 'preco': 150,
-             'info': 'Menu de três tempos com peixes do Tapajós, tucupi e jambu.'},
-            {'chave': 'seguro', 'nome': 'Seguro viagem premium (cobertura ampliada)',
-             'unidade': 'Por pessoa', 'preco': 60,
-             'info': 'Amplia as coberturas médicas, de bagagem e de cancelamento.'},
-        ],
         'destaques': [
             'Ilha do Amor', 'Lago Verde', 'Praia de Ponta de Pedras',
             'Floresta Nacional do Tapajós', 'Pôr do sol no Tapajós', 'Vila de Alter do Chão',
@@ -199,26 +114,30 @@ POR_DESTINO = {
              'detalhe': 'Manhã livre na Praia de Ponta de Pedras, almoço na vila e traslado '
                         'para o aeroporto de Santarém conforme o horário do seu voo.'},
         ],
-        'depoimento_destaque': {
-            'texto': 'Lugar incrível! A Soar cuidou de tudo nos mínimos detalhes.',
-            'nome': 'Mariana S.', 'local': 'São Paulo - SP',
-        },
+        'depoimentos': [
+            {'nome': 'Mariana S.', 'local': 'São Paulo/SP', 'nota': 5,
+             'texto': 'Lugar incrível! A Soar cuidou de tudo nos mínimos detalhes.'},
+            {'nome': 'Bruno C.', 'local': 'Alter do Chão/PA', 'nota': 5,
+             'texto': 'A Ilha do Amor no fim da tarde é uma das coisas mais bonitas que já vi no Brasil.'},
+        ],
     },
     'jalapao': {
-        'selo': 'Jalapão - TO',
+        'selo': 'Expedição',
         'subtitulo': 'Uma aventura no coração do Brasil',
-        'regiao': 'Tocantins',
+        'regiao': 'Norte',
         'estado': 'Tocantins',
+        'periodo': '16 a 21',
+        'mes_ano': 'Junho 2027',
+        'dias': '6 dias',
+        'noites': '5 noites',
+        'proxima_saida': '16 a 21 de Junho de 2027',
+        'vagas': 12,
         'nota': '4,9',
         'total_avaliacoes': 87,
+        'preco_base': 3588,
         'mais_fotos': 36,
-        'embarque_cidade': 'São Paulo - SP',
-        'data_sugerida': [2027, 6, 16],
-        'precos': {
-            'duplo': {'4d': 3588, '5d': 4120, '6d': 4640},
-            'triplo': {'4d': 3388, '5d': 3890, '6d': 4380},
-            'single': {'4d': 4988, '5d': 5620, '6d': 6240},
-        },
+        'hospedagem_nome': 'Pousada Jalapão',
+        'hospedagem_sub': 'Conforto e natureza',
         'destaques': [
             'Fervedouro do Alecrim', 'Dunas do Jalapão', 'Cânion Sussuapara',
             'Cachoeira da Velha', 'Pôr do sol nas Dunas', 'E muito mais',
@@ -249,20 +168,21 @@ POR_DESTINO = {
              'detalhe': 'Café da manhã, despedida do grupo e retorno a Palmas para o voo/ônibus de volta. '
                         'Previsão de chegada em São Paulo no fim da noite.'},
         ],
-        'depoimento_destaque': {
-            'texto': 'Foi sem dúvidas a maior aventura que já fiz. Tudo muito bem organizado!',
-            'nome': 'Mariana S.', 'local': 'São Paulo - SP',
-        },
+        'depoimentos': [
+            {'nome': 'Mariana S.', 'local': 'Serra da Canastra', 'nota': 5,
+             'texto': 'Foi sem dúvidas a maior aventura que já fiz. Tudo muito bem organizado e os guias '
+                      'são incríveis!'},
+            {'nome': 'Ricardo T.', 'local': 'Jalapão/TO', 'nota': 5,
+             'texto': 'O Jalapão com a Soar superou minhas expectativas. Cada detalhe feito com muito carinho.'},
+            {'nome': 'Ana Paula L.', 'local': 'Alter do Chão/PA', 'nota': 5,
+             'texto': 'A energia do grupo e os lugares incríveis tornam a viagem inesquecível. Já quero a próxima!'},
+        ],
     },
 }
 
-# preços genéricos quando o destino não tem tabela própria (multiplicam a diária)
-FATOR_PACOTE = {'duplo': 1.0, 'triplo': 0.93, 'single': 1.44}
-FATOR_DURACAO = {'4d': 1.0, '5d': 1.17, '6d': 1.33}
-
 
 def _moeda(valor):
-    """2980 -> '2.980'"""
+    """3588 -> '3.588'"""
     return '{:,.0f}'.format(valor).replace(',', '.')
 
 
@@ -273,7 +193,7 @@ def _estrelas(nota):
 
 
 def _fotos_do_destino(destino, cfg):
-    """Fotos cadastradas no admin; completa com os SVGs de exemplo."""
+    """Fotos cadastradas no admin; completa com os SVGs de exemplo do destino."""
     fotos = [img.imagem.url for img in destino.imagens.all() if img.imagem]
     if destino.imagem_capa:
         fotos.insert(0, destino.imagem_capa.url)
@@ -286,52 +206,33 @@ def _fotos_do_destino(destino, cfg):
 def _roteiro_generico(destino):
     nome = destino.nome
     modelos = [
-        ('Dia 1 — Chegada', 'Recepção do grupo e traslado até a hospedagem.',
-         'Recepção da equipe Soar, traslado, check-in e encontro do grupo no fim da tarde.'),
-        ('Dia 2 — {}'.format(nome), 'Os principais cartões-postais do destino.',
+        ('Dia 1 — Embarque', 'Encontro do grupo e viagem com destino a {}.'.format(nome),
+         'Encontro com a equipe Soar nos pontos combinados e embarque.'),
+        ('Dia 2 — Chegada em {}'.format(nome), 'Chegada, café da manhã e início dos passeios.',
+         'Acomodação, café da manhã e primeiro passeio de reconhecimento com o grupo.'),
+        ('Dia 3 — Passeios guiados', 'Os principais cartões-postais do destino.',
          'Dia inteiro de passeios guiados pelos pontos mais bonitos da região.'),
-        ('Dia 3 — Natureza e cultura', 'Trilhas, banhos e contato com a cultura local.',
+        ('Dia 4 — Natureza e cultura', 'Trilhas, banhos e contato com a cultura local.',
          'Roteiro de natureza pela manhã e imersão na cultura local à tarde.'),
-        ('Dia 4 — Retorno', 'Manhã livre e traslado de volta.',
-         'Manhã livre para as últimas fotos e traslado conforme o horário do seu voo.'),
-        ('Dia 5 — Passeios opcionais', 'Tempo livre e passeios opcionais.',
-         'Manhã de passeio opcional e tarde livre para descansar ou explorar por conta própria.'),
-        ('Dia 6 — Despedida', 'Café da manhã, saída e previsão de chegada à noite.',
+        ('Dia 5 — Tempo livre', 'Passeios opcionais e tempo livre para relaxar.',
+         'Manhã de passeio e tarde livre para descansar ou explorar por conta própria.'),
+        ('Dia 6 — Retorno', 'Café da manhã, saída e previsão de chegada à noite.',
          'Café da manhã, despedida do grupo e retorno com previsão de chegada à noite.'),
     ]
     return [{'titulo': t, 'resumo': r, 'detalhe': d} for t, r, d in modelos]
-
-
-def _pacotes(destino, cfg):
-    """Monta os quatro cartões de acomodação, cada um com preço por duração."""
-    tabela = cfg.get('precos')
-    if not tabela:
-        diaria = float(destino.preco_medio_diaria or 598)
-        base = round(diaria * 5 / 10) * 10
-        tabela = {
-            chave: {d: int(round(base * FATOR_PACOTE[chave] * FATOR_DURACAO[d] / 10) * 10)
-                    for d in FATOR_DURACAO}
-            for chave in FATOR_PACOTE
-        }
-
-    modelos = [
-        ('duplo', 'Duplo/Casal', '2 pessoas', True),
-        ('triplo', 'Triplo', '3 pessoas', False),
-        ('single', 'Single', '1 pessoa', False),
-    ]
-    pacotes = [{'chave': c, 'nome': n, 'pessoas': p, 'padrao': d,
-                'consulte': False, 'precos': tabela[c]} for c, n, p, d in modelos]
-    pacotes.append({'chave': 'crianca', 'nome': 'Criança (até 10 anos)', 'pessoas': '',
-                    'padrao': False, 'consulte': True, 'precos': {}})
-    return pacotes
 
 
 def montar_viagem(destino, avaliacoes):
     """Monta o dicionário usado pelo template da página de viagem."""
     cfg = POR_DESTINO.get(destino.slug, {})
     fotos = _fotos_do_destino(destino, cfg)
-    curto = destino.nome.split('/')[0].strip()
 
+    preco_base = cfg.get('preco_base')
+    if preco_base is None:
+        preco_base = int(destino.preco_medio_diaria * 6) if destino.preco_medio_diaria else 3588
+
+    # a nota/quantidade da vitrine pode vir do conteúdo editorial (histórico da
+    # operadora); sem isso, usa o que está no banco
     nota = cfg.get('nota') or destino.media_avaliacoes or 4.9
     total = cfg.get('total_avaliacoes') or len(avaliacoes) or 87
 
@@ -339,16 +240,17 @@ def montar_viagem(destino, avaliacoes):
     for i, dia in enumerate(roteiro):
         dia['foto'] = fotos[(i + 1) % len(fotos)]
 
-    pacotes = _pacotes(destino, cfg)
-    duracoes = [dict(d) for d in DURACOES]
-    opcionais = cfg.get('opcionais') or OPCIONAIS
-
-    hospedagens = list(destino.hospedagens.filter(disponivel=True))
-    for i, h in enumerate(hospedagens):
-        h.foto_url = h.imagem.url if h.imagem else static(FOTOS_HOSPEDAGEM[i % len(FOTOS_HOSPEDAGEM)])
+    hospedagem_db = destino.hospedagens.filter(disponivel=True).first()
+    fotos_hosp = []
+    if hospedagem_db:
+        if hospedagem_db.imagem:
+            fotos_hosp.append(hospedagem_db.imagem.url)
+        fotos_hosp += [i.imagem.url for i in hospedagem_db.imagens.all() if i.imagem]
+    if len(fotos_hosp) < 5:
+        fotos_hosp += [static(f) for f in FOTOS_HOSPEDAGEM[len(fotos_hosp):]]
 
     depoimentos = []
-    for i, av in enumerate(sorted(avaliacoes, key=lambda a: a.criado_em, reverse=True)):
+    for i, av in enumerate(sorted(avaliacoes, key=lambda a: a.criado_em)[:6]):
         depoimentos.append({
             'nome': av.nome_autor,
             'local': destino.nome,
@@ -358,86 +260,61 @@ def montar_viagem(destino, avaliacoes):
             'foto': av.foto.url if av.foto else '',
             'data': av.criado_em.strftime('%d/%m/%Y'),
         })
+    if not depoimentos:
+        for i, d in enumerate(cfg.get('depoimentos', [])):
+            depoimentos.append({
+                'nome': d['nome'], 'local': d['local'], 'estrelas': _estrelas(d['nota']),
+                'texto': d['texto'], 'avatar': static(AVATARES[i % len(AVATARES)]),
+                'foto': '', 'data': '',
+            })
 
-    destaque = cfg.get('depoimento_destaque') or (
-        {'texto': depoimentos[0]['texto'], 'nome': depoimentos[0]['nome'],
-         'local': depoimentos[0]['local']} if depoimentos else
-        {'texto': 'Viagem impecável do começo ao fim. Recomendo de olhos fechados!',
-         'nome': 'Mariana S.', 'local': 'São Paulo - SP'}
-    )
-    destaque = dict(destaque, avatar=static(AVATARES[0]), estrelas=_estrelas(5))
-
-    ano, mes, dia = cfg.get('data_sugerida', [2027, 5, 15])
-    pacote_padrao = next(p for p in pacotes if p['padrao'])
-    duracao_padrao = next(d for d in duracoes if d['padrao'])
-
-    # tudo o que o JavaScript precisa para o calendário e o cálculo do total
-    dados = {
-        'ano': ano, 'mes': mes, 'dia': dia,
-        'duracoes': [{'chave': d['chave'], 'rotulo': d['rotulo']} for d in duracoes],
-        'duracaoPadrao': duracao_padrao['chave'],
-        'pacotes': [{'chave': p['chave'], 'nome': p['nome'], 'pessoas': p['pessoas'],
-                     'consulte': p['consulte'], 'precos': p['precos']} for p in pacotes],
-        'pacotePadrao': pacote_padrao['chave'],
-        'opcionais': [{'chave': o['chave'], 'nome': o['nome'], 'preco': o['preco']}
-                      for o in opcionais],
-        'parcelas': 10,
-    }
+    curto = destino.nome.split('/')[0]
 
     return {
-        'selo': cfg.get('selo') or '{} - {}'.format(curto, destino.pais),
+        'selo': cfg.get('selo', 'Expedição'),
         'subtitulo': cfg.get('subtitulo') or 'Uma aventura no coração do Brasil',
         'regiao': cfg.get('regiao') or destino.get_continente_display(),
         'estado': cfg.get('estado') or destino.pais,
         'curto': curto,
-        'abas': ABAS,
-
-        # hero
+        'periodo': cfg.get('periodo', '16 a 21'),
+        'mes_ano': cfg.get('mes_ano', 'Junho 2027'),
+        'dias': cfg.get('dias', '6 dias'),
+        'noites': cfg.get('noites', '5 noites'),
+        'nota': str(nota).replace('.', ','),
+        'estrelas': _estrelas(nota),
+        'total_avaliacoes': total,
         'fotos': fotos,
-        'thumbs': fotos[:5],
-        'mais_fotos': cfg.get('mais_fotos', 28),
-        'hero_meta': [
-            {'icone': 'ic-calendario', 'titulo': 'Embarque diário',
-             'sub': 'De acordo com a data escolhida'},
-            {'icone': 'ic-lua', 'titulo': '4, 5 ou 6 dias', 'sub': 'Escolha a duração ideal'},
-            {'icone': 'ic-grupo', 'titulo': 'Viagem em grupo', 'sub': 'Saídas garantidas'},
-        ],
-
-        # aba "Escolha sua viagem"
-        'duracoes': duracoes,
-        'pacotes': pacotes,
-        'incluso_itens': INCLUSO_ITENS,
-        'opcionais': opcionais,
-        'promo': {
-            'foto': static(cfg.get('promo_foto', 'img/alter-por-do-sol.svg')),
-            'titulo': cfg.get('promo_titulo', 'Quer uma experiência ainda mais completa?'),
-            'texto': cfg.get('promo_texto',
-                             'Conheça nossos pacotes de 5 e 6 dias com roteiros exclusivos!'),
-        },
-
-        # demais abas
+        'thumbs': fotos[1:5] if len(fotos) > 4 else fotos,
+        'galeria': fotos[:4],
+        'mais_fotos': cfg.get('mais_fotos', 36),
+        'servicos': SERVICOS,
         'destaques': cfg.get('destaques') or [
             'Roteiro completo', 'Guias especializados', 'Grupo pequeno',
             'Hospedagem selecionada', 'Passeios inclusos', 'E muito mais',
         ],
         'roteiro': roteiro,
         'incluso': INCLUSO,
-        'nao_incluso': NAO_INCLUSO,
         'informacoes': INFORMACOES,
         'faq': FAQ,
-        'hospedagens': hospedagens,
-        'comodidades': COMODIDADES,
+        'preco': _moeda(preco_base),
+        'proxima_saida': cfg.get('proxima_saida', '16 a 21 de Junho de 2027'),
+        'vagas': cfg.get('vagas', 12),
+        'acomodacoes': [
+            {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa',
+             'preco': 'R$ ' + _moeda(preco_base + 1400), 'padrao': False, 'consulte': False},
+            {'chave': 'duplo', 'nome': 'Duplo/Casal', 'pessoas': '2 pessoas',
+             'preco': 'R$ ' + _moeda(preco_base), 'padrao': True, 'consulte': False},
+            {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
+             'preco': 'R$ ' + _moeda(preco_base - 200), 'padrao': False, 'consulte': False},
+            {'chave': 'crianca', 'nome': 'Criança (até 10 anos)', 'pessoas': 'Consulte condições',
+             'preco': 'Consulte', 'padrao': False, 'consulte': True},
+        ],
+        'hospedagem': {
+            'nome': hospedagem_db.nome if hospedagem_db else cfg.get('hospedagem_nome', 'Pousada Soar'),
+            'sub': cfg.get('hospedagem_sub', 'Conforto e natureza'),
+            'fotos': fotos_hosp,
+            'miniaturas': fotos_hosp[1:5],
+            'comodidades': COMODIDADES,
+        },
         'depoimentos': depoimentos,
-
-        # lateral
-        'embarque_cidade': cfg.get('embarque_cidade', 'São Paulo - SP'),
-        'pagamentos': PAGAMENTOS,
-        'confianca': CONFIANCA,
-        'nota': str(nota).replace('.', ','),
-        'estrelas': _estrelas(nota),
-        'total_avaliacoes': total,
-        'depoimento_destaque': destaque,
-        'preco_inicial': _moeda(pacote_padrao['precos'][duracao_padrao['chave']]),
-
-        'dados': dados,
     }
