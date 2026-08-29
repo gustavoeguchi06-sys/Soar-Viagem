@@ -27,7 +27,7 @@ a { color: var(--azul); text-decoration: none; }
 
 img { max-width: 100%; display: block; }
 
-.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 clamp(16px, 3.2vw, 20px); }
 
 /* ===== Cabeçalho ===== */
 .site-header {
@@ -45,7 +45,7 @@ img { max-width: 100%; display: block; }
 .hero {
     background: linear-gradient(135deg, var(--azul-escuro) 0%, var(--azul) 100%);
     color: var(--branco);
-    padding: 80px 0;
+    padding: clamp(44px, 8vw, 80px) 0;
     text-align: center;
 }
 .hero h1 { color: var(--branco); font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: 14px; }
@@ -64,13 +64,15 @@ img { max-width: 100%; display: block; }
 .busca button:hover { filter: brightness(1.08); }
 
 /* ===== Seções ===== */
-.secao { padding: 56px 0; }
-.secao-titulo { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 26px; }
+.secao { padding: clamp(32px, 6vw, 56px) 0; }
+.secao-titulo { display: flex; align-items: baseline; justify-content: space-between;
+                gap: 10px; flex-wrap: wrap; margin-bottom: 26px; }
 .secao-titulo h2 { font-size: 1.7rem; }
 .secao-titulo a { font-weight: 600; }
 
 /* ===== Cards de destino ===== */
-.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+.grade { display: grid; gap: clamp(16px, 2.4vw, 24px);
+         grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
 
 .card {
     background: var(--branco); border-radius: var(--raio); overflow: hidden;
@@ -138,7 +140,8 @@ img { max-width: 100%; display: block; }
 }
 .info-chip strong { color: var(--azul-escuro); }
 
-.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.galeria { display: grid; gap: 14px;
+          grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr)); }
 .galeria figure { border-radius: var(--raio); overflow: hidden; background: var(--branco); box-shadow: var(--sombra); }
 .galeria img { width: 100%; height: 150px; object-fit: cover; }
 .galeria figcaption { padding: 8px 12px; font-size: 0.82rem; color: var(--texto-suave); }
@@ -217,6 +220,20 @@ img { max-width: 100%; display: block; }
     .hospedagem { flex-direction: column; }
     .hospedagem-img { width: 100%; height: 180px; }
     .hospedagem-corpo { padding: 0 20px 18px; }
-    .hero .busca { flex-direction: column; }
+    /* vale para a busca da home e a da lista, que fica fora do .hero */
+    .busca { flex-direction: column; }
+    .busca input, .busca button { width: 100%; }
     .main-nav a { margin-left: 14px; font-size: 0.9rem; }
+    .hero p { font-size: 1rem; }
+    .secao-titulo h2 { font-size: 1.35rem; }
+    .card-capa { height: 168px; }
+    /* os filtros viram uma tirinha que rola em vez de quebrar em varias linhas */
+    .filtros { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+               margin-left: -4px; padding: 2px 4px 6px; }
+    .filtros::-webkit-scrollbar { display: none; }
+    .filtro { flex: 0 0 auto; }
+}
+
+@media (pointer: coarse) {
+    .main-nav a, .filtro, .secao-titulo a { min-height: 40px; display: inline-flex; align-items: center; }
 }

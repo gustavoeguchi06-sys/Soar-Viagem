@@ -45,14 +45,42 @@
         var paineis = Array.prototype.slice.call(document.querySelectorAll('.painel-aba'));
         if (!botoes.length) { return; }
 
+        var barra = document.querySelector('.abas');
+        var tirinha = document.querySelector('.abas__inner');
+
+        // em telas estreitas a faixa rola: marca a borda e traz a aba ativa para a vista
+        function marcarRolagem() {
+            if (!tirinha) { return; }
+            var sobra = tirinha.scrollWidth - tirinha.clientWidth;
+            barra.classList.toggle('rola', sobra > 4 && tirinha.scrollLeft < sobra - 4);
+        }
+
+        function trazerParaVista(botao) {
+            if (!tirinha || tirinha.scrollWidth <= tirinha.clientWidth) { return; }
+            var b = botao.getBoundingClientRect();
+            var t = tirinha.getBoundingClientRect();
+            if (b.left < t.left + 8 || b.right > t.right - 8) {
+                tirinha.scrollLeft += b.left - t.left - (t.width - b.width) / 2;
+            }
+        }
+
         function abrir(chave, rolar) {
-            botoes.forEach(function (b) { b.classList.toggle('ativa', b.dataset.aba === chave); });
+            botoes.forEach(function (b) {
+                var ativa = b.dataset.aba === chave;
+                b.classList.toggle('ativa', ativa);
+                if (ativa) { trazerParaVista(b); }
+            });
             paineis.forEach(function (p) { p.classList.toggle('ativo', p.dataset.painel === chave); });
             if (rolar) {
-                var barra = document.querySelector('.abas');
                 var topo = barra.getBoundingClientRect().top + window.pageYOffset;
                 if (window.pageYOffset > topo) { window.scrollTo({ top: topo, behavior: 'smooth' }); }
             }
+        }
+
+        if (tirinha) {
+            tirinha.addEventListener('scroll', marcarRolagem, { passive: true });
+            window.addEventListener('resize', marcarRolagem, { passive: true });
+            marcarRolagem();
         }
 
         botoes.forEach(function (botao) {

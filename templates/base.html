@@ -43,9 +43,28 @@
                aria-label="Falar com a Soar no WhatsApp">
                 <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
             </a>
-            <a class="btn btn--verde" href="#reservar">Reservar agora</a>
+            <a class="btn btn--verde btn--reservar" href="#reservar">
+                <span>Reservar</span> <span class="btn__resto">agora</span>
+            </a>
+            <button class="menu-botao" type="button" id="menuBotao"
+                    aria-expanded="false" aria-controls="menuMovel" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </div>
+
+    {# navegação para telas pequenas — o .topnav some abaixo de 1080px #}
+    <nav class="menu-movel" id="menuMovel" hidden>
+        <div class="wrap">
+            <a href="{% url 'destinations:lista' %}">Viagens</a>
+            <a href="{% url 'destinations:lista' %}">Destinos</a>
+            <a href="{% url 'destinations:lista' %}">Experiências</a>
+            <a href="{% url 'destinations:lista' %}">Calendário</a>
+            <a href="{% url 'destinations:home' %}">Guia Soar</a>
+            <a href="{% url 'destinations:home' %}">Sobre a Soar</a>
+            <a href="{% url 'destinations:home' %}">B2B</a>
+        </div>
+    </nav>
 </header>
 
 {% if messages %}
@@ -102,6 +121,7 @@
     </div>
 </footer>
 
+<script src="{% static 'js/topo.js' %}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

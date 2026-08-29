@@ -55,7 +55,8 @@ body.pagina-viagem {
     line-height: 1.2;
 }
 
-.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+/* respiro lateral que encolhe junto com a tela (24px no desktop, 16px no celular) */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 3.2vw, 24px); }
 
 .ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7;
       stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -74,7 +75,8 @@ body.pagina-viagem {
 }
 .topbar--solido { position: sticky; background: var(--preto); box-shadow: var(--sombra-sm); }
 
-.topbar__inner { display: flex; align-items: center; gap: 22px; height: var(--topo); }
+.topbar__inner { display: flex; align-items: center; gap: 22px; height: var(--topo);
+                 min-width: 0; }
 
 .marca { display: flex; align-items: center; gap: 10px; color: #fff; }
 .marca__logo { display: block; }
@@ -88,13 +90,36 @@ body.pagina-viagem {
             white-space: nowrap; transition: color .15s; }
 .topnav a:hover { color: #fff; }
 
-.topbar__acoes { display: flex; align-items: center; gap: 13px; margin-left: auto; }
+.topbar__acoes { display: flex; align-items: center; gap: 13px; margin-left: auto; flex: none; }
 .btn-whats-circ {
     width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
     background: #fff; color: var(--whats); border: 1px solid rgba(255, 255, 255, .5);
-    transition: transform .15s;
+    transition: transform .15s; flex: none;
 }
 .btn-whats-circ:hover { transform: translateY(-1px); }
+.btn--reservar { white-space: nowrap; }
+
+/* ----- menu das telas pequenas ----- */
+.menu-botao {
+    display: none; width: 40px; height: 40px; padding: 0; flex: none; cursor: pointer;
+    background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 10px; place-items: center; gap: 4px; align-content: center;
+}
+.menu-botao span { display: block; width: 18px; height: 2px; border-radius: 2px; background: #fff;
+                   transition: transform .2s, opacity .2s; }
+.menu-botao[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.menu-botao[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.menu-botao[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.menu-movel { background: var(--preto); border-top: 1px solid rgba(255, 255, 255, .12);
+              box-shadow: var(--sombra-md); }
+.menu-movel .wrap { display: flex; flex-direction: column; padding-top: 6px; padding-bottom: 10px; }
+.menu-movel a {
+    display: flex; align-items: center; min-height: 46px; color: rgba(255, 255, 255, .92);
+    font-size: .95rem; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.menu-movel a:last-child { border-bottom: 0; }
+.menu-movel a:hover { color: #fff; }
 
 /* ===== Botões ============================================================ */
 .btn {
@@ -114,14 +139,15 @@ body.pagina-viagem {
 .btn--sm { padding: 10px 16px; font-size: .72rem; }
 
 /* ===== Hero ============================================================== */
-.hero { position: relative; min-height: 470px; display: flex; align-items: flex-end;
+.hero { position: relative; min-height: clamp(400px, 44vw, 500px); display: flex; align-items: flex-end;
         overflow: hidden; background: var(--preto); }
 .hero__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero::after {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(9, 18, 14, .50) 0%, rgba(9, 18, 14, .10) 32%, rgba(9, 18, 14, .80) 100%);
 }
-.hero__conteudo { position: relative; z-index: 5; width: 100%; padding: 92px 0 24px; color: #fff; }
+.hero__conteudo { position: relative; z-index: 5; width: 100%; color: #fff;
+                  padding: clamp(86px, 11vw, 92px) 0 clamp(18px, 2.4vw, 24px); }
 
 .migalhas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
             font-size: .78rem; color: rgba(255, 255, 255, .78); margin-bottom: 14px; }
@@ -135,11 +161,13 @@ body.pagina-viagem {
     font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
     padding: 6px 13px; border-radius: 5px; margin-bottom: 12px;
 }
-.hero h1 { color: #fff; font-size: clamp(2.3rem, 4.6vw, 3.4rem); font-weight: 800;
+.hero h1 { color: #fff; font-size: clamp(1.95rem, 5.6vw, 3.4rem); font-weight: 800;
            letter-spacing: -.022em; margin-bottom: 4px; }
-.hero__sub { font-size: 1.14rem; font-weight: 300; color: rgba(255, 255, 255, .95); margin-bottom: 20px; }
+.hero__sub { font-size: clamp(1rem, 2.2vw, 1.14rem); font-weight: 300;
+             color: rgba(255, 255, 255, .95); margin-bottom: clamp(14px, 2.2vw, 20px); }
 
-.hero__meta { display: flex; flex-wrap: wrap; gap: 44px; margin-bottom: 22px; }
+.hero__meta { display: flex; flex-wrap: wrap; gap: 14px clamp(18px, 3.6vw, 44px);
+              margin-bottom: clamp(16px, 2.4vw, 22px); }
 .meta-item { display: flex; align-items: center; gap: 10px; }
 .meta-item .ic { width: 21px; height: 21px; opacity: .95; }
 .meta-item b { display: block; font-size: .9rem; font-weight: 600; line-height: 1.3; }
@@ -149,8 +177,12 @@ body.pagina-viagem {
 .estrelas-ouro .ic-f { width: 15px; height: 15px; }
 .estrelas-ouro .vazia { color: #d8ddda; }
 
-.hero__thumbs { display: flex; gap: 8px; }
+/* em telas estreitas a tirinha rola na horizontal em vez de espremer as fotos */
+.hero__thumbs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+                scroll-snap-type: x proximity; padding-bottom: 2px; }
+.hero__thumbs::-webkit-scrollbar { display: none; }
 .hero__thumbs button {
+    flex: 0 0 auto; scroll-snap-align: start;
     width: 82px; height: 64px; border-radius: 8px; overflow: hidden; padding: 0;
     border: 2px solid rgba(255, 255, 255, .5); background: none; cursor: pointer;
     transition: border-color .15s, transform .15s;
@@ -167,8 +199,16 @@ body.pagina-viagem {
 
 /* ===== Abas ============================================================== */
 .abas { position: sticky; top: 0; z-index: 25; background: #fff; border-bottom: 1px solid var(--linha); }
-.abas__inner { display: flex; gap: 34px; overflow-x: auto; scrollbar-width: none; }
+.abas__inner { display: flex; gap: 34px; overflow-x: auto; scrollbar-width: none;
+               scroll-padding-inline: 16px; scroll-behavior: smooth; }
 .abas__inner::-webkit-scrollbar { display: none; }
+/* o JS põe .rola quando a faixa de abas não cabe inteira: esse degradê à direita
+   mostra que ainda há aba escondida para o lado */
+.abas.rola::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 1px; width: 42px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff 72%);
+    pointer-events: none;
+}
 .aba {
     position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px;
     flex: 0 0 auto; min-width: 92px; padding: 13px 6px 14px;
@@ -473,10 +513,13 @@ body.pagina-viagem {
 
 /* ===== Rodapé ============================================================ */
 .rodape { background: var(--preto); color: rgba(255, 255, 255, .72); padding: 44px 0 26px; }
-.rodape__grade { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 28px; margin-bottom: 30px; }
+/* minmax(0, …) evita que um link longo estoure a coluna em telas estreitas */
+.rodape__grade { display: grid; gap: 28px; margin-bottom: 30px;
+                 grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); }
 .rodape h4 { color: #fff; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px; }
 .rodape ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.rodape a { color: rgba(255, 255, 255, .72); font-size: .87rem; }
+/* o e-mail de contato é longo e estourava a coluna em telas médias */
+.rodape a { color: rgba(255, 255, 255, .72); font-size: .87rem; overflow-wrap: anywhere; }
 .rodape a:hover { color: #fff; }
 .rodape p { font-size: .87rem; max-width: 300px; margin-top: 12px; }
 .rodape__base { border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 18px;
@@ -487,14 +530,30 @@ body.pagina-viagem {
 .aviso { background: #fff; border-left: 4px solid var(--verde); border-radius: var(--r-sm);
          box-shadow: var(--sombra-md); padding: 12px 18px; font-size: .88rem; }
 
-/* ===== Responsivo ======================================================== */
+/* ===== Responsivo ========================================================
+   1280 → lateral um pouco mais estreita
+   1080 → uma coluna só; o .topnav vira o menu-botão
+    860 → calendário, pacotes e galeria empilham
+    700 → telefone deitado / tablet pequeno
+    520 → telefone em pé
+    360 → telas bem estreitas
+   ========================================================================= */
+@media (max-width: 1280px) {
+    .grade-viagem { grid-template-columns: minmax(0, 1fr) 284px; gap: 20px; }
+    .abas__inner { gap: 24px; }
+}
+
 @media (max-width: 1080px) {
     .topnav { display: none; }
-    .grade-viagem { grid-template-columns: 1fr; }
+    .menu-botao { display: grid; }
+    .grade-viagem { grid-template-columns: 1fr; gap: 16px; }
     .lateral { position: static; }
     .incluso-fila { grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .hosp { grid-template-columns: 140px minmax(0, 1fr); }
     .hosp__preco { grid-column: 1 / -1; text-align: left; }
+    /* com uma coluna só, os cartões da lateral ficam lado a lado */
+    .lateral { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+    .sua-viagem { grid-column: 1 / -1; }
 }
 
 @media (max-width: 860px) {
@@ -503,31 +562,80 @@ body.pagina-viagem {
     .depos { grid-template-columns: 1fr; }
     .confianca__inner { grid-template-columns: 1fr 1fr; }
     .galeria-grade { grid-template-columns: 1fr 1fr; }
+    .passo { padding: 18px 16px 20px; }
+    .rodape__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
 }
 
 @media (max-width: 700px) {
-    .hero { min-height: 440px; }
-    .hero__meta { gap: 20px; }
-    .campos-viagem { grid-template-columns: 1fr; }
+    .lateral { grid-template-columns: 1fr; }
+    .campos-viagem { grid-template-columns: 1fr; gap: 10px; }
     .seta-campos { transform: rotate(90deg); margin: 0 auto; }
     .destaques { grid-template-columns: 1fr; }
     .promo { flex-wrap: wrap; }
     .promo > img { width: 100%; height: 120px; }
     .promo .btn { width: 100%; }
     .form-grade { grid-template-columns: 1fr; }
-    .rodape__grade { grid-template-columns: 1fr 1fr; }
-    .opcional { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 2px; }
+    .rodape__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+    .opcional { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 2px; column-gap: 10px; }
     .opcional__unidade { grid-column: 2; }
+    .opcional__info { grid-row: 1 / 3; grid-column: 3; }
+    .opcional__preco { grid-row: 2; grid-column: 2; text-align: left; }
     .hosp { grid-template-columns: 1fr; }
     .hosp > img { height: 150px; }
+    .dia__corpo { padding-left: 18px; }
+    .confianca { margin-top: 26px; }
 }
 
 @media (max-width: 520px) {
     .incluso-fila { grid-template-columns: repeat(2, 1fr); }
     .pacotes { grid-template-columns: 1fr; }
-    .confianca__inner { grid-template-columns: 1fr; }
-    .hero__thumbs button { width: 64px; height: 52px; }
+    .confianca__inner { grid-template-columns: 1fr; gap: 14px; }
+    .hero__thumbs button { width: 72px; height: 56px; }
+    .galeria-grade { grid-template-columns: 1fr 1fr; }
+    .marca__nome { font-size: 1.2rem; }
+    .marca__sub { letter-spacing: .3em; }
+    /* o rótulo do botão encolhe para o cabeçalho caber sem rolagem */
+    .btn--reservar .btn__resto { display: none; }
+    .btn--reservar { padding: 11px 14px; }
+    .topbar__acoes { gap: 9px; }
+    .topbar__inner { gap: 12px; }
+    .passo__topo { gap: 6px; }
+    .passo__titulo { font-size: 1.02rem; }
+    .dia__foto { width: 60px; height: 44px; }
+    .depo__foto { height: 160px; }
+}
+
+@media (max-width: 360px) {
+    .btn-whats-circ { display: none; }
+    .rodape__grade { grid-template-columns: minmax(0, 1fr); }
     .galeria-grade { grid-template-columns: 1fr; }
+    .cal { padding: 10px 8px 8px; }
+    .cal__semana { font-size: .58rem; }
+}
+
+/* ----- dedo em vez de mouse: alvos de toque maiores ----- */
+@media (pointer: coarse) {
+    .migalhas a, .rodape a, .link-verde, .lista-icones li,
+    .avaliacao-lat .link-verde { min-height: 34px; display: inline-flex; align-items: center; }
+    .rodape ul { gap: 2px; }
+    .cal__nav { width: 36px; height: 36px; }
+    .cal__dia { height: 40px; }
+    .opcional { padding: 14px 0; }
+    .aba { min-height: 56px; }
+}
+
+/* ----- quem pediu menos animação, recebe menos animação ----- */
+@media (prefers-reduced-motion: reduce) {
+    .pagina-viagem *, .pagina-viagem *::before, .pagina-viagem *::after {
+        animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important; scroll-behavior: auto !important;
+    }
+}
+
+/* ----- sem hover de verdade, o levantar dos cards só atrapalha ----- */
+@media (hover: none) {
+    .hero__thumbs button:hover, .btn-whats-circ:hover { transform: none; }
+    .galeria-grade a:hover img { transform: none; }
 }
 
 /* ===== Ajustes das páginas antigas (home / lista) ======================== */
