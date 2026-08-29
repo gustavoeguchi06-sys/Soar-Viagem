@@ -36,6 +36,53 @@ Depois abra no navegador:
 
 Para parar o servidor: `Ctrl+C` no terminal.
 
+## Colocar no ar com segurança
+
+Rodando na sua máquina não precisa configurar nada: o projeto já sobe com
+`DEBUG` ligado e só aceita `localhost`. Para publicar, defina estas variáveis
+de ambiente — o Django **se recusa a subir** sem as duas primeiras:
+
+| Variável | Para que serve |
+|---|---|
+| `SOAR_SECRET_KEY` | chave de assinatura. **Obrigatória.** A chave de exemplo está no repositório, então serve só para desenvolvimento |
+| `SOAR_ALLOWED_HOSTS` | domínios do site, separados por vírgula. **Obrigatória** |
+| `SOAR_DEBUG` | `0` no servidor (o padrão é `1`) |
+| `SOAR_SSL_REDIRECT` | `0` desliga o redirecionamento para HTTPS (padrão `1`) |
+| `SOAR_HSTS_SECONDS` | validade do HSTS. Começa em `3600` de propósito |
+| `SOAR_ATRAS_DE_PROXY` | `1` quando um Nginx/Heroku/Render fala HTTPS no lugar do Django |
+
+Para gerar a chave:
+
+```
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Com `SOAR_DEBUG=0`, entram sozinhos: redirecionamento para HTTPS, cookies de
+sessão e de CSRF só por conexão segura, HSTS e `CSRF_TRUSTED_ORIGINS`.
+Independente do modo já valem `X-Frame-Options: DENY` (contra clickjacking),
+`nosniff`, política de referenciador `same-origin` e cookie de sessão fora do
+alcance do JavaScript.
+
+Antes de publicar, confira com:
+
+```
+python manage.py check --deploy
+```
+
+O único aviso esperado é o `security.W021` (HSTS preload): entrar na lista de
+preload dos navegadores é praticamente irreversível, então fica desligado até
+você decidir.
+
+**Sobre o HSTS:** ele começa em 1 hora porque o navegador guarda a instrução e
+não dá para cancelar antes de expirar. Confirme que o HTTPS está firme e só
+então suba para `31536000` (um ano).
+
+### Envio de fotos
+
+O formulário de avaliação é público, então a foto passa por conferência: no
+máximo 5 MB, e só JPG, PNG, WEBP ou GIF. Arquivo que não for imagem de verdade
+é recusado mesmo que a extensão diga o contrário.
+
 ## Estrutura do projeto
 
 ```
