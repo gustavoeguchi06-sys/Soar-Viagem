@@ -25,6 +25,42 @@ class Destino(models.Model):
     destaque = models.BooleanField('Destaque na página inicial', default=False)
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)
 
+    # ----------------------------------------------------------------- #
+    # Sobre a viagem — o que a página do destino mostra além do catálogo.
+    # Tudo opcional: em branco, a página usa o texto padrão da operadora
+    # (destinations/conteudo.py), então um destino novo já nasce completo e o
+    # dono vai preenchendo o que quiser mudar.
+    # ----------------------------------------------------------------- #
+    selo = models.CharField('Selo', max_length=40, blank=True,
+                            help_text='Aparece sobre o título. Ex.: Expedição.')
+    subtitulo = models.CharField('Subtítulo', max_length=160, blank=True,
+                                 help_text='A frase logo abaixo do nome, na capa.')
+    regiao = models.CharField('Região', max_length=60, blank=True,
+                              help_text='Ex.: Norte. Sem isso, mostra o continente.')
+    estado = models.CharField('Estado', max_length=60, blank=True,
+                              help_text='Ex.: Tocantins. Sem isso, mostra o país.')
+    periodo = models.CharField('Período', max_length=40, blank=True,
+                               help_text='Só os dias. Ex.: 16 a 21.')
+    mes_ano = models.CharField('Mês e ano', max_length=40, blank=True,
+                               help_text='Ex.: Junho 2027.')
+    dias = models.CharField('Duração em dias', max_length=20, blank=True,
+                            help_text='Ex.: 6 dias.')
+    noites = models.CharField('Duração em noites', max_length=20, blank=True,
+                              help_text='Ex.: 5 noites.')
+    proxima_saida = models.CharField('Próxima saída', max_length=120, blank=True,
+                                     help_text='Ex.: 16 a 21 de Junho de 2027.')
+    vagas = models.PositiveSmallIntegerField('Vagas disponíveis', blank=True, null=True)
+    preco_base = models.DecimalField('Preço da viagem por pessoa (R$)', max_digits=9,
+                                     decimal_places=2, blank=True, null=True,
+                                     help_text='Valor do quarto duplo, que abre o card de reserva. '
+                                               'Sem isso, calcula a partir da diária média.')
+    hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
+                                      help_text='Ex.: A duas quadras da Ilha do Amor.')
+    incluso = models.TextField('O que está incluso', blank=True,
+                               help_text='Um item por linha.')
+    informacoes = models.TextField('Informações importantes', blank=True,
+                                   help_text='Um item por linha.')
+
     class Meta:
         verbose_name = 'Destino'
         verbose_name_plural = 'Destinos'
@@ -40,6 +76,10 @@ class Destino(models.Model):
 
     def get_absolute_url(self):
         return reverse('destinations:detalhe', kwargs={'slug': self.slug})
+
+    def linhas(self, campo):
+        """Campo de texto escrito um item por linha vira lista (vazias fora)."""
+        return [linha.strip() for linha in getattr(self, campo).splitlines() if linha.strip()]
 
     @property
     def media_avaliacoes(self):
@@ -105,3 +145,63 @@ class ImagemHospedagem(models.Model):
 
     def __str__(self):
         return self.legenda or f'Imagem de {self.hospedagem.nome}'
+
+
+class DestaqueViagem(models.Model):
+    """Um item da lista 'Destaques da viagem' (o que a pessoa vai conhecer)."""
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='destaques_viagem', verbose_name='Destino')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+    texto = models.CharField('Destaque', max_length=120,
+                             help_text='Ex.: Fervedouro do Alecrim.')
+
+    class Meta:
+        verbose_name = 'Destaque da viagem'
+        verbose_name_plural = 'Destaques da viagem'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.texto
+
+
+class DiaRoteiro(models.Model):
+    """Um dia do roteiro dia a dia."""
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='roteiro', verbose_name='Destino')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+    titulo = models.CharField('Título', max_length=120,
+                              help_text='Ex.: Dia 1 — Chegada em Santarém.')
+    resumo = models.CharField('Resumo', max_length=200,
+                              help_text='A linha que aparece com o dia fechado.')
+    detalhe = models.TextField('Detalhe', blank=True,
+                               help_text='O texto que abre quando a pessoa clica no dia.')
+    imagem = models.ImageField('Foto do dia', upload_to='roteiro/', blank=True, null=True,
+                               help_text='Opcional: sem foto, usa uma da galeria do destino.')
+
+    class Meta:
+        verbose_name = 'Dia do roteiro'
+        verbose_name_plural = 'Roteiro dia a dia'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.titulo
+
+
+class PerguntaFrequente(models.Model):
+    """Uma pergunta do bloco de FAQ da página da viagem."""
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='perguntas', verbose_name='Destino')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+    pergunta = models.CharField('Pergunta', max_length=200)
+    resposta = models.TextField('Resposta')
+
+    class Meta:
+        verbose_name = 'Pergunta frequente'
+        verbose_name_plural = 'Perguntas frequentes'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.pergunta

@@ -5,6 +5,7 @@
 {% block body_class %}pagina-viagem{% endblock %}
 {% block topbar_class %}{% endblock %}
 {% block estilos_legado %}{% endblock %}
+{% block reservar_href %}#reservar{% endblock %}
 
 {% block content %}
 {# ===================== HERO ===================== #}
@@ -146,11 +147,13 @@
                 <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
                 <p class="reserva__pp">por pessoa</p>
 
-                <a class="btn btn--verde btn--bloco" href="https://wa.me/5511999999999?text=Quero+reservar+{{ destino.nome|urlencode }}"
-                   target="_blank" rel="noopener">
-                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
-                    Reservar agora
-                </a>
+                {% comment %}GET e nao POST de proposito: a escolha vai na URL e
+                sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}
+                <form method="get" action="{% url 'reservas:nova' destino.slug %}" class="reserva__form">
+                    <button type="submit" class="btn btn--verde btn--bloco">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                        {% if user.is_authenticated %}Reservar agora{% else %}Entrar para reservar{% endif %}
+                    </button>
                 <a class="btn btn--contorno btn--bloco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
                     <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
                     Falar com a Soar
@@ -182,6 +185,14 @@
                     </label>
                     {% endfor %}
                 </div>
+                </form>
+
+                {% if not user.is_authenticated %}
+                <p class="reserva__aviso">
+                    Para reservar é preciso ter conta.
+                    <a href="{% url 'contas:cadastro' %}?next={{ request.get_full_path|urlencode }}">Criar a minha</a>
+                </p>
+                {% endif %}
             </div>
 
             <div class="ajuda">

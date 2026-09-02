@@ -220,23 +220,39 @@ def _roteiro_generico(destino):
     return [{'titulo': t, 'resumo': r, 'detalhe': d} for t, r, d in modelos]
 
 
+def _roteiro_do_banco(destino, cfg):
+    """Roteiro cadastrado no painel; sem isso, o editorial; sem isso, o genérico."""
+    dias = list(destino.roteiro.all())
+    if dias:
+        return [{'titulo': d.titulo, 'resumo': d.resumo, 'detalhe': d.detalhe,
+                 'foto_propria': d.imagem.url if d.imagem else ''} for d in dias]
+    return [dict(d) for d in (cfg.get('roteiro') or _roteiro_generico(destino))]
+
+
 def montar_viagem(destino, avaliacoes):
-    """Monta o dicionário usado pelo template da página de viagem."""
+    """Monta o dicionário usado pelo template da página de viagem.
+
+    A ordem de preferência é sempre a mesma: o que o dono cadastrou no painel
+    vence; depois vem o conteúdo editorial fixo daqui (`POR_DESTINO`); e por
+    último o texto padrão. Assim um destino recém-criado no admin já abre com
+    a página inteira montada, e cada campo preenchido vai substituindo o padrão.
+    """
     cfg = POR_DESTINO.get(destino.slug, {})
     fotos = _fotos_do_destino(destino, cfg)
 
-    preco_base = cfg.get('preco_base')
+    preco_base = destino.preco_base or cfg.get('preco_base')
     if preco_base is None:
         preco_base = int(destino.preco_medio_diaria * 6) if destino.preco_medio_diaria else 3588
+    preco_base = int(preco_base)
 
     # a nota/quantidade da vitrine pode vir do conteúdo editorial (histórico da
     # operadora); sem isso, usa o que está no banco
     nota = cfg.get('nota') or destino.media_avaliacoes or 4.9
     total = cfg.get('total_avaliacoes') or len(avaliacoes) or 87
 
-    roteiro = cfg.get('roteiro') or _roteiro_generico(destino)
+    roteiro = _roteiro_do_banco(destino, cfg)
     for i, dia in enumerate(roteiro):
-        dia['foto'] = fotos[(i + 1) % len(fotos)]
+        dia['foto'] = dia.get('foto_propria') or fotos[(i + 1) % len(fotos)]
 
     hospedagem_db = destino.hospedagens.filter(disponivel=True).first()
     fotos_hosp = []
@@ -266,18 +282,26 @@ def montar_viagem(destino, avaliacoes):
                 'foto': '', 'data': '',
             })
 
+    destaques = [d.texto for d in destino.destaques_viagem.all()] or cfg.get('destaques') or [
+        'Roteiro completo', 'Guias especializados', 'Grupo pequeno',
+        'Hospedagem selecionada', 'Passeios inclusos', 'E muito mais',
+    ]
+
+    faq = [{'pergunta': p.pergunta, 'resposta': p.resposta} for p in destino.perguntas.all()] or FAQ
+
     curto = destino.nome.split('/')[0]
 
     return {
-        'selo': cfg.get('selo', 'Expedição'),
-        'subtitulo': cfg.get('subtitulo') or 'Uma aventura no coração do Brasil',
-        'regiao': cfg.get('regiao') or destino.get_continente_display(),
-        'estado': cfg.get('estado') or destino.pais,
+        'selo': destino.selo or cfg.get('selo', 'Expedição'),
+        'subtitulo': destino.subtitulo or cfg.get('subtitulo')
+                     or 'Uma aventura no coração do Brasil',
+        'regiao': destino.regiao or cfg.get('regiao') or destino.get_continente_display(),
+        'estado': destino.estado or cfg.get('estado') or destino.pais,
         'curto': curto,
-        'periodo': cfg.get('periodo', '16 a 21'),
-        'mes_ano': cfg.get('mes_ano', 'Junho 2027'),
-        'dias': cfg.get('dias', '6 dias'),
-        'noites': cfg.get('noites', '5 noites'),
+        'periodo': destino.periodo or cfg.get('periodo', '16 a 21'),
+        'mes_ano': destino.mes_ano or cfg.get('mes_ano', 'Junho 2027'),
+        'dias': destino.dias or cfg.get('dias', '6 dias'),
+        'noites': destino.noites or cfg.get('noites', '5 noites'),
         'nota': str(nota).replace('.', ','),
         'estrelas': _estrelas(nota),
         'total_avaliacoes': total,
@@ -286,30 +310,32 @@ def montar_viagem(destino, avaliacoes):
         'galeria': fotos[:4],
         'mais_fotos': cfg.get('mais_fotos', 36),
         'servicos': SERVICOS,
-        'destaques': cfg.get('destaques') or [
-            'Roteiro completo', 'Guias especializados', 'Grupo pequeno',
-            'Hospedagem selecionada', 'Passeios inclusos', 'E muito mais',
-        ],
+        'destaques': destaques,
         'roteiro': roteiro,
-        'incluso': INCLUSO,
-        'informacoes': INFORMACOES,
-        'faq': FAQ,
+        'incluso': destino.linhas('incluso') or INCLUSO,
+        'informacoes': destino.linhas('informacoes') or INFORMACOES,
+        'faq': faq,
         'preco': _moeda(preco_base),
-        'proxima_saida': cfg.get('proxima_saida', '16 a 21 de Junho de 2027'),
-        'vagas': cfg.get('vagas', 12),
+        'preco_num': preco_base,
+        'proxima_saida': destino.proxima_saida or cfg.get('proxima_saida',
+                                                          '16 a 21 de Junho de 2027'),
+        'vagas': destino.vagas if destino.vagas is not None else cfg.get('vagas', 12),
         'acomodacoes': [
             {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa',
-             'preco': 'R$ ' + _moeda(preco_base + 1400), 'padrao': False, 'consulte': False},
+             'preco': 'R$ ' + _moeda(preco_base + 1400), 'valor': preco_base + 1400,
+             'padrao': False, 'consulte': False},
             {'chave': 'duplo', 'nome': 'Duplo/Casal', 'pessoas': '2 pessoas',
-             'preco': 'R$ ' + _moeda(preco_base), 'padrao': True, 'consulte': False},
+             'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
+             'padrao': True, 'consulte': False},
             {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
-             'preco': 'R$ ' + _moeda(preco_base - 200), 'padrao': False, 'consulte': False},
+             'preco': 'R$ ' + _moeda(preco_base - 200), 'valor': preco_base - 200,
+             'padrao': False, 'consulte': False},
             {'chave': 'crianca', 'nome': 'Criança (até 10 anos)', 'pessoas': 'Consulte condições',
-             'preco': 'Consulte', 'padrao': False, 'consulte': True},
+             'preco': 'Consulte', 'valor': None, 'padrao': False, 'consulte': True},
         ],
         'hospedagem': {
             'nome': hospedagem_db.nome if hospedagem_db else cfg.get('hospedagem_nome', 'Pousada Soar'),
-            'sub': cfg.get('hospedagem_sub', 'Conforto e natureza'),
+            'sub': destino.hospedagem_sub or cfg.get('hospedagem_sub', 'Conforto e natureza'),
             'fotos': fotos_hosp,
             'miniaturas': fotos_hosp[1:5],
             'comodidades': COMODIDADES,

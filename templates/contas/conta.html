@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minha conta — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap">
+        <header class="conta-topo">
+            <div>
+                <h1>Olá, {{ user.first_name|default:user.username }}!</h1>
+                <p>{{ user.email }}</p>
+            </div>
+            <div class="conta-topo__acoes">
+                {% if user.is_staff %}
+                <a class="btn btn--contorno btn--sm" href="/painel/">Painel do dono</a>
+                {% endif %}
+                <form action="{% url 'contas:sair' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--contorno btn--sm">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-sair"></use></svg>
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <h2 class="conta-secao">Minhas reservas</h2>
+
+        {% if reservas %}
+        <div class="reservas-lista">
+            {% for reserva in reservas %}
+            <article class="reserva-item reserva-item--{{ reserva.status }}">
+                <div class="reserva-item__topo">
+                    <div>
+                        <span class="reserva-item__codigo">{{ reserva.codigo }}</span>
+                        <h3><a href="{{ reserva.destino.get_absolute_url }}">{{ reserva.destino.nome }}</a></h3>
+                    </div>
+                    <span class="selo-status selo-status--{{ reserva.status }}">
+                        {{ reserva.get_status_display }}
+                    </span>
+                </div>
+
+                <dl class="reserva-item__dados">
+                    <div><dt>Saída</dt><dd>{{ reserva.saida|default:"a combinar" }}</dd></div>
+                    <div><dt>Acomodação</dt><dd>{{ reserva.get_acomodacao_display }}</dd></div>
+                    <div><dt>Pessoas</dt><dd>{{ reserva.pessoas }}</dd></div>
+                    <div><dt>Estimativa</dt>
+                        <dd>{% if reserva.total_estimado %}R$ {{ reserva.total_estimado|floatformat:"0" }}{% else %}sob consulta{% endif %}</dd></div>
+                    <div><dt>Pedido em</dt><dd>{{ reserva.criado_em|date:"d/m/Y" }}</dd></div>
+                </dl>
+
+                {% if reserva.observacao %}
+                <p class="reserva-item__obs">“{{ reserva.observacao }}”</p>
+                {% endif %}
+
+                {% if reserva.status == 'pendente' %}
+                <form action="{% url 'reservas:cancelar' reserva.pk %}" method="post"
+                      onsubmit="return confirm('Cancelar a reserva {{ reserva.codigo }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="link-cancelar">Cancelar este pedido</button>
+                </form>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="conta-vazio">
+            <p>Você ainda não pediu nenhuma reserva.</p>
+            <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver as viagens</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

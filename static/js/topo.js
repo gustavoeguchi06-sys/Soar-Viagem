@@ -4,6 +4,18 @@
 (function () {
     'use strict';
 
+    /* O menu da conta e um <details>: abre e fecha sozinho. So falta fechar
+       quando a pessoa clica em qualquer outro lugar da pagina. */
+    var conta = document.querySelector('.conta');
+    if (conta) {
+        document.addEventListener('click', function (evento) {
+            if (conta.open && !evento.target.closest('.conta')) { conta.open = false; }
+        });
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && conta.open) { conta.open = false; }
+        });
+    }
+
     var botao = document.getElementById('menuBotao');
     var menu = document.getElementById('menuMovel');
     if (!botao || !menu) { return; }

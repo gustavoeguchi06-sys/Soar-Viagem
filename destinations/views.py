@@ -56,7 +56,12 @@ def detalhe_destino(request, slug):
             messages.success(request, 'Obrigado! Sua avaliação foi publicada.')
             return redirect(destino.get_absolute_url() + '#avaliacoes')
     else:
-        form = AvaliacaoForm()
+        # quem está logado não precisa digitar o nome de novo
+        inicial = {}
+        if request.user.is_authenticated:
+            inicial['nome_autor'] = (request.user.get_full_name()
+                                     or request.user.username)
+        form = AvaliacaoForm(initial=inicial)
 
     avaliacoes = list(destino.avaliacoes.all())
 
