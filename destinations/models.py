@@ -65,6 +65,13 @@ class Destino(models.Model):
         verbose_name = 'Destino'
         verbose_name_plural = 'Destinos'
         ordering = ['-destaque', 'nome']
+        indexes = [
+            # A busca filtra por estes tres campos; sem indice, cada consulta
+            # e uma varredura da tabela inteira.
+            models.Index(fields=['nome'], name='destino_nome_idx'),
+            models.Index(fields=['pais'], name='destino_pais_idx'),
+            models.Index(fields=['continente'], name='destino_continente_idx'),
+        ]
 
     def __str__(self):
         return f'{self.nome}, {self.pais}'
@@ -83,7 +90,12 @@ class Destino(models.Model):
 
     @property
     def media_avaliacoes(self):
-        notas = [a.nota for a in self.avaliacoes.all()]
+        """Media das avaliacoes ja aprovadas.
+
+        So conta as publicadas: enquanto uma avaliacao esta na fila de
+        moderacao ela nao pode mexer na nota que aparece na vitrine.
+        """
+        notas = [a.nota for a in self.avaliacoes.publicadas()]
         if not notas:
             return None
         return round(sum(notas) / len(notas), 1)

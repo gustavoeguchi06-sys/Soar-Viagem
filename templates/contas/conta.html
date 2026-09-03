@@ -73,6 +73,20 @@
             <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver as viagens</a>
         </div>
         {% endif %}
+
+        <h2 class="conta-secao">Meus dados</h2>
+        <div class="conta-dados">
+            <p>Você decide o que a Soar guarda sobre você.
+               Veja o <a href="{% url 'contas:privacidade' %}">aviso de privacidade</a>.</p>
+            <div class="conta-topo__acoes">
+                <a class="btn btn--contorno btn--sm" href="{% url 'contas:meus_dados' %}">
+                    Baixar meus dados
+                </a>
+                <a class="btn btn--contorno btn--sm" href="{% url 'contas:excluir_conta' %}">
+                    Excluir minha conta
+                </a>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}

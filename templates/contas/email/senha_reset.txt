@@ -1,0 +1,16 @@
+Olá, {{ user.first_name|default:user.username }}!
+
+Recebemos um pedido para trocar a senha da sua conta na Soar Operadora. Para
+escolher uma nova, abra o link abaixo:
+
+{{ protocol }}://{{ domain }}{% url 'contas:password_reset_confirm' uidb64=uid token=token %}
+
+O link vale por algumas horas e só funciona uma vez.
+
+Se não foi você que pediu, ignore esta mensagem. Sua senha continua a mesma e
+ninguém consegue trocá-la sem abrir este link.
+
+Seu nome de usuário, caso tenha esquecido: {{ user.get_username }}
+
+--
+Soar Operadora

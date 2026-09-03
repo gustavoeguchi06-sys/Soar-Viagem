@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Esqueci minha senha — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Esqueci minha senha</h1>
+            <p class="cartao-form__sub">Informe o e-mail da sua conta. Enviamos um link
+               para você escolher uma senha nova.</p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Enviar link</button>
+            </form>
+            <p class="cartao-form__rodape">
+                Lembrou? <a href="{% url 'contas:entrar' %}">Voltar para entrar</a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

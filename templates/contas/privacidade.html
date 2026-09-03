@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Aviso de privacidade — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap" style="max-width:760px">
+        <h1>Aviso de privacidade</h1>
+        <p>Este aviso explica quais dados a Soar Operadora guarda sobre você, por que
+           guarda e o que você pode pedir a qualquer momento. Ele segue a Lei Geral de
+           Proteção de Dados (Lei 13.709/2018).</p>
+
+        <h2 class="conta-secao">Quem é o responsável</h2>
+        <p>Soar Operadora — CNPJ 00.000.000/0001-00, Cadastur 00.000000.00-0.
+           Para qualquer assunto de dados pessoais, escreva para
+           <a href="mailto:privacidade@soaroperadora.com.br">privacidade@soaroperadora.com.br</a>.</p>
+
+        <h2 class="conta-secao">O que guardamos e por quê</h2>
+        <dl class="reserva-item__dados" style="display:block">
+            <p><b>Nome, e-mail e nome de usuário.</b> Para criar sua conta, falar com você
+               pelo nome e enviar a confirmação da reserva. Base legal: execução do
+               contrato de viagem (art. 7º, V).</p>
+            <p><b>Telefone/WhatsApp.</b> Para a equipe combinar os detalhes da viagem.
+               Você escolhe se preenche. Base legal: execução do contrato.</p>
+            <p><b>Observações do pedido.</b> O que você escreve no campo livre da reserva —
+               restrição alimentar, quem viaja com você, dúvidas. Se você contar algo sobre
+               saúde ou alimentação, isso é <b>dado pessoal sensível</b> (art. 5º, II) e a
+               base legal passa a ser o seu consentimento: escreva ali só o que quiser que a
+               equipe saiba.</p>
+            <p><b>Avaliações que você publica.</b> Ficam visíveis no site com o nome da sua
+               conta, depois de passarem pela nossa revisão.</p>
+            <p><b>Endereço IP e data de envio da avaliação.</b> Guardados por segurança, para
+               apurar spam e abuso. Base legal: legítimo interesse (art. 7º, IX).</p>
+            <p><b>Registro de entradas na conta.</b> Data, hora e IP de cada acesso e de cada
+               tentativa que falhou, para detectar invasão. Base legal: legítimo interesse.</p>
+        </dl>
+
+        <h2 class="conta-secao">O que <em>não</em> guardamos</h2>
+        <p>Nenhum dado de pagamento. O site não cobra nada: o pagamento é combinado
+           direto com a equipe, fora daqui. Também não guardamos sua senha — só uma
+           marca matemática dela, que não permite descobrir a senha original.</p>
+
+        <h2 class="conta-secao">Por quanto tempo</h2>
+        <p>Dados da conta enquanto ela existir. Reservas por 5 anos após a viagem, prazo
+           que a legislação fiscal e o Código de Defesa do Consumidor exigem. Registros
+           de acesso por 6 meses, como manda o Marco Civil da Internet (art. 15).
+           Passado o prazo, apagamos.</p>
+
+        <h2 class="conta-secao">Com quem compartilhamos</h2>
+        <p>Com os fornecedores necessários para a viagem acontecer — pousada, transporte,
+           guias — e só o necessário para cada um. Não vendemos seus dados e não os usamos
+           para publicidade de terceiros.</p>
+
+        <h2 class="conta-secao">Seus direitos</h2>
+        <p>Você pode, a qualquer momento e sem justificar:</p>
+        <ul>
+            <li><a href="{% url 'contas:meus_dados' %}">Baixar tudo o que guardamos sobre você</a>,
+                em arquivo que serve para levar a outro lugar (art. 18, II e V).</li>
+            <li><a href="{% url 'contas:excluir_conta' %}">Excluir sua conta e seus dados
+                pessoais</a> (art. 18, VI).</li>
+            <li>Corrigir o que estiver errado — escreva para o e-mail acima (art. 18, III).</li>
+            <li>Revogar o consentimento do que foi coletado com base nele (art. 8º, §5º).</li>
+            <li>Reclamar à ANPD, se achar que tratamos seus dados de forma indevida.</li>
+        </ul>
+
+        <h2 class="conta-secao">Se algo der errado</h2>
+        <p>Em caso de incidente que possa causar risco a você, comunicamos a ANPD e você
+           mesmo, com o que aconteceu e o que fazer, no prazo da lei.</p>
+
+        <p style="margin-top:32px"><small>Última atualização: 2 de setembro de 2026.</small></p>
+    </div>
+</section>
+{% endblock %}

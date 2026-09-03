@@ -1,16 +1,31 @@
-"""Entrar, cadastrar e sair.
+"""Entrar, cadastrar, confirmar e-mail, sair e cuidar dos próprios dados.
 
 Quem é dono do site não passa por aqui para administrar: o painel do dono é o
 admin do Django, em /painel/. Estas telas são a porta do cliente.
 """
-from django.contrib import messages
-from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
-from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
+import json
+import logging
 
-from .forms import CadastroForm, EntrarForm
+from django.contrib import messages
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db import IntegrityError, transaction
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import (url_has_allowed_host_and_scheme, urlsafe_base64_decode,
+                               urlsafe_base64_encode)
+
+from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, ip_do_cliente
+
+from .forms import CadastroForm, EntrarForm, ExcluirContaForm
+
+log = logging.getLogger('soar.seguranca')
 
 
 def _proxima_pagina(request):
@@ -31,15 +46,38 @@ def entrar(request):
     if request.user.is_authenticated:
         return redirect(_proxima_pagina(request))
 
+    form = EntrarForm(request)
+
     if request.method == 'POST':
+        digitado = request.POST.get('username', '').strip()
+
+        # Antes de conferir a senha: esta pessoa já errou demais?
+        # Sem este limite, dava para tentar senha à vontade — e a conta do dono
+        # do site é superusuário, então adivinhá-la é administrar o site.
+        if LIMITE_LOGIN.estourou(request, digitado):
+            log.warning('login bloqueado por limite: usuario=%r ip=%s',
+                        digitado, ip_do_cliente(request))
+            messages.error(
+                request,
+                'Muitas tentativas seguidas. Espere alguns minutos antes de tentar de novo — '
+                'ou use "esqueci minha senha".'
+            )
+            return render(request, 'contas/entrar.html', {
+                'form': EntrarForm(request), 'next': request.GET.get('next', ''),
+                'bloqueado': True,
+            })
+
         form = EntrarForm(request, data=request.POST)
         if form.is_valid():
+            LIMITE_LOGIN.limpar(request, digitado)
             login(request, form.get_user())
             messages.success(request, 'Bem-vindo(a) de volta, {}!'.format(
                 request.user.first_name or request.user.username))
             return redirect(_proxima_pagina(request))
-    else:
-        form = EntrarForm(request)
+
+        # Erro de senha conta para o limite. O sinal user_login_failed já
+        # registrou a tentativa no log (contas/apps.py).
+        LIMITE_LOGIN.registrar(request, digitado)
 
     return render(request, 'contas/entrar.html', {
         'form': form,
@@ -52,12 +90,39 @@ def cadastro(request):
         return redirect(_proxima_pagina(request))
 
     if request.method == 'POST':
+        if LIMITE_CADASTRO.estourou(request):
+            messages.error(request, 'Muitos cadastros a partir daqui agora há pouco. '
+                                    'Tente de novo mais tarde.')
+            return render(request, 'contas/cadastro.html',
+                          {'form': CadastroForm(), 'next': request.GET.get('next', '')})
+
         form = CadastroForm(request.POST)
         if form.is_valid():
-            usuario = form.save()
-            login(request, usuario)
-            messages.success(request, 'Conta criada! Agora é só escolher a viagem.')
-            return redirect(_proxima_pagina(request))
+            LIMITE_CADASTRO.registrar(request)
+            email = form.cleaned_data['email']
+
+            existente = User.objects.filter(email__iexact=email).first()
+            if existente:
+                # O endereço já tem conta. Não dá para dizer isso na tela sem
+                # transformar o cadastro num consultor de "quem é cliente da
+                # Soar". Quem precisa saber é o dono do e-mail, e é para ele
+                # que a informação vai.
+                _avisar_conta_existente(request, existente)
+            else:
+                try:
+                    with transaction.atomic():
+                        usuario = form.save()
+                except IntegrityError:
+                    # Corrida com outro cadastro do mesmo e-mail; o índice
+                    # único do banco pegou. A resposta na tela não muda.
+                    pass
+                else:
+                    _enviar_confirmacao(request, usuario)
+                    log.info('conta criada: usuario=%r ip=%s',
+                             usuario.get_username(), ip_do_cliente(request))
+
+            # Mesma resposta nos dois caminhos — é isso que impede a enumeração.
+            return render(request, 'contas/verifique_email.html', {'email': email})
     else:
         form = CadastroForm()
 
@@ -65,6 +130,59 @@ def cadastro(request):
         'form': form,
         'next': request.GET.get('next', ''),
     })
+
+
+def _link_absoluto(request, caminho):
+    return request.build_absolute_uri(caminho)
+
+
+def _enviar_confirmacao(request, usuario):
+    """Manda o link que ativa a conta.
+
+    Sem esta etapa, qualquer pessoa cadastrava com o e-mail de outra e a Soar
+    acabava mandando confirmação de reserva para o endereço errado.
+    """
+    caminho = reverse('contas:ativar', kwargs={
+        'uidb64': urlsafe_base64_encode(force_bytes(usuario.pk)),
+        'token': default_token_generator.make_token(usuario),
+    })
+    corpo = render_to_string('contas/email/confirmar.txt', {
+        'usuario': usuario,
+        'link': _link_absoluto(request, caminho),
+    })
+    send_mail('Confirme seu e-mail — Soar Operadora', corpo, None, [usuario.email])
+
+
+def _avisar_conta_existente(request, usuario):
+    """Avisa o dono do endereço que alguém tentou cadastrar com o e-mail dele."""
+    corpo = render_to_string('contas/email/ja_tem_conta.txt', {
+        'usuario': usuario,
+        'link_entrar': _link_absoluto(request, reverse('contas:entrar')),
+        'link_senha': _link_absoluto(request, reverse('contas:senha_reset')),
+    })
+    send_mail('Você já tem conta na Soar', corpo, None, [usuario.email])
+
+
+def ativar(request, uidb64, token):
+    """Confirma o e-mail e liga a conta."""
+    try:
+        pk = force_str(urlsafe_base64_decode(uidb64))
+        usuario = User.objects.get(pk=pk)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        usuario = None
+
+    if usuario is None or not default_token_generator.check_token(usuario, token):
+        return render(request, 'contas/ativacao_invalida.html', status=400)
+
+    if not usuario.is_active:
+        usuario.is_active = True
+        usuario.save(update_fields=['is_active'])
+        log.info('e-mail confirmado: usuario=%r ip=%s',
+                 usuario.get_username(), ip_do_cliente(request))
+
+    login(request, usuario)
+    messages.success(request, 'E-mail confirmado! Sua conta está pronta.')
+    return redirect('destinations:home')
 
 
 def sair(request):
@@ -85,3 +203,85 @@ def minha_conta(request):
     return render(request, 'contas/conta.html', {
         'reservas': request.user.reservas.select_related('destino'),
     })
+
+
+def privacidade(request):
+    """Aviso de privacidade — quais dados a Soar guarda e por quê (LGPD)."""
+    return render(request, 'contas/privacidade.html')
+
+
+@login_required
+def meus_dados(request):
+    """Baixa tudo o que a Soar guarda sobre a pessoa (LGPD, art. 18, II).
+
+    JSON em vez de tela porque o direito é de *portabilidade*: o arquivo tem
+    que servir para levar a outro lugar.
+    """
+    usuario = request.user
+    dados = {
+        'conta': {
+            'usuario': usuario.username,
+            'nome': usuario.get_full_name(),
+            'email': usuario.email,
+            'criada_em': usuario.date_joined.isoformat(),
+            'ultimo_acesso': usuario.last_login.isoformat() if usuario.last_login else None,
+        },
+        'reservas': [
+            {
+                'codigo': r.codigo,
+                'destino': r.destino.nome,
+                'acomodacao': r.get_acomodacao_display(),
+                'pessoas': r.pessoas,
+                'telefone': r.telefone,
+                'observacao': r.observacao,
+                'preco_estimado': str(r.preco_estimado) if r.preco_estimado else None,
+                'saida': r.saida,
+                'situacao': r.get_status_display(),
+                'pedido_em': r.criado_em.isoformat(),
+            }
+            for r in usuario.reservas.select_related('destino')
+        ],
+        'avaliacoes': [
+            {
+                'destino': a.destino.nome,
+                'nota': a.nota,
+                'comentario': a.comentario,
+                'publicada': a.publicada,
+                'criado_em': a.criado_em.isoformat(),
+            }
+            for a in usuario.avaliacoes.select_related('destino')
+        ],
+    }
+    resposta = HttpResponse(
+        json.dumps(dados, ensure_ascii=False, indent=2),
+        content_type='application/json; charset=utf-8',
+    )
+    resposta['Content-Disposition'] = 'attachment; filename="meus-dados-soar.json"'
+    log.info('exportacao de dados: usuario=%r ip=%s',
+             usuario.get_username(), ip_do_cliente(request))
+    return resposta
+
+
+@login_required
+def excluir_conta(request):
+    """Apaga a conta e os dados pessoais (LGPD, art. 18, VI)."""
+    if request.method == 'POST':
+        form = ExcluirContaForm(request.user, request.POST)
+        if form.is_valid():
+            usuario = request.user
+            nome = usuario.get_username()
+
+            # As reservas ficam, porque a operadora precisa do histórico
+            # comercial e fiscal — mas sem nada que ligue a pessoa a elas.
+            usuario.reservas.update(telefone='', observacao='[dados removidos a pedido do cliente]')
+            usuario.avaliacoes.update(nome_autor='Cliente removido', publicada=False)
+
+            logout(request)
+            usuario.delete()
+            log.info('conta excluida a pedido: usuario=%r ip=%s', nome, ip_do_cliente(request))
+            messages.success(request, 'Sua conta e seus dados pessoais foram apagados.')
+            return redirect('destinations:home')
+    else:
+        form = ExcluirContaForm(request.user)
+
+    return render(request, 'contas/excluir.html', {'form': form})

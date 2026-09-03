@@ -10,7 +10,8 @@
         </div>
 
         <form class="busca" method="get" style="max-width: 520px; margin-bottom: 22px;">
-            <input type="text" name="q" value="{{ busca }}" placeholder="Busque por cidade, país ou palavra-chave...">
+            <input type="text" name="q" value="{{ busca }}" maxlength="80"
+                   placeholder="Busque por cidade, país ou palavra-chave...">
             <button type="submit">Buscar</button>
         </form>
 
@@ -29,6 +30,18 @@
                 {% include 'destinations/_card.html' %}
             {% endfor %}
         </div>
+        {% if pagina.has_other_pages %}
+        {# Sem paginacao, uma busca ampla renderiza o catalogo inteiro de uma vez. #}
+        <nav class="paginacao" aria-label="Paginas de destinos">
+            {% if pagina.has_previous %}
+            <a class="filtro" href="?pagina={{ pagina.previous_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if continente_ativo %}&continente={{ continente_ativo }}{% endif %}">Anterior</a>
+            {% endif %}
+            <span class="paginacao__conta">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+            {% if pagina.has_next %}
+            <a class="filtro" href="?pagina={{ pagina.next_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if continente_ativo %}&continente={{ continente_ativo }}{% endif %}">Próxima</a>
+            {% endif %}
+        </nav>
+        {% endif %}
         {% else %}
         <p class="vazio">Nenhum destino encontrado{% if busca %} para "{{ busca }}"{% endif %}. 😕</p>
         {% endif %}

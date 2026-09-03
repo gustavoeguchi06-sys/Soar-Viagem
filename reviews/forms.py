@@ -1,33 +1,32 @@
 from django import forms
+from django.conf import settings
 
 from .models import Avaliacao
 
-# O formulário de avaliação é público: qualquer visitante posta sem login e
-# pode anexar uma foto. Por isso o arquivo passa por conferência de tamanho e
-# de formato antes de ser aceito.
-TAMANHO_MAXIMO_FOTO = 5 * 1024 * 1024      # 5 MB
+# A foto é o único arquivo que entra pela frente do site. Quem envia já tem
+# conta (a view exige login), mas o arquivo continua vindo de fora: confere
+# tamanho e formato antes de gravar qualquer coisa em disco.
 FORMATOS_ACEITOS = {'JPEG', 'PNG', 'WEBP', 'GIF'}
 EXTENSOES_ACEITAS = ('.jpg', '.jpeg', '.png', '.webp', '.gif')
 
 
 class AvaliacaoForm(forms.ModelForm):
+    """Avaliação de um destino.
+
+    `nome_autor` saiu do formulário de propósito: era campo livre e permitia
+    assinar com o nome de outra pessoa — ou da própria operadora. Agora a view
+    preenche a partir da conta.
+    """
+
     class Meta:
         model = Avaliacao
-        fields = ['nome_autor', 'nota', 'comentario', 'foto']
+        fields = ['nota', 'comentario', 'foto']
         widgets = {
-            'nome_autor': forms.TextInput(attrs={'placeholder': 'Como você quer aparecer',
-                                                 'maxlength': 80}),
             'nota': forms.Select(choices=[(i, f'{i} estrela{"s" if i > 1 else ""}') for i in range(1, 6)]),
             'comentario': forms.Textarea(attrs={'rows': 4, 'maxlength': 2000,
                                                 'placeholder': 'Conte como foi sua experiência...'}),
             'foto': forms.ClearableFileInput(attrs={'accept': ','.join(EXTENSOES_ACEITAS)}),
         }
-
-    def clean_nome_autor(self):
-        nome = self.cleaned_data['nome_autor'].strip()
-        if len(nome) < 2:
-            raise forms.ValidationError('Escreva seu nome com pelo menos 2 letras.')
-        return nome
 
     def clean_comentario(self):
         comentario = self.cleaned_data['comentario'].strip()
@@ -44,10 +43,11 @@ class AvaliacaoForm(forms.ModelForm):
         if not hasattr(foto, 'size'):
             return foto
 
-        if foto.size > TAMANHO_MAXIMO_FOTO:
+        limite = settings.TAMANHO_MAXIMO_FOTO
+        if foto.size > limite:
             raise forms.ValidationError(
                 'A foto tem {:.1f} MB. O limite é de {} MB.'.format(
-                    foto.size / (1024 * 1024), TAMANHO_MAXIMO_FOTO // (1024 * 1024))
+                    foto.size / (1024 * 1024), limite // (1024 * 1024))
             )
 
         # O ImageField do Django já abre o arquivo com o Pillow e recusa o que

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Link enviado — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Confira seu e-mail</h1>
+            <p class="cartao-form__sub">
+                Se existir uma conta com esse endereço, o link para criar uma senha nova
+                acabou de sair. Ele vale por algumas horas.
+            </p>
+            <div class="form-nota">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
+                <span>Não dizemos se o endereço tem conta ou não — é o que impede alguém
+                      de descobrir quem é cliente da Soar testando e-mails aqui.</span>
+            </div>
+            <p class="cartao-form__rodape"><a href="{% url 'contas:entrar' %}">Voltar para entrar</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

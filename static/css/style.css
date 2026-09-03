@@ -285,3 +285,16 @@ img { max-width: 100%; display: block; }
 @media (pointer: coarse) {
     .main-nav a, .filtro, .secao-titulo a { min-height: 40px; display: inline-flex; align-items: center; }
 }
+
+/* --------------------------------------------------------------------- */
+/* Paginação da lista de destinos                                         */
+/* --------------------------------------------------------------------- */
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+.paginacao__conta { color: var(--cinza, #5c6b78); font-size: .94rem; }

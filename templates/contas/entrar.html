@@ -29,6 +29,10 @@
             </form>
 
             <p class="cartao-form__rodape">
+                <a href="{% url 'contas:senha_reset' %}">Esqueci minha senha</a>
+            </p>
+
+            <p class="cartao-form__rodape">
                 Ainda não tem conta?
                 <a href="{% url 'contas:cadastro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Criar minha conta</a>
             </p>

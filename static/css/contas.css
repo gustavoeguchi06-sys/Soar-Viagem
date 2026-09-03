@@ -143,3 +143,23 @@
     .conta-topo__acoes .btn { flex: 1; justify-content: center; }
     .reserva-item__dados { gap: 10px 20px; }
 }
+
+/* --------------------------------------------------------------------- */
+/* Meus dados (LGPD): exportar e excluir a conta                          */
+/* --------------------------------------------------------------------- */
+.conta-dados {
+    border: 1px solid var(--linha, #e3e8ee);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+.conta-dados p { margin: 0; max-width: 46ch; color: var(--cinza, #5c6b78); }
+
+@media (max-width: 520px) {
+    .conta-dados { flex-direction: column; align-items: stretch; }
+    .conta-dados .conta-topo__acoes { width: 100%; }
+}

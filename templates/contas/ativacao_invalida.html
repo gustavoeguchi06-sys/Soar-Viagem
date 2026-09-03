@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Link expirado — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Este link não vale mais</h1>
+            <p class="cartao-form__sub">
+                Ou ele já foi usado, ou passou do prazo. Links de confirmação expiram de
+                propósito: um link eterno na sua caixa de entrada é uma chave eterna para
+                a sua conta.
+            </p>
+            <p class="cartao-form__rodape">
+                Faça o cadastro de novo para receber um link novo:
+                <a href="{% url 'contas:cadastro' %}">Criar minha conta</a>
+            </p>
+            <p class="cartao-form__rodape">
+                Se a conta já estava pronta, é só <a href="{% url 'contas:entrar' %}">entrar</a>.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}
