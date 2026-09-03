@@ -109,7 +109,7 @@
 </header>
 
 {% if messages %}
-<div class="avisos">
+<div class="avisos" role="status" aria-live="polite">
     {% for message in messages %}
     <div class="aviso">{{ message }}</div>
     {% endfor %}
