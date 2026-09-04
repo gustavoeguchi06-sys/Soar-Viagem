@@ -1,19 +1,57 @@
+"""Cadastro de destinos e hospedagens no painel do dono.
+
+Duas decisões guiam este arquivo:
+
+**Preço se edita na lista.** Corrigir a diária de seis destinos abrindo seis
+formulários e salvando seis vezes é o tipo de tarefa que o dono deixa para
+depois — e o site fica com preço velho. Com `list_editable`, a lista vira uma
+planilha: digita, salva uma vez.
+
+**O formulário do destino é longo, então ele é dobrado.** Só a primeira seção
+(o catálogo) fica aberta; o resto da página de viagem abre quando o dono quiser
+mexer. Cadastrar um destino novo é preencher o primeiro bloco e salvar — o
+resto a página preenche sozinha com o texto padrão da operadora.
+"""
+from django import forms
 from django.contrib import admin
+from django.db import models
+from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
                      ImagemHospedagem, PerguntaFrequente)
 
+TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
+
+
+def miniatura(imagem, alt=''):
+    """Uma foto pequena para a lista, ou um aviso de que falta foto."""
+    if not imagem:
+        return format_html('<span class="miniatura miniatura--vazia">sem foto</span>')
+    return format_html('<img class="miniatura" src="{}" alt="{}">', imagem.url, alt)
+
+
+# --------------------------------------------------------------------------- #
+# Blocos embutidos no formulário do destino
+# --------------------------------------------------------------------------- #
 
 class ImagemDestinoInline(admin.TabularInline):
     model = ImagemDestino
     extra = 1
-    verbose_name_plural = 'Fotos do destino (galeria da página)'
+    fields = ['imagem', 'previa', 'legenda']
+    readonly_fields = ['previa']
+    verbose_name = 'foto'
+    verbose_name_plural = 'Fotos da galeria'
+
+    @admin.display(description='Prévia')
+    def previa(self, obj):
+        return miniatura(obj.imagem, obj.legenda)
 
 
 class DestaqueViagemInline(admin.TabularInline):
     model = DestaqueViagem
     extra = 0
     fields = ['ordem', 'texto']
+    verbose_name = 'destaque'
     verbose_name_plural = 'Destaques da viagem (o que a pessoa vai conhecer)'
 
 
@@ -21,14 +59,20 @@ class DiaRoteiroInline(admin.StackedInline):
     model = DiaRoteiro
     extra = 0
     fields = ['ordem', 'titulo', 'resumo', 'detalhe', 'imagem']
+    formfield_overrides = TEXTO_CURTO
+    verbose_name = 'dia'
     verbose_name_plural = 'Roteiro dia a dia'
+    classes = ['collapse']
 
 
 class PerguntaFrequenteInline(admin.TabularInline):
     model = PerguntaFrequente
     extra = 0
     fields = ['ordem', 'pergunta', 'resposta']
+    formfield_overrides = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 2})}}
+    verbose_name = 'pergunta'
     verbose_name_plural = 'Perguntas frequentes'
+    classes = ['collapse']
 
 
 class HospedagemInline(admin.TabularInline):
@@ -36,43 +80,140 @@ class HospedagemInline(admin.TabularInline):
     extra = 0
     fields = ['nome', 'tipo', 'preco_diaria', 'disponivel']
     show_change_link = True
+    verbose_name = 'hospedagem'
+    verbose_name_plural = 'Hospedagens deste destino (clique em "alterar" para fotos e endereço)'
 
+
+# --------------------------------------------------------------------------- #
+# Destino
+# --------------------------------------------------------------------------- #
 
 @admin.register(Destino)
 class DestinoAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'pais', 'continente', 'preco_medio_diaria', 'destaque', 'criado_em']
-    list_filter = ['continente', 'destaque', 'pais']
+    list_display = ['capa', 'nome', 'pais', 'preco_base', 'preco_medio_diaria',
+                    'vagas', 'destaque', 'soar_60', 'situacao', 'no_site']
+    list_display_links = ['nome']
+    list_editable = ['preco_base', 'preco_medio_diaria', 'vagas', 'destaque', 'soar_60']
+    list_filter = ['destaque', 'soar_60', 'continente', 'pais']
     search_fields = ['nome', 'pais', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
-    inlines = [ImagemDestinoInline, DestaqueViagemInline, DiaRoteiroInline,
-               PerguntaFrequenteInline, HospedagemInline]
+    formfield_overrides = TEXTO_CURTO
+    save_on_top = True
+    list_per_page = 30
+    readonly_fields = ['previa_capa', 'criado_em']
+    inlines = [HospedagemInline, ImagemDestinoInline, DestaqueViagemInline,
+               DiaRoteiroInline, PerguntaFrequenteInline]
+
     fieldsets = [
-        ('O destino', {
-            'fields': ['nome', 'slug', 'pais', 'continente', 'descricao', 'imagem_capa',
-                       'preco_medio_diaria', 'melhor_epoca', 'destaque'],
+        ('O destino no catálogo', {
+            'fields': ['nome', 'slug', 'pais', 'continente', 'descricao',
+                       'imagem_capa', 'previa_capa', 'melhor_epoca', 'destaque', 'soar_60'],
+            'description': 'O mínimo para o destino existir. O resto da página '
+                           'tem texto padrão e pode ficar para depois.',
         }),
-        ('Sobre a viagem — capa', {
+        ('Preços', {
+            'fields': ['preco_base', 'preco_medio_diaria'],
+            'description': 'O preço por pessoa é o que abre o card de reserva. '
+                           'Sem nenhum dos dois, a página mostra “sob consulta”.',
+        }),
+        ('Datas e vagas', {
+            'fields': ['periodo', 'mes_ano', 'dias', 'noites', 'proxima_saida', 'vagas'],
+            'description': 'Em branco, a página usa o período padrão da operadora.',
+        }),
+        ('Capa da página de viagem', {
+            'classes': ['collapse'],
             'fields': ['selo', 'subtitulo', 'regiao', 'estado'],
             'description': 'Tudo opcional. Em branco, a página usa o texto padrão da Soar.',
         }),
-        ('Sobre a viagem — datas e preço', {
-            'fields': ['periodo', 'mes_ano', 'dias', 'noites', 'proxima_saida', 'vagas',
-                       'preco_base'],
-        }),
-        ('Sobre a viagem — textos', {
+        ('Textos da página', {
+            'classes': ['collapse'],
             'fields': ['hospedagem_sub', 'incluso', 'informacoes'],
+            'description': 'Nos dois últimos, escreva um item por linha.',
+        }),
+        ('Registro', {
+            'classes': ['collapse'],
+            'fields': ['criado_em'],
         }),
     ]
 
+    @admin.display(description='')
+    def capa(self, destino):
+        return miniatura(destino.imagem_capa, destino.nome)
+
+    @admin.display(description='Foto de capa como fica no site')
+    def previa_capa(self, destino):
+        if not destino.imagem_capa:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem capa — a página usa uma ilustração da Soar.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
+                           destino.imagem_capa.url, destino.nome)
+
+    @admin.display(description='Situação')
+    def situacao(self, destino):
+        if destino.preco_base or destino.preco_medio_diaria:
+            return format_html('<span class="etiqueta etiqueta--confirmada">no ar</span>')
+        return format_html('<span class="etiqueta etiqueta--fila">sem preço</span>')
+
+    @admin.display(description='')
+    def no_site(self, destino):
+        return format_html('<a href="{}" target="_blank" rel="noopener">abrir &#8599;</a>',
+                           destino.get_absolute_url())
+
+
+# --------------------------------------------------------------------------- #
+# Hospedagem
+# --------------------------------------------------------------------------- #
 
 class ImagemHospedagemInline(admin.TabularInline):
     model = ImagemHospedagem
     extra = 1
+    fields = ['imagem', 'previa', 'legenda']
+    readonly_fields = ['previa']
+    verbose_name = 'foto'
+    verbose_name_plural = 'Fotos da hospedagem'
+
+    @admin.display(description='Prévia')
+    def previa(self, obj):
+        return miniatura(obj.imagem, obj.legenda)
 
 
 @admin.register(Hospedagem)
 class HospedagemAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'destino', 'tipo', 'preco_diaria', 'disponivel']
-    list_filter = ['tipo', 'disponivel', 'destino']
+    list_display = ['foto', 'nome', 'destino', 'tipo', 'preco_diaria', 'disponivel']
+    list_display_links = ['nome']
+    list_editable = ['preco_diaria', 'disponivel']
+    list_filter = ['disponivel', 'tipo', 'destino']
     search_fields = ['nome', 'destino__nome']
+    autocomplete_fields = ['destino']
+    formfield_overrides = TEXTO_CURTO
+    save_on_top = True
+    list_per_page = 30
+    readonly_fields = ['previa_imagem']
     inlines = [ImagemHospedagemInline]
+
+    fieldsets = [
+        ('A hospedagem', {
+            'fields': ['destino', 'nome', 'tipo', 'descricao', 'disponivel'],
+        }),
+        ('Preço', {
+            'fields': ['preco_diaria'],
+        }),
+        ('Foto e contato', {
+            'fields': ['imagem', 'previa_imagem', 'endereco', 'site'],
+        }),
+    ]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('destino')
+
+    @admin.display(description='')
+    def foto(self, hospedagem):
+        return miniatura(hospedagem.imagem, hospedagem.nome)
+
+    @admin.display(description='Foto principal')
+    def previa_imagem(self, hospedagem):
+        if not hospedagem.imagem:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
+                           hospedagem.imagem.url, hospedagem.nome)

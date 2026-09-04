@@ -108,7 +108,9 @@ if not DEBUG and not ALLOWED_HOSTS:
     )
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # O painel do dono no lugar do admin padrão: mesma máquina, outra tela
+    # inicial e outra roupa (soar/painel.py).
+    'soar.painel.SoarAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -23,7 +23,3 @@ urlpatterns = [
 # em arquivo servido direto pelo servidor web.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-admin.site.site_header = 'Soar — Painel do dono'
-admin.site.site_title = 'Soar'
-admin.site.index_title = 'Gerenciar o site de viagem'
