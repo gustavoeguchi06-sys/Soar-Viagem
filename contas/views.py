@@ -28,18 +28,35 @@ from .forms import CadastroForm, EntrarForm, ExcluirContaForm
 log = logging.getLogger('soar.seguranca')
 
 
+def _e_do_painel(destino):
+    """O caminho pedido é uma tela do painel do dono?"""
+    return destino.startswith(reverse('admin:index'))
+
+
 def _proxima_pagina(request):
     """Para onde mandar a pessoa depois de entrar.
 
     Só aceita destino dentro do próprio site: um `?next=` apontando para fora
     seria um convite a golpe de redirecionamento.
+
+    Duas regras a mais, porque o site tem uma porta de entrada só:
+
+    - quem é da equipe e entrou sem pedir página nenhuma vai direto ao painel,
+      que é o lugar onde ela trabalha;
+    - um cliente nunca é mandado para o painel, mesmo que o `next` diga isso.
+      Ele não tem acesso, o painel devolveria ele para esta mesma tela e os dois
+      ficariam se empurrando em círculo.
     """
+    equipe = request.user.is_authenticated and request.user.is_staff
+
     destino = request.POST.get('next') or request.GET.get('next') or ''
     if destino and url_has_allowed_host_and_scheme(
         destino, allowed_hosts={request.get_host()}, require_https=request.is_secure()
     ):
-        return destino
-    return reverse('destinations:home')
+        if equipe or not _e_do_painel(destino):
+            return destino
+
+    return reverse('admin:index') if equipe else reverse('destinations:home')
 
 
 def entrar(request):

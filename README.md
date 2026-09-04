@@ -44,15 +44,25 @@ Depois abra no navegador:
 
 Para parar o servidor: `Ctrl+C` no terminal.
 
-## Duas portas de entrada
+## Uma porta de entrada, dois tipos de conta
 
-O site tem dois tipos de conta, e elas não se misturam:
+Cliente e dono entram pela **mesma tela**: o *Entrar* do site, em
+http://127.0.0.1:8000/entrar/. O painel não tem login próprio — quem digita
+`/painel/` sem estar logado é mandado para lá e volta ao painel assim que
+entra. Duas telas de entrada no mesmo site seria uma senha a mais para lembrar,
+uma tela a mais para manter e uma a mais para um golpe copiar.
+
+O que muda é para onde a pessoa vai depois de entrar:
 
 | | Cliente | Dono do site |
 |---|---|---|
 | Como cria | botão **Entrar → Criar minha conta**, no próprio site | `python manage.py criar_dono` |
-| Onde entra | http://127.0.0.1:8000/entrar/ | http://127.0.0.1:8000/painel/ |
+| Onde entra | http://127.0.0.1:8000/entrar/ | a mesma tela |
+| Para onde vai | a página em que estava, ou a home | direto para o **painel** |
 | O que faz | pede reservas e acompanha em **Minha conta** | cadastra destinos, fotos, roteiro, preços e responde as reservas |
+
+Quem é da equipe também chega ao painel pelo menu da conta, no canto superior
+direito de qualquer página do site.
 
 **Reservar exige conta.** Quem clica em *Reservar agora* sem estar logado vai
 para a tela de entrar e volta para a mesma viagem assim que entra — com a

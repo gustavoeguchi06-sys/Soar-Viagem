@@ -11,8 +11,12 @@ primeira coisa é a fila de trabalho; a lista de tabelas continua embaixo.
 Trocar o admin inteiro por este é feito pelo `SoarAdminConfig` lá no fim do
 arquivo, que entra no INSTALLED_APPS no lugar de `django.contrib.admin`.
 """
+from urllib.parse import urlencode
+
 from django.contrib.admin import AdminSite
 from django.contrib.admin.apps import AdminConfig
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -21,6 +25,24 @@ class PainelSoar(AdminSite):
     site_header = 'Soar — Painel do dono'
     site_title = 'Soar — Painel'
     index_title = 'Gerenciar o site de viagem'
+
+    def login(self, request, extra_context=None):
+        """O painel não tem tela de login própria.
+
+        O admin do Django traz a dele, e ter duas telas de entrada no mesmo site
+        é uma a mais para lembrar da senha, uma a mais para manter e uma a mais
+        para um golpe copiar. Quem cai aqui é mandado para o *Entrar* do site,
+        levando junto para onde queria ir — o `entrar` devolve a pessoa ao
+        painel assim que ela entra, se for da equipe.
+        """
+        destino = reverse('admin:index', current_app=self.name)
+
+        if self.has_permission(request):          # já é da equipe e já entrou
+            return HttpResponseRedirect(request.GET.get(REDIRECT_FIELD_NAME) or destino)
+
+        pedido = request.GET.get(REDIRECT_FIELD_NAME) or destino
+        return HttpResponseRedirect('{}?{}'.format(
+            reverse('contas:entrar'), urlencode({REDIRECT_FIELD_NAME: pedido})))
 
     def index(self, request, extra_context=None):
         """A tela inicial: fila de trabalho, atalhos e o que está sem preço."""
