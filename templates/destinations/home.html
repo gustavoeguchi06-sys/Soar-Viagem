@@ -39,9 +39,12 @@
                 <h2>Viajar não tem idade.</h2>
                 <p>Viagens pensadas para quem quer conhecer novos lugares com conforto,
                    segurança e companhia.</p>
-                <a class="btn btn--verde"
-                   href="https://wa.me/5511999999999?text=Quero+conhecer+as+viagens+Soar+60%2B"
-                   target="_blank" rel="noopener">Conheça as viagens 60+</a>
+                {% comment %}
+                Antes ia direto para o WhatsApp: a pessoa caía na conversa sem
+                ter visto viagem nenhuma. Agora conhece o programa primeiro, e
+                o WhatsApp fica no fim daquela página, na hora de reservar.
+                {% endcomment %}
+                <a class="btn btn--verde" href="{% url 'destinations:soar_60' %}">Conheça as viagens 60+</a>
             </div>
         </div>
     </div>
@@ -60,7 +63,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="vazio">Nenhum destino cadastrado ainda. Entre no <a href="/admin/">admin</a> para adicionar o primeiro!</p>
+        <p class="vazio">Nenhum destino cadastrado ainda. Entre no <a href="{% url 'admin:index' %}">painel do dono</a> para adicionar o primeiro!</p>
         {% endif %}
     </div>
 </section>

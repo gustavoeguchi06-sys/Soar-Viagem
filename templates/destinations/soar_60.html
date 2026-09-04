@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% comment %}
+A página do Soar 60+.
+
+O botão da home levava direto ao WhatsApp. Quem clicava caía numa conversa sem
+ter visto viagem nenhuma e precisava perguntar o que existe. Aqui a pessoa
+conhece o programa, as viagens e como funciona — e só no fim, quando já
+decidiu, aparece o caminho para reservar.
+{% endcomment %}
+
+{% block title %}Soar 60+ — Viajar não tem idade{% endblock %}
+
+{% block content %}
+
+{# ===== Capa ===== #}
+<section class="p60-capa">
+    <img class="p60-capa__foto" src="{% static 'img/soar-60.svg' %}" alt="">
+    <div class="container p60-capa__conteudo">
+        <span class="soar60__selo">Soar 60+</span>
+        <h1>Viajar não tem idade.</h1>
+        <p>Viagens em grupo com ritmo tranquilo, guia do começo ao fim e hospedagem
+           bem localizada — para quem quer conhecer novos lugares com conforto,
+           segurança e companhia.</p>
+        <div class="p60-capa__acoes">
+            <a class="btn btn--verde" href="#viagens">Ver as viagens 60+</a>
+            <a class="btn btn--branco" href="#como-funciona">Como funciona</a>
+        </div>
+    </div>
+</section>
+
+{# ===== O que muda numa viagem 60+ ===== #}
+<section class="secao" id="experiencias">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>O que muda numa viagem 60+</h2>
+        </div>
+        <p class="p60-intro">É o mesmo destino, organizado de outro jeito. Seis coisas
+           que a gente faz diferente nessas saídas:</p>
+
+        <div class="p60-grade">
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>
+                <h3>Ritmo sem pressa</h3>
+                <p>Menos paradas por dia, mais tempo em cada uma. Nada de acordar às
+                   quatro da manhã para não perder nada.</p>
+            </div>
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-guia"></use></svg>
+                <h3>Guia junto o tempo todo</h3>
+                <p>Alguém da Soar acompanha o grupo do embarque ao desembarque —
+                   não é só levar até o lugar e sumir.</p>
+            </div>
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-grupo"></use></svg>
+                <h3>Grupo pequeno</h3>
+                <p>Gente na mesma fase da vida, em turmas que cabem numa mesa de
+                   jantar. Muita gente viaja sozinha e volta com amizade.</p>
+            </div>
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-hotel"></use></svg>
+                <h3>Hospedagem no centro</h3>
+                <p>Perto do que interessa, com elevador e quarto no plano certo.
+                   Menos caminhada até a cama no fim do dia.</p>
+            </div>
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-onibus"></use></svg>
+                <h3>Transporte porta a porta</h3>
+                <p>Traslado do aeroporto e entre os passeios incluído. Você não
+                   pega mala em fila de táxi.</p>
+            </div>
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#ic-escudo"></use></svg>
+                <h3>Seguro e apoio</h3>
+                <p>Seguro viagem incluso e um telefone da Soar que atende — inclusive
+                   para a família que ficou em casa.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ===== As viagens ===== #}
+<section class="secao secao--sem-topo" id="viagens">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Viagens 60+</h2>
+            <a href="{% url 'destinations:lista' %}">Ver o catálogo todo →</a>
+        </div>
+        {% if not escolhidas %}
+        <p class="p60-intro">Todas as viagens da Soar podem ser feitas no ritmo 60+ —
+           é só combinar com a gente na hora de reservar.</p>
+        {% endif %}
+
+        {% if viagens %}
+        <div class="grade">
+            {% for destino in viagens %}
+                {% include 'destinations/_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="vazio">As próximas saídas 60+ estão sendo montadas.
+           <a href="{% url 'destinations:lista' %}">Veja os destinos</a> enquanto isso.</p>
+        {% endif %}
+    </div>
+</section>
+
+{# ===== Como funciona ===== #}
+<section class="secao" id="como-funciona">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Como funciona</h2>
+        </div>
+        <ol class="p60-passos">
+            <li>
+                <span class="p60-passos__n">1</span>
+                <div>
+                    <h3>Escolha a viagem</h3>
+                    <p>Abra o destino que te interessou: lá estão o roteiro dia a dia,
+                       as datas de saída, o que está incluso e quanto custa por pessoa.</p>
+                </div>
+            </li>
+            <li>
+                <span class="p60-passos__n">2</span>
+                <div>
+                    <h3>Peça sua vaga</h3>
+                    <p>Clique em <strong>Reservar agora</strong> na página da viagem e diga
+                       quantas pessoas vão. É um pedido, não uma compra — nada é cobrado
+                       no site.</p>
+                </div>
+            </li>
+            <li>
+                <span class="p60-passos__n">3</span>
+                <div>
+                    <h3>A Soar confirma com você</h3>
+                    <p>A gente liga, confirma a vaga, tira as dúvidas e combina o
+                       pagamento do jeito que for melhor para você.</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+</section>
+
+{# ===== Perguntas ===== #}
+<section class="secao secao--sem-topo">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Perguntas de quem viaja com a gente</h2>
+        </div>
+        <div class="p60-faq">
+            <details class="p60-faq__item">
+                <summary>Preciso viajar acompanhado?</summary>
+                <p>Não. Boa parte do grupo viaja sozinha — é justamente por isso que as
+                   turmas são pequenas e o guia fica junto o tempo todo.</p>
+            </details>
+            <details class="p60-faq__item">
+                <summary>E se eu tiver dificuldade para caminhar?</summary>
+                <p>Conte para a gente na hora de reservar. Cada roteiro tem alternativa
+                   mais leve, e em alguns destinos dá para acompanhar o grupo de carro
+                   até o ponto de encontro.</p>
+            </details>
+            <details class="p60-faq__item">
+                <summary>Tomo remédio de horário. Isso é um problema?</summary>
+                <p>Não é. Avise no pedido de reserva: o guia leva a informação com ele e
+                   as paradas do dia são organizadas com isso em conta.</p>
+            </details>
+            <details class="p60-faq__item">
+                <summary>Como pago?</summary>
+                <p>Nada é cobrado no site. Depois que a vaga é confirmada, a equipe
+                   combina com você a forma e o parcelamento.</p>
+            </details>
+            <details class="p60-faq__item">
+                <summary>Posso levar meu neto ou minha filha?</summary>
+                <p>Pode. As saídas 60+ têm ritmo próprio, mas ninguém fica de fora —
+                   é só avisar quantas pessoas vão no pedido de reserva.</p>
+            </details>
+        </div>
+    </div>
+</section>
+
+{# ===== Fecho: só agora o caminho de reservar ===== #}
+<section class="secao secao--sem-topo">
+    <div class="container">
+        <div class="p60-fecho">
+            <h2>Gostou de alguma? Vamos reservar.</h2>
+            <p>Escolha a viagem e peça sua vaga pelo site, ou fale com a nossa equipe —
+               a gente ajuda a escolher e organiza o resto.</p>
+            <div class="p60-fecho__acoes">
+                <a class="btn btn--verde" href="#viagens">Escolher minha viagem</a>
+                <a class="btn btn--branco"
+                   href="https://wa.me/5511999999999?text=Vi+as+viagens+Soar+60%2B+no+site+e+quero+reservar"
+                   target="_blank" rel="noopener">
+                    <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
+                    Falar com a Soar
+                </a>
+            </div>
+            <p class="p60-fecho__nota">Ou ligue para (11) 3000-0000, de segunda a sexta, das 9h às 18h.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

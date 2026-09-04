@@ -57,6 +57,29 @@ def lista_destinos(request):
     })
 
 
+def soar_60(request):
+    """A página do programa Soar 60+.
+
+    O botão da home ia direto para o WhatsApp: a pessoa era jogada numa
+    conversa sem ter visto viagem nenhuma, e tinha que perguntar o que existe
+    para só então decidir. Aqui ela conhece o programa e as viagens primeiro; o
+    WhatsApp fica no fim, para quando ela realmente quiser reservar.
+
+    Enquanto nenhuma viagem estiver marcada como 60+ no painel, a página mostra
+    o catálogo inteiro — melhor do que uma página vazia, e é verdade: toda
+    viagem da Soar pode ser feita no ritmo 60+, é só combinar.
+    """
+    viagens = Destino.objects.filter(soar_60=True)
+    escolhidas = viagens.exists()
+    if not escolhidas:
+        viagens = Destino.objects.all()
+
+    return render(request, 'destinations/soar_60.html', {
+        'viagens': viagens[:POR_PAGINA],
+        'escolhidas': escolhidas,
+    })
+
+
 def detalhe_destino(request, slug):
     """Detalhe do destino: galeria, hospedagens e avaliações (com formulário)."""
     destino = get_object_or_404(

@@ -23,6 +23,11 @@ class Destino(models.Model):
                                              decimal_places=2, blank=True, null=True)
     melhor_epoca = models.CharField('Melhor época para visitar', max_length=120, blank=True)
     destaque = models.BooleanField('Destaque na página inicial', default=False)
+    soar_60 = models.BooleanField(
+        'Faz parte do Soar 60+', default=False,
+        help_text='Marque as viagens de ritmo mais tranquilo, que aparecem na '
+                  'página do Soar 60+. Se nenhuma estiver marcada, a página '
+                  'mostra o catálogo inteiro.')
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)
 
     # ----------------------------------------------------------------- #
