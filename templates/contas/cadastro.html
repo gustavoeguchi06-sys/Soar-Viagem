@@ -21,6 +21,8 @@
                 <button type="submit" class="btn btn--verde btn--bloco">Criar conta</button>
             </form>
 
+            {% include 'partials/_google.html' %}
+
             <p class="cartao-form__rodape">
                 Já tem conta?
                 <a href="{% url 'contas:entrar' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Entrar</a>

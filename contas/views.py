@@ -23,6 +23,7 @@ from django.utils.http import (url_has_allowed_host_and_scheme, urlsafe_base64_d
 
 from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, ip_do_cliente
 
+from . import google
 from .forms import CadastroForm, EntrarForm, ExcluirContaForm
 
 log = logging.getLogger('soar.seguranca')
@@ -200,6 +201,44 @@ def ativar(request, uidb64, token):
     login(request, usuario)
     messages.success(request, 'E-mail confirmado! Sua conta está pronta.')
     return redirect('destinations:home')
+
+
+# --------------------------------------------------------------------------- #
+# Entrar com Google
+# --------------------------------------------------------------------------- #
+def google_iniciar(request):
+    """Manda a pessoa para a tela de consentimento do Google."""
+    if not google.configurado():
+        messages.error(request, 'Login com Google não está configurado neste site.')
+        return redirect('contas:entrar')
+    if request.user.is_authenticated:
+        return redirect(_proxima_pagina(request))
+    return redirect(google.iniciar(request, request.GET.get('next', '')))
+
+
+def google_retorno(request):
+    """O Google devolve a pessoa aqui, com o código de acesso."""
+    if not google.configurado():
+        return redirect('contas:entrar')
+    try:
+        usuario, proxima, criado = google.concluir(request)
+    except google.ErroGoogle as e:
+        messages.error(request, str(e))
+        return redirect('contas:entrar')
+
+    login(request, usuario)
+    if criado:
+        messages.success(request, 'Conta criada com o Google. Bem-vindo(a), {}!'.format(
+            usuario.first_name or usuario.username))
+    else:
+        messages.success(request, 'Bem-vindo(a) de volta, {}!'.format(
+            usuario.first_name or usuario.username))
+
+    # Reaproveita a regra do `?next=` (só destino dentro do site, painel só
+    # para a equipe) passando o destino guardado na sessão.
+    request.GET = request.GET.copy()
+    request.GET['next'] = proxima
+    return redirect(_proxima_pagina(request))
 
 
 def sair(request):

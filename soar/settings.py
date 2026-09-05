@@ -23,6 +23,7 @@ caro é subir um servidor achando que ele está protegido, não o contrário.
 
     SOAR_EMAIL_BACKEND  smtp para enviar de verdade (padrão: console)
     SOAR_EMAIL_HOST/PORT/USER/PASSWORD/TLS, SOAR_EMAIL_REMETENTE
+    SOAR_GOOGLE_CLIENT_ID/SECRET  liga o botão "Continuar com Google"
 
 Para desenvolver, copie `.env.example` para `.env` (já vem com SOAR_DEBUG=1):
 
@@ -146,6 +147,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'contas.context_processors.google_login',
             ],
         },
     },
@@ -235,6 +237,12 @@ else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = os.environ.get('SOAR_EMAIL_REMETENTE', 'Soar Operadora <nao-responda@soaroperadora.com.br>')
+EMAIL_TIMEOUT = 15   # segundos; sem isso um SMTP fora do ar trava a tela de cadastro
+
+# Entrar com Google. As duas vêm do Google Cloud Console (ver README). Sem
+# elas o botão não aparece e o site segue só com e-mail e senha.
+GOOGLE_CLIENT_ID = os.environ.get('SOAR_GOOGLE_CLIENT_ID', '').strip()
+GOOGLE_CLIENT_SECRET = os.environ.get('SOAR_GOOGLE_CLIENT_SECRET', '').strip()
 
 # --------------------------------------------------------------------------- #
 # Contas

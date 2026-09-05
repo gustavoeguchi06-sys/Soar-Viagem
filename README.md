@@ -192,6 +192,68 @@ location /static/ {
 Melhor ainda: mande os uploads para um armazenamento externo (S3 ou
 equivalente) em **outro domínio**, isolando-os do cookie de sessão.
 
+### E-mails de verdade (Gmail)
+
+Rodando na sua máquina, os e-mails de confirmação de cadastro e de
+recuperação de senha **não são enviados**: eles aparecem impressos no terminal
+onde o `runserver` está rodando (procure por "Assunto:" e copie o link).
+
+Para que cheguem de verdade na caixa de entrada, use o Gmail como servidor
+de envio:
+
+1. Na conta Google, ative a **verificação em duas etapas**.
+2. Crie uma **Senha de app** em `myaccount.google.com/apppasswords` (16 letras).
+3. No arquivo `.env`, acrescente:
+
+```
+SOAR_EMAIL_BACKEND=smtp
+SOAR_EMAIL_HOST=smtp.gmail.com
+SOAR_EMAIL_PORT=587
+SOAR_EMAIL_TLS=1
+SOAR_EMAIL_USER=seu-email@gmail.com
+SOAR_EMAIL_PASSWORD=a-senha-de-app-de-16-letras
+SOAR_EMAIL_REMETENTE=Soar Operadora <seu-email@gmail.com>
+```
+
+4. Reinicie o servidor. A partir daí confirmação de cadastro, aviso de
+   "você já tem conta" e recuperação de senha chegam pelo Gmail.
+
+O Gmail limita a cerca de 500 mensagens por dia; para o site no ar, um
+serviço como Brevo ou Resend usa as mesmas variáveis, só mudando host,
+usuário e senha.
+
+### Entrar com Google
+
+O botão **Continuar com Google** aparece nas telas de entrar e de cadastro
+assim que as duas variáveis abaixo existirem no `.env`. Quem entra por ele
+não precisa de senha nem de confirmar e-mail — o Google já confirmou.
+
+1. Acesse `console.cloud.google.com` e crie um projeto (ex.: "Soar").
+2. Em **APIs e serviços → Tela de consentimento OAuth**, escolha "Externo",
+   preencha nome do app e e-mail de contato, e salve.
+3. Em **APIs e serviços → Credenciais → Criar credenciais → ID do cliente
+   OAuth**, tipo **Aplicativo da Web**. Em *URIs de redirecionamento
+   autorizados* adicione exatamente:
+   - `http://127.0.0.1:8000/entrar/google/retorno/`
+   - `http://localhost:8000/entrar/google/retorno/`
+   - e, quando publicar, `https://SEU-DOMINIO/entrar/google/retorno/`
+4. Copie o *ID do cliente* e a *Chave secreta do cliente* para o `.env`:
+
+```
+SOAR_GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+SOAR_GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxx
+```
+
+5. Reinicie o servidor e abra `/entrar/`.
+
+Enquanto a tela de consentimento estiver em modo "Teste", só os e-mails
+cadastrados como *usuários de teste* conseguem entrar; publique o app na
+mesma tela para liberar para todo mundo.
+
+Quem já tinha conta com e-mail e senha pode usar o Google com o mesmo e-mail:
+entra na mesma conta. Conta criada pelo Google não tem senha, então a tela de
+excluir conta não pede senha para ela e o "esqueci minha senha" não se aplica.
+
 ### Envio de fotos
 
 Avaliar exige conta. A foto passa por conferência: no máximo 2 MB, e só JPG,

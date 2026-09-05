@@ -16,6 +16,10 @@ urlpatterns = [
     path('cadastro/', views.cadastro, name='cadastro'),
     path('cadastro/confirmar/<uidb64>/<token>/', views.ativar, name='ativar'),
     path('sair/', views.sair, name='sair'),
+
+    # Entrar com Google (contas/google.py)
+    path('entrar/google/', views.google_iniciar, name='google_iniciar'),
+    path('entrar/google/retorno/', views.google_retorno, name='google_retorno'),
     path('minha-conta/', views.minha_conta, name='minha_conta'),
 
     # Dados pessoais (LGPD)

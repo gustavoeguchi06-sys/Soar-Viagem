@@ -129,6 +129,10 @@ class ExcluirContaForm(forms.Form):
     def __init__(self, usuario, *args, **kwargs):
         self.usuario = usuario
         super().__init__(*args, **kwargs)
+        # Conta que entra pelo Google não tem senha para conferir; a
+        # confirmação fica só na caixa de marcar.
+        if not usuario.has_usable_password():
+            del self.fields['senha']
 
     def clean_senha(self):
         senha = self.cleaned_data['senha']
