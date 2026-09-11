@@ -12,8 +12,12 @@ planilha: digita, salva uma vez.
 mexer. Cadastrar um destino novo é preencher o primeiro bloco e salvar — o
 resto a página preenche sozinha com o texto padrão da operadora.
 """
+import re
+from decimal import Decimal
+
 from django import forms
 from django.contrib import admin
+from django.core.validators import DecimalValidator
 from django.db import models
 from django.utils.html import format_html
 
@@ -21,6 +25,48 @@ from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDest
                      ImagemHospedagem, PerguntaFrequente)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
+
+
+class CampoPreco(forms.DecimalField):
+    """Preço em reais do jeito brasileiro: ponto nos milhares, vírgula nos centavos.
+
+    O campo numérico do navegador lia "6,500" como 6,5 e reclamava das casas
+    decimais. Aqui o dono digita "6.500,00", "6500" ou "R$ 6.500" e tudo vira
+    Decimal('6500.00'). Na tela, o valor guardado aparece como "6.500,00".
+    """
+    widget = forms.TextInput(attrs={'inputmode': 'decimal', 'placeholder': '0,00',
+                                    'class': 'preco-brl', 'style': 'width: 9em'})
+    default_error_messages = {
+        'invalid': 'Digite o preço como 6.500,00 — ponto nos milhares, vírgula nos centavos.',
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        for validador in self.validators:
+            if isinstance(validador, DecimalValidator):
+                validador.messages = {
+                    **validador.messages,
+                    'max_decimal_places': 'A vírgula é só para os centavos: use no máximo '
+                                          '%(max)s casas (ex.: 6.500,00, não 6,500).',
+                }
+
+    def prepare_value(self, value):
+        if isinstance(value, Decimal):
+            inteiro, centavos = f'{value:,.2f}'.split('.')
+            return inteiro.replace(',', '.') + ',' + centavos
+        return value
+
+    def to_python(self, value):
+        if isinstance(value, str):
+            value = value.strip().replace('R$', '').replace(' ', '')
+            if ',' in value:
+                value = value.replace('.', '').replace(',', '.')
+            elif value.count('.') > 1 or re.fullmatch(r'\d{1,3}(\.\d{3})+', value or ''):
+                value = value.replace('.', '')
+        return super().to_python(value)
+
+
+PRECO_BRL = {models.DecimalField: {'form_class': CampoPreco}}
 
 
 def miniatura(imagem, alt=''):
@@ -59,7 +105,7 @@ class DiaRoteiroInline(admin.StackedInline):
     model = DiaRoteiro
     extra = 0
     fields = ['ordem', 'titulo', 'resumo', 'detalhe', 'imagem']
-    formfield_overrides = TEXTO_CURTO
+    formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     verbose_name = 'dia'
     verbose_name_plural = 'Roteiro dia a dia'
     classes = ['collapse']
@@ -97,7 +143,7 @@ class DestinoAdmin(admin.ModelAdmin):
     list_filter = ['destaque', 'soar_60', 'continente', 'pais']
     search_fields = ['nome', 'pais', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
-    formfield_overrides = TEXTO_CURTO
+    formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
     list_per_page = 30
     readonly_fields = ['previa_capa', 'criado_em']
@@ -185,7 +231,7 @@ class HospedagemAdmin(admin.ModelAdmin):
     list_filter = ['disponivel', 'tipo', 'destino']
     search_fields = ['nome', 'destino__nome']
     autocomplete_fields = ['destino']
-    formfield_overrides = TEXTO_CURTO
+    formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
     list_per_page = 30
     readonly_fields = ['previa_imagem']
