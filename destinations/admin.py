@@ -189,7 +189,7 @@ class DestinoAdmin(admin.ModelAdmin):
         }),
         ('Preços', {
             'fields': ['preco_base', 'preco_medio_diaria'],
-            'description': 'O preço por pessoa é o que abre o card de reserva. '
+            'description': 'O preço por tipo de quarto é o que abre o card de reserva. '
                            'Sem nenhum dos dois, a página mostra “sob consulta”.',
         }),
         ('Datas e vagas', {
