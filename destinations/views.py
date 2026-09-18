@@ -57,6 +57,11 @@ def lista_destinos(request):
     })
 
 
+def blog(request):
+    """Blog Soar — artigo em destaque (página fixa, modelo do protótipo)."""
+    return render(request, 'destinations/blog.html')
+
+
 def soar_60(request):
     """A página do programa Soar 60+.
 
