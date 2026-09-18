@@ -254,7 +254,7 @@ def montar_viagem(destino, avaliacoes):
     for i, dia in enumerate(roteiro):
         dia['foto'] = dia.get('foto_propria') or fotos[(i + 1) % len(fotos)]
 
-    hospedagem_db = destino.hospedagens.filter(disponivel=True).first()
+    hospedagem_db = destino.hospedagens.first()
     fotos_hosp = []
     if hospedagem_db:
         if hospedagem_db.imagem:

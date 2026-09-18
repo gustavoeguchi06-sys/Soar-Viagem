@@ -124,7 +124,7 @@ class PerguntaFrequenteInline(admin.TabularInline):
 class HospedagemInline(admin.TabularInline):
     model = Hospedagem
     extra = 0
-    fields = ['nome', 'tipo', 'preco_diaria', 'disponivel']
+    fields = ['nome', 'endereco', 'pacote_completo']
     show_change_link = True
     verbose_name = 'hospedagem'
     verbose_name_plural = 'Hospedagens deste destino (clique em "alterar" para fotos e endereço)'
@@ -257,10 +257,10 @@ class ImagemHospedagemInline(admin.TabularInline):
 
 @admin.register(Hospedagem)
 class HospedagemAdmin(admin.ModelAdmin):
-    list_display = ['foto', 'nome', 'destino', 'tipo', 'preco_diaria', 'disponivel']
+    list_display = ['foto', 'nome', 'destino', 'endereco', 'pacote_completo']
     list_display_links = ['nome']
-    list_editable = ['preco_diaria', 'disponivel']
-    list_filter = ['disponivel', 'tipo', 'destino']
+    list_editable = ['pacote_completo']
+    list_filter = ['pacote_completo', 'destino']
     search_fields = ['nome', 'destino__nome']
     autocomplete_fields = ['destino']
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
@@ -271,13 +271,10 @@ class HospedagemAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('A hospedagem', {
-            'fields': ['destino', 'nome', 'tipo', 'descricao', 'disponivel'],
+            'fields': ['destino', 'nome', 'endereco', 'pacote_completo'],
         }),
-        ('Preço', {
-            'fields': ['preco_diaria'],
-        }),
-        ('Foto e contato', {
-            'fields': ['imagem', 'previa_imagem', 'endereco', 'site'],
+        ('Foto', {
+            'fields': ['imagem', 'previa_imagem'],
         }),
     ]
 

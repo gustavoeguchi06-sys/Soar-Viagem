@@ -97,7 +97,7 @@ def detalhe_destino(request, slug):
 
     return render(request, 'destinations/detalhe.html', {
         'destino': destino,
-        'hospedagens': destino.hospedagens.filter(disponivel=True),
+        'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
         'viagem': montar_viagem(destino, avaliacoes),
         'form': form,
@@ -139,7 +139,7 @@ def _receber_avaliacao(request, destino):
         avaliacoes = list(destino.avaliacoes.publicadas())
         return render(request, 'destinations/detalhe.html', {
             'destino': destino,
-            'hospedagens': destino.hospedagens.filter(disponivel=True),
+            'hospedagens': destino.hospedagens.all(),
             'avaliacoes': avaliacoes,
             'viagem': montar_viagem(destino, avaliacoes),
             'form': form,
