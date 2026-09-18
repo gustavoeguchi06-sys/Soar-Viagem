@@ -9,7 +9,7 @@
     </div>
     <div class="card-corpo">
         <h3>{{ destino.nome }}</h3>
-        <div class="card-pais">📍 {{ destino.pais }} · {{ destino.get_continente_display }}</div>
+        <div class="card-pais">📍 {{ destino.pais }}{% if destino.regiao %} · {{ destino.get_regiao_display }}{% endif %}</div>
         <div class="card-descricao">{{ destino.descricao }}</div>
         <div class="card-rodape">
             {% if destino.preco_medio_diaria %}

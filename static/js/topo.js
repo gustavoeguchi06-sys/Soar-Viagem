@@ -4,6 +4,50 @@
 (function () {
     'use strict';
 
+    /* ---------- Avisos: somem sozinhos depois de 4 segundos ---------- */
+    var TEMPO_NA_TELA = 4000;   /* quanto o aviso fica visivel */
+    var TEMPO_MINIMO = 1200;    /* mesmo chegando atrasado, da tempo de ler */
+    var TEMPO_DA_SAIDA = 350;   /* tem que bater com o transition do .aviso */
+
+    var caixaDeAvisos = document.querySelector('.avisos');
+    if (caixaDeAvisos) {
+        var avisos = caixaDeAvisos.querySelectorAll('.aviso');
+        var restantes = avisos.length;
+
+        /* O script roda com defer: ele so comeca depois do HTML todo, quando o
+           aviso ja esta na tela ha um tempinho. Por isso o prazo conta desde o
+           carregamento da pagina, e nao daqui. O piso existe para o caso de o
+           script chegar muito atrasado — sem ele, o aviso sumiria na hora e a
+           pessoa nao leria nada. */
+        var jaPassou = performance.now();
+        var esperar = Math.max(TEMPO_MINIMO, TEMPO_NA_TELA - jaPassou);
+
+        avisos.forEach(function (aviso) {
+            setTimeout(function () {
+                aviso.classList.add('aviso--saindo');
+                /* nao espera o transitionend: quem desligou animacao no sistema
+                   nao dispara o evento, e o aviso ficaria preso na tela */
+                setTimeout(function () {
+                    aviso.remove();
+                    restantes -= 1;
+                    if (restantes <= 0) { caixaDeAvisos.remove(); }
+                }, TEMPO_DA_SAIDA);
+            }, esperar);
+        });
+    }
+
+    /* O menu da conta e um <details>: abre e fecha sozinho. So falta fechar
+       quando a pessoa clica em qualquer outro lugar da pagina. */
+    var conta = document.querySelector('.conta');
+    if (conta) {
+        document.addEventListener('click', function (evento) {
+            if (conta.open && !evento.target.closest('.conta')) { conta.open = false; }
+        });
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && conta.open) { conta.open = false; }
+        });
+    }
+
     var botao = document.getElementById('menuBotao');
     var menu = document.getElementById('menuMovel');
     if (!botao || !menu) { return; }

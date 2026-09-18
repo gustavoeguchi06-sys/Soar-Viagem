@@ -5,6 +5,7 @@
 {% block body_class %}pagina-viagem{% endblock %}
 {% block topbar_class %}{% endblock %}
 {% block estilos_legado %}{% endblock %}
+{% block reservar_href %}#reservar{% endblock %}
 
 {% block content %}
 {# ===================== HERO ===================== #}
@@ -146,11 +147,13 @@
                 <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
                 <p class="reserva__pp">por pessoa</p>
 
-                <a class="btn btn--verde btn--bloco" href="https://wa.me/5511999999999?text=Quero+reservar+{{ destino.nome|urlencode }}"
-                   target="_blank" rel="noopener">
-                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
-                    Reservar agora
-                </a>
+                {% comment %}GET e nao POST de proposito: a escolha vai na URL e
+                sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}
+                <form method="get" action="{% url 'reservas:nova' destino.slug %}" class="reserva__form">
+                    <button type="submit" class="btn btn--verde btn--bloco">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                        {% if user.is_authenticated %}Reservar agora{% else %}Entrar para reservar{% endif %}
+                    </button>
                 <a class="btn btn--contorno btn--bloco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
                     <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
                     Falar com a Soar
@@ -182,6 +185,14 @@
                     </label>
                     {% endfor %}
                 </div>
+                </form>
+
+                {% if not user.is_authenticated %}
+                <p class="reserva__aviso">
+                    Para reservar é preciso ter conta.
+                    <a href="{% url 'contas:cadastro' %}?next={{ request.get_full_path|urlencode }}">Criar a minha</a>
+                </p>
+                {% endif %}
             </div>
 
             <div class="ajuda">
@@ -342,14 +353,32 @@
     {# ===================== FORMULÁRIO DE AVALIAÇÃO ===================== #}
     <div class="form-avaliacao" id="form-avaliacao">
         <h3>Deixe sua avaliação</h3>
+
+        {% if not user.is_authenticated %}
+        {% comment %}
+        Avaliar exige conta: o campo de nome era livre e dava para assinar
+        como a propria operadora. Agora o nome vem da conta.
+        {% endcomment %}
+        <p class="cartao-form__sub">
+            Para avaliar este destino, <a href="{% url 'contas:entrar' %}?next={{ request.path|urlencode }}">entre na sua conta</a>
+            ou <a href="{% url 'contas:cadastro' %}">crie uma</a>. Assim a gente sabe que a
+            avaliacao e de quem viajou de verdade.
+        </p>
+
+        {% elif ja_avaliou %}
+        <p class="cartao-form__sub">
+            Voce ja avaliou este destino — obrigado! Para mudar o que escreveu,
+            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">fale com a Soar</a>.
+        </p>
+
+        {% else %}
+        <p class="cartao-form__sub">
+            Voce vai aparecer como <b>{{ user.get_full_name|default:user.username }}</b>.
+            Sua avaliacao entra no ar assim que a Soar revisar.
+        </p>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-grade">
-                <div class="campo">
-                    <label for="{{ form.nome_autor.id_for_label }}">{{ form.nome_autor.label }}</label>
-                    {{ form.nome_autor }}
-                    {% for erro in form.nome_autor.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
-                </div>
                 <div class="campo">
                     <label for="{{ form.nota.id_for_label }}">{{ form.nota.label }}</label>
                     {{ form.nota }}
@@ -366,8 +395,9 @@
                     {% for erro in form.foto.errors %}<span class="campo-erro">{{ erro }}</span>{% endfor %}
                 </div>
             </div>
-            <button type="submit" class="btn btn--verde" style="margin-top:16px">Publicar avaliação</button>
+            <button type="submit" class="btn btn--verde" style="margin-top:16px">Enviar avaliação</button>
         </form>
+        {% endif %}
     </div>
 </div>
 

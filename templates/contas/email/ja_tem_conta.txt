@@ -1,0 +1,19 @@
+Olá, {{ usuario.first_name|default:usuario.username }}!
+
+Alguém tentou criar uma conta na Soar Operadora usando este e-mail — mas você
+já tem uma conta com ele. Não criamos nada novo.
+
+Se foi você e esqueceu que já tinha cadastro, é só entrar:
+
+{{ link_entrar }}
+
+Não lembra a senha? Escolha uma nova aqui:
+
+{{ link_senha }}
+
+Se não foi você, não precisa fazer nada. Sua conta e sua senha continuam como
+estavam — quem preencheu o formulário não recebeu nenhuma informação sobre ela
+e não conseguiu entrar.
+
+--
+Soar Operadora

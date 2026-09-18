@@ -1,0 +1,15 @@
+Olá, {{ usuario.first_name|default:usuario.username }}!
+
+Alguém — esperamos que você — criou uma conta na Soar Operadora com este
+e-mail. Para liberar a conta, confirme o endereço abrindo o link abaixo:
+
+{{ link }}
+
+O link vale por algumas horas e só pode ser usado uma vez.
+
+Se não foi você quem se cadastrou, ignore esta mensagem: sem a confirmação, a
+conta não é ativada e nada acontece.
+
+--
+Soar Operadora
+Viagens em grupo pelos destinos mais bonitos do Brasil.

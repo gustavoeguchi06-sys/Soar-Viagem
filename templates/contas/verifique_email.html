@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirme seu e-mail — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Confira seu e-mail</h1>
+            <p class="cartao-form__sub">
+                Enviamos uma mensagem para <b>{{ email }}</b>. Abra o link que está nela para
+                confirmar o endereço e liberar sua conta.
+            </p>
+            <div class="form-nota">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
+                <span>O link vale por algumas horas. Se não chegar em alguns minutos,
+                      olhe também a caixa de spam.</span>
+            </div>
+            <p class="cartao-form__rodape">
+                Já confirmou? <a href="{% url 'contas:entrar' %}">Entrar na minha conta</a>
+            </p>
+        </div>
+
+        <aside class="conta-lado">
+            <h2>Por que confirmar?</h2>
+            <ul>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Garante que a confirmação da sua reserva chegue no endereço certo.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Impede que alguém cadastre uma conta com o seu e-mail.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    É o mesmo endereço que recupera sua senha se você esquecer.</li>
+            </ul>
+        </aside>
+    </div>
+</section>
+{% endblock %}

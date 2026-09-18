@@ -8,11 +8,18 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
+# Segredos e configuração local — NUNCA versionar
+.env
+.env.local
+*.pem
+*.key
+
 # Django
 db.sqlite3
 db.sqlite3-journal
 /media/
 /staticfiles/
+/logs/
 *.log
 
 # Sistema / editores

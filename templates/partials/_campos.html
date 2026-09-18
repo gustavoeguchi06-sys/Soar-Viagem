@@ -1,0 +1,15 @@
+{% comment %}Campos de um formulário, com rótulo, ajuda e erro. Use com:
+   {% include 'partials/_campos.html' with form=form %}{% endcomment %}
+{% if form.non_field_errors %}
+<div class="form-aviso">
+    {% for erro in form.non_field_errors %}<p>{{ erro }}</p>{% endfor %}
+</div>
+{% endif %}
+{% for campo in form %}
+<div class="campo {% if campo.errors %}campo--erro{% endif %}">
+    {{ campo.label_tag }}
+    {{ campo }}
+    {% if campo.help_text %}<small class="campo__ajuda">{{ campo.help_text }}</small>{% endif %}
+    {% for erro in campo.errors %}<small class="campo__erro">{{ erro }}</small>{% endfor %}
+</div>
+{% endfor %}

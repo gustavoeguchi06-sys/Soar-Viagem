@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reservar {{ destino.nome }} — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+{% block reservar_href %}{{ destino.get_absolute_url }}#reservar{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <p class="voltar">
+                <a href="{{ destino.get_absolute_url }}">← Voltar para a viagem</a>
+            </p>
+            <h1>Reservar {{ destino.nome }}</h1>
+            <p class="cartao-form__sub">
+                Confira os dados e envie. Isto é um <b>pedido de reserva</b>: nosso time confirma
+                a vaga e combina o pagamento com você — nada é cobrado aqui.
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Enviar pedido de reserva</button>
+            </form>
+        </div>
+
+        <aside class="resumo-viagem">
+            <img src="{{ viagem.fotos.0 }}" alt="{{ destino.nome }}">
+            <div class="resumo-viagem__corpo">
+                <span class="selo-disp">{{ viagem.selo }}</span>
+                <h2>{{ destino.nome }}</h2>
+                <p class="resumo-viagem__sub">{{ viagem.subtitulo }}</p>
+
+                <ul class="resumo-viagem__linhas">
+                    <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                        {{ viagem.proxima_saida }}</li>
+                    <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>
+                        {{ viagem.dias }} · {{ viagem.noites }}</li>
+                    <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-pin"></use></svg>
+                        {{ viagem.estado }}, {{ destino.pais }}</li>
+                    <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-grupo"></use></svg>
+                        {{ viagem.vagas }} vagas disponíveis</li>
+                </ul>
+
+                <div class="resumo-viagem__preco">
+                    <small>A partir de</small>
+                    <b>R$ {{ viagem.preco }}</b>
+                    <small>por pessoa</small>
+                </div>
+
+                <p class="resumo-viagem__conta">
+                    Reservando como <b>{{ user.first_name|default:user.username }}</b>
+                    ({{ user.email|default:"sem e-mail cadastrado" }}).
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

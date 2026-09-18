@@ -439,7 +439,56 @@ body.pagina-viagem {
 /* ===== Avisos ============================================================ */
 .avisos { position: fixed; top: 90px; right: 24px; z-index: 60; display: flex; flex-direction: column; gap: 10px; }
 .aviso { background: #fff; border-left: 4px solid var(--verde); border-radius: var(--r-sm);
-         box-shadow: var(--sombra-md); padding: 12px 18px; font-size: .88rem; }
+         box-shadow: var(--sombra-md); padding: 12px 18px; font-size: .88rem;
+         transition: opacity .35s ease, transform .35s ease; }
+/* o topo.js poe essa classe depois de 4s e tira o aviso da tela */
+.aviso--saindo { opacity: 0; transform: translateX(14px); }
+
+/* ===== Conta no topo (entrar / menu do usuario) ========================== */
+.btn--linha { background: rgba(255, 255, 255, .12); color: #fff;
+              border-color: rgba(255, 255, 255, .30); }
+.btn--linha:hover { background: rgba(255, 255, 255, .22); border-color: rgba(255, 255, 255, .55); }
+.btn--entrar { padding: 12px 18px; white-space: nowrap; }
+.btn--entrar .ic { width: 17px; height: 17px; }
+
+.conta { position: relative; }
+.conta__botao {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+    padding: 9px 13px; border-radius: var(--r-sm); color: #fff; font-size: .85rem; font-weight: 600;
+    background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .28);
+    max-width: 210px;
+}
+.conta__botao::-webkit-details-marker { display: none; }
+.conta__botao:hover { background: rgba(255, 255, 255, .22); }
+.conta__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conta__seta { width: 15px; height: 15px; opacity: .8; transition: transform .15s; }
+.conta[open] .conta__seta { transform: rotate(180deg); }
+.conta__menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; min-width: 232px;
+    background: #fff; border: 1px solid var(--linha); border-radius: var(--r-md);
+    box-shadow: var(--sombra-md); padding: 6px; display: flex; flex-direction: column;
+}
+.conta__menu a, .conta__menu button {
+    display: flex; align-items: center; width: 100%; text-align: left; gap: 8px;
+    padding: 10px 12px; border-radius: var(--r-sm); border: 0; background: none; cursor: pointer;
+    color: var(--tinta); font-family: inherit; font-size: .88rem; font-weight: 500;
+}
+.conta__menu a:hover, .conta__menu button:hover { background: var(--verde-claro); color: var(--verde); }
+.conta__menu form { margin: 0; border-top: 1px solid var(--linha); padding-top: 4px; margin-top: 4px; }
+
+.menu-movel__conta { display: flex; flex-direction: column; padding-top: 8px; margin-top: 6px;
+                     border-top: 1px solid rgba(255, 255, 255, .18); }
+.menu-movel__conta button {
+    display: flex; align-items: center; min-height: 46px; padding: 0; border: 0; background: none;
+    color: rgba(255, 255, 255, .92); font-family: inherit; font-size: .95rem; font-weight: 500;
+    cursor: pointer;
+}
+.menu-movel__conta form { margin: 0; }
+
+/* aviso de "precisa entrar" embaixo do card de reserva */
+.reserva__form { margin: 0; }
+.reserva__aviso { margin-top: 10px; font-size: .8rem; color: var(--tinta-suave); text-align: center; }
+.reserva__aviso a { color: var(--verde); font-weight: 600; text-decoration: underline; }
 
 /* ===== Responsivo ========================================================
    1280 → lateral um pouco mais estreita
@@ -499,10 +548,16 @@ body.pagina-viagem {
     .comodidades { gap: 12px 16px; }
     .marca__nome { font-size: 1.2rem; }
     .marca__sub { letter-spacing: .3em; }
-    /* o rotulo do botao encolhe para o cabecalho caber sem rolagem lateral */
+    /* o cabecalho tem que caber sem rolagem lateral: os rotulos encolhem e o
+       atalho do WhatsApp sai (ele continua no rodape e no card de reserva) */
     .btn--reservar .btn__resto { display: none; }
     .btn--reservar { padding: 11px 14px; }
     .topbar__acoes { gap: 9px; }
+    .btn-whats-circ { display: none; }
+    .btn--entrar span { display: none; }
+    .btn--entrar { padding: 11px 12px; }
+    .conta__nome, .conta__seta { display: none; }
+    .conta__botao { padding: 9px 10px; }
     .topbar__inner { gap: 12px; }
     .depo { flex: 0 0 90%; }
     .bloco__titulo { font-size: 1.2rem; }
@@ -510,7 +565,9 @@ body.pagina-viagem {
 }
 
 @media (max-width: 360px) {
-    .btn-whats-circ { display: none; }
+    /* nas telas mais estreitas so sobram a marca, o "Reservar" e o menu; entrar,
+       minha conta e sair ficam dentro do menu, que ja tem todos eles */
+    .btn--entrar, .conta { display: none; }
     .servicos { grid-template-columns: 1fr 1fr; gap: 14px; }
     .rodape__grade { grid-template-columns: minmax(0, 1fr); }
     .galeria-grade { grid-template-columns: 1fr; }
@@ -543,7 +600,15 @@ body.pagina-viagem {
 
 /* ===== Ajustes das páginas antigas (home / lista) ======================== */
 .hero-antigo, .site-header { display: initial; }
-body:not(.pagina-viagem) .hero { background: linear-gradient(135deg, #0d4f31 0%, #146c43 100%); }
+/* O .hero da pagina de viagem e uma capa com foto, de 430-540px de altura.
+   Na home ele e so o titulo e a busca, entao aqui vira um bloco baixo, sem a
+   altura minima nem o degrade escuro por cima. */
+body:not(.pagina-viagem) .hero {
+    min-height: 0; display: block; overflow: visible;
+    padding: clamp(36px, 5.5vw, 56px) 0;
+    background: linear-gradient(135deg, #0d4f31 0%, #146c43 100%);
+}
+body:not(.pagina-viagem) .hero::after { content: none; }
 body:not(.pagina-viagem) .busca button,
 body:not(.pagina-viagem) .selo-destaque { background: var(--verde); }
 body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color: var(--verde); }

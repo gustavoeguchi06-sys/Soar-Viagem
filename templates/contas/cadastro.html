@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar conta — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Criar minha conta</h1>
+            <p class="cartao-form__sub">É rápido: com a conta pronta você já consegue reservar
+               a viagem que escolher.</p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Criar conta</button>
+            </form>
+
+            {% include 'partials/_google.html' %}
+
+            <p class="cartao-form__rodape">
+                Já tem conta?
+                <a href="{% url 'contas:entrar' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Entrar</a>
+            </p>
+        </div>
+
+        <aside class="conta-lado">
+            <h2>Como funciona a reserva</h2>
+            <ol class="passos">
+                <li><b>1.</b> Escolha a viagem e a acomodação.</li>
+                <li><b>2.</b> Envie o pedido de reserva pelo site.</li>
+                <li><b>3.</b> A Soar entra em contato para confirmar a vaga e combinar o pagamento.</li>
+            </ol>
+            <p class="conta-lado__ajuda">O pagamento não é feito no site — é sempre com a nossa
+               equipe, direto com você.</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

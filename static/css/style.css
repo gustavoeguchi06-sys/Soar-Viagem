@@ -263,6 +263,128 @@ img { max-width: 100%; display: block; }
     .soar60 .btn { width: 100%; }
 }
 
+/* ===== Pagina Soar 60+ =====
+   Mesma familia visual do bloco .soar60 da home: verde escuro, degrade por
+   cima da ilustracao e o mesmo selo. */
+.p60-capa {
+    position: relative; overflow: hidden;
+    background: var(--verde-escuro, #0d4f31); color: #fff;
+    min-height: 420px; display: flex; align-items: center;
+    padding: clamp(36px, 7vw, 76px) 0;
+}
+.p60-capa__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.p60-capa::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(100deg, rgba(9, 34, 24, .93) 0%, rgba(9, 34, 24, .78) 46%,
+                                rgba(9, 34, 24, .2) 82%);
+}
+.p60-capa__conteudo { position: relative; z-index: 2; max-width: 620px; }
+.p60-capa h1 {
+    color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800;
+    font-size: clamp(1.9rem, 5vw, 3rem); letter-spacing: -.02em;
+    margin: 0 0 12px; line-height: 1.1;
+}
+.p60-capa p {
+    font-size: clamp(1rem, 2.3vw, 1.14rem); color: rgba(255, 255, 255, .92);
+    max-width: 520px; margin: 0 0 24px;
+}
+.p60-capa__acoes { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.p60-intro {
+    max-width: 640px; margin: -6px 0 24px;
+    color: var(--tinta-suave, #6b7a80); font-size: 1.02rem;
+}
+
+/* o que muda numa viagem 60+ */
+.p60-grade {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.p60-item {
+    padding: 22px 22px 24px;
+    background: #fff; border: 1px solid var(--linha, #e6eae8);
+    border-radius: var(--r-lg, 18px); box-shadow: var(--sombra-sm);
+}
+.p60-item__ic {
+    width: 26px; height: 26px; color: var(--verde, #146c43);
+    stroke-width: 1.6; margin-bottom: 12px;
+}
+.p60-item h3 {
+    font-family: 'Sora', 'Inter', sans-serif; font-size: 1.02rem; font-weight: 700;
+    color: var(--preto, #14201b); margin: 0 0 6px;
+}
+.p60-item p { margin: 0; color: var(--tinta-suave, #6b7a80); font-size: .94rem; line-height: 1.55; }
+
+/* como funciona */
+.p60-passos { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.p60-passos li {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 20px 22px;
+    background: #fff; border: 1px solid var(--linha, #e6eae8);
+    border-radius: var(--r-lg, 18px); box-shadow: var(--sombra-sm);
+}
+.p60-passos__n {
+    flex: none; display: grid; place-items: center;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--verde-claro, #e8f3ec); color: var(--verde, #146c43);
+    font-family: 'Sora', 'Inter', sans-serif; font-weight: 800; font-size: 1.05rem;
+}
+.p60-passos h3 {
+    font-family: 'Sora', 'Inter', sans-serif; font-size: 1.05rem; font-weight: 700;
+    color: var(--preto, #14201b); margin: 4px 0 6px;
+}
+.p60-passos p { margin: 0; color: var(--tinta-suave, #6b7a80); line-height: 1.6; }
+
+/* perguntas */
+.p60-faq { display: grid; gap: 10px; }
+.p60-faq__item {
+    background: #fff; border: 1px solid var(--linha, #e6eae8);
+    border-radius: var(--r-md, 14px); overflow: hidden;
+}
+.p60-faq__item summary {
+    padding: 16px 20px; cursor: pointer; list-style: none;
+    font-family: 'Sora', 'Inter', sans-serif; font-weight: 600;
+    color: var(--preto, #14201b);
+}
+.p60-faq__item summary::-webkit-details-marker { display: none; }
+.p60-faq__item summary::after {
+    content: '+'; float: right; font-size: 1.3rem; line-height: 1;
+    color: var(--verde, #146c43); font-weight: 400;
+}
+.p60-faq__item[open] summary::after { content: '\2212'; }
+.p60-faq__item p {
+    margin: 0; padding: 0 20px 18px; color: var(--tinta-suave, #6b7a80); line-height: 1.6;
+}
+
+/* fecho */
+.p60-fecho {
+    text-align: center; padding: clamp(30px, 6vw, 52px) clamp(20px, 4vw, 40px);
+    background: var(--verde-escuro, #0d4f31); color: #fff;
+    border-radius: var(--r-lg, 18px);
+}
+.p60-fecho h2 {
+    color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800;
+    font-size: clamp(1.4rem, 3.6vw, 2rem); margin: 0 0 10px;
+}
+.p60-fecho > p {
+    max-width: 520px; margin: 0 auto 22px; color: rgba(255, 255, 255, .88);
+    font-size: 1.02rem;
+}
+.p60-fecho__acoes { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.p60-fecho__acoes .btn { display: inline-flex; align-items: center; gap: 8px; }
+.p60-fecho__nota { margin: 20px 0 0; font-size: .9rem; color: rgba(255, 255, 255, .7); }
+
+@media (max-width: 760px) {
+    .p60-capa { min-height: 340px; }
+    .p60-capa::after { background: linear-gradient(180deg, rgba(9, 34, 24, .5) 0%,
+                                                   rgba(9, 34, 24, .9) 48%, rgba(9, 34, 24, .96) 100%); }
+    .p60-capa__conteudo, .p60-capa p { max-width: none; }
+}
+@media (max-width: 480px) {
+    .p60-capa__acoes .btn, .p60-fecho__acoes .btn { width: 100%; justify-content: center; }
+    .p60-passos li { flex-direction: column; gap: 10px; }
+}
+
 /* ===== Responsivo ===== */
 @media (max-width: 640px) {
     .hospedagem { flex-direction: column; }
@@ -285,3 +407,16 @@ img { max-width: 100%; display: block; }
 @media (pointer: coarse) {
     .main-nav a, .filtro, .secao-titulo a { min-height: 40px; display: inline-flex; align-items: center; }
 }
+
+/* --------------------------------------------------------------------- */
+/* Paginação da lista de destinos                                         */
+/* --------------------------------------------------------------------- */
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+.paginacao__conta { color: var(--cinza, #5c6b78); font-size: .94rem; }

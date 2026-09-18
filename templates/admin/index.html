@@ -1,0 +1,181 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% comment %}
+Tela inicial do painel. A ordem responde ao que o dono precisa saber ao abrir:
+primeiro o que está esperando por ele, depois os atalhos de cadastro, e só no
+fim a lista de tabelas (que é o que o admin mostrava sozinho).
+{% endcomment %}
+
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+{% comment %}
+.painel-area mede a largura real do conteúdo (o menu lateral come 275px e pode
+ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
+{% endcomment %}
+<div class="painel-area">
+
+    <div class="painel-topo">
+        <div>
+            <h1>Olá, {% firstof user.first_name user.get_username %}.</h1>
+            <p>
+                {% if painel.reservas_pendentes %}
+                    Há {{ painel.reservas_pendentes }} pedido{{ painel.reservas_pendentes|pluralize }} de reserva
+                    esperando sua resposta.
+                {% else %}
+                    Nenhum pedido de reserva esperando resposta. Tudo em dia.
+                {% endif %}
+            </p>
+        </div>
+        <a class="button" href="{{ site_url|default:'/' }}" target="_blank" rel="noopener">Ver o site &rarr;</a>
+    </div>
+
+    {# ---------- Fila de trabalho ---------- #}
+    <div class="painel-fila">
+        <a class="ficha {% if painel.reservas_pendentes %}ficha--atencao{% else %}ficha--calma{% endif %}"
+           href="{{ painel.url_reservas_pendentes }}">
+            <span class="ficha__rotulo">Reservas a responder</span>
+            <strong class="ficha__numero">{{ painel.reservas_pendentes }}</strong>
+            <span class="ficha__nota">de {{ painel.reservas_total }} pedido{{ painel.reservas_total|pluralize }} no total</span>
+        </a>
+
+        <a class="ficha {% if painel.avaliacoes_na_fila %}ficha--atencao{% else %}ficha--calma{% endif %}"
+           href="{{ painel.url_avaliacoes_fila }}">
+            <span class="ficha__rotulo">Avaliações na fila</span>
+            <strong class="ficha__numero">{{ painel.avaliacoes_na_fila }}</strong>
+            <span class="ficha__nota">só aparecem no site depois que você publica</span>
+        </a>
+
+        <a class="ficha {% if painel.destinos_sem_preco %}ficha--atencao{% else %}ficha--calma{% endif %}"
+           href="{{ painel.url_destinos }}">
+            <span class="ficha__rotulo">Destinos sem preço</span>
+            <strong class="ficha__numero">{{ painel.destinos_sem_preco }}</strong>
+            <span class="ficha__nota">de {{ painel.destinos_total }} destino{{ painel.destinos_total|pluralize }} no ar</span>
+        </a>
+
+        <a class="ficha ficha--calma" href="{{ painel.url_hospedagens }}">
+            <span class="ficha__rotulo">Hospedagens</span>
+            <strong class="ficha__numero">{{ painel.hospedagens_total }}</strong>
+            <span class="ficha__nota">cadastradas nos destinos</span>
+        </a>
+    </div>
+
+    {# ---------- Atalhos de cadastro ---------- #}
+    <div class="painel-atalhos">
+        <a class="atalho" href="{{ painel.url_destino_novo }}">
+            <span class="atalho__mais" aria-hidden="true">+</span>
+            <span>Novo destino<small>página de viagem completa</small></span>
+        </a>
+        <a class="atalho" href="{{ painel.url_hospedagem_nova }}">
+            <span class="atalho__mais" aria-hidden="true">+</span>
+            <span>Nova hospedagem<small>com foto e diária</small></span>
+        </a>
+        <a class="atalho" href="{{ painel.url_destinos }}">
+            <span class="atalho__mais" aria-hidden="true">R$</span>
+            <span>Mexer nos preços<small>edita na lista, sem abrir um a um</small></span>
+        </a>
+        <a class="atalho" href="{{ painel.url_reservas }}">
+            <span class="atalho__mais" aria-hidden="true">&#9776;</span>
+            <span>Todas as reservas<small>histórico e situação</small></span>
+        </a>
+    </div>
+
+    {# Últimas reservas: largura toda, por ser a tabela mais larga da tela #}
+    <div class="painel-titulo">
+        <h2>Últimos pedidos de reserva</h2>
+        <a href="{{ painel.url_reservas }}">Ver todas &rarr;</a>
+    </div>
+    <div class="module tabela-rolagem">
+                <table class="tabela-painel">
+                    <thead>
+                        <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Destino</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col" class="num">Pessoas</th>
+                            <th scope="col" class="num">Estimado</th>
+                            <th scope="col">Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in painel.ultimas_reservas %}
+                        <tr>
+                            <td><a href="{% url 'admin:reservas_reserva_change' r.pk %}"><strong>{{ r.codigo }}</strong></a></td>
+                            <td>{{ r.destino.nome }}</td>
+                            <td>{% firstof r.usuario.first_name r.usuario.username %}</td>
+                            <td class="num">{{ r.pessoas }}</td>
+                            <td class="num">{% if r.total_estimado %}R$ {{ r.total_estimado|floatformat:2 }}{% else %}—{% endif %}</td>
+                            <td><span class="etiqueta etiqueta--{{ r.status }}">{{ r.get_status_display }}</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="vazio">Nenhuma reserva pedida ainda.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+
+    {# ---------- As duas pendências, lado a lado ---------- #}
+    <div class="painel-colunas">
+        <div>
+            <div class="painel-titulo">
+                <h2>Precisam de preço</h2>
+            </div>
+            <div class="module">
+                <table class="tabela-painel">
+                    <tbody>
+                    {% for d in painel.lista_sem_preco %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin:destinations_destino_change' d.pk %}"><strong>{{ d.nome }}</strong></a>
+                                <br><span class="ficha__nota">{{ d.pais }}</span>
+                            </td>
+                            <td class="num"><span class="etiqueta etiqueta--fila">sob consulta</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td class="vazio">Todos os destinos têm preço.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div class="painel-titulo">
+                <h2>Avaliações na fila</h2>
+                <a href="{{ painel.url_avaliacoes_fila }}">Moderar &rarr;</a>
+            </div>
+            <div class="module">
+                <table class="tabela-painel">
+                    <tbody>
+                    {% for a in painel.lista_avaliacoes %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin:reviews_avaliacao_change' a.pk %}"><strong>{{ a.nome_autor }}</strong></a>
+                                <br><span class="ficha__nota">{{ a.destino.nome }} · {{ a.criado_em|date:"d/m/Y" }}</span>
+                            </td>
+                            <td class="num"><span class="estrelas">{{ a.estrelas }}</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td class="vazio">Nada esperando moderação.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# ---------- Tudo o que dá para cadastrar ---------- #}
+    <div class="painel-titulo">
+        <h2>Todos os cadastros</h2>
+    </div>
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

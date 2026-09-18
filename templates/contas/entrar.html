@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Entrar — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Entrar</h1>
+            <p class="cartao-form__sub">Sua conta guarda as reservas que você pediu e agiliza o
+               contato com a nossa equipe.</p>
+
+            {% if next %}
+            <div class="form-nota">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
+                <span>Entre para continuar de onde você parou.</span>
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Entrar</button>
+            </form>
+
+            {% include 'partials/_google.html' %}
+
+            <p class="cartao-form__rodape">
+                <a href="{% url 'contas:senha_reset' %}">Esqueci minha senha</a>
+            </p>
+
+            <p class="cartao-form__rodape">
+                Ainda não tem conta?
+                <a href="{% url 'contas:cadastro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Criar minha conta</a>
+            </p>
+        </div>
+
+        <aside class="conta-lado">
+            <h2>Por que criar uma conta?</h2>
+            <ul>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Reserve sua vaga na viagem em poucos cliques.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Acompanhe a situação de cada pedido pelo site.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Seus dados já vão preenchidos — sem repetir tudo a cada viagem.</li>
+            </ul>
+            <p class="conta-lado__ajuda">
+                Prefere falar com gente?
+                <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Chame no WhatsApp</a>.
+            </p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

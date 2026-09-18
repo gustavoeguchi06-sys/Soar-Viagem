@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Soar Operadora — telas de conta (entrar, cadastro, minha conta, reserva)
+   Usa as variáveis e os botões do viagem.css; aqui só entra o que é destas
+   páginas.
+   ========================================================================== */
+
+.conta-tela { background: var(--fundo-suave); min-height: 62vh;
+              padding: clamp(28px, 5vw, 56px) 0 clamp(40px, 6vw, 72px); }
+.conta-tela__grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+                     gap: clamp(20px, 3vw, 34px); align-items: start; }
+
+/* ----- cartão do formulário ----- */
+.cartao-form { background: #fff; border: 1px solid var(--linha); border-radius: var(--r-lg);
+               box-shadow: var(--sombra-sm); padding: clamp(22px, 3.4vw, 38px); }
+.cartao-form h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 6px; }
+.cartao-form__sub { color: var(--tinta-suave); font-size: .93rem; margin-bottom: 22px; }
+.cartao-form__rodape { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--linha);
+                       font-size: .9rem; color: var(--tinta-suave); text-align: center; }
+.cartao-form__rodape a { color: var(--verde); font-weight: 700; }
+.cartao-form form { display: flex; flex-direction: column; gap: 16px; }
+.cartao-form .btn { margin-top: 4px; }
+.voltar { margin-bottom: 12px; font-size: .87rem; }
+.voltar a { color: var(--tinta-suave); font-weight: 600; }
+.voltar a:hover { color: var(--verde); }
+
+/* ----- campos ----- */
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.campo label { font-size: .84rem; font-weight: 700; color: var(--preto); }
+.campo input[type="text"], .campo input[type="email"], .campo input[type="password"],
+.campo input[type="number"], .campo input[type="tel"], .campo textarea, .campo select {
+    width: 100%; font-family: inherit; font-size: .95rem; color: var(--tinta);
+    padding: 12px 14px; background: #fff;
+    border: 1.5px solid var(--linha); border-radius: var(--r-sm);
+    transition: border-color .15s, box-shadow .15s;
+}
+.campo textarea { resize: vertical; min-height: 84px; }
+.campo input:focus, .campo textarea:focus, .campo select:focus {
+    outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(20, 108, 67, .14);
+}
+.campo__ajuda { color: var(--tinta-suave); font-size: .78rem; line-height: 1.4; }
+.campo__ajuda ul { margin: 4px 0 0; padding-left: 18px; }
+.campo__erro { color: #b42318; font-size: .79rem; font-weight: 600; }
+.campo--erro input, .campo--erro textarea, .campo--erro select { border-color: #d92d20; }
+
+/* a acomodação vira uma lista de opções clicáveis */
+.campo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.campo ul li label { display: flex; align-items: center; gap: 10px; cursor: pointer;
+                     font-weight: 500; font-size: .92rem; padding: 11px 14px;
+                     border: 1.5px solid var(--linha); border-radius: var(--r-sm); }
+.campo ul li label:hover { border-color: var(--verde); background: var(--verde-claro); }
+.campo ul li input[type="radio"] { accent-color: var(--verde); width: 17px; height: 17px; }
+
+.form-aviso { background: #fef3f2; border: 1px solid #fecdca; color: #b42318;
+              border-radius: var(--r-sm); padding: 12px 14px; font-size: .87rem; }
+.form-aviso p { margin: 0; }
+.form-nota { display: flex; align-items: center; gap: 10px; background: var(--verde-claro);
+             color: var(--verde); border-radius: var(--r-sm); padding: 11px 14px;
+             font-size: .86rem; font-weight: 600; margin-bottom: 18px; }
+
+/* ----- entrar com Google ----- */
+.ou { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px;
+      color: var(--tinta-suave); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.ou::before, .ou::after { content: ""; flex: 1; height: 1px; background: var(--linha); }
+.btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+              padding: 12px 16px; font-weight: 700; font-size: .95rem; color: var(--preto);
+              background: #fff; border: 1.5px solid var(--linha); border-radius: var(--r-sm);
+              text-decoration: none; transition: border-color .15s, box-shadow .15s, background .15s; }
+.btn-google:hover { border-color: #c9ced6; background: #f8f9fb; box-shadow: var(--sombra-sm); }
+.btn-google__logo { width: 20px; height: 20px; flex: none; }
+
+/* ----- coluna de apoio ----- */
+.conta-lado { background: var(--preto); color: rgba(255, 255, 255, .88);
+              border-radius: var(--r-lg); padding: clamp(22px, 3vw, 32px); }
+.conta-lado h2 { color: #fff; font-size: 1.12rem; margin-bottom: 16px; }
+.conta-lado ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+.conta-lado ul li { display: flex; gap: 10px; font-size: .9rem; line-height: 1.5; }
+.conta-lado ul li .ic { color: #6ee7a8; margin-top: 2px; }
+.conta-lado__ajuda { margin-top: 20px; padding-top: 16px;
+                     border-top: 1px solid rgba(255, 255, 255, .16); font-size: .85rem; }
+.conta-lado__ajuda a { color: #6ee7a8; font-weight: 700; }
+.passos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;
+          gap: 13px; font-size: .9rem; line-height: 1.5; }
+.passos b { color: #6ee7a8; margin-right: 4px; }
+
+/* ----- resumo da viagem, na tela de reserva ----- */
+.resumo-viagem { background: #fff; border: 1px solid var(--linha); border-radius: var(--r-lg);
+                 box-shadow: var(--sombra-sm); overflow: hidden; }
+.resumo-viagem > img { width: 100%; height: 168px; object-fit: cover; }
+.resumo-viagem__corpo { padding: 20px; }
+.resumo-viagem h2 { font-size: 1.25rem; margin: 10px 0 4px; }
+.resumo-viagem__sub { color: var(--tinta-suave); font-size: .88rem; margin-bottom: 16px; }
+.resumo-viagem__linhas { list-style: none; margin: 0; padding: 0; display: flex;
+                         flex-direction: column; gap: 11px; font-size: .88rem; }
+.resumo-viagem__linhas li { display: flex; align-items: center; gap: 10px; }
+.resumo-viagem__linhas .ic { color: var(--verde); }
+.resumo-viagem__preco { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linha);
+                        display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.resumo-viagem__preco b { font-family: 'Sora', sans-serif; font-size: 1.7rem; color: var(--preto); }
+.resumo-viagem__preco small { color: var(--tinta-suave); font-size: .8rem; }
+.resumo-viagem__conta { margin-top: 14px; font-size: .8rem; color: var(--tinta-suave); }
+
+/* ----- minha conta ----- */
+.conta-topo { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+              align-items: center; background: #fff; border: 1px solid var(--linha);
+              border-radius: var(--r-lg); box-shadow: var(--sombra-sm);
+              padding: clamp(20px, 3vw, 28px); }
+.conta-topo h1 { font-size: clamp(1.35rem, 3vw, 1.8rem); }
+.conta-topo p { color: var(--tinta-suave); font-size: .9rem; margin-top: 2px; }
+.conta-topo__acoes { display: flex; align-items: center; gap: 10px; }
+.conta-topo__acoes form { margin: 0; }
+.conta-secao { margin: clamp(26px, 4vw, 38px) 0 16px; font-size: 1.2rem; }
+
+.reservas-lista { display: flex; flex-direction: column; gap: 14px; }
+.reserva-item { background: #fff; border: 1px solid var(--linha);
+                border-left: 4px solid var(--tinta-suave); border-radius: var(--r-md);
+                box-shadow: var(--sombra-sm); padding: 20px; }
+.reserva-item--pendente { border-left-color: var(--ouro); }
+.reserva-item--confirmada { border-left-color: var(--verde); }
+.reserva-item--cancelada { border-left-color: #d0d5dd; opacity: .78; }
+.reserva-item__topo { display: flex; flex-wrap: wrap; gap: 10px;
+                      justify-content: space-between; align-items: flex-start; }
+.reserva-item__codigo { display: block; font-size: .74rem; font-weight: 700;
+                        letter-spacing: .08em; color: var(--tinta-suave); }
+.reserva-item h3 { font-size: 1.1rem; margin-top: 2px; }
+.reserva-item h3 a:hover { color: var(--verde); }
+.selo-status { font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+               padding: 5px 11px; border-radius: 999px; background: var(--fundo-suave);
+               color: var(--tinta-suave); white-space: nowrap; }
+.selo-status--pendente { background: #fef4e2; color: #b54708; }
+.selo-status--confirmada { background: var(--verde-claro); color: var(--verde); }
+.selo-status--cancelada { background: #f2f4f7; color: #667085; }
+.reserva-item__dados { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 16px 0 0;
+                       padding-top: 14px; border-top: 1px solid var(--linha); }
+.reserva-item__dados dt { font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+                          text-transform: uppercase; color: var(--tinta-suave); }
+.reserva-item__dados dd { margin: 2px 0 0; font-size: .92rem; font-weight: 600; color: var(--preto); }
+.reserva-item__obs { margin-top: 14px; font-size: .88rem; color: var(--tinta-suave); font-style: italic; }
+.link-cancelar { margin-top: 14px; padding: 0; border: 0; background: none; cursor: pointer;
+                 font-family: inherit; font-size: .84rem; font-weight: 600;
+                 color: #b42318; text-decoration: underline; }
+
+.conta-vazio { background: #fff; border: 1px dashed var(--linha); border-radius: var(--r-lg);
+               padding: 40px 24px; text-align: center; }
+.conta-vazio p { color: var(--tinta-suave); margin-bottom: 18px; }
+
+@media (max-width: 900px) {
+    .conta-tela__grade { grid-template-columns: 1fr; }
+    .resumo-viagem { order: -1; }
+    .resumo-viagem > img { height: 140px; }
+}
+
+@media (max-width: 520px) {
+    .conta-topo, .conta-topo__acoes { width: 100%; }
+    .conta-topo__acoes .btn { flex: 1; justify-content: center; }
+    .reserva-item__dados { gap: 10px 20px; }
+}
+
+/* --------------------------------------------------------------------- */
+/* Meus dados (LGPD): exportar e excluir a conta                          */
+/* --------------------------------------------------------------------- */
+.conta-dados {
+    border: 1px solid var(--linha, #e3e8ee);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+.conta-dados p { margin: 0; max-width: 46ch; color: var(--cinza, #5c6b78); }
+
+@media (max-width: 520px) {
+    .conta-dados { flex-direction: column; align-items: stretch; }
+    .conta-dados .conta-topo__acoes { width: 100%; }
+}

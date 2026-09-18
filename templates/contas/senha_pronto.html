@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Senha alterada — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Senha alterada</h1>
+            <p class="cartao-form__sub">Pronto. Já dá para entrar com a senha nova.</p>
+            <p class="cartao-form__rodape">
+                <a class="btn btn--verde btn--bloco" href="{% url 'contas:entrar' %}">Entrar</a>
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

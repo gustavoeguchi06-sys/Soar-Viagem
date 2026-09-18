@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nova senha — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            {% if validlink %}
+            <h1>Escolha uma senha nova</h1>
+            <p class="cartao-form__sub">Use pelo menos 8 caracteres. Evite repetir a senha
+               de outros sites.</p>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Salvar nova senha</button>
+            </form>
+            {% else %}
+            <h1>Este link não vale mais</h1>
+            <p class="cartao-form__sub">
+                Ou ele já foi usado, ou passou do prazo. Peça outro para continuar.
+            </p>
+            <p class="cartao-form__rodape">
+                <a href="{% url 'contas:senha_reset' %}">Pedir um link novo</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
