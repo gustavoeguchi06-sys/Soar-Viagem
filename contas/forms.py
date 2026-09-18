@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from .models import PerfilAgente, so_digitos, validar_cnpj
+
 
 class EntrarForm(AuthenticationForm):
     """Login por e-mail ou nome de usuário."""
@@ -139,3 +141,91 @@ class ExcluirContaForm(forms.Form):
         if not self.usuario.check_password(senha):
             raise forms.ValidationError('Senha incorreta.')
         return senha
+
+
+class AgenteCadastroForm(UserCreationForm):
+    """Cadastro de agência de viagem (B2B).
+
+    Cria o `User` (inativo até confirmar o e-mail) e o `PerfilAgente` preso a
+    ele. Nome completo e e-mail ficam no `User`; o resto, no perfil.
+    """
+
+    first_name = forms.CharField(
+        label='Nome completo', max_length=120,
+        widget=forms.TextInput(attrs={'placeholder': 'Nome do responsável'}),
+    )
+    email = forms.EmailField(
+        label='E-mail',
+        widget=forms.EmailInput(attrs={'placeholder': 'agencia@email.com',
+                                       'autocomplete': 'email'}),
+    )
+    razao_social = forms.CharField(
+        label='Razão social', max_length=160,
+        widget=forms.TextInput(attrs={'placeholder': 'Nome da empresa no CNPJ'}),
+    )
+    cnpj = forms.CharField(
+        label='CNPJ', max_length=18,
+        widget=forms.TextInput(attrs={'placeholder': '00.000.000/0000-00',
+                                      'inputmode': 'numeric'}),
+    )
+    cadastur = forms.CharField(
+        label='CADASTUR', max_length=30,
+        widget=forms.TextInput(attrs={'placeholder': 'Número do CADASTUR'}),
+    )
+    whatsapp = forms.CharField(
+        label='WhatsApp', max_length=20,
+        widget=forms.TextInput(attrs={'placeholder': '(11) 99999-9999', 'inputmode': 'tel'}),
+    )
+    aceite_privacidade = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'É preciso aceitar o aviso de privacidade para criar a conta.'},
+    )
+
+    field_order = ['first_name', 'razao_social', 'cnpj', 'cadastur', 'whatsapp',
+                   'email', 'username', 'password1', 'password2', 'aceite_privacidade']
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'email', 'username']
+        labels = {'username': 'Nome de usuário'}
+        help_texts = {'username': 'É com ele (ou o e-mail) que a agência entra no B2B.'}
+        widgets = {'username': forms.TextInput(attrs={'placeholder': 'sua.agencia'})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].label = 'Senha'
+        self.fields['password2'].label = 'Repita a senha'
+        self.fields['password1'].widget.attrs['placeholder'] = 'Mínimo de 8 caracteres'
+        self.fields['password2'].widget.attrs['placeholder'] = 'A mesma senha de novo'
+        self.fields['aceite_privacidade'].label = mark_safe(
+            'Li e aceito o <a href="{}" target="_blank" rel="noopener">aviso de '
+            'privacidade</a> e autorizo a Soar a usar os dados da agência para a '
+            'parceria B2B.'.format(reverse('contas:privacidade'))
+        )
+
+    def clean_email(self):
+        return self.cleaned_data['email'].strip().lower()
+
+    def clean_cnpj(self):
+        cnpj = so_digitos(self.cleaned_data['cnpj'])
+        validar_cnpj(cnpj)
+        if PerfilAgente.objects.filter(cnpj=cnpj).exists():
+            raise forms.ValidationError('Já existe uma agência cadastrada com este CNPJ.')
+        return cnpj
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        usuario.email = self.cleaned_data['email']
+        usuario.first_name = self.cleaned_data['first_name'].strip()
+        # Só vira conta de verdade depois de clicar no link do e-mail.
+        usuario.is_active = False
+        if commit:
+            usuario.save()
+            PerfilAgente.objects.create(
+                usuario=usuario,
+                razao_social=self.cleaned_data['razao_social'].strip(),
+                cnpj=self.cleaned_data['cnpj'],
+                cadastur=self.cleaned_data['cadastur'].strip(),
+                whatsapp=self.cleaned_data['whatsapp'].strip(),
+            )
+        return usuario

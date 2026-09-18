@@ -17,6 +17,11 @@ urlpatterns = [
     path('cadastro/confirmar/<uidb64>/<token>/', views.ativar, name='ativar'),
     path('sair/', views.sair, name='sair'),
 
+    # B2B — agentes de viagem
+    path('b2b/', views.b2b, name='b2b'),
+    path('b2b/cadastro/', views.cadastro_agente, name='cadastro_agente'),
+    path('b2b/area/', views.agente_area, name='agente_area'),
+
     # Entrar com Google (contas/google.py)
     path('entrar/google/', views.google_iniciar, name='google_iniciar'),
     path('entrar/google/retorno/', views.google_retorno, name='google_retorno'),
