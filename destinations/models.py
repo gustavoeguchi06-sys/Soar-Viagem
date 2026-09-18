@@ -4,19 +4,18 @@ from django.utils.text import slugify
 
 
 class Destino(models.Model):
-    CONTINENTES = [
-        ('AF', 'África'),
-        ('AM', 'Américas'),
-        ('AS', 'Ásia'),
-        ('EU', 'Europa'),
-        ('OC', 'Oceania'),
+    REGIOES = [
+        ('Norte', 'Norte'),
+        ('Nordeste', 'Nordeste'),
+        ('Centro-Oeste', 'Centro-Oeste'),
+        ('Sudeste', 'Sudeste'),
+        ('Sul', 'Sul'),
     ]
 
     nome = models.CharField('Nome', max_length=120)
     slug = models.SlugField('Slug', max_length=140, unique=True, blank=True,
                             help_text='Preenchido automaticamente a partir do nome.')
-    pais = models.CharField('País', max_length=80)
-    continente = models.CharField('Continente', max_length=2, choices=CONTINENTES, default='AM')
+    pais = models.CharField('País', max_length=80, default='Brasil')
     descricao = models.TextField('Descrição')
     imagem_capa = models.ImageField('Imagem de capa', upload_to='destinos/', blank=True, null=True)
     preco_medio_diaria = models.DecimalField('Preço médio da diária (R$)', max_digits=8,
@@ -40,12 +39,17 @@ class Destino(models.Model):
                             help_text='Aparece sobre o título. Ex.: Expedição.')
     subtitulo = models.CharField('Subtítulo', max_length=160, blank=True,
                                  help_text='A frase logo abaixo do nome, na capa.')
-    regiao = models.CharField('Região', max_length=60, blank=True,
-                              help_text='Ex.: Norte. Sem isso, mostra o continente.')
+    regiao = models.CharField('Região', max_length=20, blank=True, choices=REGIOES,
+                              help_text='Região do Brasil onde fica o destino.')
     estado = models.CharField('Estado', max_length=60, blank=True,
                               help_text='Ex.: Tocantins. Sem isso, mostra o país.')
+    data_ida = models.DateField('Data de ida', blank=True, null=True,
+                                help_text='Escolha no calendário o dia de saída.')
+    data_volta = models.DateField('Data de volta', blank=True, null=True,
+                                  help_text='O dia do retorno. Período, mês, duração e '
+                                            'próxima saída são preenchidos a partir das datas.')
     periodo = models.CharField('Período', max_length=40, blank=True,
-                               help_text='Só os dias. Ex.: 16 a 21.')
+                               help_text='Preenchido a partir das datas de ida e volta.')
     mes_ano = models.CharField('Mês e ano', max_length=40, blank=True,
                                help_text='Ex.: Junho 2027.')
     dias = models.CharField('Duração em dias', max_length=20, blank=True,
@@ -75,15 +79,57 @@ class Destino(models.Model):
             # e uma varredura da tabela inteira.
             models.Index(fields=['nome'], name='destino_nome_idx'),
             models.Index(fields=['pais'], name='destino_pais_idx'),
-            models.Index(fields=['continente'], name='destino_continente_idx'),
         ]
 
     def __str__(self):
         return f'{self.nome}, {self.pais}'
 
+    MESES = {
+        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
+    }
+
+    def _preencher_datas(self):
+        """Preenche período, mês, duração e próxima saída a partir das datas.
+
+        O dono escolhe ida e volta no calendário; os textos que a página mostra
+        saem daqui, sempre coerentes com as datas escolhidas.
+        """
+        ida, volta = self.data_ida, self.data_volta
+        if not (ida and volta):
+            return
+        if volta < ida:
+            ida, volta = volta, ida
+
+        total_dias = (volta - ida).days + 1
+        noites = max(total_dias - 1, 0)
+        self.dias = f'{total_dias} dia' + ('' if total_dias == 1 else 's')
+        self.noites = f'{noites} noite' + ('' if noites == 1 else 's')
+
+        mes_ida = self.MESES[ida.month]
+        self.mes_ano = f'{mes_ida} {ida.year}'
+
+        if (ida.month, ida.year) == (volta.month, volta.year):
+            self.periodo = f'{ida.day} a {volta.day}'
+            self.proxima_saida = f'{ida.day} a {volta.day} de {mes_ida} de {ida.year}'
+        elif ida.year == volta.year:
+            mes_volta = self.MESES[volta.month]
+            self.periodo = f'{ida.day} de {mes_ida} a {volta.day} de {mes_volta}'
+            self.proxima_saida = (f'{ida.day} de {mes_ida} a {volta.day} '
+                                  f'de {mes_volta} de {ida.year}')
+        else:
+            mes_volta = self.MESES[volta.month]
+            self.periodo = (f'{ida.day} de {mes_ida} de {ida.year} a '
+                            f'{volta.day} de {mes_volta} de {volta.year}')
+            self.proxima_saida = self.periodo
+
     def save(self, *args, **kwargs):
+        if not self.pais:
+            self.pais = 'Brasil'
         if not self.slug:
             self.slug = slugify(f'{self.nome}-{self.pais}')
+        self._preencher_datas()
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

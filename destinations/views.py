@@ -28,7 +28,7 @@ def home(request):
 
 
 def lista_destinos(request):
-    """Lista de todos os destinos, com busca e filtro por continente."""
+    """Lista de todos os destinos, com busca e filtro por região."""
     destinos = Destino.objects.all()
 
     busca = request.GET.get('q', '').strip()[:TAMANHO_MAXIMO_BUSCA]
@@ -37,13 +37,13 @@ def lista_destinos(request):
             Q(nome__icontains=busca) | Q(pais__icontains=busca) | Q(descricao__icontains=busca)
         )
 
-    continente = request.GET.get('continente', '')
-    # Só continente que existe: valor inventado devolve a lista inteira sem
+    regiao = request.GET.get('regiao', '')
+    # Só região que existe: valor inventado devolve a lista inteira sem
     # filtro nenhum, o que confunde mais do que ajuda.
-    if continente in dict(Destino.CONTINENTES):
-        destinos = destinos.filter(continente=continente)
+    if regiao in dict(Destino.REGIOES):
+        destinos = destinos.filter(regiao=regiao)
     else:
-        continente = ''
+        regiao = ''
 
     # Paginação: sem ela, uma busca ampla renderiza o catálogo todo de uma vez.
     pagina = Paginator(destinos, POR_PAGINA).get_page(request.GET.get('pagina'))
@@ -52,8 +52,8 @@ def lista_destinos(request):
         'destinos': pagina,
         'pagina': pagina,
         'busca': busca,
-        'continente_ativo': continente,
-        'continentes': Destino.CONTINENTES,
+        'regiao_ativa': regiao,
+        'regioes': Destino.REGIOES,
     })
 
 

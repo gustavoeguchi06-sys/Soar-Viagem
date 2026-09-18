@@ -295,7 +295,7 @@ def montar_viagem(destino, avaliacoes):
         'selo': destino.selo or cfg.get('selo', 'Expedição'),
         'subtitulo': destino.subtitulo or cfg.get('subtitulo')
                      or 'Uma aventura no coração do Brasil',
-        'regiao': destino.regiao or cfg.get('regiao') or destino.get_continente_display(),
+        'regiao': destino.regiao or cfg.get('regiao') or '',
         'estado': destino.estado or cfg.get('estado') or destino.pais,
         'curto': curto,
         'periodo': destino.periodo or cfg.get('periodo', '16 a 21'),

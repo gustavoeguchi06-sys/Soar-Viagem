@@ -134,14 +134,43 @@ class HospedagemInline(admin.TabularInline):
 # Destino
 # --------------------------------------------------------------------------- #
 
+class DestinoAdminForm(forms.ModelForm):
+    """Datas por calendário: o dono escolhe ida e volta e o site preenche o resto."""
+
+    data_ida = forms.DateField(
+        label='Data de ida', required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        input_formats=['%Y-%m-%d'],
+        help_text='Escolha no calendário o dia de saída.')
+    data_volta = forms.DateField(
+        label='Data de volta', required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        input_formats=['%Y-%m-%d'],
+        help_text='O dia do retorno. Período, mês, duração e próxima saída são '
+                  'preenchidos a partir das datas.')
+
+    class Meta:
+        model = Destino
+        fields = '__all__'
+
+    def clean(self):
+        dados = super().clean()
+        ida, volta = dados.get('data_ida'), dados.get('data_volta')
+        if ida and volta and volta < ida:
+            self.add_error('data_volta', 'A volta não pode ser antes da ida.')
+        return dados
+
+
+
 @admin.register(Destino)
 class DestinoAdmin(admin.ModelAdmin):
-    list_display = ['capa', 'nome', 'pais', 'preco_base', 'preco_medio_diaria',
+    form = DestinoAdminForm
+    list_display = ['capa', 'nome', 'regiao', 'preco_base', 'preco_medio_diaria',
                     'vagas', 'destaque', 'soar_60', 'situacao', 'no_site']
     list_display_links = ['nome']
     list_editable = ['preco_base', 'preco_medio_diaria', 'vagas', 'destaque', 'soar_60']
-    list_filter = ['destaque', 'soar_60', 'continente', 'pais']
-    search_fields = ['nome', 'pais', 'descricao']
+    list_filter = ['destaque', 'soar_60', 'regiao']
+    search_fields = ['nome', 'regiao', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
@@ -152,9 +181,10 @@ class DestinoAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('O destino no catálogo', {
-            'fields': ['nome', 'slug', 'pais', 'continente', 'descricao',
+            'fields': ['nome', 'slug', 'regiao', 'descricao',
                        'imagem_capa', 'previa_capa', 'melhor_epoca', 'destaque', 'soar_60'],
-            'description': 'O mínimo para o destino existir. O resto da página '
+            'description': 'O mínimo para o destino existir. A operadora só trabalha '
+                           'no Brasil, então o país é sempre Brasil. O resto da página '
                            'tem texto padrão e pode ficar para depois.',
         }),
         ('Preços', {
@@ -163,12 +193,14 @@ class DestinoAdmin(admin.ModelAdmin):
                            'Sem nenhum dos dois, a página mostra “sob consulta”.',
         }),
         ('Datas e vagas', {
-            'fields': ['periodo', 'mes_ano', 'dias', 'noites', 'proxima_saida', 'vagas'],
-            'description': 'Em branco, a página usa o período padrão da operadora.',
+            'fields': ['data_ida', 'data_volta', 'vagas'],
+            'description': 'Escolha ida e volta no calendário — período, mês, duração e '
+                           'próxima saída são preenchidos sozinhos. Em branco, a página '
+                           'usa o período padrão da operadora.',
         }),
         ('Capa da página de viagem', {
             'classes': ['collapse'],
-            'fields': ['selo', 'subtitulo', 'regiao', 'estado'],
+            'fields': ['selo', 'subtitulo', 'estado'],
             'description': 'Tudo opcional. Em branco, a página usa o texto padrão da Soar.',
         }),
         ('Textos da página', {

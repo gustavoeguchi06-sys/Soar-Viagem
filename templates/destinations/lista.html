@@ -16,11 +16,11 @@
         </form>
 
         <div class="filtros">
-            <a class="filtro {% if not continente_ativo %}ativo{% endif %}"
-               href="{% url 'destinations:lista' %}{% if busca %}?q={{ busca }}{% endif %}">Todos</a>
-            {% for codigo, nome in continentes %}
-            <a class="filtro {% if continente_ativo == codigo %}ativo{% endif %}"
-               href="?continente={{ codigo }}{% if busca %}&q={{ busca }}{% endif %}">{{ nome }}</a>
+            <a class="filtro {% if not regiao_ativa %}ativo{% endif %}"
+               href="{% url 'destinations:lista' %}{% if busca %}?q={{ busca }}{% endif %}">Todas</a>
+            {% for codigo, nome in regioes %}
+            <a class="filtro {% if regiao_ativa == codigo %}ativo{% endif %}"
+               href="?regiao={{ codigo|urlencode }}{% if busca %}&q={{ busca }}{% endif %}">{{ nome }}</a>
             {% endfor %}
         </div>
 
@@ -34,11 +34,11 @@
         {# Sem paginacao, uma busca ampla renderiza o catalogo inteiro de uma vez. #}
         <nav class="paginacao" aria-label="Paginas de destinos">
             {% if pagina.has_previous %}
-            <a class="filtro" href="?pagina={{ pagina.previous_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if continente_ativo %}&continente={{ continente_ativo }}{% endif %}">Anterior</a>
+            <a class="filtro" href="?pagina={{ pagina.previous_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Anterior</a>
             {% endif %}
             <span class="paginacao__conta">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
             {% if pagina.has_next %}
-            <a class="filtro" href="?pagina={{ pagina.next_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if continente_ativo %}&continente={{ continente_ativo }}{% endif %}">Próxima</a>
+            <a class="filtro" href="?pagina={{ pagina.next_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Próxima</a>
             {% endif %}
         </nav>
         {% endif %}

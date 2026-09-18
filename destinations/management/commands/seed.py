@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dados = [
             {
-                'nome': 'Alter do Chão', 'slug': 'alter-do-chao', 'pais': 'Brasil', 'continente': 'AM',
+                'nome': 'Alter do Chão', 'slug': 'alter-do-chao', 'pais': 'Brasil', 'regiao': 'Norte',
                 'descricao': 'O Caribe amazônico: praias de areia branca que surgem na seca do rio '
                              'Tapajós, água doce e transparente, a famosa Ilha do Amor e o pôr do sol '
                              'mais bonito do Pará. A vila reúne floresta, cultura ribeirinha e um '
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Jalapão/TO', 'slug': 'jalapao', 'pais': 'Brasil', 'continente': 'AM',
+                'nome': 'Jalapão/TO', 'slug': 'jalapao', 'pais': 'Brasil', 'regiao': 'Norte',
                 'descricao': 'Uma aventura no coração do Brasil: fervedouros de água cristalina onde é '
                              'impossível afundar, dunas alaranjadas com o pôr do sol mais bonito do '
                              'cerrado, cânions, cachoeiras e o artesanato de capim dourado.',
@@ -56,7 +56,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Fernando de Noronha', 'pais': 'Brasil', 'continente': 'AM',
+                'nome': 'Fernando de Noronha', 'pais': 'Brasil', 'regiao': 'Nordeste',
                 'descricao': 'Arquipélago paradisíaco com as praias mais bonitas do Brasil. '
                              'Águas cristalinas, mergulho com tartarugas e golfinhos, e o famoso '
                              'pôr do sol do Forte do Boldró.',
@@ -71,7 +71,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Quioto', 'pais': 'Japão', 'continente': 'AS',
+                'nome': 'Quioto', 'pais': 'Japão',
                 'descricao': 'A antiga capital do Japão reúne mais de 1.600 templos, jardins zen, '
                              'gueixas no bairro de Gion e o famoso bosque de bambus de Arashiyama.',
                 'preco_medio_diaria': 420, 'melhor_epoca': 'Março-abril (sakura) e novembro (outono)',
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Lisboa', 'pais': 'Portugal', 'continente': 'EU',
+                'nome': 'Lisboa', 'pais': 'Portugal',
                 'descricao': 'Colinas, azulejos e fado. Explore Alfama de bondinho, prove o pastel '
                              'de Belém original e veja o pôr do sol nos miradouros.',
                 'preco_medio_diaria': 380, 'melhor_epoca': 'Maio a setembro', 'destaque': True,
@@ -99,7 +99,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Cidade do Cabo', 'pais': 'África do Sul', 'continente': 'AF',
+                'nome': 'Cidade do Cabo', 'pais': 'África do Sul',
                 'descricao': 'Entre a Table Mountain e o oceano, a cidade oferece trilhas, vinícolas, '
                              'pinguins na praia de Boulders e o encontro dos oceanos no Cabo da Boa Esperança.',
                 'preco_medio_diaria': 340, 'melhor_epoca': 'Novembro a março',
@@ -111,7 +111,7 @@ class Command(BaseCommand):
                 ],
             },
             {
-                'nome': 'Queenstown', 'pais': 'Nova Zelândia', 'continente': 'OC',
+                'nome': 'Queenstown', 'pais': 'Nova Zelândia',
                 'descricao': 'A capital mundial dos esportes de aventura: bungee jump, esqui, '
                              'trilhas e paisagens que serviram de cenário para O Senhor dos Anéis.',
                 'preco_medio_diaria': 480, 'melhor_epoca': 'Dezembro a fevereiro (verão)',
