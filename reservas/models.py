@@ -16,7 +16,7 @@ class Reserva(models.Model):
     ACOMODACOES = [
         ('single', 'Single — 1 pessoa'),
         ('casal', 'Casal — 2 pessoas'),
-        ('duplo', 'Duplo — 2 pessoas'),
+        ('duplo', 'Duplo (Twin) — 2 pessoas'),
         ('triplo', 'Triplo — 3 pessoas'),
         ('crianca', 'Criança (8 anos)'),
     ]

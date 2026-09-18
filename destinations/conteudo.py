@@ -327,7 +327,7 @@ def montar_viagem(destino, avaliacoes):
             {'chave': 'casal', 'nome': 'Casal', 'pessoas': '2 pessoas (cama de casal)',
              'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
              'padrao': True, 'consulte': False},
-            {'chave': 'duplo', 'nome': 'Duplo', 'pessoas': '2 pessoas (camas separadas)',
+            {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
              'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
              'padrao': False, 'consulte': False},
             {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
