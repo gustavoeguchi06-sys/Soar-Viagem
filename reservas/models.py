@@ -15,9 +15,10 @@ class Reserva(models.Model):
 
     ACOMODACOES = [
         ('single', 'Single — 1 pessoa'),
-        ('duplo', 'Duplo/Casal — 2 pessoas'),
+        ('casal', 'Casal — 2 pessoas'),
+        ('duplo', 'Duplo — 2 pessoas'),
         ('triplo', 'Triplo — 3 pessoas'),
-        ('crianca', 'Criança (até 10 anos)'),
+        ('crianca', 'Criança (8 anos)'),
     ]
 
     STATUS = [
@@ -31,7 +32,7 @@ class Reserva(models.Model):
     destino = models.ForeignKey(Destino, on_delete=models.PROTECT,
                                 related_name='reservas', verbose_name='Destino')
     acomodacao = models.CharField('Acomodação', max_length=20,
-                                  choices=ACOMODACOES, default='duplo')
+                                  choices=ACOMODACOES, default='casal')
     pessoas = models.PositiveSmallIntegerField('Quantidade de pessoas', default=1)
     telefone = models.CharField('Telefone/WhatsApp', max_length=20, blank=True)
     observacao = models.TextField('Observações', blank=True)
