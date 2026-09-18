@@ -24,7 +24,7 @@ from django.utils.http import (url_has_allowed_host_and_scheme, urlsafe_base64_d
 from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, ip_do_cliente
 
 from . import google
-from .forms import CadastroForm, EntrarForm, ExcluirContaForm
+from .forms import AgenteCadastroForm, CadastroForm, EntrarForm, ExcluirContaForm
 
 log = logging.getLogger('soar.seguranca')
 
@@ -341,3 +341,94 @@ def excluir_conta(request):
         form = ExcluirContaForm(request.user)
 
     return render(request, 'contas/excluir.html', {'form': form})
+
+
+# --------------------------------------------------------------------------- #
+# B2B — agentes de viagem
+# --------------------------------------------------------------------------- #
+def b2b(request):
+    """Porta de entrada das agências: entrar ou ir para o cadastro B2B."""
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'agente'):
+            return redirect('contas:agente_area')
+        return redirect(_proxima_pagina(request))
+
+    form = EntrarForm(request)
+
+    if request.method == 'POST':
+        digitado = request.POST.get('username', '').strip()
+        if LIMITE_LOGIN.estourou(request, digitado):
+            log.warning('login b2b bloqueado por limite: usuario=%r ip=%s',
+                        digitado, ip_do_cliente(request))
+            messages.error(request, 'Muitas tentativas seguidas. Espere alguns minutos antes '
+                                    'de tentar de novo — ou use "esqueci minha senha".')
+            return render(request, 'contas/b2b.html',
+                          {'form': EntrarForm(request), 'bloqueado': True})
+
+        form = EntrarForm(request, data=request.POST)
+        if form.is_valid():
+            LIMITE_LOGIN.limpar(request, digitado)
+            login(request, form.get_user())
+            usuario = request.user
+            messages.success(request, 'Bem-vindo(a), {}!'.format(
+                usuario.first_name or usuario.username))
+            if hasattr(usuario, 'agente'):
+                return redirect('contas:agente_area')
+            return redirect(_proxima_pagina(request))
+
+        LIMITE_LOGIN.registrar(request, digitado)
+
+    return render(request, 'contas/b2b.html', {'form': form})
+
+
+def cadastro_agente(request):
+    """Cadastro de agência de viagem (B2B), com confirmação por e-mail."""
+    if request.user.is_authenticated:
+        return redirect('contas:b2b')
+
+    if request.method == 'POST':
+        if LIMITE_CADASTRO.estourou(request):
+            messages.error(request, 'Muitos cadastros a partir daqui agora há pouco. '
+                                    'Tente de novo mais tarde.')
+            return render(request, 'contas/b2b_cadastro.html', {'form': AgenteCadastroForm()})
+
+        form = AgenteCadastroForm(request.POST)
+        if form.is_valid():
+            LIMITE_CADASTRO.registrar(request)
+            email = form.cleaned_data['email']
+
+            existente = User.objects.filter(email__iexact=email).first()
+            if existente:
+                # Mesmo cuidado do cadastro do cliente: não confirmar na tela se
+                # o e-mail já tem conta. Quem precisa saber é o dono do endereço.
+                _avisar_conta_existente(request, existente)
+            else:
+                try:
+                    with transaction.atomic():
+                        usuario = form.save()
+                except IntegrityError:
+                    pass
+                else:
+                    _enviar_confirmacao(request, usuario)
+                    log.info('agencia cadastrada: usuario=%r ip=%s',
+                             usuario.get_username(), ip_do_cliente(request))
+
+            return render(request, 'contas/verifique_email.html', {'email': email})
+    else:
+        form = AgenteCadastroForm()
+
+    return render(request, 'contas/b2b_cadastro.html', {'form': form})
+
+
+@login_required
+def agente_area(request):
+    """Área da agência parceira.
+
+    Por enquanto é uma tela de boas-vindas com os dados da agência. O conteúdo
+    de verdade (tabela B2B, comissão, pedidos) entra quando for definido.
+    """
+    agente = getattr(request.user, 'agente', None)
+    if agente is None:
+        messages.info(request, 'Esta área é exclusiva das agências parceiras.')
+        return redirect('contas:minha_conta')
+    return render(request, 'contas/agente_area.html', {'agente': agente})

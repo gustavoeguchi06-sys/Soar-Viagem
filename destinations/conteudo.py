@@ -254,7 +254,7 @@ def montar_viagem(destino, avaliacoes):
     for i, dia in enumerate(roteiro):
         dia['foto'] = dia.get('foto_propria') or fotos[(i + 1) % len(fotos)]
 
-    hospedagem_db = destino.hospedagens.filter(disponivel=True).first()
+    hospedagem_db = destino.hospedagens.first()
     fotos_hosp = []
     if hospedagem_db:
         if hospedagem_db.imagem:
@@ -324,13 +324,16 @@ def montar_viagem(destino, avaliacoes):
             {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa',
              'preco': 'R$ ' + _moeda(preco_base + 1400), 'valor': preco_base + 1400,
              'padrao': False, 'consulte': False},
-            {'chave': 'duplo', 'nome': 'Duplo/Casal', 'pessoas': '2 pessoas',
+            {'chave': 'casal', 'nome': 'Casal', 'pessoas': '2 pessoas (cama de casal)',
              'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
              'padrao': True, 'consulte': False},
+            {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
+             'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
+             'padrao': False, 'consulte': False},
             {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
              'preco': 'R$ ' + _moeda(preco_base - 200), 'valor': preco_base - 200,
              'padrao': False, 'consulte': False},
-            {'chave': 'crianca', 'nome': 'Criança (até 10 anos)', 'pessoas': 'Consulte condições',
+            {'chave': 'crianca', 'nome': 'Criança (8 anos)', 'pessoas': 'Consulte condições',
              'preco': 'Consulte', 'valor': None, 'padrao': False, 'consulte': True},
         ],
         'hospedagem': {

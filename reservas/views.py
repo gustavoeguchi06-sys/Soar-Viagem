@@ -56,11 +56,11 @@ def nova(request, slug):
             )
             return redirect('contas:minha_conta')
     else:
-        escolha = request.GET.get('acomodacao', 'duplo')
+        escolha = request.GET.get('acomodacao', 'casal')
         chaves = [a['chave'] for a in viagem['acomodacoes']]
         form = ReservaForm(initial={
-            'acomodacao': escolha if escolha in chaves else 'duplo',
-            'pessoas': 2 if escolha in ('duplo', '') else 1,
+            'acomodacao': escolha if escolha in chaves else 'casal',
+            'pessoas': 2 if escolha in ('casal', 'duplo', '') else 1,
         })
 
     return render(request, 'reservas/nova.html', {

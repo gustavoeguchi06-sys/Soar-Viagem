@@ -59,7 +59,7 @@ class Destino(models.Model):
     proxima_saida = models.CharField('Próxima saída', max_length=120, blank=True,
                                      help_text='Ex.: 16 a 21 de Junho de 2027.')
     vagas = models.PositiveSmallIntegerField('Vagas disponíveis', blank=True, null=True)
-    preco_base = models.DecimalField('Preço da viagem por pessoa (R$)', max_digits=9,
+    preco_base = models.DecimalField('Preço da viagem por tipo de quarto (R$)', max_digits=9,
                                      decimal_places=2, blank=True, null=True,
                                      help_text='Valor do quarto duplo, que abre o card de reserva. '
                                                'Sem isso, calcula a partir da diária média.')
@@ -167,33 +167,22 @@ class ImagemDestino(models.Model):
 
 
 class Hospedagem(models.Model):
-    TIPOS = [
-        ('hotel', 'Hotel'),
-        ('pousada', 'Pousada'),
-        ('hostel', 'Hostel'),
-        ('resort', 'Resort'),
-        ('apartamento', 'Apartamento'),
-        ('casa', 'Casa de temporada'),
-    ]
-
     destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
                                 related_name='hospedagens', verbose_name='Destino')
     nome = models.CharField('Nome', max_length=120)
-    tipo = models.CharField('Tipo', max_length=20, choices=TIPOS, default='hotel')
-    descricao = models.TextField('Descrição', blank=True)
-    preco_diaria = models.DecimalField('Preço da diária (R$)', max_digits=8, decimal_places=2)
+    endereco = models.CharField('Endereço', max_length=200, blank=True,
+                                help_text='Onde a hospedagem fica.')
     imagem = models.ImageField('Imagem principal', upload_to='hospedagens/', blank=True, null=True)
-    endereco = models.CharField('Endereço', max_length=200, blank=True)
-    site = models.URLField('Site', blank=True)
-    disponivel = models.BooleanField('Disponível', default=True)
+    pacote_completo = models.BooleanField('Incluso no pacote completo', default=True,
+                                          help_text='A hospedagem já está inclusa no pacote da viagem.')
 
     class Meta:
         verbose_name = 'Hospedagem'
         verbose_name_plural = 'Hospedagens'
-        ordering = ['preco_diaria']
+        ordering = ['nome']
 
     def __str__(self):
-        return f'{self.nome} ({self.get_tipo_display()})'
+        return self.nome
 
 
 class ImagemHospedagem(models.Model):

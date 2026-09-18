@@ -32,11 +32,10 @@
         <nav class="topnav">
             <a href="{% url 'destinations:lista' %}">Viagens</a>
             <a href="{% url 'destinations:lista' %}">Destinos</a>
-            <a href="{% url 'destinations:lista' %}">Experiências</a>
             <a href="{% url 'destinations:lista' %}">Calendário</a>
-            <a href="{% url 'destinations:home' %}">Guia Soar</a>
+            <a href="{% url 'destinations:blog' %}">Blog Soar</a>
             <a href="{% url 'destinations:home' %}">Sobre a Soar</a>
-            <a href="{% url 'destinations:home' %}">B2B</a>
+            <a href="{% url 'contas:b2b' %}">B2B</a>
         </nav>
 
         <div class="topbar__acoes">
@@ -86,11 +85,10 @@
         <div class="wrap">
             <a href="{% url 'destinations:lista' %}">Viagens</a>
             <a href="{% url 'destinations:lista' %}">Destinos</a>
-            <a href="{% url 'destinations:lista' %}">Experiências</a>
             <a href="{% url 'destinations:lista' %}">Calendário</a>
-            <a href="{% url 'destinations:home' %}">Guia Soar</a>
+            <a href="{% url 'destinations:blog' %}">Blog Soar</a>
             <a href="{% url 'destinations:home' %}">Sobre a Soar</a>
-            <a href="{% url 'destinations:home' %}">B2B</a>
+            <a href="{% url 'contas:b2b' %}">B2B</a>
             <div class="menu-movel__conta">
                 {% if user.is_authenticated %}
                 <a href="{% url 'contas:minha_conta' %}">Minha conta e reservas</a>
@@ -134,15 +132,14 @@
                     <li><a href="{% url 'destinations:lista' %}">Todos os destinos</a></li>
                     <li><a href="{% url 'destinations:lista' %}">Expedições</a></li>
                     <li><a href="{% url 'destinations:lista' %}">Calendário de saídas</a></li>
-                    <li><a href="{% url 'destinations:lista' %}">Experiências</a></li>
                 </ul>
             </div>
             <div>
                 <h4>A Soar</h4>
                 <ul>
                     <li><a href="{% url 'destinations:home' %}">Sobre a Soar</a></li>
-                    <li><a href="{% url 'destinations:home' %}">Guia Soar</a></li>
-                    <li><a href="{% url 'destinations:home' %}">B2B / Agentes</a></li>
+                    <li><a href="{% url 'destinations:blog' %}">Blog Soar</a></li>
+                    <li><a href="{% url 'contas:b2b' %}">B2B / Agentes</a></li>
                     <li><a href="{% url 'contas:privacidade' %}">Aviso de privacidade</a></li>
                 </ul>
             </div>

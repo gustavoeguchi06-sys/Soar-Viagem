@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minha agência — B2B — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap">
+        <div class="cartao-form" style="max-width:720px;margin:0 auto">
+            <h1>Olá, {{ request.user.first_name|default:request.user.username }}!</h1>
+
+            {% if agente.aprovado %}
+            <p class="cartao-form__sub">Sua agência está aprovada como parceira da Soar.</p>
+            {% else %}
+            <div class="form-nota">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
+                <span>Cadastro recebido. A Soar está conferindo o CNPJ e o CADASTUR —
+                      avisaremos assim que a parceria for aprovada.</span>
+            </div>
+            {% endif %}
+
+            <h2 style="margin-top:22px">Dados da agência</h2>
+            <dl class="dados-agente">
+                <dt>Razão social</dt><dd>{{ agente.razao_social }}</dd>
+                <dt>CNPJ</dt><dd>{{ agente.cnpj_formatado }}</dd>
+                <dt>CADASTUR</dt><dd>{{ agente.cadastur }}</dd>
+                <dt>Responsável</dt><dd>{{ request.user.get_full_name|default:request.user.username }}</dd>
+                <dt>E-mail</dt><dd>{{ request.user.email }}</dd>
+                <dt>WhatsApp</dt><dd>{{ agente.whatsapp }}</dd>
+            </dl>
+
+            <p class="cartao-form__sub" style="margin-top:22px">A área de vendas B2B (viagens,
+               comissão e pedidos) está em construção e chega em breve.</p>
+
+            <p class="conta-lado__ajuda">
+                Precisa de algo agora?
+                <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Chame no WhatsApp</a>.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

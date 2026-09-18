@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}B2B — Agentes de viagem — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Área do agente</h1>
+            <p class="cartao-form__sub">Acesso das agências parceiras da Soar. Entre com seu
+               usuário ou e-mail para acompanhar a parceria.</p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Entrar</button>
+            </form>
+
+            <p class="cartao-form__rodape">
+                <a href="{% url 'contas:senha_reset' %}">Esqueci minha senha</a>
+            </p>
+
+            <p class="cartao-form__rodape">
+                Ainda não é parceiro?
+                <a href="{% url 'contas:cadastro_agente' %}">Cadastrar minha agência</a>
+            </p>
+        </div>
+
+        <aside class="conta-lado">
+            <h2>Parceria B2B</h2>
+            <ul>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Venda as viagens da Soar para os seus clientes.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Condições e comissão de agência.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Atendimento direto com a nossa equipe.</li>
+            </ul>
+            <p class="conta-lado__ajuda">
+                Dúvidas sobre a parceria?
+                <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Chame no WhatsApp</a>.
+            </p>
+        </aside>
+    </div>
+</section>
+{% endblock %}

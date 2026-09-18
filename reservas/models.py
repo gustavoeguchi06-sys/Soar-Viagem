@@ -15,9 +15,10 @@ class Reserva(models.Model):
 
     ACOMODACOES = [
         ('single', 'Single — 1 pessoa'),
-        ('duplo', 'Duplo/Casal — 2 pessoas'),
+        ('casal', 'Casal — 2 pessoas'),
+        ('duplo', 'Duplo (Twin) — 2 pessoas'),
         ('triplo', 'Triplo — 3 pessoas'),
-        ('crianca', 'Criança (até 10 anos)'),
+        ('crianca', 'Criança (8 anos)'),
     ]
 
     STATUS = [
@@ -31,11 +32,11 @@ class Reserva(models.Model):
     destino = models.ForeignKey(Destino, on_delete=models.PROTECT,
                                 related_name='reservas', verbose_name='Destino')
     acomodacao = models.CharField('Acomodação', max_length=20,
-                                  choices=ACOMODACOES, default='duplo')
+                                  choices=ACOMODACOES, default='casal')
     pessoas = models.PositiveSmallIntegerField('Quantidade de pessoas', default=1)
     telefone = models.CharField('Telefone/WhatsApp', max_length=20, blank=True)
     observacao = models.TextField('Observações', blank=True)
-    preco_estimado = models.DecimalField('Preço estimado por pessoa (R$)', max_digits=9,
+    preco_estimado = models.DecimalField('Preço estimado por tipo de quarto (R$)', max_digits=9,
                                          decimal_places=2, blank=True, null=True)
     saida = models.CharField('Saída pedida', max_length=120, blank=True,
                              help_text='Período que estava anunciado quando o cliente reservou.')
