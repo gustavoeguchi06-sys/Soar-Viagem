@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Jalapão: guia completo para sua viagem — Blog Soar{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/blog.css' %}">{% endblock %}
+
+{% block content %}
+<article class="blog">
+
+  {# ===================== HERO ===================== #}
+  <header class="blog-hero">
+    <div class="blog-hero__bg" aria-hidden="true"></div>
+    <div class="blog-hero__overlay" aria-hidden="true"></div>
+    <div class="wrap blog-hero__inner">
+      <h1>Jalapão: guia completo<br>para sua viagem inesquecível</h1>
+      <p class="blog-hero__sub">Descubra tudo sobre o Jalapão: quando ir, o que fazer,
+         onde se hospedar, quanto custa e dicas essenciais.</p>
+
+      <div class="blog-autor">
+        <span class="blog-autor__foto ph" aria-hidden="true"></span>
+        <span class="blog-autor__nome">Por Camila Azevedo</span>
+        <span class="blog-autor__meta"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>15 de Maio de 2024</span>
+        <span class="blog-autor__meta"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>8 min de leitura</span>
+      </div>
+    </div>
+  </header>
+
+  {# ===================== ÍNDICE ===================== #}
+  <div class="wrap">
+    <nav class="blog-indice" aria-label="Neste artigo">
+      <b class="blog-indice__titulo">Neste artigo você vai ver:</b>
+      <div class="blog-indice__grade">
+        <a href="#sobre"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-info"></use></svg><span>Sobre o Jalapão</span></a>
+        <a href="#quando"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg><span>Quando ir</span></a>
+        <a href="#fazer"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-camera"></use></svg><span>O que fazer</span></a>
+        <a href="#chegar"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-onibus"></use></svg><span>Como chegar</span></a>
+        <a href="#ficar"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-cama"></use></svg><span>Onde ficar</span></a>
+        <a href="#dicas"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-escudo"></use></svg><span>Dicas essenciais</span></a>
+      </div>
+    </nav>
+  </div>
+
+  {# ===================== CORPO + SIDEBAR ===================== #}
+  <div class="wrap blog-grade">
+
+    <div class="blog-corpo">
+      <p>O Jalapão é um dos destinos mais surpreendentes do Brasil. Dunas douradas, fervedouros
+         de águas cristalinas, cachoeiras incríveis e paisagens de tirar o fôlego fazem desse paraíso
+         no Tocantins um lugar único e inesquecível.</p>
+      <p>Se você está planejando sua viagem, preparamos este guia completo com todas as informações
+         que você precisa para aproveitar o melhor do Jalapão!</p>
+
+      <div class="blog-foto ph ph--larga" aria-hidden="true"></div>
+
+      <h2 id="sobre">1. Sobre o Jalapão</h2>
+      <p>Localizado no estado do Tocantins, o Jalapão é uma região preservada e pouco explorada
+         pelo turismo de massa. Suas belezas naturais impressionam: fervedouros, cachoeiras,
+         formações rochosas, rios de águas cristalinas e o famoso pôr do sol nas dunas.</p>
+      <div class="blog-nota">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-info"></use></svg>
+        <p>O Jalapão é um destino de natureza e aventura. Prepare-se para dias intensos
+           e cenários que parecem de outro planeta!</p>
+      </div>
+
+      <h2 id="quando">2. Quando ir ao Jalapão?</h2>
+      <p>A melhor época para visitar o Jalapão é durante a estação seca, entre maio e setembro,
+         quando as estradas estão em melhores condições e os passeios ficam ainda mais incríveis.</p>
+      <div class="blog-meses">
+        <span>JAN</span><span>FEV</span><span>MAR</span><span>ABR</span>
+        <span class="otima">MAI</span><span class="otima">JUN</span><span class="otima">JUL</span><span class="otima">AGO</span><span class="otima">SET</span>
+        <span>OUT</span><span>NOV</span><span>DEZ</span>
+      </div>
+      <div class="blog-legenda">
+        <span><i class="dot dot--otima"></i>Ótima época</span>
+        <span><i class="dot dot--boa"></i>Boa época</span>
+        <span><i class="dot dot--evite"></i>Evite</span>
+      </div>
+
+      <h2 id="fazer">3. O que fazer no Jalapão</h2>
+      <p>Prepare-se para conhecer lugares incríveis e colecionar memórias inesquecíveis.</p>
+      <div class="blog-atracoes">
+        <div class="blog-atracao">
+          <div class="blog-atracao__foto ph" aria-hidden="true"></div>
+          <b>Fervedouro do Alecrim</b>
+          <small>Experiência única de flutuar nas águas cristalinas.</small>
+        </div>
+        <div class="blog-atracao">
+          <div class="blog-atracao__foto ph" aria-hidden="true"></div>
+          <b>Cachoeira da Velha</b>
+          <small>Uma das cachoeiras mais famosas da região.</small>
+        </div>
+        <div class="blog-atracao">
+          <div class="blog-atracao__foto ph" aria-hidden="true"></div>
+          <b>Dunas do Jalapão</b>
+          <small>Pôr do sol inesquecível nas dunas douradas.</small>
+        </div>
+        <div class="blog-atracao">
+          <div class="blog-atracao__foto ph" aria-hidden="true"></div>
+          <b>Cânion Sussuapara</b>
+          <small>Trilha leve com vista espetacular do cânion.</small>
+        </div>
+      </div>
+      <div class="blog-centro">
+        <a class="btn btn--contorno" href="{% url 'destinations:lista' %}">Ver mais atrações</a>
+      </div>
+
+      <h2 id="chegar">4. Como chegar</h2>
+      <p>O acesso ao Jalapão é feito principalmente pela cidade de Palmas (TO). De lá, os passeios
+         começam em veículos 4x4, pois as estradas são de terra.</p>
+      <div class="blog-nota">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-onibus"></use></svg>
+        <p>A Soar cuida de toda a logística para você: transporte, guia, hospedagem e passeios.
+           É só aproveitar!</p>
+      </div>
+
+      <h2 id="dicas">5. Dicas essenciais para sua viagem</h2>
+      <ul class="blog-dicas">
+        <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>Leve roupas leves, chapéu, óculos de sol e protetor solar.</li>
+        <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>Hidrate-se bastante! O clima é quente e seco.</li>
+        <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>Leve dinheiro em espécie. Não há bancos ou caixas eletrônicos na região.</li>
+        <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>Respeite a natureza e preserve esse paraíso.</li>
+        <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>Viaje com uma operadora experiente e aproveite com segurança.</li>
+      </ul>
+
+      <div class="blog-cta" id="ficar">
+        <div class="blog-cta__foto ph" aria-hidden="true"></div>
+        <div class="blog-cta__texto">
+          <b>Pronto para viver o Jalapão?</b>
+          <p>Viaje com a Soar e descubra o melhor do Jalapão com conforto, segurança
+             e experiências incríveis.</p>
+          <div class="blog-cta__acoes">
+            <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver pacotes para Jalapão</a>
+            <a class="btn btn--contorno" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
+              <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>Falar com a Soar</a>
+          </div>
+        </div>
+      </div>
+
+      <nav class="blog-navpost">
+        <a href="{% url 'destinations:blog' %}" class="blog-navpost__item">
+          <small>‹ Artigo anterior</small>
+          <b>O que levar na mala para o Jalapão?</b>
+        </a>
+        <a href="{% url 'destinations:blog' %}" class="blog-navpost__item blog-navpost__item--dir">
+          <small>Próximo artigo ›</small>
+          <b>Melhor época para viajar: Alter do Chão</b>
+        </a>
+      </nav>
+    </div>
+
+    {# ===================== SIDEBAR ===================== #}
+    <aside class="blog-lado">
+      <div class="blog-card">
+        <h3>Categorias</h3>
+        <ul class="blog-cats">
+          <li><a href="{% url 'destinations:blog' %}">Todos os artigos<span>42</span></a></li>
+          <li><a class="ativo" href="{% url 'destinations:blog' %}">Destinos<span>18</span></a></li>
+          <li><a href="{% url 'destinations:blog' %}">Dicas de Viagem<span>8</span></a></li>
+          <li><a href="{% url 'destinations:blog' %}">Natureza<span>7</span></a></li>
+          <li><a href="{% url 'destinations:blog' %}">Roteiros<span>5</span></a></li>
+          <li><a href="{% url 'destinations:blog' %}">Experiências<span>3</span></a></li>
+          <li><a href="{% url 'destinations:blog' %}">Soar 60+<span>3</span></a></li>
+        </ul>
+      </div>
+
+      <div class="blog-proxima">
+        <div class="blog-proxima__bg ph" aria-hidden="true"></div>
+        <div class="blog-proxima__texto">
+          <b>Sua próxima aventura começa aqui!</b>
+          <p>Conheça nossos pacotes para o Jalapão e viva dias inesquecíveis.</p>
+          <a class="btn btn--branco" href="{% url 'destinations:lista' %}">Ver viagens</a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <h3>Artigos mais lidos</h3>
+        <ul class="blog-lidos">
+          <li><a href="{% url 'destinations:blog' %}"><span class="blog-lidos__num ph">1</span><span><b>Jalapão: guia completo para sua viagem inesquecível</b><small>8 min de leitura</small></span></a></li>
+          <li><a href="{% url 'destinations:blog' %}"><span class="blog-lidos__num ph">2</span><span><b>Alter do Chão: o paraíso amazônico do Pará</b><small>6 min de leitura</small></span></a></li>
+          <li><a href="{% url 'destinations:blog' %}"><span class="blog-lidos__num ph">3</span><span><b>O que levar na mala para o Jalapão?</b><small>4 min de leitura</small></span></a></li>
+          <li><a href="{% url 'destinations:blog' %}"><span class="blog-lidos__num ph">4</span><span><b>Melhores cachoeiras para visitar no Brasil</b><small>5 min de leitura</small></span></a></li>
+          <li><a href="{% url 'destinations:blog' %}"><span class="blog-lidos__num ph">5</span><span><b>Serra da Canastra: roteiro completo</b><small>7 min de leitura</small></span></a></li>
+        </ul>
+      </div>
+
+      <div class="blog-news">
+        <h3>Receba dicas e novidades da Soar</h3>
+        <p>Cadastre-se e receba conteúdos exclusivos para transformar suas viagens.</p>
+        <form class="blog-news__form" onsubmit="return false">
+          <input type="email" placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail">
+          <button type="submit" class="btn btn--verde btn--bloco">Cadastrar</button>
+        </form>
+        <small>Ao se cadastrar, você concorda com nossa
+          <a href="{% url 'contas:privacidade' %}">Política de Privacidade</a>.</small>
+      </div>
+
+      <div class="blog-card">
+        <h3>Siga a Soar no Instagram</h3>
+        <p class="blog-insta__sub">Inspirações diárias de destinos incríveis e experiências inesquecíveis!</p>
+        <div class="blog-insta">
+          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
+          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
+        </div>
+        <a class="btn btn--verde btn--bloco" href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">@OperadoraSoar</a>
+      </div>
+    </aside>
+  </div>
+</article>
+{% endblock %}

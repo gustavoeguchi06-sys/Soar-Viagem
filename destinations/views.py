@@ -58,8 +58,13 @@ def lista_destinos(request):
 
 
 def blog(request):
-    """Blog Soar — artigo em destaque (página fixa, modelo do protótipo)."""
+    """Blog Soar — índice de artigos (página fixa, modelo do protótipo)."""
     return render(request, 'destinations/blog.html')
+
+
+def blog_artigo(request):
+    """Artigo do blog (página de detalhe, modelo do protótipo)."""
+    return render(request, 'destinations/blog_artigo.html')
 
 
 def soar_60(request):
