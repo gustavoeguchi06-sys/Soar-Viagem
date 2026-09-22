@@ -69,7 +69,7 @@ body.pagina-viagem {
 .topbar__inner { display: flex; align-items: center; gap: 26px; height: 76px; min-width: 0; }
 
 .marca { display: flex; align-items: center; color: #fff; }
-.marca__logo { display: block; height: 31px; width: auto; }
+.marca__logo { display: block; height: 52px; width: auto; }
 
 .topnav { display: flex; align-items: center; gap: 26px; margin-left: 34px; }
 .topnav a { color: rgba(255, 255, 255, .92); font-size: .875rem; font-weight: 500;

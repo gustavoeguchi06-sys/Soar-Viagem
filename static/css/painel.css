@@ -204,7 +204,7 @@ h1, h2, h3, h4 {
 #branding { flex: 1 1 auto; min-width: 0; }
 #branding h1 { margin: 0; padding: 0; font-size: 1rem; }
 
-/* a marca, igual à do site: risco de voo + SOAR / PAINEL DO DONO */
+/* a marca, igual à do site: logo Soar + "painel do dono" ao lado */
 .marca-painel {
     display: inline-flex;
     align-items: center;
@@ -213,7 +213,7 @@ h1, h2, h3, h4 {
     line-height: 1.05;
 }
 .marca-painel:link, .marca-painel:visited, .marca-painel:hover { color: #fff; text-decoration: none; }
-.marca-painel__logo { flex: none; display: block; height: 31px; width: auto; }
+.marca-painel__logo { flex: none; display: block; height: 44px; width: auto; }
 .marca-painel__sub {
     display: block;
     font-size: .58rem;
