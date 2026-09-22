@@ -68,12 +68,8 @@ body.pagina-viagem {
 
 .topbar__inner { display: flex; align-items: center; gap: 26px; height: 76px; min-width: 0; }
 
-.marca { display: flex; align-items: center; gap: 10px; color: #fff; }
-.marca__logo { display: block; }
-.marca__nome { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 1.5rem;
-               letter-spacing: .06em; line-height: 1; }
-.marca__sub { display: block; font-family: 'Inter', sans-serif; font-size: .52rem; font-weight: 600;
-              letter-spacing: .42em; opacity: .82; margin-top: 3px; }
+.marca { display: flex; align-items: center; color: #fff; }
+.marca__logo { display: block; height: 31px; width: auto; }
 
 .topnav { display: flex; align-items: center; gap: 26px; margin-left: 34px; }
 .topnav a { color: rgba(255, 255, 255, .92); font-size: .875rem; font-weight: 500;
@@ -546,8 +542,6 @@ body.pagina-viagem {
     .galeria-grade { grid-template-columns: 1fr 1fr; }
     .galeria-grade img { height: 120px; }
     .comodidades { gap: 12px 16px; }
-    .marca__nome { font-size: 1.2rem; }
-    .marca__sub { letter-spacing: .3em; }
     /* o cabecalho tem que caber sem rolagem lateral: os rotulos encolhem e o
        atalho do WhatsApp sai (ele continua no rodape e no card de reserva) */
     .btn--reservar .btn__resto { display: none; }
