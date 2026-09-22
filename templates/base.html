@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Soar Operadora — viagens em grupo pelo Brasil{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {# fontes servidas pelo próprio site — ver o comentário em static/css/fontes.css #}
+    <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/sora-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'css/fontes.css' %}">
     {# style.css veste as páginas antigas; a de viagem usa só o viagem.css #}
     {% block estilos_legado %}<link rel="stylesheet" href="{% static 'css/style.css' %}">{% endblock %}
     <link rel="stylesheet" href="{% static 'css/viagem.css' %}">

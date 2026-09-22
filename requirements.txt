@@ -1,2 +1,6 @@
-Django>=5.2,<6.0
-Pillow>=10.0
+# Versoes exatas: o que foi testado e o que vai para o servidor e a mesma coisa.
+# Para atualizar, troque o numero aqui, rode os testes e so entao faca o commit.
+# (Conferido em 22/09/2026: sao as versoes mais recentes, sem falha de seguranca
+# publicada em aberto.)
+Django==5.2.17
+Pillow==12.3.0

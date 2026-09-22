@@ -254,6 +254,11 @@ GOOGLE_CLIENT_SECRET = os.environ.get('SOAR_GOOGLE_CLIENT_SECRET', '').strip()
 # ("falta confirmar o e-mail"). Quem erra a senha continua sem saber de nada.
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
+# Validade dos links de confirmação de e-mail e de troca de senha. O padrão do
+# Django é 3 dias; um link de senha esquecido na caixa de entrada por tanto
+# tempo é uma porta aberta para quem tiver acesso a ela depois.
+PASSWORD_RESET_TIMEOUT = 24 * 3600
+
 LOGIN_URL = 'contas:entrar'
 LOGIN_REDIRECT_URL = 'destinations:home'
 LOGOUT_REDIRECT_URL = 'destinations:home'
@@ -293,13 +298,14 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
 # Content-Security-Policy — a rede que apara o que passar pelo escape dos
 # templates. Sem 'unsafe-inline' em script-src: todo o JavaScript do site está
 # em arquivos sob static/. Os estilos ainda precisam de inline por causa dos
-# `style="..."` nos templates, e as fontes vêm do Google.
+# `style="..."` nos templates. As fontes são servidas pelo próprio site
+# (static/fonts/), então nenhum domínio de fora entra na política.
 CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', True)
 CSP_DIRETIVAS = {
     'default-src': "'self'",
     'script-src': "'self'",
-    'style-src': "'self' 'unsafe-inline' https://fonts.googleapis.com",
-    'font-src': "'self' https://fonts.gstatic.com",
+    'style-src': "'self' 'unsafe-inline'",
+    'font-src': "'self'",
     'img-src': "'self' data:",
     'connect-src': "'self'",
     'form-action': "'self'",
@@ -354,11 +360,20 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'completo',
         },
+        # Um arquivo por dia, 183 dias guardados: os 6 meses de registro de
+        # acesso que o Marco Civil (art. 15) exige e o aviso de privacidade
+        # promete. Girar por tamanho (como era) não garantia prazo nenhum — com
+        # pouco movimento guardava anos, com muito perdia a prova em semanas.
+        # O `expurgar_dados` apaga o que sobrar de antes desta troca.
+        # `delay` só abre o arquivo no primeiro registro: o processo vigia do
+        # runserver nunca registra nada e não fica segurando o arquivo, o que no
+        # Windows impediria a virada do dia.
         'arquivo_seguranca': {
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': PASTA_LOGS / 'seguranca.log',
-            'maxBytes': 5 * 1024 * 1024,
-            'backupCount': 10,          # ~50 MB de histórico
+            'when': 'midnight',
+            'backupCount': 183,
+            'delay': True,
             'encoding': 'utf-8',
             'formatter': 'completo',
         },

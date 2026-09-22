@@ -5,7 +5,7 @@ escolher uma nova, abra o link abaixo:
 
 {{ protocol }}://{{ domain }}{% url 'contas:password_reset_confirm' uidb64=uid token=token %}
 
-O link vale por algumas horas e só funciona uma vez.
+O link vale por 24 horas e só funciona uma vez.
 
 Se não foi você que pediu, ignore esta mensagem. Sua senha continua a mesma e
 ninguém consegue trocá-la sem abrir este link.

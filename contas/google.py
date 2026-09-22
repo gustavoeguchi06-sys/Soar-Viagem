@@ -10,7 +10,8 @@ Como funciona, em três passos:
 
 Não há senha envolvida: o Google já confirmou que o e-mail é da pessoa, então
 a conta nasce ativa. Quem já tinha conta com o mesmo e-mail entra nela — e, se
-ainda não tinha confirmado o e-mail, a confirmação fica feita aqui.
+ainda não tinha confirmado o e-mail, a confirmação fica feita aqui, com a senha
+antiga anulada (ver `_usuario_para`).
 
 Configuração (ver .env.example): SOAR_GOOGLE_CLIENT_ID e SOAR_GOOGLE_CLIENT_SECRET.
 Sem elas, o botão nem aparece.
@@ -135,10 +136,28 @@ def _usuario_para(email, nome):
     usuario = User.objects.filter(email__iexact=email).first()
     if usuario:
         mudou = []
+        if not usuario.is_active and usuario.last_login is not None:
+            # Já entrou antes e hoje está inativa: foi desligada no painel, de
+            # propósito. O Google prova quem é a pessoa, não que ela pode voltar.
+            log.warning('login google recusado, conta desativada: usuario=%r email=%s',
+                        usuario.get_username(), email)
+            raise ErroGoogle('Esta conta está desativada. Fale com a Soar pelo WhatsApp.')
         if not usuario.is_active:
             # O Google confirmou o e-mail; é a mesma prova que o link daria.
             usuario.is_active = True
             mudou.append('is_active')
+            # Mas a senha desta conta não é confiável. Conta inativa é conta que
+            # nunca teve o e-mail confirmado — e o cadastro aceita qualquer
+            # endereço. Alguém pode ter cadastrado o e-mail de outra pessoa com
+            # uma senha só dele e esperado: quando o dono de verdade entrasse
+            # pelo Google, a conta ligaria e a senha do intruso passaria a valer.
+            # Anular a senha fecha essa porta: a partir daqui a conta entra pelo
+            # Google, como as que nascem por ele.
+            if usuario.has_usable_password():
+                usuario.set_unusable_password()
+                mudou.append('password')
+                log.warning('login google ativou conta nunca confirmada e anulou a senha '
+                            'antiga: usuario=%r email=%s', usuario.get_username(), email)
         if not usuario.first_name and nome:
             usuario.first_name = nome[:60]
             mudou.append('first_name')

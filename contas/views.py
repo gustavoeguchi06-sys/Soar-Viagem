@@ -182,7 +182,14 @@ def _avisar_conta_existente(request, usuario):
 
 
 def ativar(request, uidb64, token):
-    """Confirma o e-mail e liga a conta."""
+    """Confirma o e-mail e liga a conta — sem entrar nela.
+
+    O link só prova que alguém abriu aquele e-mail, não que é o dono da senha.
+    Link de e-mail é reencaminhado, fica no histórico e é aberto sozinho pelos
+    filtros antivírus de e-mail corporativo; se ele também fizesse login, quem
+    clicasse primeiro ficaria com a sessão. Então ele só liga a conta, e a
+    pessoa entra com a senha que acabou de criar.
+    """
     try:
         pk = force_str(urlsafe_base64_decode(uidb64))
         usuario = User.objects.get(pk=pk)
@@ -198,9 +205,8 @@ def ativar(request, uidb64, token):
         log.info('e-mail confirmado: usuario=%r ip=%s',
                  usuario.get_username(), ip_do_cliente(request))
 
-    login(request, usuario)
-    messages.success(request, 'E-mail confirmado! Sua conta está pronta.')
-    return redirect('destinations:home')
+    messages.success(request, 'E-mail confirmado! Agora é só entrar com seu usuário e senha.')
+    return redirect('contas:entrar')
 
 
 # --------------------------------------------------------------------------- #
@@ -328,7 +334,9 @@ def excluir_conta(request):
             nome = usuario.get_username()
 
             # As reservas ficam, porque a operadora precisa do histórico
-            # comercial e fiscal — mas sem nada que ligue a pessoa a elas.
+            # comercial e fiscal — mas sem nada que ligue a pessoa a elas: o
+            # telefone e as observações saem aqui, e o vínculo com a conta vira
+            # NULL quando ela é apagada (Reserva.usuario é SET_NULL).
             usuario.reservas.update(telefone='', observacao='[dados removidos a pedido do cliente]')
             usuario.avaliacoes.update(nome_autor='Cliente removido', publicada=False)
 

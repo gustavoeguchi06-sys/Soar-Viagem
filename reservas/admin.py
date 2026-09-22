@@ -82,6 +82,8 @@ class ReservaAdmin(admin.ModelAdmin):
 
     @admin.display(description='Cliente', ordering='usuario__first_name')
     def cliente(self, reserva):
+        if reserva.usuario is None:
+            return 'Cliente removido'
         return reserva.usuario.get_full_name() or reserva.usuario.username
 
     @admin.display(description='Contato')

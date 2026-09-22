@@ -258,7 +258,40 @@ excluir conta não pede senha para ela e o "esqueci minha senha" não se aplica.
 
 Avaliar exige conta. A foto passa por conferência: no máximo 2 MB, e só JPG,
 PNG, WEBP ou GIF. Arquivo que não for imagem de verdade é recusado mesmo que a
-extensão diga o contrário.
+extensão diga o contrário. A foto é gravada com nome sorteado (32 caracteres
+aleatórios) e com a extensão do formato real — o nome original nunca vai para o
+disco, e a foto de uma avaliação ainda na fila não é achada por tentativa.
+
+### Apagar o que venceu (LGPD)
+
+O aviso de privacidade promete prazos: reservas por 5 anos após a viagem, IP das
+avaliações e registro de acessos por 6 meses, cadastro nunca confirmado por 30
+dias. Quem cumpre é o comando `expurgar_dados`:
+
+```bash
+python manage.py expurgar_dados --simular   # mostra o que seria apagado
+python manage.py expurgar_dados             # apaga
+```
+
+O `rodar.bat` já roda o comando toda vez que o servidor sobe. **No servidor de
+produção, agende uma vez por dia** — sem isso o prazo do aviso volta a ser só
+texto:
+
+```cron
+30 3 * * *  cd /caminho/do/soar && .venv/bin/python manage.py expurgar_dados
+```
+
+O log de segurança (`logs/seguranca.log`) vira um arquivo por dia e guarda 183
+dias sozinho.
+
+### Testes
+
+```bash
+python manage.py test
+```
+
+Cada correção de segurança tem um teste que quebra se alguém desfizer a correção
+(`contas/tests.py`, `reviews/tests.py`).
 
 ### O que ainda depende de infraestrutura
 

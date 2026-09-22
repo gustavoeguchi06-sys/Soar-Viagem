@@ -5,7 +5,7 @@ e-mail. Para liberar a conta, confirme o endereço abrindo o link abaixo:
 
 {{ link }}
 
-O link vale por algumas horas e só pode ser usado uma vez.
+O link vale por 24 horas. Depois de confirmar, é só entrar com seu usuário e senha.
 
 Se não foi você quem se cadastrou, ignore esta mensagem: sem a confirmação, a
 conta não é ativada e nada acontece.
