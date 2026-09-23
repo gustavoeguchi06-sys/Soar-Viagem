@@ -298,6 +298,28 @@ body.pagina-viagem {
 .pill-vagas { background: #dcfce7; color: var(--verde-texto); font-size: .78rem; font-weight: 700;
               padding: 5px 12px; border-radius: 999px; }
 
+/* várias datas de saída: o cliente escolhe uma, como na acomodação */
+.saidas { padding-bottom: 12px; border-bottom: 1px solid var(--linha); }
+.saidas .saida { margin-bottom: 8px; }
+.saida-op {
+    display: flex; align-items: center; gap: 11px; padding: 8px 11px; cursor: pointer;
+    border: 1px solid transparent; border-radius: var(--r-sm); transition: background .15s, border-color .15s;
+}
+.saida-op + .saida-op { margin-top: 2px; }
+.saida-op:hover { background: var(--fundo-suave); }
+.saida-op input { appearance: none; flex: none; width: 18px; height: 18px; margin: 0; border: 2px solid #c3ccc7;
+                  border-radius: 50%; background: #fff; cursor: pointer; transition: border .15s; }
+.saida-op input:checked { border-color: var(--verde); border-width: 5px; }
+.saida-op:has(input:checked) { border-color: var(--verde); background: #fff; }
+.saida-op__data { flex: 1; min-width: 0; font-size: .88rem; font-weight: 600; color: var(--preto); line-height: 1.35; }
+.saida-op .pill-vagas { flex: none; white-space: nowrap; padding: 4px 10px; }
+.saida-op--esgotada { cursor: not-allowed; }
+.saida-op--esgotada:hover { background: none; }
+.saida-op--esgotada .saida-op__data { color: var(--tinta-suave); text-decoration: line-through; font-weight: 500; }
+.saida-op--esgotada input { cursor: not-allowed; background: var(--fundo-suave); }
+.pill-vagas--esgotada { background: #fee2e2; color: #b42318; }
+.pill-vagas--consulte { background: var(--fundo-suave); color: var(--tinta-suave); }
+
 .acomodacoes { margin-top: 13px; }
 .acomodacoes > b { display: block; font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--preto); }
 .acom {
@@ -573,7 +595,7 @@ body.pagina-viagem {
     .migalhas a, .rodape a, .depoimentos__link { min-height: 34px; display: inline-flex; align-items: center; }
     .rodape ul { gap: 2px; }
     .abas a { display: flex; align-items: center; min-height: 52px; }
-    .acom { padding: 12px 11px; }
+    .acom, .saida-op { padding: 12px 11px; }
     .seta { width: 46px; height: 46px; }
     .carrossel__setas { width: 42px; height: 42px; }
 }

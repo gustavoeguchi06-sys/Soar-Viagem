@@ -291,6 +291,19 @@ def montar_viagem(destino, avaliacoes):
 
     curto = destino.nome.split('/')[0]
 
+    # Todas as saídas que ainda vão acontecer. A primeira com vaga é a que
+    # manda no período mostrado na capa; sem nenhuma cadastrada, vale o
+    # texto antigo do destino.
+    saidas = [{
+        'id': s.pk, 'texto': s.texto, 'vagas': s.vagas, 'esgotada': s.esgotada,
+        'textos': s.textos,
+    } for s in destino.saidas_futuras] if destino.pk else []
+    livres = [s for s in saidas if not s['esgotada']]
+    if livres:
+        livres[0]['padrao'] = True
+    primeira = (livres or saidas or [None])[0]
+    prox = primeira['textos'] if primeira else {}
+
     return {
         'selo': destino.selo or cfg.get('selo', 'Expedição'),
         'subtitulo': destino.subtitulo or cfg.get('subtitulo')
@@ -298,10 +311,10 @@ def montar_viagem(destino, avaliacoes):
         'regiao': destino.regiao or cfg.get('regiao') or '',
         'estado': destino.estado or cfg.get('estado') or destino.pais,
         'curto': curto,
-        'periodo': destino.periodo or cfg.get('periodo', '16 a 21'),
-        'mes_ano': destino.mes_ano or cfg.get('mes_ano', 'Junho 2027'),
-        'dias': destino.dias or cfg.get('dias', '6 dias'),
-        'noites': destino.noites or cfg.get('noites', '5 noites'),
+        'periodo': prox.get('periodo') or destino.periodo or cfg.get('periodo', '16 a 21'),
+        'mes_ano': prox.get('mes_ano') or destino.mes_ano or cfg.get('mes_ano', 'Junho 2027'),
+        'dias': prox.get('dias') or destino.dias or cfg.get('dias', '6 dias'),
+        'noites': prox.get('noites') or destino.noites or cfg.get('noites', '5 noites'),
         'nota': str(nota).replace('.', ','),
         'estrelas': _estrelas(nota),
         'total_avaliacoes': total,
@@ -317,9 +330,12 @@ def montar_viagem(destino, avaliacoes):
         'faq': faq,
         'preco': _moeda(preco_base),
         'preco_num': preco_base,
-        'proxima_saida': destino.proxima_saida or cfg.get('proxima_saida',
+        'proxima_saida': prox.get('proxima_saida') or destino.proxima_saida or cfg.get('proxima_saida',
                                                           '16 a 21 de Junho de 2027'),
-        'vagas': destino.vagas if destino.vagas is not None else cfg.get('vagas', 12),
+        'vagas': (primeira['vagas'] if primeira
+                  else destino.vagas if destino.vagas is not None else cfg.get('vagas', 12)),
+        'saidas': saidas,
+        'tem_vaga': bool(livres) or not saidas,
         'acomodacoes': [
             {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa',
              'preco': 'R$ ' + _moeda(preco_base + 1400), 'valor': preco_base + 1400,

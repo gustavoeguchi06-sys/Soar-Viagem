@@ -36,13 +36,15 @@
 
                 <ul class="resumo-viagem__linhas">
                     <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
-                        {{ viagem.proxima_saida }}</li>
+                        {% if viagem.saidas|length > 1 %}{{ viagem.saidas|length }} datas de saída, escolha a sua ao lado{% else %}{{ viagem.proxima_saida }}{% endif %}</li>
                     <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>
                         {{ viagem.dias }} · {{ viagem.noites }}</li>
                     <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-pin"></use></svg>
                         {{ viagem.estado }}, {{ destino.pais }}</li>
+                    {% if viagem.saidas|length <= 1 and viagem.vagas is not None %}
                     <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-grupo"></use></svg>
                         {{ viagem.vagas }} vagas disponíveis</li>
+                    {% endif %}
                 </ul>
 
                 <div class="resumo-viagem__preco">

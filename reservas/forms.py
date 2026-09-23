@@ -22,6 +22,24 @@ class ReservaForm(forms.ModelForm):
                 'placeholder': 'Restrição alimentar, quem viaja com você, dúvida sobre a data...'}),
         }
 
+    def __init__(self, *args, saidas=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Com mais de uma data cadastrada, o cliente escolhe em qual quer ir.
+        # Só entram as que ainda têm vaga.
+        livres = [s for s in (saidas or []) if not s['esgotada']]
+        if livres:
+            self.fields['saida_escolhida'] = forms.ChoiceField(
+                label='Data da viagem', widget=forms.RadioSelect(),
+                choices=[(str(s['id']), self._rotulo(s)) for s in livres])
+            self.order_fields(['saida_escolhida'])
+
+    @staticmethod
+    def _rotulo(saida):
+        if saida['vagas'] is None:
+            return saida['texto']
+        return '{} ({} vaga{})'.format(saida['texto'], saida['vagas'],
+                                       '' if saida['vagas'] == 1 else 's')
+
     def clean_pessoas(self):
         pessoas = self.cleaned_data['pessoas']
         if pessoas < 1:
