@@ -90,7 +90,7 @@ class ReservaAdmin(admin.ModelAdmin):
     def contato(self, reserva):
         """O telefone como link de WhatsApp — um clique e a conversa abre."""
         if not reserva.telefone:
-            return '—'
+            return '-'
         numeros = re.sub(r'\D', '', reserva.telefone)
         if len(numeros) < 10:
             return reserva.telefone
@@ -102,7 +102,7 @@ class ReservaAdmin(admin.ModelAdmin):
     @admin.display(description='Total estimado')
     def total(self, reserva):
         if reserva.total_estimado is None:
-            return '—'
+            return '-'
         # number_format respeita o pt-br do projeto: 1.234,50 e não 1,234.50.
         return 'R$ {}'.format(number_format(reserva.total_estimado, decimal_pos=2,
                                             force_grouping=True))

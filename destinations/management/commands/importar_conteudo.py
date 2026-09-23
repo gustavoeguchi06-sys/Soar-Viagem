@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
         if tocados:
             self.stdout.write(self.style.SUCCESS(
-                '\n{} destino(s) atualizados — agora dá para editar tudo em /painel/.'.format(
+                '\n{} destino(s) atualizados. Agora dá para editar tudo em /painel/.'.format(
                     tocados)))
         else:
             self.stdout.write('Nada a fazer: o conteúdo já está no painel.')

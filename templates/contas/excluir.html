@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Excluir minha conta — Soar Operadora{% endblock %}
+{% block title %}Excluir minha conta | Soar Operadora{% endblock %}
 {% block body_class %}pagina-viagem pagina-conta{% endblock %}
 {% block estilos_legado %}{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
@@ -19,7 +19,7 @@
             <div class="form-nota">
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
                 <span>As reservas em si continuam no sistema da operadora, sem nada que
-                      ligue você a elas — a Soar precisa do histórico por obrigação fiscal.</span>
+                      ligue você a elas. A Soar precisa do histórico por obrigação fiscal.</span>
             </div>
 
             <form method="post" novalidate>
@@ -37,7 +37,7 @@
             <h2>Antes de apagar</h2>
             <ul>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    <a href="{% url 'contas:meus_dados' %}">Baixe uma cópia dos seus dados</a> —
+                    <a href="{% url 'contas:meus_dados' %}">Baixe uma cópia dos seus dados</a>, porque
                     depois da exclusão não tem como recuperar.</li>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
                     Tem reserva em andamento? Fale com a equipe antes.</li>

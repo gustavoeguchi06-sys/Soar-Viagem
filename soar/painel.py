@@ -22,8 +22,8 @@ from django.urls import reverse
 
 
 class PainelSoar(AdminSite):
-    site_header = 'Soar — Painel do dono'
-    site_title = 'Soar — Painel'
+    site_header = 'Soar | Painel do dono'
+    site_title = 'Soar | Painel'
     index_title = 'Gerenciar o site de viagem'
 
     def login(self, request, extra_context=None):

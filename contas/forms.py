@@ -32,7 +32,7 @@ class EntrarForm(AuthenticationForm):
         # Só chega aqui quem acertou a senha (o backend é o AllowAllUsersModelBackend),
         # então dizer o motivo não revela nada a quem está tentando adivinhar.
         'inactive': 'Falta confirmar seu e-mail. Procure a mensagem que enviamos no '
-                    'cadastro — o link de confirmação está nela.',
+                    'cadastro: o link de confirmação está nela.',
     }
 
     def clean_username(self):
@@ -72,7 +72,7 @@ class CadastroForm(UserCreationForm):
         model = User
         fields = ['first_name', 'email', 'username']
         labels = {'username': 'Nome de usuário'}
-        help_texts = {'username': 'Letras, números e @ . + - _ — é com ele que você entra.'}
+        help_texts = {'username': 'É com ele que você entra. Pode ter letras, números e @ . + - _'}
         widgets = {'username': forms.TextInput(attrs={'placeholder': 'seu.usuario'})}
 
     def __init__(self, *args, **kwargs):
