@@ -171,7 +171,7 @@ class ArtigoAdmin(admin.ModelAdmin):
     @admin.action(description='Publicar os artigos selecionados')
     def publicar(self, request, queryset):
         total = queryset.update(publicado=True)
-        self.message_user(request, f'{total} artigo(s) publicado(s). Os com data futura ficam '
+        self.message_user(request, f'{total} artigo(s) publicado(s). Os que têm data futura ficam '
                                    'agendados.', messages.SUCCESS)
 
     @admin.action(description='Voltar para rascunho os artigos selecionados')

@@ -363,7 +363,7 @@
         <p class="cartao-form__sub">
             Para avaliar este destino, <a href="{% url 'contas:entrar' %}?next={{ request.path|urlencode }}">entre na sua conta</a>
             ou <a href="{% url 'contas:cadastro' %}">crie uma</a>. Assim a gente sabe que a
-            avaliacao e de quem viajou de verdade.
+            avaliação é de quem viajou de verdade.
         </p>
 
         {% elif ja_avaliou %}
@@ -374,8 +374,8 @@
 
         {% else %}
         <p class="cartao-form__sub">
-            Voce vai aparecer como <b>{{ user.get_full_name|default:user.username }}</b>.
-            Sua avaliacao entra no ar assim que a Soar revisar.
+            Você vai aparecer como <b>{{ user.get_full_name|default:user.username }}</b>.
+            Sua avaliação entra no ar assim que a Soar revisar.
         </p>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}

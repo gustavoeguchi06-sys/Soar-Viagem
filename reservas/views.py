@@ -23,7 +23,7 @@ def nova(request, slug):
     if request.method == 'POST':
         # Uma conta so nao enche a fila do painel de pedido falso.
         if LIMITE_RESERVA.estourou(request, request.user.pk):
-            messages.error(request, 'Voce enviou muitos pedidos agora ha pouco. '
+            messages.error(request, 'Você enviou muitos pedidos agora há pouco. '
                                     'Fale com a Soar pelo WhatsApp se precisar de mais.')
             return redirect('contas:minha_conta')
 
@@ -32,8 +32,8 @@ def nova(request, slug):
         ja_pendente = Reserva.objects.filter(
             usuario=request.user, destino=destino, status='pendente').exists()
         if ja_pendente:
-            messages.info(request, 'Voce ja tem um pedido aguardando contato para este '
-                                   'destino. Nosso time vai falar com voce.')
+            messages.info(request, 'Você já tem um pedido aguardando contato para este '
+                                   'destino. Nosso time vai falar com você.')
             return redirect('contas:minha_conta')
 
         form = ReservaForm(request.POST)
