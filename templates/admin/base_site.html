@@ -10,7 +10,7 @@ Comentário de várias linhas vai sempre em {% comment %}: o {# … #} do Django
 de uma linha só, e quando passa disso ele vira texto na tela.
 {% endcomment %}
 
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:'Soar — Painel' }}{% endblock %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:'Soar | Painel' }}{% endblock %}
 
 {% block extrastyle %}{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/fontes.css' %}">

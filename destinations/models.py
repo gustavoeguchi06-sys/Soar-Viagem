@@ -224,7 +224,7 @@ class DiaRoteiro(models.Model):
                                 related_name='roteiro', verbose_name='Destino')
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
     titulo = models.CharField('Título', max_length=120,
-                              help_text='Ex.: Dia 1 — Chegada em Santarém.')
+                              help_text='Ex.: Dia 1: Chegada em Santarém.')
     resumo = models.CharField('Resumo', max_length=200,
                               help_text='A linha que aparece com o dia fechado.')
     detalhe = models.TextField('Detalhe', blank=True,

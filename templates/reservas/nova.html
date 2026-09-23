@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Reservar {{ destino.nome }} — Soar Operadora{% endblock %}
+{% block title %}Reservar {{ destino.nome }} | Soar Operadora{% endblock %}
 {% block body_class %}pagina-viagem pagina-conta{% endblock %}
 {% block estilos_legado %}{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
@@ -17,7 +17,7 @@
             <h1>Reservar {{ destino.nome }}</h1>
             <p class="cartao-form__sub">
                 Confira os dados e envie. Isto é um <b>pedido de reserva</b>: nosso time confirma
-                a vaga e combina o pagamento com você — nada é cobrado aqui.
+                a vaga e combina o pagamento com você. Nada é cobrado aqui.
             </p>
 
             <form method="post" novalidate>

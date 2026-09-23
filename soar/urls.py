@@ -14,6 +14,7 @@ urlpatterns = [
     path('painel/', admin.site.urls),
     path('', include('contas.urls')),
     path('', include('reservas.urls')),
+    path('blog/', include('blog.urls')),
     path('', include('destinations.urls')),
 ]
 

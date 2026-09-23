@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ artigo.titulo }} | Blog Soar{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/blog.css' %}">{% endblock %}
+
+{% block content %}
+<article class="blog">
+
+  {# ===================== HERO ===================== #}
+  {% if previa %}
+  <div class="blog-previa" role="status">
+    <b>Pré-visualização.</b>
+    {% if artigo.situacao == 'agendado' %}Este artigo está agendado e entra no ar em {{ artigo.data_publicacao|date:"d/m/Y" }}.
+    {% else %}Este artigo é um rascunho: só a equipe da Soar vê esta página.{% endif %}
+    <a href="{% url 'admin:blog_artigo_change' artigo.pk %}">Voltar a editar</a>
+  </div>
+  {% endif %}
+
+  <header class="blog-hero">
+    <div class="blog-hero__bg" aria-hidden="true">{% if artigo.capa %}<img src="{{ artigo.capa.url }}" alt="">{% endif %}</div>
+    <div class="blog-hero__overlay" aria-hidden="true"></div>
+    <div class="wrap blog-hero__inner">
+      <h1>{{ artigo.titulo }}</h1>
+      <p class="blog-hero__sub">{{ artigo.resumo }}</p>
+
+      <div class="blog-autor">
+        <span class="blog-autor__foto ph" aria-hidden="true"></span>
+        <span class="blog-autor__nome">Por {{ artigo.autor }}</span>
+        <span class="blog-autor__meta"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>{{ artigo.data_publicacao|date:"j \d\e F \d\e Y" }}</span>
+        <span class="blog-autor__meta"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>{{ artigo.minutos_de_leitura }} min de leitura</span>
+      </div>
+    </div>
+  </header>
+
+  {# ===================== ÍNDICE ===================== #}
+  {% if secoes %}
+  <div class="wrap">
+    <nav class="blog-indice" aria-label="Neste artigo">
+      <b class="blog-indice__titulo">Neste artigo você vai ver:</b>
+      <div class="blog-indice__grade">
+        {% for secao in secoes %}
+        <a href="#{{ secao.ancora }}"><svg class="ic" viewBox="0 0 24 24"><use href="#ic-{{ secao.icone }}"></use></svg><span>{{ secao.titulo }}</span></a>
+        {% endfor %}
+      </div>
+    </nav>
+  </div>
+  {% endif %}
+
+  {# ===================== CORPO + SIDEBAR ===================== #}
+  <div class="wrap blog-grade">
+
+    <div class="blog-corpo">
+      {% for p in artigo.paragrafos %}<p>{{ p|linebreaksbr }}</p>{% endfor %}
+
+      {% for secao in secoes %}
+      <h2 id="{{ secao.ancora }}">{{ forloop.counter }}. {{ secao.titulo }}</h2>
+      {% for p in secao.paragrafos %}<p>{{ p|linebreaksbr }}</p>{% endfor %}
+
+      {% if secao.tem_meses %}
+      <div class="blog-meses">
+        {% for mes in secao.calendario %}<span{% if mes.classe %} class="{{ mes.classe }}"{% endif %}>{{ mes.sigla }}</span>{% endfor %}
+      </div>
+      <div class="blog-legenda">
+        <span><i class="dot dot--otima"></i>Ótima época</span>
+        {% if secao.tem_meses_bons %}<span><i class="dot dot--boa"></i>Boa época</span>{% endif %}
+      </div>
+      {% endif %}
+
+      {% if secao.mostrar_atracoes and atracoes %}
+      <div class="blog-atracoes">
+        {% for a in atracoes %}
+        <div class="blog-atracao">
+          <div class="blog-atracao__foto {% if a.foto %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if a.foto %}<img src="{{ a.foto.url }}" alt="" loading="lazy">{% endif %}</div>
+          <b>{{ a.nome }}</b>
+          {% if a.descricao %}<small>{{ a.descricao }}</small>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if secao.foto %}
+      <figure class="blog-foto tem-foto"><img src="{{ secao.foto.url }}" alt="{{ secao.titulo }}" loading="lazy"></figure>
+      {% endif %}
+
+      {% if secao.nota %}
+      <div class="blog-nota">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-{{ secao.icone }}"></use></svg>
+        <p>{{ secao.nota|linebreaksbr }}</p>
+      </div>
+      {% endif %}
+
+      {% if secao.lista_dicas %}
+      <ul class="blog-dicas">
+        {% for dica in secao.lista_dicas %}<li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>{{ dica }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% endfor %}
+
+      <div class="blog-cta">
+        <div class="blog-cta__foto {% if artigo.destino.imagem_capa %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if artigo.destino.imagem_capa %}<img src="{{ artigo.destino.imagem_capa.url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="blog-cta__texto">
+          {% if artigo.destino %}
+          <b>Pronto para viver {{ artigo.destino.nome }}?</b>
+          <p>Viaje com a Soar e conheça {{ artigo.destino.nome }} com conforto, segurança
+             e experiências incríveis.</p>
+          {% else %}
+          <b>Pronto para a sua próxima viagem?</b>
+          <p>Viaje com a Soar e conheça o Brasil com conforto, segurança e experiências incríveis.</p>
+          {% endif %}
+          <div class="blog-cta__acoes">
+            {% if artigo.destino %}
+            <a class="btn btn--verde" href="{{ artigo.destino.get_absolute_url }}">Ver a viagem para {{ artigo.destino.nome }}</a>
+            {% else %}
+            <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver viagens</a>
+            {% endif %}
+            <a class="btn btn--contorno" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
+              <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>Falar com a Soar</a>
+          </div>
+        </div>
+      </div>
+
+      {% if anterior or proximo %}
+      <nav class="blog-navpost">
+        {% if anterior %}
+        <a href="{{ anterior.get_absolute_url }}" class="blog-navpost__item">
+          <small>‹ Artigo anterior</small>
+          <b>{{ anterior.titulo }}</b>
+        </a>
+        {% else %}<span></span>{% endif %}
+        {% if proximo %}
+        <a href="{{ proximo.get_absolute_url }}" class="blog-navpost__item blog-navpost__item--dir">
+          <small>Próximo artigo ›</small>
+          <b>{{ proximo.titulo }}</b>
+        </a>
+        {% endif %}
+      </nav>
+      {% endif %}
+    </div>
+
+    {# ===================== SIDEBAR ===================== #}
+    <aside class="blog-lado">
+      {% include 'blog/_lateral.html' with categoria_ativa=artigo.categoria %}
+
+      <div class="blog-proxima">
+        <div class="blog-proxima__bg ph" aria-hidden="true"></div>
+        <div class="blog-proxima__texto">
+          <b>Sua próxima aventura começa aqui!</b>
+          <p>{% if artigo.destino %}Conheça a viagem para {{ artigo.destino.nome }} e viva dias inesquecíveis.{% else %}Conheça as próximas saídas e viva dias inesquecíveis.{% endif %}</p>
+          <a class="btn btn--branco" href="{% if artigo.destino %}{{ artigo.destino.get_absolute_url }}{% else %}{% url 'destinations:lista' %}{% endif %}">Ver viagens</a>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <h3>Artigos mais lidos</h3>
+        <ul class="blog-lidos">
+          {% for a in mais_lidos %}
+          <li><a href="{{ a.get_absolute_url }}"><span class="blog-lidos__num ph">{{ forloop.counter }}</span><span><b>{{ a.titulo }}</b><small>{{ a.minutos_de_leitura }} min de leitura</small></span></a></li>
+          {% empty %}
+          <li><small>Os mais lidos aparecem aqui.</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="blog-news">
+        <h3>Receba dicas e novidades da Soar</h3>
+        <p>Cadastre-se e receba conteúdos exclusivos para transformar suas viagens.</p>
+        <form class="blog-news__form" onsubmit="return false">
+          <input type="email" placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail">
+          <button type="submit" class="btn btn--verde btn--bloco">Cadastrar</button>
+        </form>
+        <small>Ao se cadastrar, você concorda com nossa
+          <a href="{% url 'contas:privacidade' %}">Política de Privacidade</a>.</small>
+      </div>
+
+      <div class="blog-card">
+        <h3>Siga a Soar no Instagram</h3>
+        <p class="blog-insta__sub">Inspirações diárias de destinos incríveis e experiências inesquecíveis!</p>
+        <div class="blog-insta">
+          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
+          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
+        </div>
+        <a class="btn btn--verde btn--bloco" href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">@OperadoraSoar</a>
+      </div>
+    </aside>
+  </div>
+</article>
+{% endblock %}

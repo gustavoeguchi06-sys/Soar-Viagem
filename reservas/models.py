@@ -14,10 +14,10 @@ class Reserva(models.Model):
     """
 
     ACOMODACOES = [
-        ('single', 'Single — 1 pessoa'),
-        ('casal', 'Casal — 2 pessoas'),
-        ('duplo', 'Duplo (Twin) — 2 pessoas'),
-        ('triplo', 'Triplo — 3 pessoas'),
+        ('single', 'Single: 1 pessoa'),
+        ('casal', 'Casal: 2 pessoas'),
+        ('duplo', 'Duplo (Twin): 2 pessoas'),
+        ('triplo', 'Triplo: 3 pessoas'),
         ('crianca', 'Criança (8 anos)'),
     ]
 
@@ -54,7 +54,7 @@ class Reserva(models.Model):
         ordering = ['-criado_em']
 
     def __str__(self):
-        return '{} — {} ({})'.format(self.codigo, self.destino.nome, self.get_status_display())
+        return '{} - {} ({})'.format(self.codigo, self.destino.nome, self.get_status_display())
 
     @property
     def codigo(self):

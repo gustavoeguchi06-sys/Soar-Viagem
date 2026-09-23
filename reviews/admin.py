@@ -25,8 +25,8 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     fieldsets = [
         ('Moderação', {
             'fields': ['publicada'],
-            'description': 'A avaliação só aparece no site — e só conta para a nota '
-                           'do destino — depois de publicada.',
+            'description': 'A avaliação só aparece no site, e só conta para a nota '
+                           'do destino, depois de publicada.',
         }),
         ('A avaliação', {
             'fields': ['destino', 'nota', 'comentario', 'foto', 'previa_foto'],

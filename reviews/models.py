@@ -88,7 +88,7 @@ class Avaliacao(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.nome_autor} — {self.destino.nome} ({self.nota}/5)'
+        return f'{self.nome_autor} - {self.destino.nome} ({self.nota}/5)'
 
     @property
     def estrelas(self):

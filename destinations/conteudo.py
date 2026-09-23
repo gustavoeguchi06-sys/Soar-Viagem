@@ -51,7 +51,7 @@ INCLUSO = [
 ]
 
 INFORMACOES = [
-    'Leve documento oficial com foto — RG ou CNH dentro da validade.',
+    'Leve documento oficial com foto (RG ou CNH) dentro da validade.',
     'Roupas leves, protetor solar, repelente e uma muda de roupa de banho.',
     'Os passeios têm nível leve a moderado: caminhadas curtas em terreno de areia e pedra.',
     'Bagagem recomendada: uma mala média por pessoa e uma mochila de ataque.',
@@ -95,19 +95,19 @@ POR_DESTINO = {
             'Floresta Nacional do Tapajós', 'Pôr do sol no Tapajós', 'Vila de Alter do Chão',
         ],
         'roteiro': [
-            {'titulo': 'Dia 1 — Chegada em Santarém',
+            {'titulo': 'Dia 1: Chegada em Santarém',
              'resumo': 'Recepção no aeroporto e traslado até a vila de Alter do Chão.',
              'detalhe': 'Recepção da equipe Soar no aeroporto de Santarém e traslado de cerca de '
                         '40 minutos até a vila. Check-in, tarde livre e encontro do grupo ao pôr do sol.'},
-            {'titulo': 'Dia 2 — Ilha do Amor e Lago Verde',
+            {'titulo': 'Dia 2: Ilha do Amor e Lago Verde',
              'resumo': 'Travessia para a Ilha do Amor e volta de barco pelo Lago Verde.',
              'detalhe': 'Manhã na Ilha do Amor, a faixa de areia branca que aparece na seca do Tapajós. '
                         'À tarde, passeio de barco pelo Lago Verde com paradas para banho.'},
-            {'titulo': 'Dia 3 — Floresta Nacional do Tapajós',
+            {'titulo': 'Dia 3: Floresta Nacional do Tapajós',
              'resumo': 'Trilha guiada na floresta e visita a uma comunidade ribeirinha.',
              'detalhe': 'Dia inteiro na Flona do Tapajós: trilha interpretativa com guia local, '
                         'a sumaúma gigante e almoço em uma comunidade ribeirinha.'},
-            {'titulo': 'Dia 4 — Ponta de Pedras e retorno',
+            {'titulo': 'Dia 4: Ponta de Pedras e retorno',
              'resumo': 'Última manhã de praia e traslado de volta a Santarém.',
              'detalhe': 'Manhã livre na Praia de Ponta de Pedras, almoço na vila e traslado '
                         'para o aeroporto de Santarém conforme o horário do seu voo.'},
@@ -141,27 +141,27 @@ POR_DESTINO = {
             'Cachoeira da Velha', 'Pôr do sol nas Dunas', 'E muito mais',
         ],
         'roteiro': [
-            {'titulo': 'Dia 1 — São Paulo → Palmas',
+            {'titulo': 'Dia 1: São Paulo → Palmas',
              'resumo': 'Embarque nos pontos de encontro e viagem noturna com destino a Palmas.',
              'detalhe': 'Encontro com a equipe Soar nos pontos combinados, embarque e viagem noturna. '
                         'Kit lanche a bordo e paradas programadas para descanso.'},
-            {'titulo': 'Dia 2 — Palmas → Jalapão',
+            {'titulo': 'Dia 2: Palmas → Jalapão',
              'resumo': 'Chegada, café da manhã e início dos passeios.',
              'detalhe': 'Chegada em Palmas, café da manhã e transfer 4x4 para o Jalapão. '
                         'À tarde, primeiro banho de rio e apresentação do grupo ao pôr do sol.'},
-            {'titulo': 'Dia 3 — Fervedouros e Cachoeiras',
+            {'titulo': 'Dia 3: Fervedouros e Cachoeiras',
              'resumo': 'Visita ao Fervedouro do Alecrim e Cachoeira da Velha.',
              'detalhe': 'Manhã no Fervedouro do Alecrim, onde a água brota do chão e é impossível afundar. '
                         'À tarde, mirante e banho na Cachoeira da Velha.'},
-            {'titulo': 'Dia 4 — Dunas e Cânions',
+            {'titulo': 'Dia 4: Dunas e Cânions',
              'resumo': 'Dunas do Jalapão, Cânion Sussuapara e Pôr do sol.',
              'detalhe': 'Travessia até as Dunas, caminhada no Cânion Sussuapara e o famoso pôr do sol '
-                        'no alto das dunas alaranjadas — o cartão-postal da viagem.'},
-            {'titulo': 'Dia 5 — Rio Sono e Cachoeiras',
+                        'no alto das dunas alaranjadas, o cartão-postal da viagem.'},
+            {'titulo': 'Dia 5: Rio Sono e Cachoeiras',
              'resumo': 'Passeios guiados e tempo livre para relaxar.',
              'detalhe': 'Descida de bote no Rio Sono, parada nas cachoeiras do caminho e tarde livre '
                         'para descansar na pousada ou conhecer o artesanato de capim dourado.'},
-            {'titulo': 'Dia 6 — Retorno',
+            {'titulo': 'Dia 6: Retorno',
              'resumo': 'Café da manhã, saída e previsão de chegada à noite.',
              'detalhe': 'Café da manhã, despedida do grupo e retorno a Palmas para o voo/ônibus de volta. '
                         'Previsão de chegada em São Paulo no fim da noite.'},
@@ -204,17 +204,17 @@ def _fotos_do_destino(destino, cfg):
 def _roteiro_generico(destino):
     nome = destino.nome
     modelos = [
-        ('Dia 1 — Embarque', 'Encontro do grupo e viagem com destino a {}.'.format(nome),
+        ('Dia 1: Embarque', 'Encontro do grupo e viagem com destino a {}.'.format(nome),
          'Encontro com a equipe Soar nos pontos combinados e embarque.'),
-        ('Dia 2 — Chegada em {}'.format(nome), 'Chegada, café da manhã e início dos passeios.',
+        ('Dia 2: Chegada em {}'.format(nome), 'Chegada, café da manhã e início dos passeios.',
          'Acomodação, café da manhã e primeiro passeio de reconhecimento com o grupo.'),
-        ('Dia 3 — Passeios guiados', 'Os principais cartões-postais do destino.',
+        ('Dia 3: Passeios guiados', 'Os principais cartões-postais do destino.',
          'Dia inteiro de passeios guiados pelos pontos mais bonitos da região.'),
-        ('Dia 4 — Natureza e cultura', 'Trilhas, banhos e contato com a cultura local.',
+        ('Dia 4: Natureza e cultura', 'Trilhas, banhos e contato com a cultura local.',
          'Roteiro de natureza pela manhã e imersão na cultura local à tarde.'),
-        ('Dia 5 — Tempo livre', 'Passeios opcionais e tempo livre para relaxar.',
+        ('Dia 5: Tempo livre', 'Passeios opcionais e tempo livre para relaxar.',
          'Manhã de passeio e tarde livre para descansar ou explorar por conta própria.'),
-        ('Dia 6 — Retorno', 'Café da manhã, saída e previsão de chegada à noite.',
+        ('Dia 6: Retorno', 'Café da manhã, saída e previsão de chegada à noite.',
          'Café da manhã, despedida do grupo e retorno com previsão de chegada à noite.'),
     ]
     return [{'titulo': t, 'resumo': r, 'detalhe': d} for t, r, d in modelos]

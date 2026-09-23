@@ -1,0 +1,10 @@
+{% comment %}Barra lateral comum ao índice e ao artigo. `categoria_ativa` marca a categoria atual.{% endcomment %}
+<div class="blog-card">
+  <h3>Categorias</h3>
+  <ul class="blog-cats">
+    <li><a {% if not categoria_ativa %}class="ativo" {% endif %}href="{% url 'blog:indice' %}">Todos os artigos<span>{{ total_no_ar }}</span></a></li>
+    {% for c in categorias %}
+    <li><a {% if categoria_ativa and categoria_ativa.pk == c.pk %}class="ativo" {% endif %}href="{% url 'blog:indice' %}?categoria={{ c.slug }}">{{ c.nome }}<span>{{ c.total }}</span></a></li>
+    {% endfor %}
+  </ul>
+</div>

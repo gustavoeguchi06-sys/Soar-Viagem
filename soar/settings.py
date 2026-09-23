@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     'reviews',
     'contas',
     'reservas',
+    'blog',
 ]
 
 MIDDLEWARE = [

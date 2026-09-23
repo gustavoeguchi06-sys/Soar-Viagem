@@ -77,7 +77,7 @@ def entrar(request):
                         digitado, ip_do_cliente(request))
             messages.error(
                 request,
-                'Muitas tentativas seguidas. Espere alguns minutos antes de tentar de novo — '
+                'Muitas tentativas seguidas. Espere alguns minutos antes de tentar de novo, '
                 'ou use "esqueci minha senha".'
             )
             return render(request, 'contas/entrar.html', {
@@ -168,7 +168,7 @@ def _enviar_confirmacao(request, usuario):
         'usuario': usuario,
         'link': _link_absoluto(request, caminho),
     })
-    send_mail('Confirme seu e-mail — Soar Operadora', corpo, None, [usuario.email])
+    send_mail('Confirme seu e-mail | Soar Operadora', corpo, None, [usuario.email])
 
 
 def _avisar_conta_existente(request, usuario):
@@ -369,7 +369,7 @@ def b2b(request):
             log.warning('login b2b bloqueado por limite: usuario=%r ip=%s',
                         digitado, ip_do_cliente(request))
             messages.error(request, 'Muitas tentativas seguidas. Espere alguns minutos antes '
-                                    'de tentar de novo — ou use "esqueci minha senha".')
+                                    'de tentar de novo, ou use "esqueci minha senha".')
             return render(request, 'contas/b2b.html',
                           {'form': EntrarForm(request), 'bloqueado': True})
 

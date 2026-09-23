@@ -44,7 +44,7 @@ class Command(BaseCommand):
         else:
             if opcoes.get('email'):
                 usuario.email = opcoes['email']
-            self.stdout.write('Usuário "{}" já existe — dando acesso de dono.'.format(usuario_nome))
+            self.stdout.write('Usuário "{}" já existe. Dando acesso de dono.'.format(usuario_nome))
 
         usuario.is_staff = True         # entra no /painel/
         usuario.is_superuser = True     # mexe em tudo lá dentro

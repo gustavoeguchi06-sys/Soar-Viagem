@@ -37,7 +37,7 @@ class CampoPreco(forms.DecimalField):
     widget = forms.TextInput(attrs={'inputmode': 'decimal', 'placeholder': '0,00',
                                     'class': 'preco-brl', 'style': 'width: 9em'})
     default_error_messages = {
-        'invalid': 'Digite o preço como 6.500,00 — ponto nos milhares, vírgula nos centavos.',
+        'invalid': 'Digite o preço como 6.500,00: ponto nos milhares, vírgula nos centavos.',
     }
 
     def __init__(self, **kwargs):
@@ -194,7 +194,7 @@ class DestinoAdmin(admin.ModelAdmin):
         }),
         ('Datas e vagas', {
             'fields': ['data_ida', 'data_volta', 'vagas'],
-            'description': 'Escolha ida e volta no calendário — período, mês, duração e '
+            'description': 'Escolha ida e volta no calendário. Período, mês, duração e '
                            'próxima saída são preenchidos sozinhos. Em branco, a página '
                            'usa o período padrão da operadora.',
         }),
@@ -222,7 +222,7 @@ class DestinoAdmin(admin.ModelAdmin):
     def previa_capa(self, destino):
         if not destino.imagem_capa:
             return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
-                               'Sem capa — a página usa uma ilustração da Soar.</span>')
+                               'Sem capa: a página usa uma ilustração da Soar.</span>')
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
                            destino.imagem_capa.url, destino.nome)
 
