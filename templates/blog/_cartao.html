@@ -1,0 +1,19 @@
+{% comment %}Cartão de artigo na grade do blog. `grande` = o cartão de destaque.{% endcomment %}
+<a class="blog-post{% if grande %} blog-post--destaque{% endif %}" href="{{ artigo.get_absolute_url }}">
+  <div class="blog-post__foto {% if artigo.capa %}tem-foto{% else %}ph{% endif %}">
+    {% if artigo.capa %}<img src="{{ artigo.capa.url }}" alt="" loading="lazy">{% endif %}
+    {% if grande %}<span class="blog-post__destaque">Destaque</span>{% endif %}
+    <span class="blog-post__tag tag--{{ artigo.cor_etiqueta }}">{{ artigo.etiqueta_exibida }}</span>
+  </div>
+  <div class="blog-post__corpo">
+    <h3>{{ artigo.titulo }}</h3>
+    <p>{{ artigo.resumo }}</p>
+    {% if grande %}<div class="blog-post__rodape">{% endif %}
+    <div class="blog-post__meta">
+      <span><svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>{{ artigo.data_publicacao|date:"j \d\e F \d\e Y" }}</span>
+      <span><svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>{{ artigo.minutos_de_leitura }} min{% if grande %} de leitura{% endif %}</span>
+    </div>
+    <span class="blog-post__link">Ler artigo →</span>
+    {% if grande %}</div>{% endif %}
+  </div>
+</a>

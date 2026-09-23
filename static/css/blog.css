@@ -28,7 +28,7 @@
             font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
             padding: 6px 12px; border-radius: 6px; margin-bottom: 16px; }
 .blog-hero h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); line-height: 1.12; font-weight: 800;
-                margin: 0 0 16px; max-width: 15ch; }
+                margin: 0 0 16px; max-width: 15ch; color: #fff; }
 .blog-hero__sub { font-size: 1.02rem; color: rgba(255,255,255,.9); max-width: 46ch; margin: 0 0 26px; }
 .blog-autor { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: .86rem; }
 .blog-autor__foto { width: 38px; height: 38px; border-radius: 50%; flex: none; }
@@ -121,7 +121,7 @@
 .blog-proxima__bg { position: absolute; inset: 0; }
 .blog-proxima::after { content: ""; position: absolute; inset: 0;
       background: linear-gradient(180deg, rgba(13,79,49,.15), rgba(13,79,49,.9)); }
-.blog-proxima__texto { position: relative; padding: 20px; }
+.blog-proxima__texto { position: relative; z-index: 1; padding: 20px; }   /* acima da película ::after */
 .blog-proxima__texto b { display: block; font-size: 1.1rem; margin-bottom: 6px; }
 .blog-proxima__texto p { margin: 0 0 14px; font-size: .86rem; color: rgba(255,255,255,.9); line-height: 1.5; }
 
@@ -173,7 +173,7 @@
 .blog-capa__overlay { position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(10,30,24,.82) 0%, rgba(10,30,24,.55) 45%, rgba(10,30,24,.15) 100%); }
 .blog-capa__inner { position: relative; padding: 40px 0; }
-.blog-capa h1 { font-size: clamp(2.1rem, 4.5vw, 3rem); font-weight: 800; margin: 12px 0 10px; }
+.blog-capa h1 { font-size: clamp(2.1rem, 4.5vw, 3rem); font-weight: 800; margin: 12px 0 10px; color: #fff; }
 .blog-capa__sub { font-size: 1.02rem; color: rgba(255,255,255,.92); margin: 0 0 22px; line-height: 1.5; }
 .blog-busca { display: flex; max-width: 480px; background: #fff; border-radius: 12px;
               padding: 6px; box-shadow: 0 14px 34px -18px rgba(0,0,0,.5); }
@@ -264,3 +264,26 @@
   .blog-post--destaque .blog-post__foto { height: 200px; }
   .blog-faixa__inner { flex-direction: column; align-items: flex-start; gap: 18px; }
 }
+
+/* ===== Fotos reais enviadas pelo painel =====
+   Sem foto, o bloco continua com o fundo de exemplo (.ph); com foto, ganha
+   .tem-foto e a imagem cobre o espaço inteiro, recortada no centro. */
+.tem-foto { position: relative; overflow: hidden; }
+.tem-foto > img,
+.blog-hero__bg > img { position: absolute; inset: 0; width: 100%; height: 100%;
+                       object-fit: cover; display: block; }
+figure.blog-foto { margin: 8px 0 28px; }
+.blog-post__destaque, .blog-post__tag { z-index: 1; }
+
+/* Faixa de pré-visualização: rascunho e agendado, só a equipe vê */
+.blog-previa { background: #fef4e2; color: #6b4206; border-bottom: 1px solid #f3d9a8;
+               padding: 12px 20px; font-size: .9rem; text-align: center; }
+.blog-previa a { color: inherit; font-weight: 600; margin-left: 8px; }
+
+/* Busca e lista vazia */
+.blog-resultado { margin: 0 0 16px; color: var(--body-quiet-color, #6b7a80); }
+.blog-resultado a { color: var(--verde, #146c43); margin-left: 8px; }
+.blog-vazio { background: #fff; border: 1px solid var(--border-color, #e6eae8); border-radius: 14px;
+              padding: 40px 24px; text-align: center; }
+.blog-vazio p { margin: 6px 0 0; color: var(--body-quiet-color, #6b7a80); }
+.blog-vazio a { color: var(--verde, #146c43); }

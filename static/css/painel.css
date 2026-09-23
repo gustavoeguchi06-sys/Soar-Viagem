@@ -300,6 +300,10 @@ div.breadcrumbs a { color: var(--breadcrumbs-link-fg); font-weight: 600; }
 #nav-sidebar .module caption { background: transparent; }
 #nav-sidebar a { padding: 7px 14px; border-radius: var(--r-sm); }
 #nav-sidebar .current-model a { background: var(--verde-claro); color: var(--verde); font-weight: 600; }
+/* O Django pinta o nome da seção atual com a cor do cabeçalho (branca), que
+   aqui fica sobre o cartão branco da lateral e some. */
+#nav-sidebar .current-app .section:link,
+#nav-sidebar .current-app .section:visited { color: var(--verde); }
 html[data-theme="dark"] #nav-sidebar .current-model a,
 :root:not([data-theme="light"]) #nav-sidebar .current-model a { background: var(--selected-bg); }
 #nav-filter {
@@ -419,8 +423,9 @@ html[data-theme="dark"] #content-main .module table td a:hover,
 .painel-area { container-type: inline-size; container-name: painel; }
 
 /* fila de trabalho: o que espera o dono hoje.
-   São 4 cartões, então a grade vai de 1 para 2 e de 2 para 4 — nunca 3, que
-   deixaria um órfão sozinho na linha de baixo. */
+   São 5 cartões (e 5 atalhos): em 2 colunas o quinto ocuparia meia linha
+   sozinho, então ele se estica pela linha toda; na tela larga cabem os 5 lado
+   a lado. */
 .painel-fila {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -516,8 +521,12 @@ html[data-theme="dark"] .atalho:hover,
 @container painel (min-width: 640px) {
     .painel-colunas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.painel-fila > :last-child:nth-child(odd),
+.painel-atalhos > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 @container painel (min-width: 940px) {
-    .painel-fila, .painel-atalhos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .painel-fila, .painel-atalhos { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .painel-fila > :last-child:nth-child(odd),
+    .painel-atalhos > :last-child:nth-child(odd) { grid-column: auto; }
 }
 @container painel (max-width: 420px) {
     .painel-fila, .painel-atalhos { grid-template-columns: 1fr; }
@@ -745,6 +754,7 @@ fieldset.module .form-row:last-child { border-bottom: 0; }
 .aligned input[type="number"],
 .aligned input[type="password"],
 .aligned input[type="tel"],
+.aligned input[type="date"],
 .aligned textarea,
 .aligned select {
     padding: 9px 11px;
@@ -967,3 +977,12 @@ body.login #content { padding: 12px 0 0; }
     #content-main .module table th[scope="row"],
     #content-main .module table td { padding: 9px 12px; }
 }
+
+/* Blog: os 12 meses de "melhor época" como caixinhas lado a lado */
+.meses-escolha { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.meses-escolha > div { margin: 0; }
+.meses-escolha label { display: inline-flex; align-items: center; gap: 4px; font-weight: 400; }
+
+/* O Django fixa todo <select> em 30px de altura; com a margem interna do
+   tema, o texto da opção escolhida ficava cortado (ou sumia). */
+.aligned select { height: auto; min-height: 38px; line-height: 1.3; }

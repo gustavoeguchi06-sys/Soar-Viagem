@@ -48,6 +48,7 @@ class PainelSoar(AdminSite):
         """A tela inicial: fila de trabalho, atalhos e o que está sem preço."""
         # Importados aqui, e não no topo, porque este módulo é carregado quando
         # o app de admin sobe — antes dos models estarem prontos.
+        from blog.models import Artigo
         from destinations.models import Destino, Hospedagem
         from reservas.models import Reserva
         from reviews.models import Avaliacao
@@ -73,6 +74,8 @@ class PainelSoar(AdminSite):
                 'destinos_total': Destino.objects.count(),
                 'destinos_sem_preco': sem_preco.count(),
                 'hospedagens_total': Hospedagem.objects.count(),
+                'artigos_no_ar': Artigo.objects.no_ar().count(),
+                'artigos_total': Artigo.objects.count(),
 
                 'ultimas_reservas': list(reservas[:8]),
                 'lista_sem_preco': list(sem_preco[:6]),
@@ -86,6 +89,8 @@ class PainelSoar(AdminSite):
                 'url_hospedagens': reverse('admin:destinations_hospedagem_changelist'),
                 'url_hospedagem_nova': reverse('admin:destinations_hospedagem_add'),
                 'url_avaliacoes': reverse('admin:reviews_avaliacao_changelist'),
+                'url_artigos': reverse('admin:blog_artigo_changelist'),
+                'url_artigo_novo': reverse('admin:blog_artigo_add'),
                 'url_avaliacoes_fila':
                     reverse('admin:reviews_avaliacao_changelist') + '?publicada__exact=0',
             },

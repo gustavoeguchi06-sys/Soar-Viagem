@@ -62,6 +62,11 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
             <strong class="ficha__numero">{{ painel.hospedagens_total }}</strong>
             <span class="ficha__nota">cadastradas nos destinos</span>
         </a>
+        <a class="ficha ficha--calma" href="{{ painel.url_artigos }}">
+            <span class="ficha__rotulo">Blog Soar</span>
+            <strong class="ficha__numero">{{ painel.artigos_no_ar }}</strong>
+            <span class="ficha__nota">artigo{{ painel.artigos_no_ar|pluralize }} no ar, de {{ painel.artigos_total }} escrito{{ painel.artigos_total|pluralize }}</span>
+        </a>
     </div>
 
     {# ---------- Atalhos de cadastro ---------- #}
@@ -73,6 +78,10 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
         <a class="atalho" href="{{ painel.url_hospedagem_nova }}">
             <span class="atalho__mais" aria-hidden="true">+</span>
             <span>Nova hospedagem<small>com foto e diária</small></span>
+        </a>
+        <a class="atalho" href="{{ painel.url_artigo_novo }}">
+            <span class="atalho__mais" aria-hidden="true">+</span>
+            <span>Novo artigo no blog<small>com data no calendário</small></span>
         </a>
         <a class="atalho" href="{{ painel.url_destinos }}">
             <span class="atalho__mais" aria-hidden="true">R$</span>
