@@ -57,6 +57,16 @@ def lista_destinos(request):
     })
 
 
+def blog(request):
+    """Blog Soar — índice de artigos (página fixa, modelo do protótipo)."""
+    return render(request, 'destinations/blog.html')
+
+
+def blog_artigo(request):
+    """Artigo do blog (página de detalhe, modelo do protótipo)."""
+    return render(request, 'destinations/blog_artigo.html')
+
+
 def soar_60(request):
     """A página do programa Soar 60+.
 
@@ -97,7 +107,7 @@ def detalhe_destino(request, slug):
 
     return render(request, 'destinations/detalhe.html', {
         'destino': destino,
-        'hospedagens': destino.hospedagens.filter(disponivel=True),
+        'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
         'viagem': montar_viagem(destino, avaliacoes),
         'form': form,
@@ -139,7 +149,7 @@ def _receber_avaliacao(request, destino):
         avaliacoes = list(destino.avaliacoes.publicadas())
         return render(request, 'destinations/detalhe.html', {
             'destino': destino,
-            'hospedagens': destino.hospedagens.filter(disponivel=True),
+            'hospedagens': destino.hospedagens.all(),
             'avaliacoes': avaliacoes,
             'viagem': montar_viagem(destino, avaliacoes),
             'form': form,

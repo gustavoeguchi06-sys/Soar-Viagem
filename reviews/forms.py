@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.core.files.uploadedfile import UploadedFile
 
 from .models import Avaliacao
 
@@ -8,6 +9,10 @@ from .models import Avaliacao
 # tamanho e formato antes de gravar qualquer coisa em disco.
 FORMATOS_ACEITOS = {'JPEG', 'PNG', 'WEBP', 'GIF'}
 EXTENSOES_ACEITAS = ('.jpg', '.jpeg', '.png', '.webp', '.gif')
+# A extensão gravada sai do formato que o Pillow reconheceu, não do nome que o
+# navegador mandou: um PNG chamado "foto.gif" é gravado como .png, e o servidor
+# web entrega com o tipo certo.
+EXTENSAO_DO_FORMATO = {'JPEG': '.jpg', 'PNG': '.png', 'WEBP': '.webp', 'GIF': '.gif'}
 
 
 class AvaliacaoForm(forms.ModelForm):
@@ -39,8 +44,8 @@ class AvaliacaoForm(forms.ModelForm):
         if not foto:
             return foto
 
-        # arquivo já salvo (edição) não traz tamanho novo para conferir
-        if not hasattr(foto, 'size'):
+        # arquivo já salvo (edição) não é upload novo: nada para conferir
+        if not isinstance(foto, UploadedFile):
             return foto
 
         limite = settings.TAMANHO_MAXIMO_FOTO
@@ -53,9 +58,12 @@ class AvaliacaoForm(forms.ModelForm):
         # O ImageField do Django já abre o arquivo com o Pillow e recusa o que
         # não for imagem; aqui a gente restringe também quais formatos entram.
         formato = getattr(foto, 'image', None)
-        formato = getattr(formato, 'format', None)
-        if formato and formato.upper() not in FORMATOS_ACEITOS:
+        formato = (getattr(formato, 'format', None) or '').upper()
+        if formato not in FORMATOS_ACEITOS:
             raise forms.ValidationError(
-                'Formato {} não aceito. Envie JPG, PNG, WEBP ou GIF.'.format(formato)
+                'Formato {} não aceito. Envie JPG, PNG, WEBP ou GIF.'.format(formato or 'desconhecido')
             )
+        # O nome é descartado de qualquer jeito (reviews.models.caminho_foto_avaliacao
+        # sorteia outro); aqui só a extensão é acertada ao conteúdo.
+        foto.name = 'foto' + EXTENSAO_DO_FORMATO[formato]
         return foto

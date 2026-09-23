@@ -145,7 +145,7 @@
                 <span class="selo-disp">Disponível</span>
                 <p class="reserva__label">A partir de</p>
                 <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
-                <p class="reserva__pp">por pessoa</p>
+                <p class="reserva__pp">por tipo de quarto</p>
 
                 {% comment %}GET e nao POST de proposito: a escolha vai na URL e
                 sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}
@@ -156,7 +156,7 @@
                     </button>
                 <a class="btn btn--contorno btn--bloco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
                     <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
-                    Falar com a Soar
+                    Falar com o agente de viagem
                 </a>
 
                 <div class="reserva__divisor"></div>
@@ -176,6 +176,7 @@
 
                 <div class="acomodacoes">
                     <b>Escolha sua acomodação</b>
+                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por tipo de quarto.</small>
                     {% for a in viagem.acomodacoes %}
                     <label class="acom">
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"

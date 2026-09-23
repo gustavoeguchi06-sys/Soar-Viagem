@@ -13,9 +13,7 @@ de uma linha só, e quando passa disso ele vira texto na tela.
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:'Soar — Painel' }}{% endblock %}
 
 {% block extrastyle %}{{ block.super }}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/fontes.css' %}">
 {% endblock %}
 
 {% comment %}
@@ -32,14 +30,8 @@ todos sem precisar de !important nem de seletor inflado.
 {% block branding %}
 <h1 id="site-name">
     <a href="{% url 'admin:index' %}" class="marca-painel">
-        <svg class="marca-painel__logo" width="34" height="30" viewBox="0 0 34 30" fill="none" aria-hidden="true">
-            <path d="M2 9.5C8.5 3 24 1.5 32 6" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M6.5 13.5c5-4 15.5-5 21 -1.6" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".65"/>
-        </svg>
-        <span>
-            <span class="marca-painel__nome">SOAR</span>
-            <span class="marca-painel__sub">Painel do dono</span>
-        </span>
+        <img class="marca-painel__logo" src="{% static 'img/logo-soar.png' %}" alt="Soar Paradiso" width="85" height="44">
+        <span class="marca-painel__sub">Painel do dono</span>
     </a>
 </h1>
 {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}

@@ -1,8 +1,31 @@
+import os
+import uuid
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from destinations.models import Destino
+
+EXTENSOES_FOTO = ('.jpg', '.jpeg', '.png', '.webp', '.gif')
+
+
+def caminho_foto_avaliacao(avaliacao, nome_enviado):
+    """Nome sorteado para a foto, no lugar do nome que veio do celular.
+
+    Duas razões. A pasta /media/ é pública: com o nome original (praia.jpg,
+    IMG_2031.jpg), a foto de uma avaliação ainda na fila de moderação podia ser
+    achada por tentativa antes de o dono aprovar. E o nome original às vezes é
+    dado pessoal ("joao-silva-cpf.jpg"). Com 32 caracteres aleatórios, o
+    endereço só aparece para quem o painel mostra.
+
+    A extensão já chega corrigida pelo formulário (a do formato real da
+    imagem); a lista aqui é só a segunda trava.
+    """
+    extensao = os.path.splitext(nome_enviado)[1].lower()
+    if extensao not in EXTENSOES_FOTO:
+        extensao = ''
+    return 'avaliacoes/{}{}'.format(uuid.uuid4().hex, extensao)
 
 
 class AvaliacaoQuerySet(models.QuerySet):
@@ -39,7 +62,7 @@ class Avaliacao(models.Model):
         default=5,
     )
     comentario = models.TextField('Comentário')
-    foto = models.ImageField('Foto da viagem (opcional)', upload_to='avaliacoes/',
+    foto = models.ImageField('Foto da viagem (opcional)', upload_to=caminho_foto_avaliacao,
                              blank=True, null=True)
     publicada = models.BooleanField(
         'Publicada', default=False,

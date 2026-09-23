@@ -70,56 +70,6 @@ class Command(BaseCommand):
                     ('Carlos E.', 4, 'Lugar incrível, mas se programe: tudo na ilha é bem caro.'),
                 ],
             },
-            {
-                'nome': 'Quioto', 'pais': 'Japão',
-                'descricao': 'A antiga capital do Japão reúne mais de 1.600 templos, jardins zen, '
-                             'gueixas no bairro de Gion e o famoso bosque de bambus de Arashiyama.',
-                'preco_medio_diaria': 420, 'melhor_epoca': 'Março-abril (sakura) e novembro (outono)',
-                'destaque': True,
-                'hospedagens': [
-                    ('Ryokan Sakura', 'pousada', 780, 'Hospedagem tradicional japonesa com tatame e onsen.'),
-                    ('Kyoto Central Hotel', 'hotel', 350, 'Moderno, ao lado da estação de Kyoto.'),
-                ],
-                'avaliacoes': [
-                    ('Fernanda L.', 5, 'O Fushimi Inari ao amanhecer, sem multidão, é inesquecível.'),
-                ],
-            },
-            {
-                'nome': 'Lisboa', 'pais': 'Portugal',
-                'descricao': 'Colinas, azulejos e fado. Explore Alfama de bondinho, prove o pastel '
-                             'de Belém original e veja o pôr do sol nos miradouros.',
-                'preco_medio_diaria': 380, 'melhor_epoca': 'Maio a setembro', 'destaque': True,
-                'hospedagens': [
-                    ('Hotel Tejo Mar', 'hotel', 520, 'Quartos com vista para o rio Tejo.'),
-                    ('Alfama Guest House', 'apartamento', 290, 'Apartamento charmoso no coração de Alfama.'),
-                ],
-                'avaliacoes': [
-                    ('João P.', 5, 'Cidade apaixonante, dá pra fazer quase tudo a pé. Comida maravilhosa!'),
-                    ('Ana T.', 4, 'Linda, mas prepare as pernas para as ladeiras!'),
-                ],
-            },
-            {
-                'nome': 'Cidade do Cabo', 'pais': 'África do Sul',
-                'descricao': 'Entre a Table Mountain e o oceano, a cidade oferece trilhas, vinícolas, '
-                             'pinguins na praia de Boulders e o encontro dos oceanos no Cabo da Boa Esperança.',
-                'preco_medio_diaria': 340, 'melhor_epoca': 'Novembro a março',
-                'hospedagens': [
-                    ('Waterfront Lodge', 'hotel', 610, 'No V&A Waterfront, perto de tudo.'),
-                ],
-                'avaliacoes': [
-                    ('Ricardo M.', 5, 'Subir a Table Mountain de teleférico vale cada centavo.'),
-                ],
-            },
-            {
-                'nome': 'Queenstown', 'pais': 'Nova Zelândia',
-                'descricao': 'A capital mundial dos esportes de aventura: bungee jump, esqui, '
-                             'trilhas e paisagens que serviram de cenário para O Senhor dos Anéis.',
-                'preco_medio_diaria': 480, 'melhor_epoca': 'Dezembro a fevereiro (verão)',
-                'hospedagens': [
-                    ('Lakeview Resort', 'resort', 950, 'Vista para o lago Wakatipu e as montanhas Remarkables.'),
-                ],
-                'avaliacoes': [],
-            },
         ]
 
         criados = 0
@@ -134,8 +84,7 @@ class Command(BaseCommand):
                 continue
 
             for nome, tipo, preco, desc in hospedagens:
-                Hospedagem.objects.create(destino=destino, nome=nome, tipo=tipo,
-                                          preco_diaria=preco, descricao=desc)
+                Hospedagem.objects.create(destino=destino, nome=nome)
             for autor, nota, comentario in avaliacoes:
                 Avaliacao.objects.create(destino=destino, nome_autor=autor,
                                          nota=nota, comentario=comentario)

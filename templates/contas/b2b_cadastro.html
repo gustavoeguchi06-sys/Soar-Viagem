@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cadastrar agência — B2B — Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap conta-tela__grade">
+        <div class="cartao-form">
+            <h1>Cadastrar minha agência</h1>
+            <p class="cartao-form__sub">Preencha os dados da agência. Depois de confirmar o
+               e-mail, a Soar confere o CNPJ e o CADASTUR para liberar a parceria.</p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% include 'partials/_campos.html' with form=form %}
+                <button type="submit" class="btn btn--verde btn--bloco">Cadastrar agência</button>
+            </form>
+
+            <p class="cartao-form__rodape">
+                Já é parceiro?
+                <a href="{% url 'contas:b2b' %}">Entrar</a>
+            </p>
+        </div>
+
+        <aside class="conta-lado">
+            <h2>O que você vai precisar</h2>
+            <ul>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Razão social e CNPJ da agência.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    Número do CADASTUR.</li>
+                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
+                    WhatsApp e e-mail para contato.</li>
+            </ul>
+            <p class="conta-lado__ajuda">Seus dados são usados só para a parceria B2B, conforme
+               o nosso <a href="{% url 'contas:privacidade' %}">aviso de privacidade</a>.</p>
+        </aside>
+    </div>
+</section>
+{% endblock %}
