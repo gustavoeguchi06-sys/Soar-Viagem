@@ -18,7 +18,10 @@
                  background: linear-gradient(135deg, #0e3b30 0%, #1c6b52 45%, #2f9c7e 100%); }
 .blog-hero__overlay { position: absolute; inset: 0;
       background: linear-gradient(180deg, rgba(10,30,24,.15) 0%, rgba(10,30,24,.55) 60%, rgba(10,30,24,.82) 100%); }
-.blog-hero__inner { position: relative; padding: 90px 0 40px; }
+/* Só em cima e embaixo: "padding: 90px 0 40px" zerava a margem lateral do .wrap
+   e, no celular, o título encostava na borda. Embaixo, sobra mais que os 44px
+   que o quadro "Neste artigo" sobe por cima do topo, senão ele cobre a data. */
+.blog-hero__inner { position: relative; padding-top: 90px; padding-bottom: 76px; }
 .blog-crumbs { font-size: .82rem; color: rgba(255,255,255,.8); margin-bottom: 22px; }
 .blog-crumbs a { color: rgba(255,255,255,.8); text-decoration: none; }
 .blog-crumbs a:hover { color: #fff; }
@@ -172,7 +175,7 @@
                  background: linear-gradient(135deg, #0e3b30 0%, #1c6b52 45%, #2f9c7e 100%); }
 .blog-capa__overlay { position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(10,30,24,.82) 0%, rgba(10,30,24,.55) 45%, rgba(10,30,24,.15) 100%); }
-.blog-capa__inner { position: relative; padding: 40px 0; }
+.blog-capa__inner { position: relative; padding-top: 40px; padding-bottom: 40px; }
 .blog-capa h1 { font-size: clamp(2.1rem, 4.5vw, 3rem); font-weight: 800; margin: 12px 0 10px; color: #fff; }
 .blog-capa__sub { font-size: 1.02rem; color: rgba(255,255,255,.92); margin: 0 0 22px; line-height: 1.5; }
 .blog-busca { display: flex; max-width: 480px; background: #fff; border-radius: 12px;
