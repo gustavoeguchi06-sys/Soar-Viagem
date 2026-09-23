@@ -149,7 +149,7 @@ class Artigo(models.Model):
     class Meta:
         verbose_name = 'Artigo'
         verbose_name_plural = 'Artigos'
-        ordering = ['-data_publicacao', '-id']
+        ordering = ['-data_publicacao', 'id']
 
     def __str__(self):
         return self.titulo
