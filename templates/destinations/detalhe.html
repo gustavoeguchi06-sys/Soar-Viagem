@@ -161,6 +161,31 @@
 
                 <div class="reserva__divisor"></div>
 
+                {% if viagem.saidas %}
+                <div class="saidas">
+                    <div class="saida">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
+                        <div>
+                            <b>{% if viagem.saidas|length == 1 %}Próxima saída{% else %}Próximas saídas{% endif %}</b>
+                            <small>Escolha a data em que quer viajar.</small>
+                        </div>
+                    </div>
+                    {% for s in viagem.saidas %}
+                    <label class="saida-op{% if s.esgotada %} saida-op--esgotada{% endif %}">
+                        <input type="radio" name="saida" value="{{ s.id }}"
+                               {% if s.padrao %}checked{% endif %}{% if s.esgotada %} disabled{% endif %}>
+                        <span class="saida-op__data">{{ s.texto }}</span>
+                        {% if s.esgotada %}
+                        <span class="pill-vagas pill-vagas--esgotada">Esgotada</span>
+                        {% elif s.vagas is None %}
+                        <span class="pill-vagas pill-vagas--consulte">Consulte</span>
+                        {% else %}
+                        <span class="pill-vagas">{{ s.vagas }} vaga{{ s.vagas|pluralize }}</span>
+                        {% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div class="saida">
                     <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
                     <div>
@@ -173,6 +198,7 @@
                     <span>Vagas disponíveis</span>
                     <span class="pill-vagas">{{ viagem.vagas }} vagas</span>
                 </div>
+                {% endif %}
 
                 <div class="acomodacoes">
                     <b>Escolha sua acomodação</b>

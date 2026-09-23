@@ -1,6 +1,50 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.urls import reverse
 from django.utils.text import slugify
+
+
+MESES = {
+    1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+    5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+    9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
+}
+
+
+def textos_do_periodo(ida, volta):
+    """Os textos que a página mostra para uma viagem de `ida` a `volta`.
+
+    Devolve período, mês e ano, duração e a frase completa da saída
+    (ex.: "16 a 21 de Junho de 2027"). Sem as duas datas, devolve None.
+    """
+    if not (ida and volta):
+        return None
+    if volta < ida:
+        ida, volta = volta, ida
+
+    total_dias = (volta - ida).days + 1
+    noites = max(total_dias - 1, 0)
+    mes_ida = MESES[ida.month]
+    textos = {
+        'dias': f'{total_dias} dia' + ('' if total_dias == 1 else 's'),
+        'noites': f'{noites} noite' + ('' if noites == 1 else 's'),
+        'mes_ano': f'{mes_ida} {ida.year}',
+    }
+    if (ida.month, ida.year) == (volta.month, volta.year):
+        textos['periodo'] = f'{ida.day} a {volta.day}'
+        textos['proxima_saida'] = f'{ida.day} a {volta.day} de {mes_ida} de {ida.year}'
+    elif ida.year == volta.year:
+        mes_volta = MESES[volta.month]
+        textos['periodo'] = f'{ida.day} de {mes_ida} a {volta.day} de {mes_volta}'
+        textos['proxima_saida'] = (f'{ida.day} de {mes_ida} a {volta.day} '
+                                   f'de {mes_volta} de {ida.year}')
+    else:
+        mes_volta = MESES[volta.month]
+        textos['periodo'] = (f'{ida.day} de {mes_ida} de {ida.year} a '
+                             f'{volta.day} de {mes_volta} de {volta.year}')
+        textos['proxima_saida'] = textos['periodo']
+    return textos
 
 
 class Destino(models.Model):
@@ -84,11 +128,7 @@ class Destino(models.Model):
     def __str__(self):
         return f'{self.nome}, {self.pais}'
 
-    MESES = {
-        1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
-        5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
-        9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro',
-    }
+    MESES = MESES
 
     def _preencher_datas(self):
         """Preenche período, mês, duração e próxima saída a partir das datas.
@@ -96,33 +136,15 @@ class Destino(models.Model):
         O dono escolhe ida e volta no calendário; os textos que a página mostra
         saem daqui, sempre coerentes com as datas escolhidas.
         """
-        ida, volta = self.data_ida, self.data_volta
-        if not (ida and volta):
-            return
-        if volta < ida:
-            ida, volta = volta, ida
+        textos = textos_do_periodo(self.data_ida, self.data_volta)
+        if textos:
+            for campo, valor in textos.items():
+                setattr(self, campo, valor)
 
-        total_dias = (volta - ida).days + 1
-        noites = max(total_dias - 1, 0)
-        self.dias = f'{total_dias} dia' + ('' if total_dias == 1 else 's')
-        self.noites = f'{noites} noite' + ('' if noites == 1 else 's')
-
-        mes_ida = self.MESES[ida.month]
-        self.mes_ano = f'{mes_ida} {ida.year}'
-
-        if (ida.month, ida.year) == (volta.month, volta.year):
-            self.periodo = f'{ida.day} a {volta.day}'
-            self.proxima_saida = f'{ida.day} a {volta.day} de {mes_ida} de {ida.year}'
-        elif ida.year == volta.year:
-            mes_volta = self.MESES[volta.month]
-            self.periodo = f'{ida.day} de {mes_ida} a {volta.day} de {mes_volta}'
-            self.proxima_saida = (f'{ida.day} de {mes_ida} a {volta.day} '
-                                  f'de {mes_volta} de {ida.year}')
-        else:
-            mes_volta = self.MESES[volta.month]
-            self.periodo = (f'{ida.day} de {mes_ida} de {ida.year} a '
-                            f'{volta.day} de {mes_volta} de {volta.year}')
-            self.proxima_saida = self.periodo
+    @property
+    def saidas_futuras(self):
+        """Saídas que ainda não aconteceram, da mais próxima para a mais distante."""
+        return self.saidas.filter(data_ida__gte=timezone.localdate()).order_by('data_ida')
 
     def save(self, *args, **kwargs):
         if not self.pais:
@@ -257,3 +279,45 @@ class PerguntaFrequente(models.Model):
 
     def __str__(self):
         return self.pergunta
+
+
+class Saida(models.Model):
+    """Uma data em que o grupo sai para o destino.
+
+    O mesmo destino costuma ter várias saídas no ano. A página da viagem lista
+    todas as que ainda vão acontecer, cada uma com as suas vagas, e o cliente
+    escolhe em qual quer ir. As que já passaram somem sozinhas do site.
+    """
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='saidas', verbose_name='Destino')
+    data_ida = models.DateField('Ida', help_text='Dia em que o grupo sai.')
+    data_volta = models.DateField('Volta', help_text='Dia do retorno.')
+    vagas = models.PositiveSmallIntegerField(
+        'Vagas', blank=True, null=True,
+        help_text='Em branco, o site mostra "consulte". Com 0, aparece como esgotada.')
+
+    class Meta:
+        verbose_name = 'Saída'
+        verbose_name_plural = 'Saídas'
+        ordering = ['data_ida', 'id']
+
+    def __str__(self):
+        return self.texto
+
+    def clean(self):
+        if self.data_ida and self.data_volta and self.data_volta < self.data_ida:
+            raise ValidationError({'data_volta': 'A volta não pode ser antes da ida.'})
+
+    @property
+    def textos(self):
+        return textos_do_periodo(self.data_ida, self.data_volta) or {}
+
+    @property
+    def texto(self):
+        """Ex.: 16 a 21 de Junho de 2027."""
+        return self.textos.get('proxima_saida', '')
+
+    @property
+    def esgotada(self):
+        return self.vagas == 0

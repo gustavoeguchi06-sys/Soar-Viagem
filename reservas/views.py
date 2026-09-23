@@ -19,6 +19,13 @@ from .models import Reserva
 def nova(request, slug):
     destino = get_object_or_404(Destino, slug=slug)
     viagem = montar_viagem(destino, list(destino.avaliacoes.all()))
+    saidas = viagem['saidas']
+
+    # Todas as datas cadastradas estão lotadas: não tem o que pedir aqui.
+    if saidas and not viagem['tem_vaga']:
+        messages.info(request, 'Todas as saídas desta viagem estão esgotadas. '
+                               'Fale com a Soar pelo WhatsApp para entrar na lista de espera.')
+        return redirect(destino.get_absolute_url())
 
     if request.method == 'POST':
         # Uma conta so nao enche a fila do painel de pedido falso.
@@ -36,7 +43,7 @@ def nova(request, slug):
                                    'destino. Nosso time vai falar com você.')
             return redirect('contas:minha_conta')
 
-        form = ReservaForm(request.POST)
+        form = ReservaForm(request.POST, saidas=saidas)
         if form.is_valid():
             reserva = form.save(commit=False)
             reserva.usuario = request.user
@@ -46,7 +53,9 @@ def nova(request, slug):
             escolhida = next((a for a in viagem['acomodacoes']
                               if a['chave'] == reserva.acomodacao), None)
             reserva.preco_estimado = escolhida['valor'] if escolhida else None
-            reserva.saida = viagem['proxima_saida']
+            escolhida_id = form.cleaned_data.get('saida_escolhida')
+            saida = next((s for s in saidas if str(s['id']) == escolhida_id), None)
+            reserva.saida = saida['texto'] if saida else viagem['proxima_saida']
             reserva.save()
             LIMITE_RESERVA.registrar(request, request.user.pk)
             messages.success(
@@ -58,9 +67,12 @@ def nova(request, slug):
     else:
         escolha = request.GET.get('acomodacao', 'casal')
         chaves = [a['chave'] for a in viagem['acomodacoes']]
-        form = ReservaForm(initial={
+        livres = [str(s['id']) for s in saidas if not s['esgotada']]
+        data = request.GET.get('saida', '')
+        form = ReservaForm(saidas=saidas, initial={
             'acomodacao': escolha if escolha in chaves else 'casal',
             'pessoas': 2 if escolha in ('casal', 'duplo', '') else 1,
+            'saida_escolhida': data if data in livres else (livres[0] if livres else None),
         })
 
     return render(request, 'reservas/nova.html', {

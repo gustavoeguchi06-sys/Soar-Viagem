@@ -22,7 +22,7 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, PerguntaFrequente)
+                     ImagemHospedagem, PerguntaFrequente, Saida)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -134,41 +134,32 @@ class HospedagemInline(admin.TabularInline):
 # Destino
 # --------------------------------------------------------------------------- #
 
-class DestinoAdminForm(forms.ModelForm):
-    """Datas por calendário: o dono escolhe ida e volta e o site preenche o resto."""
+class SaidaInline(admin.TabularInline):
+    """As datas de saída do destino, uma por linha, com calendário."""
 
-    data_ida = forms.DateField(
-        label='Data de ida', required=False,
-        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-        input_formats=['%Y-%m-%d'],
-        help_text='Escolha no calendário o dia de saída.')
-    data_volta = forms.DateField(
-        label='Data de volta', required=False,
-        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-        input_formats=['%Y-%m-%d'],
-        help_text='O dia do retorno. Período, mês, duração e próxima saída são '
-                  'preenchidos a partir das datas.')
+    model = Saida
+    extra = 1
+    fields = ['data_ida', 'data_volta', 'vagas']
+    formfield_overrides = {
+        models.DateField: {'widget': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')},
+    }
+    verbose_name = 'saída'
+    verbose_name_plural = ('Datas de saída (o site mostra todas as que ainda vão acontecer; '
+                           'as que já passaram somem sozinhas)')
 
-    class Meta:
-        model = Destino
-        fields = '__all__'
-
-    def clean(self):
-        dados = super().clean()
-        ida, volta = dados.get('data_ida'), dados.get('data_volta')
-        if ida and volta and volta < ida:
-            self.add_error('data_volta', 'A volta não pode ser antes da ida.')
-        return dados
-
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        for campo in ('data_ida', 'data_volta'):
+            formset.form.base_fields[campo].input_formats = ['%Y-%m-%d']
+        return formset
 
 
 @admin.register(Destino)
 class DestinoAdmin(admin.ModelAdmin):
-    form = DestinoAdminForm
     list_display = ['capa', 'nome', 'regiao', 'preco_base', 'preco_medio_diaria',
-                    'vagas', 'destaque', 'soar_60', 'situacao', 'no_site']
+                    'saidas_no_site', 'destaque', 'soar_60', 'situacao', 'no_site']
     list_display_links = ['nome']
-    list_editable = ['preco_base', 'preco_medio_diaria', 'vagas', 'destaque', 'soar_60']
+    list_editable = ['preco_base', 'preco_medio_diaria', 'destaque', 'soar_60']
     list_filter = ['destaque', 'soar_60', 'regiao']
     search_fields = ['nome', 'regiao', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
@@ -176,7 +167,7 @@ class DestinoAdmin(admin.ModelAdmin):
     save_on_top = True
     list_per_page = 30
     readonly_fields = ['previa_capa', 'criado_em']
-    inlines = [HospedagemInline, ImagemDestinoInline, DestaqueViagemInline,
+    inlines = [SaidaInline, HospedagemInline, ImagemDestinoInline, DestaqueViagemInline,
                DiaRoteiroInline, PerguntaFrequenteInline]
 
     fieldsets = [
@@ -191,12 +182,6 @@ class DestinoAdmin(admin.ModelAdmin):
             'fields': ['preco_base', 'preco_medio_diaria'],
             'description': 'O preço por tipo de quarto é o que abre o card de reserva. '
                            'Sem nenhum dos dois, a página mostra “sob consulta”.',
-        }),
-        ('Datas e vagas', {
-            'fields': ['data_ida', 'data_volta', 'vagas'],
-            'description': 'Escolha ida e volta no calendário. Período, mês, duração e '
-                           'próxima saída são preenchidos sozinhos. Em branco, a página '
-                           'usa o período padrão da operadora.',
         }),
         ('Capa da página de viagem', {
             'classes': ['collapse'],
@@ -225,6 +210,16 @@ class DestinoAdmin(admin.ModelAdmin):
                                'Sem capa: a página usa uma ilustração da Soar.</span>')
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
                            destino.imagem_capa.url, destino.nome)
+
+    @admin.display(description='Saídas')
+    def saidas_no_site(self, destino):
+        futuras = list(destino.saidas_futuras)
+        if not futuras:
+            return format_html('<span class="etiqueta etiqueta--fila">nenhuma</span>')
+        proxima = futuras[0].data_ida.strftime('%d/%m/%Y')
+        if len(futuras) == 1:
+            return format_html('1 saída, em {}', proxima)
+        return format_html('{} saídas, a próxima em {}', len(futuras), proxima)
 
     @admin.display(description='Situação')
     def situacao(self, destino):
