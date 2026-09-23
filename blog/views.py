@@ -16,7 +16,7 @@ def _lateral():
     no_ar = Artigo.objects.no_ar()
     categorias = Categoria.objects.annotate(total=Count('artigos', filter=Q(
         artigos__publicado=True, artigos__data_publicacao__lte=timezone.localdate()),
-    )).filter(total__gt=0)
+    )).order_by('ordem', 'nome')   # consulta com contagem ignora a ordem padrão do modelo
     return {
         'categorias': categorias,
         'total_no_ar': no_ar.count(),
@@ -73,12 +73,14 @@ def artigo(request, slug):
         Artigo.objects.filter(pk=artigo.pk).update(leituras=F('leituras') + 1)
 
     no_ar = Artigo.objects.no_ar()
+    # Na ordem da vitrine: "anterior" é o que vem logo depois (mais antigo) e
+    # "próximo" o que vem logo antes (mais novo). Mesma data: vale a ordem de cadastro.
     anterior = no_ar.filter(Q(data_publicacao__lt=artigo.data_publicacao)
-                            | Q(data_publicacao=artigo.data_publicacao, pk__lt=artigo.pk)
-                            ).order_by('-data_publicacao', '-pk').first()
+                            | Q(data_publicacao=artigo.data_publicacao, pk__gt=artigo.pk)
+                            ).order_by('-data_publicacao', 'pk').first()
     proximo = no_ar.filter(Q(data_publicacao__gt=artigo.data_publicacao)
-                           | Q(data_publicacao=artigo.data_publicacao, pk__gt=artigo.pk)
-                           ).order_by('data_publicacao', 'pk').first()
+                           | Q(data_publicacao=artigo.data_publicacao, pk__lt=artigo.pk)
+                           ).order_by('data_publicacao', '-pk').first()
 
     return render(request, 'blog/artigo.html', {
         'artigo': artigo,

@@ -41,8 +41,12 @@ class ConteudoMigradoTests(TestCase):
         self.assertContains(resposta, 'Fervedouro do Alecrim')
         self.assertContains(resposta, 'class="otima">MAI')
 
-    def test_outros_cartoes_viraram_rascunho(self):
-        self.assertEqual(Artigo.objects.filter(publicado=False).count(), 7)
+    def test_vitrine_continua_com_os_oito_cartoes(self):
+        self.assertEqual(Artigo.objects.no_ar().count(), 8)
+        indice = self.client.get('/blog/').content.decode()
+        self.assertEqual(indice.count('<a class="blog-post'), 8)
+        for aba in ('Destinos', 'Dicas de Viagem', 'Natureza', 'Roteiros', 'Experiências', 'Soar 60+'):
+            self.assertIn(aba, indice)
 
 
 class SituacaoTests(BlogBase):
