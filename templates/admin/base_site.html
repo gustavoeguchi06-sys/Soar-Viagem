@@ -39,6 +39,19 @@ todos sem precisar de !important nem de seletor inflado.
 
 {% block welcome-msg %}<span class="boas-vindas">Olá, <strong>{% firstof user.first_name user.get_short_name user.get_username %}</strong></span>{% endblock %}
 
+{% comment %}
+Os botões do topo sem o "Alterar senha": a senha se troca pela tela de
+"Esqueci minha senha" do site, a mesma para todo mundo.
+{% endcomment %}
+{% block userlinks %}
+    {% if site_url %}<a href="{{ site_url }}">Ver o site</a>{% endif %}
+    <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Encerrar sessão</button>
+    </form>
+    {% include "admin/color_theme_toggle.html" %}
+{% endblock %}
+
 {% block nav-global %}{% endblock %}
 
 {% comment %}

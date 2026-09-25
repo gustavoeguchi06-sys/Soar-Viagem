@@ -1,0 +1,197 @@
+/* ==========================================================================
+   Tema escuro do site público
+
+   Liga quando o <html> tem data-tema="escuro". Quem escolhe é o visitante,
+   no botão de lua/sol do topo (static/js/tema.js e topo.js); a escolha fica
+   guardada no navegador e vale também para o painel do dono, que usa a mesma
+   chave. Sem escolha nenhuma, o site abre claro, como foi desenhado.
+
+   Três partes: as cores trocadas nas variáveis; os cartões que tinham fundo
+   branco escrito direto no CSS (lista gerada a partir das folhas do site); e
+   os ajustes à mão do que é escuro por natureza (topo, rodapé, faixas).
+   ========================================================================== */
+
+html[data-tema="escuro"] {
+    color-scheme: dark;
+
+    /* viagem.css, contas.css, agencia.css */
+    --fundo: #0f1613;
+    --fundo-suave: #0b110e;
+    --cartao: #17211c;
+    --linha: #26332c;
+    --tinta: #d6e0db;
+    --tinta-suave: #98aaa3;
+    --preto: #f1f5f3;
+    --verde: #1a7f4e;
+    --verde-claro: #16301f;
+    --verde-texto: #7fdca7;
+    --azul-selo: #93c5fd;
+    --azul-selo-bg: #1b2740;
+    --sombra-sm: 0 1px 2px rgba(0, 0, 0, .45);
+    --sombra-md: 0 10px 30px rgba(0, 0, 0, .5);
+
+    /* style.css (páginas mais antigas: início, catálogo, Soar 60+) */
+    --areia: #0f1613;
+    --texto: #d6e0db;
+    --texto-suave: #98aaa3;
+    --borda: #26332c;
+    --azul-escuro: #f1f5f3;
+    --azul: #4cc38a;
+    --sombra: 0 6px 24px rgba(0, 0, 0, .45);
+
+    /* blog.css usa os nomes do painel */
+    --border-color: #26332c;
+    --hairline-color: #1e2a24;
+    --body-bg: #0f1613;
+    --body-fg: #d6e0db;
+    --body-loud-color: #f1f5f3;
+    --body-quiet-color: #98aaa3;
+    --body-medium-color: #c3d0cb;
+    --darkened-bg: #0b110e;
+}
+html[data-tema="escuro"] body { background: var(--fundo); color: var(--tinta); }
+
+/* ----- Cartões que tinham fundo branco ----------------------------------- */
+/* style.css */
+html[data-tema="escuro"] .site-header,
+html[data-tema="escuro"] .card,
+html[data-tema="escuro"] .filtro,
+html[data-tema="escuro"] .info-chip,
+html[data-tema="escuro"] .galeria figure,
+html[data-tema="escuro"] .hospedagem,
+html[data-tema="escuro"] .avaliacao,
+html[data-tema="escuro"] .form-card,
+html[data-tema="escuro"] .form-campo input:focus,
+html[data-tema="escuro"] .form-campo select:focus,
+html[data-tema="escuro"] .form-campo textarea:focus,
+html[data-tema="escuro"] .p60-item,
+html[data-tema="escuro"] .p60-passos li,
+html[data-tema="escuro"] .p60-faq__item
+    { background-color: var(--cartao); }
+
+/* viagem.css */
+html[data-tema="escuro"] .btn--contorno,
+html[data-tema="escuro"] .abas,
+html[data-tema="escuro"] .dia,
+html[data-tema="escuro"] .reserva,
+html[data-tema="escuro"] .saida-op input,
+html[data-tema="escuro"] .saida-op:has(input:checked),
+html[data-tema="escuro"] .acom:has(input:checked),
+html[data-tema="escuro"] .ajuda,
+html[data-tema="escuro"] .painel,
+html[data-tema="escuro"] .hosp-legenda,
+html[data-tema="escuro"] .carrossel__setas,
+html[data-tema="escuro"] .depo,
+html[data-tema="escuro"] .form-avaliacao,
+html[data-tema="escuro"] .campo input[type=text],
+html[data-tema="escuro"] .campo input[type=file],
+html[data-tema="escuro"] .campo select,
+html[data-tema="escuro"] .campo textarea,
+html[data-tema="escuro"] .aviso,
+html[data-tema="escuro"] .conta__menu
+    { background-color: var(--cartao); }
+
+/* contas.css */
+html[data-tema="escuro"] .cartao-form,
+html[data-tema="escuro"] .campo input[type="text"],
+html[data-tema="escuro"] .campo input[type="email"],
+html[data-tema="escuro"] .campo input[type="password"],
+html[data-tema="escuro"] .campo input[type="number"],
+html[data-tema="escuro"] .campo input[type="tel"],
+html[data-tema="escuro"] .campo textarea,
+html[data-tema="escuro"] .campo select,
+html[data-tema="escuro"] .btn-google,
+html[data-tema="escuro"] .resumo-viagem,
+html[data-tema="escuro"] .conta-topo,
+html[data-tema="escuro"] .reserva-item,
+html[data-tema="escuro"] .conta-vazio
+    { background-color: var(--cartao); }
+
+/* agencia.css */
+html[data-tema="escuro"] .ag-numero,
+html[data-tema="escuro"] .ag-copiar input,
+html[data-tema="escuro"] .ag-filtros a,
+html[data-tema="escuro"] .ag-form .campo input[type="date"]
+    { background-color: var(--cartao); }
+
+/* blog.css */
+html[data-tema="escuro"] .blog-indice,
+html[data-tema="escuro"] .blog-meses span,
+html[data-tema="escuro"] .blog-atracao,
+html[data-tema="escuro"] .blog-cta,
+html[data-tema="escuro"] .blog-card,
+html[data-tema="escuro"] .blog-news,
+html[data-tema="escuro"] .blog-news__form input,
+html[data-tema="escuro"] .blog-busca,
+html[data-tema="escuro"] .blog-post,
+html[data-tema="escuro"] .blog-pag a,
+html[data-tema="escuro"] .blog-pag span,
+html[data-tema="escuro"] .blog-vazio
+    { background-color: var(--cartao); }
+
+/* ----- O que é escuro por natureza: fica escuro, não vira texto claro ---- */
+html[data-tema="escuro"] .topbar--solido,
+html[data-tema="escuro"] .menu-movel,
+html[data-tema="escuro"] .rodape,
+html[data-tema="escuro"] .conta-lado,
+html[data-tema="escuro"] .site-footer { background: #080d0a; }
+html[data-tema="escuro"] .hero { background-color: #080d0a; }
+html[data-tema="escuro"] .conta-lado { border: 1px solid var(--linha); }
+/* o topo verde da página inicial (style.css) usava as cores "azul" */
+html[data-tema="escuro"] .container > .hero,
+html[data-tema="escuro"] section.hero:not(:has(.hero__foto)) {
+    background: linear-gradient(135deg, #0b3a24 0%, #146c43 100%);
+}
+html[data-tema="escuro"] .filtro.ativo { background: var(--verde); border-color: var(--verde); color: #fff; }
+
+/* texto escuro escrito direto em botões e campos claros */
+html[data-tema="escuro"] .btn--branco { color: #14201b; }
+html[data-tema="escuro"] .btn--contorno { color: var(--verde-texto); border-color: var(--verde-texto); }
+html[data-tema="escuro"] .btn--contorno:hover { background: var(--verde-claro); }
+
+/* campos de formulário */
+html[data-tema="escuro"] input,
+html[data-tema="escuro"] select,
+html[data-tema="escuro"] textarea { color: var(--tinta); }
+html[data-tema="escuro"] input::placeholder,
+html[data-tema="escuro"] textarea::placeholder { color: #6f817a; }
+html[data-tema="escuro"] .busca input { background: var(--cartao); border: 1px solid var(--linha); }
+
+/* links verdes: um tom mais claro para dar leitura no fundo escuro */
+html[data-tema="escuro"] .cartao-form__rodape a,
+html[data-tema="escuro"] .texto-legal a,
+html[data-tema="escuro"] .ver-todos,
+html[data-tema="escuro"] .ag-titulo a:not(.btn),
+html[data-tema="escuro"] .ag-contato a:not(.btn),
+html[data-tema="escuro"] .ag-vazio a:not(.btn),
+html[data-tema="escuro"] .dados-agente a,
+html[data-tema="escuro"] .conta-dados a,
+html[data-tema="escuro"] .resumo-viagem__linhas .ic { color: var(--verde-texto); }
+
+/* pílulas e etiquetas de situação */
+html[data-tema="escuro"] .pill-vagas { background: #10371f; color: #7fdca7; }
+html[data-tema="escuro"] .pill-vagas--esgotada { background: #3d1310; color: #f0a29b; }
+html[data-tema="escuro"] .pill-vagas--consulte { background: var(--fundo-suave); color: var(--tinta-suave); }
+html[data-tema="escuro"] .selo-status--pendente,
+html[data-tema="escuro"] .ag-selo--enviado { background: #3a2a08; color: #f7c164; }
+html[data-tema="escuro"] .selo-status--confirmada,
+html[data-tema="escuro"] .ag-selo--aceito { background: #10371f; color: #7fdca7; }
+html[data-tema="escuro"] .selo-status--cancelada,
+html[data-tema="escuro"] .ag-selo--recusado { background: #222c27; color: #9fb0aa; }
+html[data-tema="escuro"] .form-aviso { background: #3d1310; border-color: #6b221b; color: #f0a29b; }
+html[data-tema="escuro"] .form-nota { color: var(--verde-texto); }
+html[data-tema="escuro"] .ag-indicacao { border-color: #1f4a31; }
+
+/* abas da página da viagem e do painel da agência */
+html[data-tema="escuro"] .abas a[aria-current="true"],
+html[data-tema="escuro"] .abas a.ativa { color: var(--verde-texto); }
+html[data-tema="escuro"] .ag-abas a[aria-current="page"] { color: var(--verde-texto); }
+html[data-tema="escuro"] .ag-faixa { background: #0b3a24; }
+
+/* imagens de ilustração e fotos não precisam de ajuste; os ícones de traço
+   seguem a cor do texto */
+
+/* busca do blog e da página inicial */
+html[data-tema="escuro"] .blog-busca input { color: var(--tinta); }
+html[data-tema="escuro"] .hero .busca button { background: #fff; color: #0d4f31; }
+html[data-tema="escuro"] .blog-previa { background: #3a2a08; color: #f7c164; border-color: #5a4210; }

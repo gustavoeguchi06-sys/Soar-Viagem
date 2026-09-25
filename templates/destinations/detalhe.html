@@ -145,7 +145,7 @@
                 <span class="selo-disp">Disponível</span>
                 <p class="reserva__label">A partir de</p>
                 <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
-                <p class="reserva__pp">por tipo de quarto</p>
+                <p class="reserva__pp">por pessoa</p>
 
                 {% comment %}GET e nao POST de proposito: a escolha vai na URL e
                 sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}
@@ -198,7 +198,7 @@
 
                 <div class="acomodacoes">
                     <b>Escolha sua acomodação</b>
-                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por tipo de quarto.</small>
+                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por pessoa.</small>
                     {% for a in viagem.acomodacoes %}
                     <label class="acom">
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"
