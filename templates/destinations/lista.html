@@ -17,12 +17,17 @@
 
         <div class="filtros">
             <a class="filtro {% if not regiao_ativa %}ativo{% endif %}"
-               href="{% url 'destinations:lista' %}{% if busca %}?q={{ busca }}{% endif %}">Todas</a>
+               href="{% url 'destinations:lista' %}{% if qs_filtros %}?{{ qs_filtros }}{% endif %}">Todas</a>
             {% for codigo, nome in regioes %}
             <a class="filtro {% if regiao_ativa == codigo %}ativo{% endif %}"
-               href="?regiao={{ codigo|urlencode }}{% if busca %}&q={{ busca }}{% endif %}">{{ nome }}</a>
+               href="?regiao={{ codigo|urlencode }}{% if qs_filtros %}&{{ qs_filtros }}{% endif %}">{{ nome }}</a>
             {% endfor %}
         </div>
+
+        {% if filtros %}
+        <p class="filtros-ativos">Mostrando viagens com {{ filtros|join:", " }}.
+           <a href="{% url 'destinations:lista' %}">Limpar filtros</a></p>
+        {% endif %}
 
         {% if destinos %}
         <div class="grade">
@@ -34,16 +39,17 @@
         {# Sem paginacao, uma busca ampla renderiza o catalogo inteiro de uma vez. #}
         <nav class="paginacao" aria-label="Paginas de destinos">
             {% if pagina.has_previous %}
-            <a class="filtro" href="?pagina={{ pagina.previous_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Anterior</a>
+            <a class="filtro" href="?pagina={{ pagina.previous_page_number }}{% if qs_filtros %}&{{ qs_filtros }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Anterior</a>
             {% endif %}
             <span class="paginacao__conta">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
             {% if pagina.has_next %}
-            <a class="filtro" href="?pagina={{ pagina.next_page_number }}{% if busca %}&q={{ busca|urlencode }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Próxima</a>
+            <a class="filtro" href="?pagina={{ pagina.next_page_number }}{% if qs_filtros %}&{{ qs_filtros }}{% endif %}{% if regiao_ativa %}&regiao={{ regiao_ativa|urlencode }}{% endif %}">Próxima</a>
             {% endif %}
         </nav>
         {% endif %}
         {% else %}
-        <p class="vazio">Nenhum destino encontrado{% if busca %} para "{{ busca }}"{% endif %}. 😕</p>
+        <p class="vazio">Nenhuma viagem encontrada{% if busca %} para "{{ busca }}"{% endif %}{% if filtros %} com esses filtros{% endif %}.
+           <a href="{% url 'destinations:lista' %}">Ver todas as viagens</a></p>
         {% endif %}
     </div>
 </section>

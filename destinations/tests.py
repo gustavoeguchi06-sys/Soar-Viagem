@@ -177,3 +177,32 @@ class ExemplosPorRegiaoTests(TestCase):
         pagina = self.client.get('/destinos/lencois-maranhenses/')
         self.assertContains(pagina, 'Lagoa Bonita')
         self.assertContains(pagina, 'Maranhão')
+
+
+class PaginaInicialTests(TestCase):
+    def setUp(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        self.d = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                        preco_base=3690, regiao='Centro-Oeste', selo='Natureza',
+                                        estado='Mato Grosso do Sul')
+        hoje = timezone.localdate()
+        self.s = Saida.objects.create(destino=self.d, vagas=3, data_ida=hoje + timedelta(days=40),
+                                      data_volta=hoje + timedelta(days=44))
+
+    def test_pagina_inicial_mostra_as_secoes(self):
+        r = self.client.get('/')
+        self.assertEqual(r.status_code, 200)
+        for texto in ['O Brasil começa onde termina o óbvio.', 'Encontre a viagem perfeita',
+                      'Próximas experiências', 'Destinos mais amados', 'Por que viajar com a Soar?',
+                      'Viajar não tem idade.', '#ViajantesSoar', 'Pronto para sua próxima aventura?',
+                      'Últimas vagas', 'R$ 3.690', 'Natureza']:
+            self.assertContains(r, texto)
+
+    def test_busca_por_mes_estilo_e_duracao(self):
+        mes = self.s.data_ida.month
+        outro = mes % 12 + 1
+        self.assertContains(self.client.get(f'/destinos/?mes={mes}&estilo=Natureza&duracao=media'), 'Bonito')
+        self.assertNotContains(self.client.get(f'/destinos/?mes={outro}'), '/destinos/bonito/')
+        self.assertNotContains(self.client.get('/destinos/?duracao=longa'), '/destinos/bonito/')
+        self.assertNotContains(self.client.get('/destinos/?estilo=Cultura'), '/destinos/bonito/')

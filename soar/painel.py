@@ -27,6 +27,8 @@ from django.urls import NoReverseMatch, reverse
 # inicial.
 ABAS = [
     ('Visão geral', 'admin:index', None, None),
+    ('Página inicial', 'admin:destinations_slideinicio_changelist',
+     'destinations.view_slideinicio', None),
     ('Reservas', 'admin:reservas_reserva_changelist', 'reservas.view_reserva', 'reservas'),
     ('Orçamentos', 'admin:agencia_orcamento_changelist', 'agencia.view_orcamento', None),
     ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),

@@ -22,7 +22,7 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, PerguntaFrequente, Saida)
+                     ImagemHospedagem, PerguntaFrequente, Saida, SlideInicio)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -287,3 +287,29 @@ class HospedagemAdmin(admin.ModelAdmin):
                                'Sem foto</span>')
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
                            hospedagem.imagem.url, hospedagem.nome)
+
+
+# --------------------------------------------------------------------------- #
+# Fotos do topo da página inicial
+# --------------------------------------------------------------------------- #
+
+@admin.register(SlideInicio)
+class SlideInicioAdmin(admin.ModelAdmin):
+    """As fotos que giram no topo da página inicial."""
+
+    list_display = ['foto', 'legenda', 'ordem', 'ativo']
+    list_display_links = ['foto', 'legenda']
+    list_editable = ['ordem', 'ativo']
+    fields = ['imagem', 'previa', 'legenda', 'ordem', 'ativo']
+    readonly_fields = ['previa']
+
+    @admin.display(description='')
+    def foto(self, slide):
+        return miniatura(slide.imagem, slide.legenda)
+
+    @admin.display(description='Como fica')
+    def previa(self, slide):
+        if not slide.imagem:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto: a página usa as fotos de exemplo do site.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">', slide.imagem.url)
