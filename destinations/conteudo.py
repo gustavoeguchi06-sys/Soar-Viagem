@@ -263,6 +263,29 @@ def _moeda(valor):
     return '{:,.0f}'.format(valor).replace(',', '.')
 
 
+def _acomodacoes(preco_base):
+    """Os tipos de quarto e o preço por pessoa de cada um, a partir do casal."""
+    def preco(valor):
+        if preco_base is None:
+            return {'preco': 'Consulte', 'valor': None, 'consulte': True}
+        return {'preco': 'R$ ' + _moeda(valor), 'valor': valor, 'consulte': False}
+
+    base = preco_base or 0
+    return [
+        {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa', 'padrao': False,
+         **preco(base + 1400)},
+        {'chave': 'casal', 'nome': 'Casal', 'pessoas': '2 pessoas (cama de casal)', 'padrao': True,
+         **preco(base)},
+        {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
+         'padrao': False, **preco(base)},
+        {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas', 'padrao': False,
+         **preco(base - 200)},
+        # Criança até 8 anos não paga a viagem.
+        {'chave': 'crianca', 'nome': 'Criança até 8 anos', 'pessoas': 'Não paga a viagem',
+         'preco': 'Grátis', 'valor': 0, 'padrao': False, 'consulte': False, 'gratis': True},
+    ]
+
+
 def _estrelas(nota):
     """4.9 (ou '4,9') -> [True, True, True, True, True]"""
     cheias = int(round(float(str(nota).replace(',', '.'))))
@@ -319,10 +342,10 @@ def montar_viagem(destino, avaliacoes):
     cfg = POR_DESTINO.get(destino.slug, {})
     fotos = _fotos_do_destino(destino, cfg)
 
-    preco_base = destino.preco_base or cfg.get('preco_base')
-    if preco_base is None:
-        preco_base = int(destino.preco_medio_diaria * 6) if destino.preco_medio_diaria else 3588
-    preco_base = int(preco_base)
+    # Sem preço cadastrado a página diz "sob consulta": preço inventado na
+    # vitrine é oferta que a operadora teria de cumprir (CDC, art. 30).
+    preco_base = destino.preco_base
+    preco_base = int(preco_base) if preco_base is not None else None
 
     # a nota/quantidade da vitrine pode vir do conteúdo editorial (histórico da
     # operadora); sem isso, usa o que está no banco
@@ -404,7 +427,7 @@ def montar_viagem(destino, avaliacoes):
         'incluso': destino.linhas('incluso') or INCLUSO,
         'informacoes': destino.linhas('informacoes') or INFORMACOES,
         'faq': faq,
-        'preco': _moeda(preco_base),
+        'preco': _moeda(preco_base) if preco_base is not None else '',
         'preco_num': preco_base,
         'proxima_saida': prox.get('proxima_saida') or destino.proxima_saida or cfg.get('proxima_saida',
                                                           '16 a 21 de Junho de 2027'),
@@ -412,23 +435,7 @@ def montar_viagem(destino, avaliacoes):
                   else destino.vagas if destino.vagas is not None else cfg.get('vagas', 12)),
         'saidas': saidas,
         'tem_vaga': bool(livres) or not saidas,
-        'acomodacoes': [
-            {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa',
-             'preco': 'R$ ' + _moeda(preco_base + 1400), 'valor': preco_base + 1400,
-             'padrao': False, 'consulte': False},
-            {'chave': 'casal', 'nome': 'Casal', 'pessoas': '2 pessoas (cama de casal)',
-             'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
-             'padrao': True, 'consulte': False},
-            {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
-             'preco': 'R$ ' + _moeda(preco_base), 'valor': preco_base,
-             'padrao': False, 'consulte': False},
-            {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
-             'preco': 'R$ ' + _moeda(preco_base - 200), 'valor': preco_base - 200,
-             'padrao': False, 'consulte': False},
-            # Criança até 8 anos não paga a viagem.
-            {'chave': 'crianca', 'nome': 'Criança até 8 anos', 'pessoas': 'Não paga a viagem',
-             'preco': 'Grátis', 'valor': 0, 'padrao': False, 'consulte': False, 'gratis': True},
-        ],
+        'acomodacoes': _acomodacoes(preco_base),
         'hospedagem': {
             'nome': hospedagem_db.nome if hospedagem_db else cfg.get('hospedagem_nome', 'Pousada Soar'),
             'sub': destino.hospedagem_sub or cfg.get('hospedagem_sub', 'Conforto e natureza'),

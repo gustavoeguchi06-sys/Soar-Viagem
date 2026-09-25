@@ -32,8 +32,6 @@ ABAS = [
     ('Reservas', 'admin:reservas_reserva_changelist', 'reservas.view_reserva', 'reservas'),
     ('Orçamentos', 'admin:agencia_orcamento_changelist', 'agencia.view_orcamento', None),
     ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),
-    ('Hospedagens', 'admin:destinations_hospedagem_changelist',
-     'destinations.view_hospedagem', None),
     ('Blog Soar', 'admin:blog_artigo_changelist', 'blog.view_artigo', None),
     ('Avaliações', 'admin:reviews_avaliacao_changelist', 'reviews.view_avaliacao', 'avaliacoes'),
     ('Agências', 'admin:contas_perfilagente_changelist', 'contas.view_perfilagente', None),
@@ -105,7 +103,9 @@ class PainelSoar(AdminSite):
         # Importados aqui, e não no topo, porque este módulo é carregado quando
         # o app de admin sobe — antes dos models estarem prontos.
         from blog.models import Artigo
-        from destinations.models import Destino, Hospedagem
+        from django.utils import timezone
+
+        from destinations.models import Destino, Saida
         from reservas.models import Reserva
         from reviews.models import Avaliacao
 
@@ -114,8 +114,7 @@ class PainelSoar(AdminSite):
 
         # Um destino no ar sem preço nenhum mostra "sob consulta" no card de
         # reserva. Vale avisar antes de o cliente descobrir.
-        sem_preco = Destino.objects.filter(preco_base__isnull=True,
-                                           preco_medio_diaria__isnull=True)
+        sem_preco = Destino.objects.filter(preco_base__isnull=True)
 
         fila_avaliacoes = Avaliacao.objects.filter(publicada=False).select_related('destino')
 
@@ -129,7 +128,8 @@ class PainelSoar(AdminSite):
                 'avaliacoes_na_fila': fila_avaliacoes.count(),
                 'destinos_total': Destino.objects.count(),
                 'destinos_sem_preco': sem_preco.count(),
-                'hospedagens_total': Hospedagem.objects.count(),
+                'saidas_futuras': Saida.objects.filter(
+                    data_ida__gte=timezone.localdate()).count(),
                 'artigos_no_ar': Artigo.objects.no_ar().count(),
                 'artigos_total': Artigo.objects.count(),
 
@@ -142,8 +142,7 @@ class PainelSoar(AdminSite):
                     reverse('admin:reservas_reserva_changelist') + '?status__exact=pendente',
                 'url_destinos': reverse('admin:destinations_destino_changelist'),
                 'url_destino_novo': reverse('admin:destinations_destino_add'),
-                'url_hospedagens': reverse('admin:destinations_hospedagem_changelist'),
-                'url_hospedagem_nova': reverse('admin:destinations_hospedagem_add'),
+                'url_slides': reverse('admin:destinations_slideinicio_changelist'),
                 'url_avaliacoes': reverse('admin:reviews_avaliacao_changelist'),
                 'url_artigos': reverse('admin:blog_artigo_changelist'),
                 'url_artigo_novo': reverse('admin:blog_artigo_add'),

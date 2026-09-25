@@ -48,9 +48,14 @@
                 </ul>
 
                 <div class="resumo-viagem__preco">
+                    {% if viagem.preco %}
                     <small>A partir de</small>
                     <b>R$ {{ viagem.preco }}</b>
                     <small>por pessoa</small>
+                    {% else %}
+                    <small>Preço</small>
+                    <b>Sob consulta</b>
+                    {% endif %}
                 </div>
 
                 <p class="resumo-viagem__conta">

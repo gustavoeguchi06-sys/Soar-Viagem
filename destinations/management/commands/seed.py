@@ -20,7 +20,7 @@ class Command(BaseCommand):
                              'Tapajós, água doce e transparente, a famosa Ilha do Amor e o pôr do sol '
                              'mais bonito do Pará. A vila reúne floresta, cultura ribeirinha e um '
                              'ritmo tranquilo a 30 km de Santarém.',
-                'preco_medio_diaria': 596, 'melhor_epoca': 'Agosto a janeiro (seca do Tapajós)',
+                'preco_base': 3576, 'melhor_epoca': 'Agosto a janeiro (seca do Tapajós)',
                 'destaque': True,
                 'hospedagens': [
                     ('Pousada Vila Amazônia', 'pousada', 420, 'A duas quadras da Ilha do Amor, com '
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 'descricao': 'Uma aventura no coração do Brasil: fervedouros de água cristalina onde é '
                              'impossível afundar, dunas alaranjadas com o pôr do sol mais bonito do '
                              'cerrado, cânions, cachoeiras e o artesanato de capim dourado.',
-                'preco_medio_diaria': 598, 'melhor_epoca': 'Maio a setembro', 'destaque': True,
+                'preco_base': 3588, 'melhor_epoca': 'Maio a setembro', 'destaque': True,
                 'hospedagens': [
                     ('Pousada Jalapão', 'pousada', 480, 'Conforto e natureza, com piscina, '
                                                         'ar-condicionado e café da manhã regional.'),
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                 'descricao': 'Arquipélago paradisíaco com as praias mais bonitas do Brasil. '
                              'Águas cristalinas, mergulho com tartarugas e golfinhos, e o famoso '
                              'pôr do sol do Forte do Boldró.',
-                'preco_medio_diaria': 650, 'melhor_epoca': 'Agosto a dezembro', 'destaque': True,
+                'preco_base': 3900, 'melhor_epoca': 'Agosto a dezembro', 'destaque': True,
                 'hospedagens': [
                     ('Pousada Maravilha', 'pousada', 1800, 'Vista para o Mar de Fora, piscina de borda infinita.'),
                     ('Hostel Ilha Azul', 'hostel', 220, 'Opção econômica perto da Vila dos Remédios.'),

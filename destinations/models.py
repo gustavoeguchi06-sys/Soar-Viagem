@@ -62,8 +62,6 @@ class Destino(models.Model):
     pais = models.CharField('País', max_length=80, default='Brasil')
     descricao = models.TextField('Descrição')
     imagem_capa = models.ImageField('Imagem de capa', upload_to='destinos/', blank=True, null=True)
-    preco_medio_diaria = models.DecimalField('Preço médio da diária (R$)', max_digits=8,
-                                             decimal_places=2, blank=True, null=True)
     melhor_epoca = models.CharField('Melhor época para visitar', max_length=120, blank=True)
     destaque = models.BooleanField('Destaque na página inicial', default=False)
     soar_60 = models.BooleanField(
@@ -106,7 +104,7 @@ class Destino(models.Model):
     preco_base = models.DecimalField('Preço da viagem por pessoa (R$)', max_digits=9,
                                      decimal_places=2, blank=True, null=True,
                                      help_text='Valor por pessoa em quarto de casal, que abre o card '
-                                               'de reserva. Sem isso, calcula a partir da diária média.')
+                                               'de reserva. Sem ele, a página mostra "sob consulta".')
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,

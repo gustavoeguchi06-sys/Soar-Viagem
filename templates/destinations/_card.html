@@ -14,8 +14,6 @@
         <div class="card-rodape">
             {% if destino.preco_base %}
                 <span class="preco"><small>a partir de</small> R$ {{ destino.preco_base|floatformat:"0g" }} <small>/ pessoa</small></span>
-            {% elif destino.preco_medio_diaria %}
-                <span class="preco">R$ {{ destino.preco_medio_diaria }} <small>/ diária</small></span>
             {% else %}
                 <span class="preco"><small>Preço sob consulta</small></span>
             {% endif %}

@@ -57,10 +57,10 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
             <span class="ficha__nota">de {{ painel.destinos_total }} destino{{ painel.destinos_total|pluralize }} no ar</span>
         </a>
 
-        <a class="ficha ficha--calma" href="{{ painel.url_hospedagens }}">
-            <span class="ficha__rotulo">Hospedagens</span>
-            <strong class="ficha__numero">{{ painel.hospedagens_total }}</strong>
-            <span class="ficha__nota">cadastradas nos destinos</span>
+        <a class="ficha ficha--calma" href="{% url 'destinations:calendario' %}" target="_blank" rel="noopener">
+            <span class="ficha__rotulo">Próximas saídas</span>
+            <strong class="ficha__numero">{{ painel.saidas_futuras }}</strong>
+            <span class="ficha__nota">datas no calendário do site</span>
         </a>
         <a class="ficha ficha--calma" href="{{ painel.url_artigos }}">
             <span class="ficha__rotulo">Blog Soar</span>
@@ -75,9 +75,9 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
             <span class="atalho__mais" aria-hidden="true">+</span>
             <span>Novo destino<small>página de viagem completa</small></span>
         </a>
-        <a class="atalho" href="{{ painel.url_hospedagem_nova }}">
+        <a class="atalho" href="{{ painel.url_slides }}">
             <span class="atalho__mais" aria-hidden="true">+</span>
-            <span>Nova hospedagem<small>com foto e diária</small></span>
+            <span>Fotos da página inicial<small>o carrossel do topo</small></span>
         </a>
         <a class="atalho" href="{{ painel.url_artigo_novo }}">
             <span class="atalho__mais" aria-hidden="true">+</span>

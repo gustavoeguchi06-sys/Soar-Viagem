@@ -2,7 +2,7 @@
 
 Duas decisões guiam este arquivo:
 
-**Preço se edita na lista.** Corrigir a diária de seis destinos abrindo seis
+**Preço se edita na lista.** Corrigir o preço de seis destinos abrindo seis
 formulários e salvando seis vezes é o tipo de tarefa que o dono deixa para
 depois — e o site fica com preço velho. Com `list_editable`, a lista vira uma
 planilha: digita, salva uma vez.
@@ -121,13 +121,25 @@ class PerguntaFrequenteInline(admin.TabularInline):
     classes = ['collapse']
 
 
-class HospedagemInline(admin.TabularInline):
+class HospedagemInline(admin.StackedInline):
+    """A hospedagem é parte do pacote: cadastra-se dentro do destino.
+
+    A Soar não vende hospedagem avulsa, então ela não tem tela própria no
+    painel. Nome, endereço e foto principal ficam aqui; as fotos extras (os
+    quartos) abrem pelo link "mais fotos" de cada hospedagem.
+    """
+
     model = Hospedagem
     extra = 0
-    fields = ['nome', 'endereco', 'pacote_completo']
+    fields = ['nome', 'endereco', 'imagem', 'previa']
+    readonly_fields = ['previa']
     show_change_link = True
     verbose_name = 'hospedagem'
-    verbose_name_plural = 'Hospedagens deste destino (clique em "alterar" para fotos e endereço)'
+    verbose_name_plural = 'Hospedagem do pacote'
+
+    @admin.display(description='Foto como fica no site')
+    def previa(self, hospedagem):
+        return miniatura(hospedagem.imagem, hospedagem.nome)
 
 
 # --------------------------------------------------------------------------- #
@@ -156,10 +168,10 @@ class SaidaInline(admin.TabularInline):
 
 @admin.register(Destino)
 class DestinoAdmin(admin.ModelAdmin):
-    list_display = ['capa', 'nome', 'regiao', 'preco_base', 'preco_medio_diaria',
+    list_display = ['capa', 'nome', 'regiao', 'preco_base',
                     'saidas_no_site', 'destaque', 'soar_60', 'situacao', 'no_site']
     list_display_links = ['nome']
-    list_editable = ['preco_base', 'preco_medio_diaria', 'destaque', 'soar_60']
+    list_editable = ['preco_base', 'destaque', 'soar_60']
     list_filter = ['destaque', 'soar_60', 'regiao']
     search_fields = ['nome', 'regiao', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
@@ -179,9 +191,10 @@ class DestinoAdmin(admin.ModelAdmin):
                            'tem texto padrão e pode ficar para depois.',
         }),
         ('Preços', {
-            'fields': ['preco_base', 'preco_medio_diaria'],
-            'description': 'O preço por pessoa é o que abre o card de reserva. '
-                           'Sem nenhum dos dois, a página mostra “sob consulta”.',
+            'fields': ['preco_base'],
+            'description': 'O preço por pessoa em quarto de casal abre o card de reserva; os '
+                           'outros quartos são calculados a partir dele. Em branco, a '
+                           'página mostra “sob consulta”.',
         }),
         ('Capa da página de viagem', {
             'classes': ['collapse'],
@@ -223,7 +236,7 @@ class DestinoAdmin(admin.ModelAdmin):
 
     @admin.display(description='Situação')
     def situacao(self, destino):
-        if destino.preco_base or destino.preco_medio_diaria:
+        if destino.preco_base:
             return format_html('<span class="etiqueta etiqueta--confirmada">no ar</span>')
         return format_html('<span class="etiqueta etiqueta--fila">sem preço</span>')
 
@@ -252,10 +265,15 @@ class ImagemHospedagemInline(admin.TabularInline):
 
 @admin.register(Hospedagem)
 class HospedagemAdmin(admin.ModelAdmin):
-    list_display = ['foto', 'nome', 'destino', 'endereco', 'pacote_completo']
+    """Tela de uma hospedagem, só para as fotos extras dos quartos.
+
+    Não aparece no menu do painel (a hospedagem se cadastra dentro do
+    destino); abre pelo link "mais fotos" na tela do destino.
+    """
+
+    list_display = ['foto', 'nome', 'destino', 'endereco']
     list_display_links = ['nome']
-    list_editable = ['pacote_completo']
-    list_filter = ['pacote_completo', 'destino']
+    list_filter = ['destino']
     search_fields = ['nome', 'destino__nome']
     autocomplete_fields = ['destino']
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
@@ -266,7 +284,7 @@ class HospedagemAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('A hospedagem', {
-            'fields': ['destino', 'nome', 'endereco', 'pacote_completo'],
+            'fields': ['destino', 'nome', 'endereco'],
         }),
         ('Foto', {
             'fields': ['imagem', 'previa_imagem'],
@@ -275,6 +293,19 @@ class HospedagemAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('destino')
+
+    def has_module_permission(self, request):
+        return False
+
+    def response_change(self, request, obj):
+        """Salvou as fotos: volta para o destino, onde a hospedagem mora."""
+        if '_continue' not in request.POST and '_addanother' not in request.POST:
+            from django.http import HttpResponseRedirect
+            from django.urls import reverse
+            self.message_user(request, 'Fotos da hospedagem salvas.')
+            return HttpResponseRedirect(reverse('admin:destinations_destino_change',
+                                                args=[obj.destino_id]))
+        return super().response_change(request, obj)
 
     @admin.display(description='')
     def foto(self, hospedagem):

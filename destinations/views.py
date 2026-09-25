@@ -11,7 +11,7 @@ from reviews.forms import AvaliacaoForm
 from soar.seguranca import LIMITE_AVALIACAO, ip_do_cliente
 
 from .conteudo import montar_viagem
-from .inicio import DURACOES, dias_da_saida, montar_inicio
+from .inicio import montar_inicio
 from .models import MESES, Destino, Saida
 
 # Uma busca útil cabe numa linha. Acima disso é só custo: o filtro varre a
@@ -43,7 +43,7 @@ def lista_destinos(request):
     else:
         regiao = ''
 
-    # Filtros da busca da página inicial: mês da saída, estilo e duração.
+    # Filtros da busca da página inicial: mês da saída e estilo.
     filtros = []
     hoje = timezone.localdate()
     saidas = Saida.objects.filter(data_ida__gte=hoje)
@@ -53,15 +53,7 @@ def lista_destinos(request):
         filtros.append('saídas em {}'.format(MESES[int(mes)].lower()))
     else:
         mes = ''
-    duracao = request.GET.get('duracao', '')
-    if duracao in dict(DURACOES):
-        faixa = {'curta': (1, 3), 'media': (4, 5), 'longa': (6, 999)}[duracao]
-        ids = {s.pk for s in saidas if faixa[0] <= dias_da_saida(s) <= faixa[1]}
-        saidas = saidas.filter(pk__in=ids)
-        filtros.append(dict(DURACOES)[duracao].lower())
-    else:
-        duracao = ''
-    if mes or duracao:
+    if mes:
         destinos = destinos.filter(pk__in=saidas.values('destino'))
     estilo = request.GET.get('estilo', '').strip()[:40]
     if estilo:
@@ -69,8 +61,7 @@ def lista_destinos(request):
         filtros.append('estilo {}'.format(estilo.lower()))
 
     # os filtros vão junto nos links de página e de região
-    mantidos = {k: v for k, v in (('q', busca), ('mes', mes), ('duracao', duracao),
-                                  ('estilo', estilo)) if v}
+    mantidos = {k: v for k, v in (('q', busca), ('mes', mes), ('estilo', estilo)) if v}
 
     # Paginação: sem ela, uma busca ampla renderiza o catálogo todo de uma vez.
     pagina = Paginator(destinos, POR_PAGINA).get_page(request.GET.get('pagina'))
