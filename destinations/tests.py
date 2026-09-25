@@ -76,3 +76,12 @@ class SaidasTests(TestCase):
         resposta = self.client.get(self.destino.get_absolute_url())
         self.assertContains(resposta, 'Próxima saída')
         self.assertContains(resposta, 'Vagas disponíveis')
+
+
+class ServiceWorkerTests(TestCase):
+    def test_sw_js_desinstala_o_worker_antigo(self):
+        resposta = self.client.get('/sw.js')
+        self.assertEqual(resposta.status_code, 200)
+        self.assertIn('javascript', resposta['Content-Type'])
+        self.assertIn('unregister', resposta.content.decode())
+        self.assertEqual(resposta['Cache-Control'], 'no-store')
