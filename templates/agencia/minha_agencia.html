@@ -1,0 +1,33 @@
+{% extends 'agencia/_base.html' %}
+
+{% block titulo %}Minha agência{% endblock %}
+
+{% block corpo %}
+<div class="ag-ficha">
+    <div class="cartao-form">
+        <h2>Dados da agência</h2>
+        <dl class="dados-agente">
+            <dt>Razão social</dt><dd>{{ request.agencia.razao_social }}</dd>
+            <dt>CNPJ</dt><dd>{{ request.agencia.cnpj_formatado }}</dd>
+            <dt>CADASTUR</dt><dd>{{ request.agencia.cadastur }}</dd>
+            <dt>Responsável</dt><dd>{{ user.get_full_name|default:user.username }}</dd>
+            <dt>E-mail</dt><dd>{{ user.email }}</dd>
+            <dt>WhatsApp</dt><dd>{{ request.agencia.whatsapp }}</dd>
+        </dl>
+        <p class="conta-lado__ajuda ag-ajuda">Algum dado mudou?
+            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Avise a Soar no WhatsApp</a>.</p>
+    </div>
+
+    <div class="cartao-form">
+        <h2>Link de indicação</h2>
+        <p class="cartao-form__sub">Seu código é <b>{{ request.agencia.codigo }}</b>. Mande o link para
+           os clientes: quem reservar por ele aparece no seu painel.</p>
+        <div class="ag-copiar">
+            <input type="text" readonly value="{{ link_indicacao }}" id="linkIndicacao" aria-label="Link de indicação">
+            <button type="button" class="btn btn--verde btn--sm" data-copiar="linkIndicacao">Copiar link</button>
+        </div>
+        <p class="campo__ajuda ag-dica">Também funciona no link de uma viagem: acrescente
+           <b>?ag={{ request.agencia.codigo }}</b> no fim do endereço da página.</p>
+    </div>
+</div>
+{% endblock %}

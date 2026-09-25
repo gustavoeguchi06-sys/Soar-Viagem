@@ -53,6 +53,13 @@
                     <small>por tipo de quarto</small>
                 </div>
 
+                {% if agencia %}
+                <p class="resumo-viagem__conta">
+                    Atendimento pela agência parceira <b>{{ agencia.razao_social }}</b>, que
+                    indicou a Soar para você. Ela recebe seu nome, e-mail, telefone e os dados
+                    deste pedido para cuidar da sua viagem.
+                </p>
+                {% endif %}
                 <p class="resumo-viagem__conta">
                     Reservando como <b>{{ user.first_name|default:user.username }}</b>
                     ({{ user.email|default:"sem e-mail cadastrado" }}).

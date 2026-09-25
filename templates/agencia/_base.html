@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% block titulo %}Painel{% endblock %} | Painel da agência | Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta pagina-agencia{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}
+<link rel="stylesheet" href="{% static 'css/contas.css' %}">
+<link rel="stylesheet" href="{% static 'css/agencia.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="ag">
+    <div class="ag-faixa">
+        <div class="wrap ag-faixa__dentro">
+            <div class="ag-faixa__quem">
+                <span class="ag-faixa__selo">Painel da agência</span>
+                <h1>{{ request.agencia.razao_social }}</h1>
+                <p>Olá, {{ user.first_name|default:user.username }}. Aqui ficam os pedidos dos
+                   seus clientes e os orçamentos que você montou.</p>
+            </div>
+            <div class="ag-faixa__acoes">
+                <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">+ Novo orçamento</a>
+                <form action="{% url 'contas:sair' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--sm ag-btn-sair">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-sair"></use></svg>
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </div>
+        <nav class="wrap ag-abas" aria-label="Seções do painel da agência">
+            <a href="{% url 'agencia:painel' %}" {% if aba == 'painel' %}aria-current="page"{% endif %}>Visão geral</a>
+            <a href="{% url 'agencia:reservas' %}" {% if aba == 'reservas' %}aria-current="page"{% endif %}>Reservas dos clientes</a>
+            <a href="{% url 'agencia:orcamentos' %}" {% if aba == 'orcamentos' %}aria-current="page"{% endif %}>Orçamentos</a>
+            <a href="{% url 'agencia:minha_agencia' %}" {% if aba == 'agencia' %}aria-current="page"{% endif %}>Minha agência</a>
+        </nav>
+    </div>
+
+    <div class="wrap ag-corpo">
+        {% block corpo %}{% endblock %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/agencia.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'agencia/_base.html' %}
+
+{% block titulo %}{% if orcamento %}Orçamento {{ orcamento.codigo }}{% else %}Novo orçamento{% endif %}{% endblock %}
+
+{% block corpo %}
+<p class="voltar"><a href="{% url 'agencia:orcamentos' %}">&larr; Voltar para os orçamentos</a></p>
+
+<div class="cartao-form ag-form">
+    {% if orcamento %}
+    <span class="reserva-item__codigo">{{ orcamento.codigo }} · criado em {{ orcamento.criado_em|date:"d/m/Y" }}</span>
+    <h1>Orçamento de {{ orcamento.cliente_nome }}</h1>
+    {% else %}
+    <h1>Novo orçamento</h1>
+    <p class="cartao-form__sub">Registre o que você passou ao cliente para acompanhar a resposta.</p>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="form-aviso">{% for erro in form.non_field_errors %}<p>{{ erro }}</p>{% endfor %}</div>
+        {% endif %}
+
+        <fieldset class="ag-bloco">
+            <legend>Cliente</legend>
+            <div class="ag-grade">
+                {% include 'agencia/_campo.html' with campo=form.cliente_nome largo=True %}
+                {% include 'agencia/_campo.html' with campo=form.cliente_telefone %}
+                {% include 'agencia/_campo.html' with campo=form.cliente_email %}
+            </div>
+        </fieldset>
+
+        <fieldset class="ag-bloco">
+            <legend>Viagem</legend>
+            <div class="ag-grade">
+                {% include 'agencia/_campo.html' with campo=form.destino %}
+                {% include 'agencia/_campo.html' with campo=form.saida_escolhida %}
+                {% include 'agencia/_campo.html' with campo=form.acomodacao %}
+                {% include 'agencia/_campo.html' with campo=form.pessoas %}
+            </div>
+        </fieldset>
+
+        <fieldset class="ag-bloco">
+            <legend>Valor e resposta</legend>
+            <div class="ag-grade">
+                {% include 'agencia/_campo.html' with campo=form.valor %}
+                {% include 'agencia/_campo.html' with campo=form.validade %}
+                {% include 'agencia/_campo.html' with campo=form.status %}
+                {% include 'agencia/_campo.html' with campo=form.observacoes largo=True %}
+            </div>
+        </fieldset>
+
+        <button type="submit" class="btn btn--verde btn--bloco">
+            {% if orcamento %}Salvar orçamento{% else %}Criar orçamento{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}

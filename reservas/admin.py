@@ -19,10 +19,10 @@ from .models import Reserva
 @admin.register(Reserva)
 class ReservaAdmin(admin.ModelAdmin):
     list_display = ['codigo', 'situacao', 'destino', 'cliente', 'contato',
-                    'pessoas', 'acomodacao', 'total', 'status', 'criado_em']
+                    'pessoas', 'acomodacao', 'total', 'agencia', 'status', 'criado_em']
     list_display_links = ['codigo']
     list_editable = ['status']
-    list_filter = ['status', 'destino', 'acomodacao']
+    list_filter = ['status', 'destino', 'acomodacao', 'agencia']
     search_fields = ['usuario__first_name', 'usuario__username', 'usuario__email',
                      'destino__nome', 'telefone']
     date_hierarchy = 'criado_em'
@@ -44,6 +44,11 @@ class ReservaAdmin(admin.ModelAdmin):
         ('A viagem pedida', {
             'fields': ['destino', 'acomodacao', 'pessoas'],
         }),
+        ('Agência parceira', {
+            'fields': ['agencia', 'nota_agencia'],
+            'description': 'A agência escolhida aqui passa a ver esta reserva no painel '
+                           'dela e pode atender o cliente. Em branco, só a Soar vê.',
+        }),
         ('Registro do momento do pedido', {
             'fields': ['preco_estimado', 'total', 'saida', 'criado_em', 'atualizado_em'],
             'description': 'Guardado automaticamente quando o cliente pediu a reserva. '
@@ -53,7 +58,7 @@ class ReservaAdmin(admin.ModelAdmin):
     ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('destino', 'usuario')
+        return super().get_queryset(request).select_related('destino', 'usuario', 'agencia')
 
     def get_ordering(self, request):
         """Pendente primeiro: é a fila de quem está esperando resposta.
