@@ -199,10 +199,29 @@ class PaginaInicialTests(TestCase):
                       'Últimas vagas', 'R$ 3.690', 'Natureza']:
             self.assertContains(r, texto)
 
-    def test_busca_por_mes_estilo_e_duracao(self):
+    def test_busca_por_destino_mes_e_estilo(self):
         mes = self.s.data_ida.month
         outro = mes % 12 + 1
-        self.assertContains(self.client.get(f'/destinos/?mes={mes}&estilo=Natureza&duracao=media'), 'Bonito')
+        pagina = self.client.get('/')
+        self.assertContains(pagina, '<option value="Bonito">Bonito</option>', html=True)
+        self.assertNotContains(pagina, 'name="duracao"')
+        self.assertContains(self.client.get(f'/destinos/?q=Bonito&mes={mes}&estilo=Natureza'), 'Bonito')
         self.assertNotContains(self.client.get(f'/destinos/?mes={outro}'), '/destinos/bonito/')
-        self.assertNotContains(self.client.get('/destinos/?duracao=longa'), '/destinos/bonito/')
         self.assertNotContains(self.client.get('/destinos/?estilo=Cultura'), '/destinos/bonito/')
+
+
+class SemPrecoTests(TestCase):
+    def test_destino_sem_preco_mostra_sob_consulta(self):
+        d = Destino.objects.create(nome='Caraça', slug='caraca', descricao='Santuário.')
+        r = self.client.get(d.get_absolute_url())
+        self.assertContains(r, 'Sob consulta')
+        self.assertNotContains(r, '3.588')
+
+    def test_hospedagem_fora_do_menu_e_dentro_do_destino(self):
+        from django.contrib.auth.models import User
+        dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(dono)
+        d = Destino.objects.create(nome='Caraça', slug='caraca', descricao='Santuário.')
+        tela = self.client.get(f'/painel/destinations/destino/{d.pk}/change/')
+        self.assertContains(tela, 'Hospedagem do pacote')
+        self.assertNotContains(self.client.get('/painel/'), '/painel/destinations/hospedagem/')

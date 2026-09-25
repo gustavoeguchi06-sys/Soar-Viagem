@@ -150,9 +150,15 @@
         <aside class="lateral" id="reservar">
             <div class="reserva">
                 <span class="selo-disp">Disponível</span>
+                {% if viagem.preco %}
                 <p class="reserva__label">A partir de</p>
                 <p class="reserva__preco"><span>R$</span><b>{{ viagem.preco }}</b></p>
                 <p class="reserva__pp">por pessoa</p>
+                {% else %}
+                <p class="reserva__label">Preço</p>
+                <p class="reserva__preco"><b>Sob consulta</b></p>
+                <p class="reserva__pp">fale com a Soar para saber o valor</p>
+                {% endif %}
 
                 {% comment %}GET e nao POST de proposito: a escolha vai na URL e
                 sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}

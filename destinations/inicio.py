@@ -26,12 +26,6 @@ SLIDES_PADRAO = [
 ILUSTRACOES = ['img/cachoeira.svg', 'img/rio.svg', 'img/dunas.svg', 'img/palmeiras.svg',
                'img/hero-jalapao.svg', 'img/placa.svg', 'img/alter-por-do-sol.svg']
 
-DURACOES = [
-    ('curta', 'Até 3 dias'),
-    ('media', '4 a 5 dias'),
-    ('longa', '6 dias ou mais'),
-]
-
 MOTIVOS = [
     ('ic-onibus', 'Transporte confortável',
      'Veículos fretados e estrutura pensada para viagens em grupo.'),
@@ -176,7 +170,8 @@ def montar_inicio():
         'nomes': [v['curto'] for v in sorted(viagens, key=lambda v: (not v['destaque'], v['nome']))][:6],
         'meses': [(n, MESES[n]) for n in range(1, 13)],
         'estilos': estilos,
-        'duracoes': DURACOES,
+        # "Para onde?": todos os destinos do site, em ordem alfabética
+        'destinos': sorted(v['nome'] for v in viagens),
         'experiencias': experiencias,
         'amados': amados,
         'motivos': MOTIVOS,
