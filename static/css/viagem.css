@@ -640,3 +640,6 @@ body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color:
 /* :where() derruba a especificidade para 0-0-1: o link comum fica verde, mas
    quem tem cor propria (.btn--verde, .filtro.ativo...) continua mandando. */
 :where(body:not(.pagina-viagem)) a { color: var(--verde); }
+
+/* criança até 8 anos não paga: o preço aparece em verde */
+.acom__preco.gratis { color: var(--verde); }

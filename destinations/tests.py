@@ -104,3 +104,25 @@ class CartaoDestinoTests(TestCase):
         self.assertTrue(destino.capa_card.endswith('.svg'))
         resposta = self.client.get('/destinos/')
         self.assertNotContains(resposta, '🏝')
+
+
+class CriancaNaoPagaTests(TestCase):
+    def test_crianca_gratis_e_sem_botao_de_agente(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                         preco_base=3000)
+        resposta = self.client.get(destino.get_absolute_url())
+        self.assertContains(resposta, 'Criança até 8 anos')
+        self.assertContains(resposta, 'Grátis')
+        self.assertNotContains(resposta, 'Falar com o agente')
+
+    def test_reserva_de_crianca_sai_gratis(self):
+        from django.contrib.auth.models import User
+        from reservas.models import Reserva
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                         preco_base=3000)
+        cliente = User.objects.create_user('cli', 'cli@exemplo.com', 'senha-boa-123')
+        self.client.force_login(cliente)
+        self.client.post('/reservar/bonito/', {'acomodacao': 'crianca', 'pessoas': 1})
+        reserva = Reserva.objects.get()
+        self.assertEqual(reserva.preco_estimado, 0)
+        self.assertContains(self.client.get('/minha-conta/'), 'Grátis')

@@ -18,7 +18,7 @@ class Reserva(models.Model):
         ('casal', 'Casal: 2 pessoas'),
         ('duplo', 'Duplo (Twin): 2 pessoas'),
         ('triplo', 'Triplo: 3 pessoas'),
-        ('crianca', 'Criança (8 anos)'),
+        ('crianca', 'Criança até 8 anos (não paga)'),
     ]
 
     STATUS = [

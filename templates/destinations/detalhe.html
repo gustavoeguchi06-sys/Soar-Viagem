@@ -154,10 +154,6 @@
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
                         {% if user.is_authenticated %}Reservar agora{% else %}Entrar para reservar{% endif %}
                     </button>
-                <a class="btn btn--contorno btn--bloco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
-                    <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
-                    Falar com o agente de viagem
-                </a>
 
                 <div class="reserva__divisor"></div>
 
@@ -208,7 +204,7 @@
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"
                                {% if a.padrao %}checked{% endif %}>
                         <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small></span>
-                        <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
+                        <span class="acom__preco {% if a.consulte %}consulte{% endif %}{% if a.gratis %} gratis{% endif %}">{{ a.preco }}</span>
                     </label>
                     {% endfor %}
                 </div>

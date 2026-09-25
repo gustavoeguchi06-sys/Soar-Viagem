@@ -106,6 +106,8 @@ class ReservaAdmin(admin.ModelAdmin):
 
     @admin.display(description='Total estimado')
     def total(self, reserva):
+        if reserva.acomodacao == 'crianca':
+            return 'Grátis'
         if reserva.total_estimado is None:
             return '-'
         # number_format respeita o pt-br do projeto: 1.234,50 e não 1,234.50.
