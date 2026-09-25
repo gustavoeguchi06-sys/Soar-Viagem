@@ -664,3 +664,13 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .nota > a { color: rgba(255, 255, 255, .9); font-size: .92rem; text-decoration: underline; text-underline-offset: 3px; }
 .depo-vazio { padding: 18px 4px; color: var(--tinta-suave); font-size: .92rem; }
 .depo-vazio a { color: var(--verde); font-weight: 700; }
+
+/* botão de voltar no topo da página da viagem */
+.btn-voltar { display: flex; width: fit-content; align-items: center; gap: 6px; margin-bottom: 16px;
+              padding: 8px 16px 8px 11px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .45);
+              background: rgba(10, 20, 16, .35); backdrop-filter: blur(4px);
+              color: #fff !important; font-size: .82rem; font-weight: 700; letter-spacing: .02em;
+              text-decoration: none; transition: background .15s, border-color .15s; }
+.btn-voltar:hover { background: rgba(255, 255, 255, .18); border-color: #fff; }
+.btn-voltar .ic { width: 16px; height: 16px; stroke-width: 2.2; }
+@media (pointer: coarse) { .btn-voltar { min-height: 40px; } }
