@@ -126,3 +126,38 @@ class CriancaNaoPagaTests(TestCase):
         reserva = Reserva.objects.get()
         self.assertEqual(reserva.preco_estimado, 0)
         self.assertContains(self.client.get('/minha-conta/'), 'Grátis')
+
+
+class FuncionalidadesTests(TestCase):
+    def setUp(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        self.destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                              preco_base=3000)
+        hoje = timezone.localdate()
+        self.saida = Saida.objects.create(destino=self.destino, vagas=5,
+                                          data_ida=hoje + timedelta(days=30),
+                                          data_volta=hoje + timedelta(days=34))
+
+    def test_sem_avaliacoes_nao_inventa_nota(self):
+        resposta = self.client.get(self.destino.get_absolute_url())
+        self.assertContains(resposta, 'Ainda sem avaliações')
+        self.assertNotContains(resposta, '87 avaliações')
+
+    def test_calendario_lista_as_saidas(self):
+        resposta = self.client.get('/calendario/')
+        self.assertContains(resposta, 'Bonito')
+        self.assertContains(resposta, self.saida.texto)
+        self.assertContains(resposta, f'/reservar/bonito/?saida={self.saida.pk}')
+
+    def test_newsletter_grava_o_email(self):
+        from blog.models import Inscricao
+        resposta = self.client.post('/blog/novidades/', {'email': 'Ana@Exemplo.com',
+                                                         'voltar': '/blog/'})
+        self.assertRedirects(resposta, '/blog/', fetch_redirect_response=False)
+        self.assertTrue(Inscricao.objects.filter(email='ana@exemplo.com').exists())
+        self.client.post('/blog/novidades/', {'email': 'ana@exemplo.com'})
+        self.assertEqual(Inscricao.objects.count(), 1)
+        resposta = self.client.post('/blog/novidades/', {'email': 'x',
+                                                         'voltar': 'https://golpe.com/'})
+        self.assertRedirects(resposta, '/blog/', fetch_redirect_response=False)

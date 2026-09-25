@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendário de saídas | Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap calendario">
+        <h1>Calendário de saídas</h1>
+        <p class="calendario__sub">Todas as datas em que um grupo da Soar sai, mês a mês. Escolha a
+           sua e reserve direto pela data.</p>
+
+        {% for mes in meses %}
+        <h2 class="conta-secao">{{ mes.nome }}</h2>
+        <div class="calendario__lista">
+            {% for s in mes.saidas %}
+            <article class="calendario__item{% if s.esgotada %} calendario__item--esgotada{% endif %}">
+                <div class="calendario__data" aria-hidden="true">
+                    <b>{{ s.data_ida|date:"d" }}</b><small>{{ s.data_ida|date:"b" }}</small>
+                </div>
+                <div class="calendario__info">
+                    <h3><a href="{{ s.destino.get_absolute_url }}">{{ s.destino.nome }}</a></h3>
+                    <p>{{ s.texto }} · {{ s.textos.dias }}, {{ s.textos.noites }}</p>
+                </div>
+                {% if s.esgotada %}
+                <span class="pill-vagas pill-vagas--esgotada">Esgotada</span>
+                {% elif s.vagas is None %}
+                <span class="pill-vagas pill-vagas--consulte">Consulte</span>
+                {% else %}
+                <span class="pill-vagas">{{ s.vagas }} vaga{{ s.vagas|pluralize }}</span>
+                {% endif %}
+                {% if not s.esgotada %}
+                <a class="btn btn--verde btn--sm calendario__botao" href="{% url 'reservas:nova' s.destino.slug %}?saida={{ s.pk }}">Reservar esta data</a>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% empty %}
+        <div class="conta-vazio">
+            <p>Nenhuma saída marcada no momento. Fale com a Soar para saber das próximas.</p>
+            <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver as viagens</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

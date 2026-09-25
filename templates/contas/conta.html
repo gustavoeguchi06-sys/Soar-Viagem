@@ -59,7 +59,7 @@
 
                 {% if reserva.status == 'pendente' %}
                 <form action="{% url 'reservas:cancelar' reserva.pk %}" method="post"
-                      onsubmit="return confirm('Cancelar a reserva {{ reserva.codigo }}?');">
+                      data-confirmar="Cancelar a reserva {{ reserva.codigo }}?">
                     {% csrf_token %}
                     <button type="submit" class="link-cancelar">Cancelar este pedido</button>
                 </form>

@@ -264,3 +264,23 @@ class Atracao(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Inscricao(models.Model):
+    """E-mail de quem pediu para receber as novidades do blog.
+
+    Base legal é o consentimento (LGPD, art. 7º, I): a pessoa digitou o e-mail
+    e apertou o botão sabendo para quê. Fica até ela pedir para sair.
+    """
+
+    email = models.EmailField('E-mail', unique=True)
+    origem = models.CharField('Onde se inscreveu', max_length=120, blank=True)
+    criado_em = models.DateTimeField('Inscrito em', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Inscrição na newsletter'
+        verbose_name_plural = 'Newsletter (inscritos)'
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return self.email

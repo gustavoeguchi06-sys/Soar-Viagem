@@ -654,3 +654,10 @@ body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color:
 html[data-tema="escuro"] .btn-tema__lua { display: none; }
 html[data-tema="escuro"] .btn-tema__sol { display: block; }
 @media (max-width: 520px) { .btn-tema { width: 36px; height: 36px; } }
+
+/* "+N fotos" agora é link para a galeria; sem avaliações, um convite no lugar da nota */
+.hero__thumbs a.mais { flex: none; text-decoration: none; }
+.hero__thumbs a.mais:hover { border-color: #fff; }
+.nota > a { color: rgba(255, 255, 255, .9); font-size: .92rem; text-decoration: underline; text-underline-offset: 3px; }
+.depo-vazio { padding: 18px 4px; color: var(--tinta-suave); font-size: .92rem; }
+.depo-vazio a { color: var(--verde); font-weight: 700; }
