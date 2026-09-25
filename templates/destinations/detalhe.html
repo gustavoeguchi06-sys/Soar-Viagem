@@ -23,8 +23,8 @@
             <div class="migalhas">
                 <a href="{% url 'destinations:home' %}">Home</a> <span class="sep">›</span>
                 <a href="{% url 'destinations:lista' %}">Viagens</a> <span class="sep">›</span>
-                <a href="{% url 'destinations:lista' %}">{{ viagem.regiao }}</a> <span class="sep">›</span>
-                <a href="{% url 'destinations:lista' %}">{{ viagem.curto }}</a> <span class="sep">›</span>
+                <a href="{% url 'destinations:lista' %}?regiao={{ viagem.regiao|urlencode }}">{{ viagem.regiao }}</a> <span class="sep">›</span>
+                {% if viagem.curto != destino.nome %}<a href="{% url 'destinations:lista' %}">{{ viagem.curto }}</a> <span class="sep">›</span>{% endif %}
                 <span class="atual">{{ destino.nome }}</span>
             </div>
 

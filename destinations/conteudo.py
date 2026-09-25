@@ -71,52 +71,143 @@ FAQ = [
 # Ajustes por destino (chave = slug)
 # --------------------------------------------------------------------------- #
 POR_DESTINO = {
-    'alter-do-chao': {
+    'lencois-maranhenses': {
         'selo': 'Expedição',
-        'subtitulo': 'O paraíso amazônico te espera',
-        'regiao': 'Norte',
-        'estado': 'Pará',
-        'periodo': '15 a 18',
-        'mes_ano': 'Maio 2027',
-        'dias': '4 dias',
-        'noites': '3 noites',
-        'proxima_saida': '15 a 18 de Maio de 2027',
-        'vagas': 14,
-        'nota': '4,9',
-        'total_avaliacoes': 128,
-        'preco_base': 2980,
-        'mais_fotos': 28,
-        'hospedagem_nome': 'Pousada Vila Amazônia',
-        'hospedagem_sub': 'A duas quadras da Ilha do Amor',
-        'fotos': ['img/alter-1.svg', 'img/alter-2.svg', 'img/alter-3.svg',
-                  'img/alter-4.svg', 'img/alter-5.svg', 'img/alter-por-do-sol.svg'],
+        'subtitulo': 'Dunas brancas e lagoas azuis a perder de vista',
+        'regiao': 'Nordeste',
+        'estado': 'Maranhão',
+        'hospedagem_nome': 'Pousada parceira em Barreirinhas',
+        'hospedagem_sub': 'Na beira do Rio Preguiças',
+        'fotos': ['img/dunas.svg', 'img/rio.svg', 'img/palmeiras.svg',
+                  'img/hero-jalapao.svg', 'img/placa.svg', 'img/cachoeira.svg'],
         'destaques': [
-            'Ilha do Amor', 'Lago Verde', 'Praia de Ponta de Pedras',
-            'Floresta Nacional do Tapajós', 'Pôr do sol no Tapajós', 'Vila de Alter do Chão',
+            'Lagoa Azul', 'Lagoa Bonita', 'Rio Preguiças',
+            'Vassouras e Mandacaru', 'Caburé', 'Pôr do sol nas dunas',
         ],
         'roteiro': [
-            {'titulo': 'Dia 1: Chegada em Santarém',
-             'resumo': 'Recepção no aeroporto e traslado até a vila de Alter do Chão.',
-             'detalhe': 'Recepção da equipe Soar no aeroporto de Santarém e traslado de cerca de '
-                        '40 minutos até a vila. Check-in, tarde livre e encontro do grupo ao pôr do sol.'},
-            {'titulo': 'Dia 2: Ilha do Amor e Lago Verde',
-             'resumo': 'Travessia para a Ilha do Amor e volta de barco pelo Lago Verde.',
-             'detalhe': 'Manhã na Ilha do Amor, a faixa de areia branca que aparece na seca do Tapajós. '
-                        'À tarde, passeio de barco pelo Lago Verde com paradas para banho.'},
-            {'titulo': 'Dia 3: Floresta Nacional do Tapajós',
-             'resumo': 'Trilha guiada na floresta e visita a uma comunidade ribeirinha.',
-             'detalhe': 'Dia inteiro na Flona do Tapajós: trilha interpretativa com guia local, '
-                        'a sumaúma gigante e almoço em uma comunidade ribeirinha.'},
-            {'titulo': 'Dia 4: Ponta de Pedras e retorno',
-             'resumo': 'Última manhã de praia e traslado de volta a Santarém.',
-             'detalhe': 'Manhã livre na Praia de Ponta de Pedras, almoço na vila e traslado '
-                        'para o aeroporto de Santarém conforme o horário do seu voo.'},
+            {'titulo': 'Dia 1: São Luís → Barreirinhas',
+             'resumo': 'Recepção em São Luís e estrada até Barreirinhas.',
+             'detalhe': 'Recepção da equipe Soar no aeroporto de São Luís e viagem de cerca de '
+                        '4 horas até Barreirinhas, a porta de entrada do parque. Check-in e jantar '
+                        'de boas-vindas com o grupo.'},
+            {'titulo': 'Dia 2: Circuito Lagoa Azul',
+             'resumo': 'Travessia de 4x4 e caminhada entre as dunas até a Lagoa Azul.',
+             'detalhe': 'Saída de 4x4 com travessia do Rio Preguiças de balsa. Caminhada leve pelas '
+                        'dunas até a Lagoa Azul e a Lagoa Esmeralda, com tempo para banho.'},
+            {'titulo': 'Dia 3: Lagoa Bonita e pôr do sol',
+             'resumo': 'Subida da grande duna da Lagoa Bonita e pôr do sol no parque.',
+             'detalhe': 'À tarde, subida da duna mais alta do circuito até a Lagoa Bonita, banho '
+                        'nas lagoas e o pôr do sol sobre os Lençóis, o momento mais bonito da viagem.'},
+            {'titulo': 'Dia 4: Rio Preguiças',
+             'resumo': 'Passeio de lancha até Vassouras, Mandacaru e Caburé.',
+             'detalhe': 'Descida do Rio Preguiças com paradas nos Pequenos Lençóis de Vassouras, '
+                        'no farol de Mandacaru e almoço em Caburé, entre o rio e o mar.'},
+            {'titulo': 'Dia 5: Retorno',
+             'resumo': 'Café da manhã e estrada de volta a São Luís.',
+             'detalhe': 'Café da manhã, despedida de Barreirinhas e retorno a São Luís para o voo '
+                        'de volta, conforme o horário de cada um.'},
         ],
-        'depoimentos': [
-            {'nome': 'Mariana S.', 'local': 'São Paulo/SP', 'nota': 5,
-             'texto': 'Lugar incrível! A Soar cuidou de tudo nos mínimos detalhes.'},
-            {'nome': 'Bruno C.', 'local': 'Alter do Chão/PA', 'nota': 5,
-             'texto': 'A Ilha do Amor no fim da tarde é uma das coisas mais bonitas que já vi no Brasil.'},
+    },
+    'bonito': {
+        'selo': 'Expedição',
+        'subtitulo': 'Rios de água cristalina no coração do Mato Grosso do Sul',
+        'regiao': 'Centro-Oeste',
+        'estado': 'Mato Grosso do Sul',
+        'hospedagem_nome': 'Pousada parceira no centro de Bonito',
+        'hospedagem_sub': 'A poucos passos da rua principal',
+        'fotos': ['img/rio.svg', 'img/cachoeira.svg', 'img/palmeiras.svg',
+                  'img/hero-jalapao.svg', 'img/dunas.svg', 'img/placa.svg'],
+        'destaques': [
+            'Flutuação no Rio da Prata', 'Gruta do Lago Azul', 'Buraco das Araras',
+            'Balneário Municipal', 'Cachoeiras da Boca da Onça', 'Centrinho de Bonito',
+        ],
+        'roteiro': [
+            {'titulo': 'Dia 1: Campo Grande → Bonito',
+             'resumo': 'Recepção em Campo Grande e estrada até Bonito.',
+             'detalhe': 'Recepção da equipe Soar no aeroporto de Campo Grande e viagem de cerca de '
+                        '4 horas até Bonito. Check-in e noite livre no centrinho.'},
+            {'titulo': 'Dia 2: Gruta do Lago Azul e Balneário',
+             'resumo': 'A gruta de água azul pela manhã e banho de rio à tarde.',
+             'detalhe': 'Manhã na Gruta do Lago Azul, um dos cartões-postais da região. À tarde, '
+                        'banho no Balneário Municipal, cheio de peixes na água transparente.'},
+            {'titulo': 'Dia 3: Flutuação no Rio da Prata',
+             'resumo': 'Flutuação com snorkel em um dos rios mais cristalinos do país.',
+             'detalhe': 'Trilha curta pela mata e flutuação de colete e snorkel no Rio da Prata, '
+                        'entre peixes e nascentes. Almoço na fazenda.'},
+            {'titulo': 'Dia 4: Buraco das Araras e cachoeiras',
+             'resumo': 'Dolina com araras-vermelhas e dia de cachoeiras.',
+             'detalhe': 'Manhã no Buraco das Araras, uma dolina gigante onde vivem araras-vermelhas. '
+                        'À tarde, trilha e banho nas cachoeiras da Boca da Onça.'},
+            {'titulo': 'Dia 5: Retorno',
+             'resumo': 'Café da manhã e estrada de volta a Campo Grande.',
+             'detalhe': 'Café da manhã, despedida do grupo e retorno a Campo Grande para o voo de volta.'},
+        ],
+    },
+    'serra-da-canastra': {
+        'selo': 'Natureza',
+        'subtitulo': 'Onde nasce o Rio São Francisco',
+        'regiao': 'Sudeste',
+        'estado': 'Minas Gerais',
+        'hospedagem_nome': 'Pousada parceira em São Roque de Minas',
+        'hospedagem_sub': 'Pé na serra, café mineiro na mesa',
+        'fotos': ['img/cachoeira.svg', 'img/hero-jalapao.svg', 'img/rio.svg',
+                  'img/placa.svg', 'img/palmeiras.svg', 'img/dunas.svg'],
+        'destaques': [
+            'Nascente do São Francisco', 'Cachoeira Casca d’Anta', 'Parte alta do parque',
+            'Queijo canastra na fazenda', 'Mirantes da serra', 'São Roque de Minas',
+        ],
+        'roteiro': [
+            {'titulo': 'Dia 1: Belo Horizonte → São Roque de Minas',
+             'resumo': 'Recepção em Belo Horizonte e estrada até a serra.',
+             'detalhe': 'Recepção da equipe Soar em Belo Horizonte e viagem até São Roque de Minas, '
+                        'a cidade na porta do Parque Nacional. Jantar mineiro com o grupo.'},
+            {'titulo': 'Dia 2: Parte alta e nascente',
+             'resumo': 'Nascente do São Francisco e mirantes da parte alta do parque.',
+             'detalhe': 'Dia de 4x4 pela parte alta do parque: a nascente histórica do Rio São '
+                        'Francisco, os campos de altitude e o mirante da Casca d’Anta vista de cima.'},
+            {'titulo': 'Dia 3: Cachoeira Casca d’Anta',
+             'resumo': 'Trilha até a base da maior cachoeira do parque.',
+             'detalhe': 'Trilha leve pela parte baixa até o poço da Casca d’Anta, com mais de '
+                        '180 metros de queda. Tempo para banho e piquenique.'},
+            {'titulo': 'Dia 4: Queijo e retorno',
+             'resumo': 'Visita a uma fazenda de queijo canastra e volta para BH.',
+             'detalhe': 'Manhã em uma fazenda de queijo canastra, com degustação, e retorno a Belo '
+                        'Horizonte com previsão de chegada à noite.'},
+        ],
+    },
+    'canions-do-sul': {
+        'selo': 'Expedição',
+        'subtitulo': 'Os grandes cânions entre a serra gaúcha e o litoral catarinense',
+        'regiao': 'Sul',
+        'estado': 'Rio Grande do Sul',
+        'hospedagem_nome': 'Pousada parceira em Cambará do Sul',
+        'hospedagem_sub': 'Lareira acesa e vista para os campos',
+        'fotos': ['img/hero-jalapao.svg', 'img/cachoeira.svg', 'img/rio.svg',
+                  'img/placa.svg', 'img/dunas.svg', 'img/palmeiras.svg'],
+        'destaques': [
+            'Cânion Itaimbezinho', 'Cânion Fortaleza', 'Trilha do Rio do Boi',
+            'Cachoeira dos Venâncios', 'Campos de cima da serra', 'Praia Grande (SC)',
+        ],
+        'roteiro': [
+            {'titulo': 'Dia 1: Porto Alegre → Cambará do Sul',
+             'resumo': 'Recepção em Porto Alegre e subida da serra.',
+             'detalhe': 'Recepção da equipe Soar em Porto Alegre e viagem de cerca de 3 horas até '
+                        'Cambará do Sul. Check-in e jantar com o grupo.'},
+            {'titulo': 'Dia 2: Cânion Itaimbezinho',
+             'resumo': 'Trilhas do Vértice e do Cotovelo na borda do cânion.',
+             'detalhe': 'Parque Nacional de Aparados da Serra: trilhas leves na borda do Itaimbezinho, '
+                        'com as cachoeiras caindo cânion abaixo.'},
+            {'titulo': 'Dia 3: Cânion Fortaleza',
+             'resumo': 'Mirantes do Fortaleza e a Pedra do Segredo.',
+             'detalhe': 'Parque Nacional da Serra Geral: trilha até os mirantes do Cânion Fortaleza, '
+                        'de onde se vê o litoral em dia limpo, e a Pedra do Segredo.'},
+            {'titulo': 'Dia 4: Os cânions por baixo',
+             'resumo': 'Descida até Praia Grande e trilha do Rio do Boi.',
+             'detalhe': 'Descida da serra até Praia Grande (SC) e trilha pelo leito do Rio do Boi, '
+                        'dentro do Itaimbezinho, vendo o cânion de baixo para cima.'},
+            {'titulo': 'Dia 5: Retorno',
+             'resumo': 'Café da manhã e volta para Porto Alegre.',
+             'detalhe': 'Café da manhã, despedida do grupo e retorno a Porto Alegre para o voo de volta.'},
         ],
     },
     'jalapao': {
@@ -130,10 +221,7 @@ POR_DESTINO = {
         'noites': '5 noites',
         'proxima_saida': '16 a 21 de Junho de 2027',
         'vagas': 12,
-        'nota': '4,9',
-        'total_avaliacoes': 87,
         'preco_base': 3588,
-        'mais_fotos': 36,
         'hospedagem_nome': 'Pousada Jalapão',
         'hospedagem_sub': 'Conforto e natureza',
         'destaques': [
@@ -165,15 +253,6 @@ POR_DESTINO = {
              'resumo': 'Café da manhã, saída e previsão de chegada à noite.',
              'detalhe': 'Café da manhã, despedida do grupo e retorno a Palmas para o voo/ônibus de volta. '
                         'Previsão de chegada em São Paulo no fim da noite.'},
-        ],
-        'depoimentos': [
-            {'nome': 'Mariana S.', 'local': 'Serra da Canastra', 'nota': 5,
-             'texto': 'Foi sem dúvidas a maior aventura que já fiz. Tudo muito bem organizado e os guias '
-                      'são incríveis!'},
-            {'nome': 'Ricardo T.', 'local': 'Jalapão/TO', 'nota': 5,
-             'texto': 'O Jalapão com a Soar superou minhas expectativas. Cada detalhe feito com muito carinho.'},
-            {'nome': 'Ana Paula L.', 'local': 'Alter do Chão/PA', 'nota': 5,
-             'texto': 'A energia do grupo e os lugares incríveis tornam a viagem inesquecível. Já quero a próxima!'},
         ],
     },
 }
