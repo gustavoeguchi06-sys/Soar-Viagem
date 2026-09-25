@@ -1,70 +1,298 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Soar Operadora | Viagens em grupo pelo Brasil{% endblock %}
+{% block body_class %}pagina-viagem pagina-inicio{% endblock %}
+{% block topbar_class %}{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/inicio.css' %}">{% endblock %}
+
 {% block content %}
-<section class="hero">
-    <div class="container">
-        <h1>Para onde você quer voar?</h1>
-        <p>Descubra destinos incríveis, compare hospedagens e leia avaliações de outros viajantes.</p>
-        <form class="busca" action="{% url 'destinations:lista' %}" method="get">
-            <input type="text" name="q" placeholder="Busque por destino ou estado...">
-            <button type="submit">Buscar</button>
-        </form>
+{% with i=inicio %}
+
+{# ===================== TOPO COM CARROSSEL ===================== #}
+<section class="in-hero" aria-roledescription="carrossel" aria-label="Fotos de destinos">
+    <div class="in-hero__fotos">
+        {% for s in i.slides %}
+        <img class="in-hero__foto{% if forloop.first %} ativo{% endif %}" src="{{ s.url }}" alt="{{ s.legenda }}"
+             {% if not forloop.first %}loading="lazy"{% endif %}>
+        {% endfor %}
+    </div>
+    {% if i.slides|length > 1 %}
+    <button class="in-hero__seta in-hero__seta--esq" type="button" data-slide="-1" aria-label="Foto anterior">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+    </button>
+    <button class="in-hero__seta in-hero__seta--dir" type="button" data-slide="1" aria-label="Próxima foto">
+        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+    </button>
+    {% endif %}
+
+    <div class="wrap in-hero__conteudo">
+        <h1>{{ i.titulo }}</h1>
+        <p>{{ i.subtitulo }}</p>
+        <div class="in-hero__botoes">
+            <a class="btn btn--verde" href="#proximas">Ver próximas viagens</a>
+            <a class="btn in-btn-vazado" href="#encontre">Encontre sua viagem</a>
+        </div>
+    </div>
+
+    <div class="wrap in-hero__rodape">
+        {% if i.nomes %}
+        <p class="in-hero__nomes">
+            {% for n in i.nomes %}<span>{{ n }}</span>{% endfor %}
+            <span>e muito mais</span>
+        </p>
+        {% endif %}
+        {% if i.slides|length > 1 %}
+        <div class="in-hero__pontos">
+            {% for s in i.slides %}
+            <button type="button" class="{% if forloop.first %}ativo{% endif %}" data-ir="{{ forloop.counter0 }}"
+                    aria-label="Mostrar foto {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 </section>
 
-{% if destaques %}
-<section class="secao">
-    <div class="container">
-        <div class="secao-titulo">
-            <h2>Destinos em destaque</h2>
-            <a href="{% url 'destinations:lista' %}">Ver todos →</a>
+{# ===================== BUSCA ===================== #}
+<div class="wrap">
+    <form class="in-busca" id="encontre" action="{% url 'destinations:lista' %}" method="get">
+        <p class="in-busca__titulo">
+            <svg class="ic" viewBox="0 0 24 24"><use href="#ic-busca"></use></svg>
+            Encontre a viagem perfeita para você
+        </p>
+        <div class="in-busca__campos">
+            <label class="in-campo">
+                <span>Para onde?</span>
+                <input type="text" name="q" maxlength="80" placeholder="Digite um destino">
+            </label>
+            <label class="in-campo">
+                <span>Quando?</span>
+                <select name="mes">
+                    <option value="">Escolha o mês</option>
+                    {% for n, nome in i.meses %}<option value="{{ n }}">{{ nome }}</option>{% endfor %}
+                </select>
+            </label>
+            <label class="in-campo">
+                <span>Estilo de viagem</span>
+                <select name="estilo">
+                    <option value="">{% for e in i.estilos|slice:":3" %}{{ e }}{% if not forloop.last %}, {% endif %}{% endfor %}...</option>
+                    {% for e in i.estilos %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+                </select>
+            </label>
+            <label class="in-campo">
+                <span>Duração</span>
+                <select name="duracao">
+                    <option value="">Qualquer duração</option>
+                    {% for chave, nome in i.duracoes %}<option value="{{ chave }}">{{ nome }}</option>{% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="btn btn--verde in-busca__botao">Encontrar minha viagem</button>
         </div>
-        <div class="grade">
-            {% for destino in destaques %}
-                {% include 'destinations/_card.html' %}
+    </form>
+</div>
+
+{# ===================== PRÓXIMAS EXPERIÊNCIAS ===================== #}
+<section class="in-secao" id="proximas">
+    <div class="wrap">
+        <div class="in-titulo">
+            <h2>Próximas experiências</h2>
+            <a href="{% url 'destinations:calendario' %}">Ver todas as viagens &rarr;</a>
+        </div>
+        <div class="in-carrossel">
+            <button class="in-carrossel__seta in-carrossel__seta--esq" type="button" data-trilho="-1" aria-label="Anteriores">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+            </button>
+            <div class="in-trilho">
+                {% for v in i.experiencias %}
+                <article class="in-exp">
+                    <a class="in-exp__foto" href="{{ v.destino.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+                        <img src="{{ v.foto }}" alt="" loading="lazy">
+                        <span class="in-tag in-tag--{{ v.situacao }}">{{ v.situacao_rotulo }}</span>
+                    </a>
+                    <div class="in-exp__corpo">
+                        <h3><a href="{{ v.destino.get_absolute_url }}">{{ v.rotulo }}</a></h3>
+                        <div class="in-exp__linha">
+                            <span>{% if v.proxima %}{{ v.proxima.texto }}{% else %}Datas em breve{% endif %}</span>
+                            {% if v.n_avaliacoes %}
+                            <span class="in-estrelas" title="Nota {{ v.nota|floatformat:1 }}">★★★★★ <small>({{ v.n_avaliacoes }})</small></span>
+                            {% endif %}
+                        </div>
+                        <p class="in-exp__dias">
+                            <svg class="ic" viewBox="0 0 24 24"><use href="#ic-relogio"></use></svg>
+                            {% if v.dias %}{{ v.dias }} dia{{ v.dias|pluralize }}{% else %}Duração a confirmar{% endif %}
+                        </p>
+                        <div class="in-exp__rodape">
+                            <div>
+                                <small>A partir de</small>
+                                <b>{% if v.preco %}R$ {{ v.preco|floatformat:"0g" }}{% else %}Consulte{% endif %}</b>
+                            </div>
+                            <a class="in-btn-mini" href="{{ v.destino.get_absolute_url }}">{% if v.situacao == 'breve' %}Saiba mais{% else %}Ver viagem{% endif %}</a>
+                        </div>
+                    </div>
+                </article>
+                {% empty %}
+                <p class="in-vazio">As próximas viagens aparecem aqui assim que forem cadastradas.</p>
+                {% endfor %}
+            </div>
+            <button class="in-carrossel__seta in-carrossel__seta--dir" type="button" data-trilho="1" aria-label="Próximas">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+            </button>
+        </div>
+    </div>
+</section>
+
+{# ===================== DESTINOS MAIS AMADOS ===================== #}
+{% if i.amados %}
+<section class="in-secao in-secao--junta">
+    <div class="wrap">
+        <div class="in-titulo">
+            <h2>Destinos mais amados</h2>
+            <a href="{% url 'destinations:lista' %}">Ver todos os destinos &rarr;</a>
+        </div>
+        <div class="in-amados" style="--colunas: {{ i.amados|length }}">
+            {% for v in i.amados %}
+            <a class="in-amado" href="{{ v.destino.get_absolute_url }}">
+                <img src="{{ v.foto }}" alt="" loading="lazy">
+                <div class="in-amado__topo">
+                    <b>{{ v.curto }}</b>
+                    <small>{{ v.estado }}</small>
+                </div>
+                <div class="in-amado__base">
+                    <span class="in-estilo in-estilo--{{ v.estilo_classe }}">{{ v.estilo }}</span>
+                    <small>A partir de</small>
+                    <b>{% if v.preco %}R$ {{ v.preco|floatformat:"0g" }}{% else %}Consulte{% endif %}</b>
+                    <small>Próxima saída: {% if v.proxima %}{{ v.proxima.data_ida|date:"d/m/y" }}{% else %}Em breve{% endif %}</small>
+                </div>
+            </a>
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
 
-{# ===== Soar 60+ ===== #}
-<section class="secao secao--sem-topo">
-    <div class="container">
-        <div class="soar60">
-            <img class="soar60__foto" src="{% static 'img/soar-60.svg' %}" alt="">
-            <div class="soar60__conteudo">
-                <span class="soar60__selo">Soar 60+</span>
-                <h2>Viajar não tem idade.</h2>
-                <p>Viagens pensadas para quem quer conhecer novos lugares com conforto,
-                   segurança e companhia.</p>
-                {% comment %}
-                Antes ia direto para o WhatsApp: a pessoa caía na conversa sem
-                ter visto viagem nenhuma. Agora conhece o programa primeiro, e
-                o WhatsApp fica no fim daquela página, na hora de reservar.
-                {% endcomment %}
-                <a class="btn btn--verde" href="{% url 'destinations:soar_60' %}">Conheça as viagens 60+</a>
+{# ===================== POR QUE VIAJAR COM A SOAR ===================== #}
+<section class="in-secao in-secao--junta">
+    <div class="wrap">
+        <div class="in-motivos">
+            <h2>Por que viajar com a Soar?</h2>
+            <div class="in-motivos__grade">
+                {% for icone, titulo, texto in i.motivos %}
+                <div class="in-motivo">
+                    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#{{ icone }}"></use></svg>
+                    <b>{{ titulo }}</b>
+                    <p>{{ texto }}</p>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </section>
 
-<section class="secao">
-    <div class="container">
-        <div class="secao-titulo">
-            <h2>Adicionados recentemente</h2>
-            <a href="{% url 'destinations:lista' %}">Ver todos →</a>
+{# ===================== SOAR 60+ E DEPOIMENTOS ===================== #}
+<section class="in-secao in-secao--junta">
+    <div class="wrap in-duo">
+        <div class="in-60">
+            <img src="{% static 'img/soar-60.svg' %}" alt="" class="in-60__foto">
+            <div class="in-60__texto">
+                <span class="in-60__selo">Soar 60+</span>
+                <h2>Viajar não tem idade.</h2>
+                <p>Viagens pensadas para quem quer conhecer novos lugares com conforto, segurança e companhia.</p>
+                <a class="btn btn--branco btn--sm" href="{% url 'destinations:soar_60' %}">Conheça as viagens 60+</a>
+            </div>
         </div>
-        {% if recentes %}
-        <div class="grade">
-            {% for destino in recentes %}
-                {% include 'destinations/_card.html' %}
-            {% endfor %}
+
+        <div class="in-depo">
+            <div class="in-titulo">
+                <h2>Quem viaja com a Soar, conta.</h2>
+                <a href="{% url 'destinations:lista' %}">Ver as viagens &rarr;</a>
+            </div>
+            {% if i.depoimentos %}
+            <div class="in-depo__caixa">
+                <button class="in-carrossel__seta" type="button" data-depo="-1" aria-label="Depoimento anterior">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                </button>
+                <div class="in-depo__slides">
+                    {% for d in i.depoimentos %}
+                    <article class="in-depo__item{% if forloop.first %} ativo{% endif %}">
+                        <div class="in-depo__texto">
+                            <span class="in-estrelas in-estrelas--grande" aria-label="Nota {{ d.nota }} de 5">{% for n in "12345" %}{% if forloop.counter <= d.nota %}★{% else %}<span class="vazia">★</span>{% endif %}{% endfor %}</span>
+                            <p>“{{ d.texto|truncatechars:220 }}”</p>
+                            <div class="in-depo__autor">
+                                <img src="{{ d.avatar }}" alt="">
+                                <div><b>{{ d.nome }}</b><small>{{ d.destino }}</small></div>
+                            </div>
+                        </div>
+                        <a class="in-depo__foto" href="{{ d.url }}" aria-label="Ver a viagem {{ d.destino }}">
+                            <img src="{{ d.foto }}" alt="" loading="lazy">
+                        </a>
+                    </article>
+                    {% endfor %}
+                </div>
+                <button class="in-carrossel__seta" type="button" data-depo="1" aria-label="Próximo depoimento">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                </button>
+            </div>
+            {% else %}
+            <p class="in-vazio">Os depoimentos de quem viajou aparecem aqui assim que forem publicados.</p>
+            {% endif %}
         </div>
-        {% else %}
-        <p class="vazio">Nenhum destino cadastrado ainda. Entre no <a href="{% url 'admin:index' %}">painel do dono</a> para adicionar o primeiro!</p>
-        {% endif %}
     </div>
 </section>
+
+{# ===================== #VIAJANTESSOAR ===================== #}
+<section class="in-secao in-secao--junta">
+    <div class="wrap">
+        <div class="in-titulo">
+            <h2>#ViajantesSoar</h2>
+            <a href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">Siga a Soar no Instagram &rarr;</a>
+        </div>
+        <div class="in-insta">
+            {% for f in i.viajantes %}
+            <a href="https://instagram.com/operadorasoar" target="_blank" rel="noopener" aria-label="Instagram da Soar">
+                <img src="{{ f }}" alt="" loading="lazy">
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{# ===================== GUIA SOAR (BLOG) ===================== #}
+{% if i.artigos %}
+<section class="in-secao in-secao--junta">
+    <div class="wrap">
+        <div class="in-titulo">
+            <h2>Guia Soar <small>Conteúdo para quem ama viajar.</small></h2>
+            <a href="{% url 'blog:indice' %}">Ver todos os artigos &rarr;</a>
+        </div>
+        <div class="in-guia">
+            {% for a in i.artigos %}
+            <a class="in-artigo" href="{{ a.get_absolute_url }}">
+                <div class="in-artigo__foto{% if not a.capa %} in-artigo__foto--vazia{% endif %}">
+                    {% if a.capa %}<img src="{{ a.capa.url }}" alt="" loading="lazy">{% endif %}
+                    <span class="in-artigo__tag tag--{{ a.cor_etiqueta }}">{{ a.etiqueta_exibida }}</span>
+                </div>
+                <div class="in-artigo__corpo">
+                    <h3>{{ a.titulo }}</h3>
+                    <p>{{ a.resumo }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ===================== CHAMADA FINAL ===================== #}
+<section class="in-cta" style="--fundo-cta: url('{{ i.fundo_cta }}')">
+    <div class="wrap in-cta__dentro">
+        <h2>Pronto para sua próxima aventura?</h2>
+        <p>Escolha seu destino e embarque com a Soar.</p>
+        <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver todas as viagens</a>
+    </div>
+</section>
+
+{% endwith %}
 {% endblock %}
+
+{% block scripts %}<script src="{% static 'js/inicio.js' %}" defer></script>{% endblock %}

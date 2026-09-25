@@ -336,3 +336,29 @@ class Saida(models.Model):
     @property
     def esgotada(self):
         return self.vagas == 0
+
+
+class SlideInicio(models.Model):
+    """Uma foto do carrossel do topo da página inicial.
+
+    O título e os botões do topo são fixos; o que gira são as fotos. Sem
+    nenhuma foto cadastrada, a página usa as fotos de exemplo do site.
+    """
+
+    imagem = models.ImageField(
+        'Foto', upload_to='inicio/',
+        help_text='Foto deitada e grande (pelo menos 1600 px de largura). Ela ocupa a tela '
+                  'inteira, então o assunto principal deve ficar mais para a direita: o '
+                  'título aparece à esquerda.')
+    legenda = models.CharField('Descrição da foto', max_length=120, blank=True,
+                               help_text='Ex.: Cachoeira no Jalapão. Lida por quem usa leitor de tela.')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+    ativo = models.BooleanField('Aparece no site', default=True)
+
+    class Meta:
+        verbose_name = 'Foto do topo da página inicial'
+        verbose_name_plural = 'Fotos do topo da página inicial'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.legenda or 'Foto {}'.format(self.pk)

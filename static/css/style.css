@@ -430,3 +430,6 @@ img { max-width: 100%; display: block; }
 /* botão da busca no topo verde da página inicial: branco, para aparecer */
 .hero .busca button { background: #fff; color: #0d4f31; font-weight: 700; }
 .hero .busca button:hover { background: #e8f3ec; filter: none; }
+
+.filtros-ativos { margin: -6px 0 18px; color: var(--texto-suave); font-size: .92rem; }
+.filtros-ativos a { font-weight: 700; }
