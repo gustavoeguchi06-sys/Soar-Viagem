@@ -1,7 +1,7 @@
 """Painel da agência parceira.
 
 Uma tela de trabalho só da agência, separada do painel do dono: ela vê as
-reservas dos clientes que chegaram pelo link dela e os orçamentos que montou.
+reservas que a Soar passou para ela e os orçamentos que montou.
 
 Toda consulta daqui passa por `request.agencia`. É isso que impede uma agência
 de ver cliente de outra: o `get_object_or_404(..., agencia=request.agencia)`
@@ -15,7 +15,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 
 from reservas.models import Reserva
 
@@ -69,8 +68,6 @@ def painel(request):
                              .select_related('destino', 'usuario')[:5],
         'orcamentos_abertos': orcamentos.filter(status='enviado')
                                         .select_related('destino')[:5],
-        'link_indicacao': request.build_absolute_uri(
-            reverse('destinations:home') + '?ag=' + agencia.codigo),
     })
 
 
@@ -156,6 +153,4 @@ def orcamento_editar(request, pk):
 def minha_agencia(request):
     return render(request, 'agencia/minha_agencia.html', {
         'aba': 'agencia',
-        'link_indicacao': request.build_absolute_uri(
-            reverse('destinations:home') + '?ag=' + request.agencia.codigo),
     })

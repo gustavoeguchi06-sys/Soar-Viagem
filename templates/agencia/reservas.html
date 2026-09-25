@@ -6,8 +6,7 @@
 <div class="ag-titulo">
     <h2>Reservas dos clientes</h2>
 </div>
-<p class="ag-explica">Pedidos feitos no site por clientes que chegaram pelo seu link de indicação,
-   ou que a Soar passou para a sua agência. Ligue para o cliente, combine a viagem e mude a
+<p class="ag-explica">Pedidos de reserva que a Soar passou para a sua agência. Ligue para o cliente, combine a viagem e mude a
    situação quando fechar.</p>
 
 <nav class="ag-filtros" aria-label="Filtrar por situação">
@@ -23,8 +22,8 @@
 </div>
 {% else %}
 <div class="conta-vazio ag-vazio">
-    <p>{% if status %}Nenhuma reserva nesta situação.{% else %}Ainda não chegou nenhuma reserva de cliente seu.
-       Mande seu link de indicação, que está na <a href="{% url 'agencia:painel' %}">visão geral</a>.{% endif %}</p>
+    <p>{% if status %}Nenhuma reserva nesta situação.{% else %}Ainda não chegou nenhuma reserva.
+       Quando a Soar passar um pedido para a sua agência, ele aparece aqui.{% endif %}</p>
 </div>
 {% endif %}
 {% endblock %}

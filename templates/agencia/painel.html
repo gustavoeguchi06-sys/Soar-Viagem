@@ -27,18 +27,7 @@
     </a>
 </div>
 
-<div class="ag-indicacao">
-    <div>
-        <h2>Seu link de indicação</h2>
-        <p>Mande este link para os seus clientes. Quem reservar por ele aparece aqui, no seu painel.</p>
-    </div>
-    <div class="ag-copiar">
-        <input type="text" readonly value="{{ link_indicacao }}" id="linkIndicacao" aria-label="Link de indicação">
-        <button type="button" class="btn btn--verde btn--sm" data-copiar="linkIndicacao">Copiar link</button>
-    </div>
-</div>
-
-<div class="ag-duas">
+<div class="ag-duas ag-duas--topo">
     <section>
         <div class="ag-titulo">
             <h2>Aguardando contato</h2>
@@ -50,7 +39,7 @@
         </div>
         {% else %}
         <div class="conta-vazio ag-vazio">
-            <p>Nenhum cliente esperando. Os pedidos de quem reservar pelo seu link chegam aqui.</p>
+            <p>Nenhum cliente esperando. Quando a Soar passar um pedido para a sua agência, ele aparece aqui.</p>
         </div>
         {% endif %}
     </section>

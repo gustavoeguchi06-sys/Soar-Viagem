@@ -129,3 +129,7 @@
 
 /* o reset da página zera a margem dos parágrafos: devolve o respiro antes do formulário */
 .ag .cartao-form__sub { margin-bottom: 18px; }
+
+/* sem o quadro do link, os blocos da visão geral encostam nos números */
+.ag-duas--topo { margin-top: 26px; }
+.ag-ficha--uma { grid-template-columns: minmax(0, 720px); }

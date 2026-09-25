@@ -119,23 +119,3 @@ class PainelAgenciaTests(TestCase):
         })
         self.assertEqual(resposta.status_code, 200)
         self.assertFalse(Orcamento.objects.exists())
-
-    def test_link_de_indicacao_marca_a_reserva(self):
-        self.client.get(reverse('destinations:home') + '?ag=' + self.ag2.codigo.lower())
-        self.client.force_login(User.objects.create_user('novo', 'novo@exemplo.com', SENHA))
-        resposta = self.client.get(reverse('reservas:nova', args=['bonito']))
-        self.assertContains(resposta, self.ag2.razao_social)
-        self.client.post(reverse('reservas:nova', args=['bonito']), {
-            'saida_escolhida': self.saida.pk, 'acomodacao': 'casal', 'pessoas': 2,
-        })
-        self.assertEqual(Reserva.objects.get(usuario__username='novo').agencia, self.ag2)
-
-    def test_codigo_de_agencia_nao_aprovada_e_ignorado(self):
-        pendente = _agencia('gama', '11222333000262', aprovado=False)
-        self.client.get(reverse('destinations:home') + '?ag=' + pendente.codigo)
-        novo = User.objects.create_user('novo', 'novo@exemplo.com', SENHA)
-        self.client.force_login(novo)
-        self.client.post(reverse('reservas:nova', args=['bonito']), {
-            'saida_escolhida': self.saida.pk, 'acomodacao': 'casal', 'pessoas': 2,
-        })
-        self.assertIsNone(Reserva.objects.get(usuario=novo).agencia)

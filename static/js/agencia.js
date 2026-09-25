@@ -1,4 +1,4 @@
-// Painel da agência: copiar o link de indicação e mostrar só as datas de
+// Painel da agência: botões de copiar e mostrar só as datas de
 // saída do destino escolhido no orçamento.
 (function () {
     document.querySelectorAll('[data-copiar]').forEach(function (botao) {

@@ -16,17 +16,12 @@ class PerfilAgenteAdmin(admin.ModelAdmin):
     list_filter = ['aprovado']
     search_fields = ['razao_social', 'cnpj', 'cadastur',
                      'usuario__first_name', 'usuario__email', 'usuario__username']
-    readonly_fields = ['criado_em', 'codigo']
+    readonly_fields = ['criado_em']
     list_per_page = 30
 
     fieldsets = [
         ('Agência', {'fields': ['usuario', 'razao_social', 'cnpj', 'cadastur', 'whatsapp']}),
         ('Situação', {'fields': ['aprovado', 'criado_em']}),
-        ('Link de indicação', {
-            'fields': ['codigo'],
-            'description': 'Cliente que chega ao site pelo link com este código e faz uma '
-                           'reserva aparece no painel desta agência.',
-        }),
     ]
 
     @admin.display(description='CNPJ')
