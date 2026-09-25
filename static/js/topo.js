@@ -48,6 +48,23 @@
         });
     }
 
+    /* Botão de tema: troca claro/escuro e guarda a escolha no navegador. */
+    var botaoTema = document.getElementById('botaoTema');
+    function rotularTema() {
+        var escuro = document.documentElement.getAttribute('data-tema') === 'escuro';
+        botaoTema.setAttribute('aria-label', escuro ? 'Mudar para o tema claro' : 'Mudar para o tema escuro');
+        botaoTema.setAttribute('title', escuro ? 'Tema claro' : 'Tema escuro');
+    }
+    if (botaoTema) {
+        rotularTema();
+        botaoTema.addEventListener('click', function () {
+            var escuro = document.documentElement.getAttribute('data-tema') !== 'escuro';
+            document.documentElement.setAttribute('data-tema', escuro ? 'escuro' : 'claro');
+            try { localStorage.setItem('theme', escuro ? 'dark' : 'light'); } catch (e) { /* sem armazenamento */ }
+            rotularTema();
+        });
+    }
+
     var botao = document.getElementById('menuBotao');
     var menu = document.getElementById('menuMovel');
     if (!botao || !menu) { return; }

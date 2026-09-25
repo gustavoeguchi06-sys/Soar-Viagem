@@ -103,10 +103,10 @@ class Destino(models.Model):
     proxima_saida = models.CharField('Próxima saída', max_length=120, blank=True,
                                      help_text='Ex.: 16 a 21 de Junho de 2027.')
     vagas = models.PositiveSmallIntegerField('Vagas disponíveis', blank=True, null=True)
-    preco_base = models.DecimalField('Preço da viagem por tipo de quarto (R$)', max_digits=9,
+    preco_base = models.DecimalField('Preço da viagem por pessoa (R$)', max_digits=9,
                                      decimal_places=2, blank=True, null=True,
-                                     help_text='Valor do quarto duplo, que abre o card de reserva. '
-                                               'Sem isso, calcula a partir da diária média.')
+                                     help_text='Valor por pessoa em quarto de casal, que abre o card '
+                                               'de reserva. Sem isso, calcula a partir da diária média.')
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,

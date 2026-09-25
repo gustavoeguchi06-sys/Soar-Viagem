@@ -40,7 +40,7 @@ class Reserva(models.Model):
     pessoas = models.PositiveSmallIntegerField('Quantidade de pessoas', default=1)
     telefone = models.CharField('Telefone/WhatsApp', max_length=20, blank=True)
     observacao = models.TextField('Observações', blank=True)
-    preco_estimado = models.DecimalField('Preço estimado por tipo de quarto (R$)', max_digits=9,
+    preco_estimado = models.DecimalField('Preço estimado por pessoa (R$)', max_digits=9,
                                          decimal_places=2, blank=True, null=True)
     saida = models.CharField('Saída pedida', max_length=120, blank=True,
                              help_text='Período que estava anunciado quando o cliente reservou.')

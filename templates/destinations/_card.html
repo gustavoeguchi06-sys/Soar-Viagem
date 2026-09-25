@@ -12,7 +12,9 @@
         <div class="card-pais"><svg class="card-pais__ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-pin"></use></svg>{{ destino.pais }}{% if destino.regiao %} · {{ destino.get_regiao_display }}{% endif %}</div>
         <div class="card-descricao">{{ destino.descricao }}</div>
         <div class="card-rodape">
-            {% if destino.preco_medio_diaria %}
+            {% if destino.preco_base %}
+                <span class="preco"><small>a partir de</small> R$ {{ destino.preco_base|floatformat:"0g" }} <small>/ pessoa</small></span>
+            {% elif destino.preco_medio_diaria %}
                 <span class="preco">R$ {{ destino.preco_medio_diaria }} <small>/ diária</small></span>
             {% else %}
                 <span class="preco"><small>Preço sob consulta</small></span>

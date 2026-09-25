@@ -643,3 +643,14 @@ body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color:
 
 /* criança até 8 anos não paga: o preço aparece em verde */
 .acom__preco.gratis { color: var(--verde); }
+
+/* botão de tema (lua no claro, sol no escuro) */
+.btn-tema { display: grid; place-items: center; width: 38px; height: 38px; flex: none; padding: 0;
+            border-radius: 50%; border: 1px solid rgba(255, 255, 255, .28); background: transparent;
+            color: #fff; cursor: pointer; transition: background .15s; }
+.btn-tema:hover { background: rgba(255, 255, 255, .12); }
+.btn-tema .ic { width: 18px; height: 18px; }
+.btn-tema__sol { display: none; }
+html[data-tema="escuro"] .btn-tema__lua { display: none; }
+html[data-tema="escuro"] .btn-tema__sol { display: block; }
+@media (max-width: 520px) { .btn-tema { width: 36px; height: 36px; } }
