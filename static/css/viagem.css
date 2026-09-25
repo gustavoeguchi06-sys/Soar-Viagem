@@ -636,6 +636,9 @@ body:not(.pagina-viagem) .hero {
 body:not(.pagina-viagem) .hero::after { content: none; }
 body:not(.pagina-viagem) .busca button,
 body:not(.pagina-viagem) .selo-destaque { background: var(--verde); }
+/* no topo verde da página inicial o botão verde sumia: lá ele é branco */
+body:not(.pagina-viagem) .hero .busca button { background: #fff; color: #0d4f31; font-weight: 700; }
+body:not(.pagina-viagem) .hero .busca button:hover { background: #e8f3ec; }
 body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color: var(--verde); }
 /* :where() derruba a especificidade para 0-0-1: o link comum fica verde, mas
    quem tem cor propria (.btn--verde, .filtro.ativo...) continua mandando. */

@@ -161,3 +161,19 @@ class FuncionalidadesTests(TestCase):
         resposta = self.client.post('/blog/novidades/', {'email': 'x',
                                                          'voltar': 'https://golpe.com/'})
         self.assertRedirects(resposta, '/blog/', fetch_redirect_response=False)
+
+
+class ExemplosPorRegiaoTests(TestCase):
+    def test_um_exemplo_por_regiao_sem_duplicar(self):
+        from django.core.management import call_command
+        from io import StringIO
+        call_command('criar_exemplos_regioes', stdout=StringIO())
+        call_command('criar_exemplos_regioes', stdout=StringIO())
+        regioes = set(Destino.objects.values_list('regiao', flat=True))
+        self.assertEqual(regioes, {'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul'})
+        self.assertEqual(Destino.objects.count(), 4)
+        resposta = self.client.get('/destinos/?regiao=Sul')
+        self.assertContains(resposta, 'Cânions do Sul')
+        pagina = self.client.get('/destinos/lencois-maranhenses/')
+        self.assertContains(pagina, 'Lagoa Bonita')
+        self.assertContains(pagina, 'Maranhão')
