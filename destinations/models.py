@@ -142,6 +142,21 @@ class Destino(models.Model):
                 setattr(self, campo, valor)
 
     @property
+    def capa_card(self):
+        """Imagem do cartão do catálogo: a capa, a primeira foto da galeria ou,
+        sem nenhuma, a mesma ilustração que abre a página da viagem."""
+        if self.imagem_capa:
+            return self.imagem_capa.url
+        foto = self.imagens.exclude(imagem='').first() if self.pk else None
+        if foto:
+            return foto.imagem.url
+        from django.templatetags.static import static
+
+        from .conteudo import FOTOS_PADRAO, POR_DESTINO
+        fotos = POR_DESTINO.get(self.slug, {}).get('fotos') or FOTOS_PADRAO
+        return static(fotos[0])
+
+    @property
     def saidas_futuras(self):
         """Saídas que ainda não aconteceram, da mais próxima para a mais distante."""
         return self.saidas.filter(data_ida__gte=timezone.localdate()).order_by('data_ida')

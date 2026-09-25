@@ -85,3 +85,22 @@ class ServiceWorkerTests(TestCase):
         self.assertIn('javascript', resposta['Content-Type'])
         self.assertIn('unregister', resposta.content.decode())
         self.assertEqual(resposta['Cache-Control'], 'no-store')
+
+
+class PaginasDeErroTests(TestCase):
+    def test_404_tem_a_cara_do_site(self):
+        resposta = self.client.get('/pagina-que-nao-existe/')
+        self.assertEqual(resposta.status_code, 404)
+        self.assertContains(resposta, 'Essa página não existe', status_code=404)
+
+    def test_500_renderiza_sem_request(self):
+        from django.template.loader import render_to_string
+        self.assertIn('Algo deu errado aqui', render_to_string('500.html'))
+
+
+class CartaoDestinoTests(TestCase):
+    def test_destino_sem_foto_usa_ilustracao(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        self.assertTrue(destino.capa_card.endswith('.svg'))
+        resposta = self.client.get('/destinos/')
+        self.assertNotContains(resposta, '🏝')

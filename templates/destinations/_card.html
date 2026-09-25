@@ -3,13 +3,13 @@
         {% if destino.imagem_capa %}
             <img src="{{ destino.imagem_capa.url }}" alt="{{ destino.nome }}">
         {% else %}
-            <div class="capa-placeholder">🏝️</div>
+            <img src="{{ destino.capa_card }}" alt="" class="capa-ilustracao">
         {% endif %}
         {% if destino.destaque %}<span class="selo-destaque">Destaque</span>{% endif %}
     </div>
     <div class="card-corpo">
         <h3>{{ destino.nome }}</h3>
-        <div class="card-pais">📍 {{ destino.pais }}{% if destino.regiao %} · {{ destino.get_regiao_display }}{% endif %}</div>
+        <div class="card-pais"><svg class="card-pais__ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-pin"></use></svg>{{ destino.pais }}{% if destino.regiao %} · {{ destino.get_regiao_display }}{% endif %}</div>
         <div class="card-descricao">{{ destino.descricao }}</div>
         <div class="card-rodape">
             {% if destino.preco_medio_diaria %}

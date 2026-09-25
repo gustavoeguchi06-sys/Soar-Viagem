@@ -24,6 +24,23 @@
         });
     });
 
+    // No celular as setas somem: deslizar o dedo na foto troca de foto.
+    var hero = document.querySelector('.hero');
+    var inicioX = null;
+    if (hero) {
+        hero.addEventListener('touchstart', function (e) {
+            inicioX = e.touches.length === 1 ? e.touches[0].clientX : null;
+        }, { passive: true });
+        hero.addEventListener('touchend', function (e) {
+            if (inicioX === null) { return; }
+            var dx = e.changedTouches[0].clientX - inicioX;
+            inicioX = null;
+            if (Math.abs(dx) > 50 && !e.target.closest('.hero__thumbs')) {
+                mostrarFoto(atual + (dx < 0 ? 1 : -1));
+            }
+        }, { passive: true });
+    }
+
     /* ---------- Carrossel da hospedagem ---------- */
     var hospFoto = document.getElementById('hospFoto');
     var hospMinis = Array.prototype.slice.call(document.querySelectorAll('.hosp-mini img'));

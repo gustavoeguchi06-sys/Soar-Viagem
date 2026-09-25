@@ -25,10 +25,13 @@
     --topo: 56px;
 }
 
-/* reset (a página de viagem não carrega o style.css antigo) */
+/* reset (a página de viagem não carrega o style.css antigo)
+   Dentro de :where() o reset não pesa nada na disputa de especificidade.
+   Antes ele pesava uma classe a mais e ganhava de toda margem escrita numa
+   classe (.conta-secao, .cartao-form__sub...): títulos grudavam no texto de
+   baixo nas telas de conta, entrar, cadastro e privacidade. */
 .pagina-viagem *, .pagina-viagem *::before, .pagina-viagem *::after { box-sizing: border-box; }
-.pagina-viagem h1, .pagina-viagem h2, .pagina-viagem h3, .pagina-viagem h4,
-.pagina-viagem p, .pagina-viagem figure, .pagina-viagem ul { margin: 0; padding: 0; }
+:where(.pagina-viagem) :where(h1, h2, h3, h4, p, figure, ul) { margin: 0; padding: 0; }
 .pagina-viagem img { max-width: 100%; display: block; }
 .pagina-viagem a { text-decoration: none; }
 /* :where() zera a especificidade — assim `.btn--verde`, `.marca` e afins,
@@ -528,6 +531,12 @@ body.pagina-viagem {
     .servicos { grid-template-columns: repeat(3, 1fr); gap: 18px; }
     .duo { grid-template-columns: 1fr; }
     .abas a { padding: 16px 14px; }
+}
+
+@media (max-width: 1024px) {
+    /* as setas grandes do hero cobriam o subtítulo e as informações da viagem;
+       aqui a foto troca pelas miniaturas ou deslizando o dedo */
+    .hero > .seta { display: none; }
 }
 
 @media (max-width: 900px) {

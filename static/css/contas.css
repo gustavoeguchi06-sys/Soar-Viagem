@@ -188,3 +188,25 @@
     .dados-agente { grid-template-columns: 1fr; gap: 2px; }
     .dados-agente dd { margin-bottom: 10px; }
 }
+
+/* --------------------------------------------------------------------- */
+/* Textos longos (aviso de privacidade)                                  */
+/* --------------------------------------------------------------------- */
+.texto-legal { max-width: 760px; }
+.texto-legal h1 { font-size: clamp(1.6rem, 3.4vw, 2.1rem); margin-bottom: 12px; }
+.texto-legal p { margin: 0 0 12px; line-height: 1.7; }
+.texto-legal .conta-secao { margin: 34px 0 10px; padding-top: 22px; border-top: 1px solid var(--linha); }
+.texto-legal dl { margin: 0; }
+.texto-legal ul { margin: 0 0 12px; padding-left: 22px; }
+.texto-legal li { margin-bottom: 6px; line-height: 1.6; }
+.texto-legal a { color: var(--verde); font-weight: 600; overflow-wrap: anywhere; }
+
+/* o link da lateral não encosta na última vantagem da lista */
+.conta-lado ul { margin-bottom: 4px; }
+
+/* páginas de erro (404 e 500) */
+.pagina-erro { max-width: 560px; margin: 0 auto; text-align: center; }
+.pagina-erro__logo { margin: 0 auto 18px; height: 57px; width: auto; }
+.pagina-erro__codigo { display: inline-block; margin-bottom: 10px; font-size: .72rem; font-weight: 800;
+                       letter-spacing: .12em; text-transform: uppercase; color: var(--verde); }
+.pagina-erro__botoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }

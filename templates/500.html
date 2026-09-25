@@ -1,0 +1,33 @@
+{% load static %}<!DOCTYPE html>
+{% comment %}
+Página de erro interno. Não herda do base.html de propósito: quando o servidor
+falha, o Django monta esta página sem request nem usuário, e qualquer coisa
+que dependa deles (menu da conta, formulário de sair) quebraria de novo.
+{% endcomment %}
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algo deu errado | Soar Operadora</title>
+    <link rel="stylesheet" href="{% static 'css/fontes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/viagem.css' %}">
+    <link rel="stylesheet" href="{% static 'css/contas.css' %}">
+</head>
+<body class="pagina-viagem pagina-conta">
+<section class="conta-tela">
+    <div class="wrap">
+        <div class="cartao-form pagina-erro">
+            <img class="pagina-erro__logo" src="{% static 'img/logo-soar.png' %}" alt="Soar Paradiso" width="110" height="57">
+            <span class="pagina-erro__codigo">Erro 500</span>
+            <h1>Algo deu errado aqui</h1>
+            <p class="cartao-form__sub">A falha foi do nosso lado, não sua. Tente de novo em alguns
+               minutos. Se precisar falar com a gente agora, chame no WhatsApp.</p>
+            <div class="pagina-erro__botoes">
+                <a class="btn btn--verde" href="/">Voltar para o início</a>
+                <a class="btn btn--contorno" href="https://wa.me/5511999999999">Falar no WhatsApp</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
