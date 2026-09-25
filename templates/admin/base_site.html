@@ -40,3 +40,39 @@ todos sem precisar de !important nem de seletor inflado.
 {% block welcome-msg %}Olá, <strong>{% firstof user.first_name user.get_short_name user.get_username %}</strong>{% endblock %}
 
 {% block nav-global %}{% endblock %}
+
+{% comment %}
+A faixa verde embaixo do cabeçalho, no mesmo desenho do painel da agência:
+a trilha em letra pequena, o título da tela, as ações e as abas. O título sai
+daqui, então o h1 que o admin põe dentro do conteúdo fica desligado logo
+abaixo. A tela inicial troca o título e as ações pelos blocos faixa_*.
+{% endcomment %}
+{% block nav-breadcrumbs %}
+<div class="pf">
+    <div class="pf__dentro">
+        <div class="pf__quem">
+            <nav aria-label="Trilha">
+            {% block breadcrumbs %}
+                <div class="breadcrumbs">
+                    <a href="{% url 'admin:index' %}">Início</a>
+                    {% if title %} &rsaquo; {{ title }}{% endif %}
+                </div>
+            {% endblock %}
+            </nav>
+            <h1>{% block faixa_titulo %}{{ title }}{% endblock %}</h1>
+            {% block faixa_sub %}{% if subtitle %}<p class="pf__sub">{{ subtitle }}</p>{% endif %}{% endblock %}
+        </div>
+        <div class="pf__acoes">{% block faixa_acoes %}{% endblock %}</div>
+    </div>
+    {% if abas_painel %}
+    <nav class="pf-abas" aria-label="Seções do painel">
+        {% for aba in abas_painel %}
+        <a href="{{ aba.url }}"{% if aba.ativa %} aria-current="page"{% endif %}>{{ aba.nome }}{% if aba.contador %}<span class="pf-abas__conta" title="esperando você">{{ aba.contador }}</span>{% endif %}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content_subtitle %}{% endblock %}
