@@ -20,13 +20,14 @@
 
     <div class="hero__conteudo">
         <div class="wrap">
-            <div class="migalhas">
-                <a href="{% url 'destinations:home' %}">Home</a> <span class="sep">›</span>
-                <a href="{% url 'destinations:lista' %}">Viagens</a> <span class="sep">›</span>
-                <a href="{% url 'destinations:lista' %}?regiao={{ viagem.regiao|urlencode }}">{{ viagem.regiao }}</a> <span class="sep">›</span>
-                {% if viagem.curto != destino.nome %}<a href="{% url 'destinations:lista' %}">{{ viagem.curto }}</a> <span class="sep">›</span>{% endif %}
-                <span class="atual">{{ destino.nome }}</span>
-            </div>
+            {% comment %}Um botão de voltar no lugar da trilha "Home › Viagens › ...".
+            Com JavaScript, volta para a página de onde a pessoa veio (a busca,
+            o filtro, o calendário); sem ele, ou vindo de fora do site, leva ao
+            catálogo.{% endcomment %}
+            <a class="btn-voltar" href="{% url 'destinations:lista' %}" data-voltar>
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-esq"></use></svg>
+                Voltar
+            </a>
 
             <span class="selo-exp">{{ viagem.selo }}</span>
             <h1>{{ destino.nome }}</h1>

@@ -57,6 +57,18 @@
         });
     });
 
+    /* Botão "Voltar": se a pessoa chegou por uma página do próprio site, volta
+       para ela (com a busca e o filtro como estavam); senão, segue o link. */
+    document.querySelectorAll('[data-voltar]').forEach(function (link) {
+        link.addEventListener('click', function (evento) {
+            var veioDaqui = document.referrer && document.referrer.indexOf(location.origin + '/') === 0;
+            if (veioDaqui && history.length > 1) {
+                evento.preventDefault();
+                history.back();
+            }
+        });
+    });
+
     /* Botão de tema: troca claro/escuro e guarda a escolha no navegador. */
     var botaoTema = document.getElementById('botaoTema');
     function rotularTema() {
