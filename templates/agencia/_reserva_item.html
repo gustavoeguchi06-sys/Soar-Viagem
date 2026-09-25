@@ -14,7 +14,7 @@
         <div><dt>Acomodação</dt><dd>{{ r.get_acomodacao_display }}</dd></div>
         <div><dt>Pessoas</dt><dd>{{ r.pessoas }}</dd></div>
         <div><dt>Estimativa</dt>
-            <dd>{% if r.total_estimado %}R$ {{ r.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd></div>
+            <dd>{% if r.acomodacao == 'crianca' %}Grátis{% elif r.total_estimado %}R$ {{ r.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd></div>
     </dl>
 
     <div class="ag-contato">

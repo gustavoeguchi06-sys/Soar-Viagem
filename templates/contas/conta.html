@@ -49,7 +49,7 @@
                     <div><dt>Acomodação</dt><dd>{{ reserva.get_acomodacao_display }}</dd></div>
                     <div><dt>Pessoas</dt><dd>{{ reserva.pessoas }}</dd></div>
                     <div><dt>Estimativa</dt>
-                        <dd>{% if reserva.total_estimado %}R$ {{ reserva.total_estimado|floatformat:"2g" }}{% else %}sob consulta{% endif %}</dd></div>
+                        <dd>{% if reserva.acomodacao == 'crianca' %}Grátis{% elif reserva.total_estimado %}R$ {{ reserva.total_estimado|floatformat:"2g" }}{% else %}sob consulta{% endif %}</dd></div>
                     <div><dt>Pedido em</dt><dd>{{ reserva.criado_em|date:"d/m/Y" }}</dd></div>
                 </dl>
 

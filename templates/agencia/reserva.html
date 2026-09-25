@@ -19,7 +19,7 @@
             <dt>Saída</dt><dd>{{ reserva.saida|default:"a combinar" }}</dd>
             <dt>Acomodação</dt><dd>{{ reserva.get_acomodacao_display }}</dd>
             <dt>Pessoas</dt><dd>{{ reserva.pessoas }}</dd>
-            <dt>Estimativa</dt><dd>{% if reserva.total_estimado %}R$ {{ reserva.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd>
+            <dt>Estimativa</dt><dd>{% if reserva.acomodacao == 'crianca' %}Grátis{% elif reserva.total_estimado %}R$ {{ reserva.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd>
         </dl>
 
         {% if reserva.observacao %}

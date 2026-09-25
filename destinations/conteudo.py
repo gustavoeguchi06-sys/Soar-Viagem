@@ -349,8 +349,9 @@ def montar_viagem(destino, avaliacoes):
             {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas',
              'preco': 'R$ ' + _moeda(preco_base - 200), 'valor': preco_base - 200,
              'padrao': False, 'consulte': False},
-            {'chave': 'crianca', 'nome': 'Criança (8 anos)', 'pessoas': 'Consulte condições',
-             'preco': 'Consulte', 'valor': None, 'padrao': False, 'consulte': True},
+            # Criança até 8 anos não paga a viagem.
+            {'chave': 'crianca', 'nome': 'Criança até 8 anos', 'pessoas': 'Não paga a viagem',
+             'preco': 'Grátis', 'valor': 0, 'padrao': False, 'consulte': False, 'gratis': True},
         ],
         'hospedagem': {
             'nome': hospedagem_db.nome if hospedagem_db else cfg.get('hospedagem_nome', 'Pousada Soar'),
