@@ -247,8 +247,11 @@ def montar_viagem(destino, avaliacoes):
 
     # a nota/quantidade da vitrine pode vir do conteúdo editorial (histórico da
     # operadora); sem isso, usa o que está no banco
-    nota = cfg.get('nota') or destino.media_avaliacoes or 4.9
-    total = cfg.get('total_avaliacoes') or len(avaliacoes) or 87
+    # Nota e quantidade vêm só das avaliações publicadas de verdade. Número
+    # inventado na vitrine é propaganda enganosa (CDC, art. 37): sem nenhuma
+    # avaliação, a página diz isso em vez de mostrar uma nota.
+    nota = destino.media_avaliacoes
+    total = len(avaliacoes)
 
     roteiro = _roteiro_do_banco(destino, cfg)
     for i, dia in enumerate(roteiro):
@@ -274,13 +277,6 @@ def montar_viagem(destino, avaliacoes):
             'foto': av.foto.url if av.foto else '',
             'data': av.criado_em.strftime('%d/%m/%Y'),
         })
-    if not depoimentos:
-        for i, d in enumerate(cfg.get('depoimentos', [])):
-            depoimentos.append({
-                'nome': d['nome'], 'local': d['local'], 'estrelas': _estrelas(d['nota']),
-                'texto': d['texto'], 'avatar': static(AVATARES[i % len(AVATARES)]),
-                'foto': '', 'data': '',
-            })
 
     destaques = [d.texto for d in destino.destaques_viagem.all()] or cfg.get('destaques') or [
         'Roteiro completo', 'Guias especializados', 'Grupo pequeno',
@@ -315,13 +311,14 @@ def montar_viagem(destino, avaliacoes):
         'mes_ano': prox.get('mes_ano') or destino.mes_ano or cfg.get('mes_ano', 'Junho 2027'),
         'dias': prox.get('dias') or destino.dias or cfg.get('dias', '6 dias'),
         'noites': prox.get('noites') or destino.noites or cfg.get('noites', '5 noites'),
-        'nota': str(nota).replace('.', ','),
-        'estrelas': _estrelas(nota),
+        'nota': str(nota).replace('.', ',') if nota is not None else '',
+        'estrelas': _estrelas(nota or 0),
         'total_avaliacoes': total,
         'fotos': fotos,
         'thumbs': fotos[1:5] if len(fotos) > 4 else fotos,
-        'galeria': fotos[:4],
-        'mais_fotos': cfg.get('mais_fotos', 36),
+        'galeria': fotos,
+        # as fotos que não cabem nas miniaturas do topo; o botão leva à galeria
+        'mais_fotos': max(len(fotos) - 5, 0),
         'servicos': SERVICOS,
         'destaques': destaques,
         'roteiro': roteiro,

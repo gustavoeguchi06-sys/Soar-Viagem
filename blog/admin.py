@@ -13,7 +13,7 @@ from django.utils.html import format_html
 
 from destinations.admin import miniatura
 
-from .models import MESES, Artigo, Atracao, Categoria, Secao
+from .models import MESES, Artigo, Atracao, Categoria, Inscricao, Secao
 
 CALENDARIO = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
 
@@ -193,3 +193,29 @@ class CategoriaAdmin(admin.ModelAdmin):
     @admin.display(description='Artigos', ordering='total')
     def total_artigos(self, categoria):
         return categoria.total
+
+
+@admin.register(Inscricao)
+class InscricaoAdmin(admin.ModelAdmin):
+    """Quem pediu as novidades do blog. Dá para baixar a lista para o envio."""
+
+    list_display = ['email', 'criado_em', 'origem']
+    search_fields = ['email']
+    date_hierarchy = 'criado_em'
+    readonly_fields = ['criado_em']
+    actions = ['baixar_csv']
+    list_per_page = 50
+
+    @admin.action(description='Baixar os e-mails selecionados (planilha CSV)')
+    def baixar_csv(self, request, queryset):
+        import csv
+
+        from django.http import HttpResponse
+        resposta = HttpResponse(content_type='text/csv; charset=utf-8')
+        resposta['Content-Disposition'] = 'attachment; filename="newsletter-soar.csv"'
+        resposta.write('\ufeff')
+        escritor = csv.writer(resposta, delimiter=';')
+        escritor.writerow(['E-mail', 'Inscrito em'])
+        for inscricao in queryset:
+            escritor.writerow([inscricao.email, inscricao.criado_em.strftime('%d/%m/%Y %H:%M')])
+        return resposta

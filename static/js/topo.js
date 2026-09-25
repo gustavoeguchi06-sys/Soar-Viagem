@@ -48,6 +48,15 @@
         });
     }
 
+    /* Formulário que pede confirmação antes de enviar (ex.: cancelar reserva).
+       Fica aqui, e não num onsubmit="" no HTML, porque a política de
+       segurança do site (CSP) bloqueia JavaScript escrito dentro do HTML. */
+    document.querySelectorAll('form[data-confirmar]').forEach(function (form) {
+        form.addEventListener('submit', function (evento) {
+            if (!window.confirm(form.dataset.confirmar)) { evento.preventDefault(); }
+        });
+    });
+
     /* Botão de tema: troca claro/escuro e guarda a escolha no navegador. */
     var botaoTema = document.getElementById('botaoTema');
     function rotularTema() {

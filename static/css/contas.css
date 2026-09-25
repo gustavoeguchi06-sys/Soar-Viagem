@@ -210,3 +210,25 @@
 .pagina-erro__codigo { display: inline-block; margin-bottom: 10px; font-size: .72rem; font-weight: 800;
                        letter-spacing: .12em; text-transform: uppercase; color: var(--verde); }
 .pagina-erro__botoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* calendário de saídas */
+.calendario h1 { font-size: clamp(1.6rem, 3.4vw, 2.1rem); }
+.calendario__sub { margin-top: 6px; color: var(--tinta-suave); max-width: 60ch; }
+
+.calendario__lista { display: flex; flex-direction: column; gap: 10px; }
+.calendario__item { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: #fff;
+                    border: 1px solid var(--linha); border-radius: var(--r-md); }
+.calendario__item--esgotada { opacity: .7; }
+.calendario__data { display: grid; place-items: center; flex: none; width: 58px; height: 58px;
+                    border-radius: var(--r-sm); background: var(--verde-claro); color: var(--verde); line-height: 1.05; }
+.calendario__data b { font-family: 'Sora', sans-serif; font-size: 1.35rem; }
+.calendario__data small { font-size: .72rem; font-weight: 700; text-transform: uppercase; }
+.calendario__info { flex: 1; min-width: 0; }
+.calendario__info h3 { font-size: 1.02rem; }
+.calendario__info h3 a:hover { color: var(--verde); }
+.calendario__info p { margin-top: 2px; font-size: .88rem; color: var(--tinta-suave); }
+.calendario__botao { flex: none; }
+@media (max-width: 620px) {
+    .calendario__item { flex-wrap: wrap; }
+    .calendario__botao { width: 100%; justify-content: center; }
+}

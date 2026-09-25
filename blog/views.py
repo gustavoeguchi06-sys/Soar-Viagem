@@ -1,11 +1,15 @@
 """Páginas públicas do Blog Soar: o índice de artigos e cada artigo."""
+from django import forms
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Q
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-from .models import Artigo, Categoria
+from .models import Artigo, Categoria, Inscricao
 
 POR_PAGINA = 8
 TAMANHO_MAXIMO_BUSCA = 80
@@ -91,3 +95,30 @@ def artigo(request, slug):
         'proximo': proximo,
         **_lateral(),
     })
+
+
+class _EmailForm(forms.Form):
+    email = forms.EmailField(max_length=254)
+
+
+@require_POST
+def inscrever(request):
+    """Recebe o e-mail dos formulários de newsletter do blog."""
+    voltar = request.POST.get('voltar') or ''
+    if not url_has_allowed_host_and_scheme(voltar, allowed_hosts={request.get_host()},
+                                           require_https=request.is_secure()):
+        voltar = ''
+    voltar = voltar or '/blog/'
+
+    form = _EmailForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Esse e-mail não parece certo. Confira e tente de novo.')
+        return redirect(voltar)
+
+    email = form.cleaned_data['email'].strip().lower()
+    _, nova = Inscricao.objects.get_or_create(email=email, defaults={'origem': voltar[:120]})
+    if nova:
+        messages.success(request, 'Pronto! Você vai receber as novidades da Soar nesse e-mail.')
+    else:
+        messages.info(request, 'Esse e-mail já recebe as novidades da Soar.')
+    return redirect(voltar)

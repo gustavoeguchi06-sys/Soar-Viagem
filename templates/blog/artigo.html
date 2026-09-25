@@ -165,8 +165,10 @@
       <div class="blog-news">
         <h3>Receba dicas e novidades da Soar</h3>
         <p>Cadastre-se e receba conteúdos exclusivos para transformar suas viagens.</p>
-        <form class="blog-news__form" onsubmit="return false">
-          <input type="email" placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail">
+        <form class="blog-news__form" method="post" action="{% url 'blog:inscrever' %}">
+          {% csrf_token %}
+          <input type="hidden" name="voltar" value="{{ request.get_full_path }}">
+          <input type="email" name="email" required maxlength="254" autocomplete="email" placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail">
           <button type="submit" class="btn btn--verde btn--bloco">Cadastrar</button>
         </form>
         <small>Ao se cadastrar, você concorda com nossa

@@ -195,3 +195,5 @@ html[data-tema="escuro"] .ag-faixa { background: #0b3a24; }
 html[data-tema="escuro"] .blog-busca input { color: var(--tinta); }
 html[data-tema="escuro"] .hero .busca button { background: #fff; color: #0d4f31; }
 html[data-tema="escuro"] .blog-previa { background: #3a2a08; color: #f7c164; border-color: #5a4210; }
+html[data-tema="escuro"] .calendario__item { background-color: var(--cartao); }
+html[data-tema="escuro"] .calendario__data { color: var(--verde-texto); }

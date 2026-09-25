@@ -3,13 +3,14 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.urls import reverse
 
 from reviews.forms import AvaliacaoForm
 from soar.seguranca import LIMITE_AVALIACAO, ip_do_cliente
 
 from .conteudo import montar_viagem
-from .models import Destino
+from .models import MESES, Destino, Saida
 
 # Uma busca útil cabe numa linha. Acima disso é só custo: o filtro varre a
 # tabela inteira comparando substring em três colunas.
@@ -163,3 +164,16 @@ def _receber_avaliacao(request, destino):
     messages.success(request, 'Obrigado! Sua avaliação foi enviada e aparece no site '
                               'assim que a Soar revisar.')
     return redirect(destino_url + '#avaliacoes')
+
+
+def calendario(request):
+    """Todas as saídas que ainda vão acontecer, de todos os destinos, mês a mês."""
+    saidas = (Saida.objects.filter(data_ida__gte=timezone.localdate())
+              .select_related('destino').order_by('data_ida', 'destino__nome'))
+    meses = []
+    for saida in saidas:
+        chave = (saida.data_ida.year, saida.data_ida.month)
+        if not meses or meses[-1]['chave'] != chave:
+            meses.append({'chave': chave, 'nome': f'{MESES[chave[1]]} de {chave[0]}', 'saidas': []})
+        meses[-1]['saidas'].append(saida)
+    return render(request, 'destinations/calendario.html', {'meses': meses})
