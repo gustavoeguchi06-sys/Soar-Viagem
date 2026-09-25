@@ -6,13 +6,15 @@ B2B. Quem cria e mexe no orçamento é a agência, no painel dela.
 from django.contrib import admin
 from django.utils.html import format_html
 
+from destinations.admin import PRECO_BRL
+
 from .models import Orcamento
 
 
 @admin.register(Orcamento)
 class OrcamentoAdmin(admin.ModelAdmin):
     list_display = ['codigo', 'agencia', 'cliente_nome', 'destino', 'saida_texto',
-                    'pessoas', 'valor', 'situacao', 'criado_em']
+                    'pessoas', 'valor_brl', 'situacao', 'criado_em']
     list_display_links = ['codigo']
     list_filter = ['status', 'agencia', 'destino']
     search_fields = ['cliente_nome', 'cliente_email', 'cliente_telefone',
@@ -20,6 +22,8 @@ class OrcamentoAdmin(admin.ModelAdmin):
     date_hierarchy = 'criado_em'
     readonly_fields = ['saida_texto', 'criado_em', 'atualizado_em']
     list_per_page = 40
+    # valor em reais do jeito brasileiro: 6.500,00
+    formfield_overrides = {**PRECO_BRL}
 
     fieldsets = [
         ('Agência e situação', {'fields': ['agencia', 'status']}),
@@ -35,6 +39,13 @@ class OrcamentoAdmin(admin.ModelAdmin):
     @admin.display(description='Código', ordering='pk')
     def codigo(self, orcamento):
         return orcamento.codigo
+
+    @admin.display(description='Valor', ordering='valor')
+    def valor_brl(self, orcamento):
+        if orcamento.valor is None:
+            return '-'
+        inteiro, centavos = f'{orcamento.valor:,.2f}'.split('.')
+        return 'R$ ' + inteiro.replace(',', '.') + ',' + centavos
 
     @admin.display(description='Situação', ordering='status')
     def situacao(self, orcamento):

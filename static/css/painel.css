@@ -304,8 +304,7 @@ div.breadcrumbs a { color: var(--breadcrumbs-link-fg); font-weight: 600; }
    aqui fica sobre o cartão branco da lateral e some. */
 #nav-sidebar .current-app .section:link,
 #nav-sidebar .current-app .section:visited { color: var(--verde); }
-html[data-theme="dark"] #nav-sidebar .current-model a,
-:root:not([data-theme="light"]) #nav-sidebar .current-model a { background: var(--selected-bg); }
+html[data-theme="dark"] #nav-sidebar .current-model a { background: var(--selected-bg); }
 #nav-filter {
     margin: 0 10px 10px;
     width: calc(100% - 20px);
@@ -340,10 +339,7 @@ html[data-theme="dark"] #nav-sidebar .current-model a,
 }
 html[data-theme="dark"] .module > h2,
 html[data-theme="dark"] .module caption,
-html[data-theme="dark"] .inline-group h2,
-:root:not([data-theme="light"]) .module > h2,
-:root:not([data-theme="light"]) .module caption,
-:root:not([data-theme="light"]) .inline-group h2 {
+html[data-theme="dark"] .inline-group h2 {
     background: var(--darkened-bg);
     color: var(--body-fg);
 }
@@ -358,32 +354,32 @@ html[data-theme="dark"] .inline-group h2,
    aquele arquivo, a tabela vira uma lista de linhas de largura inteira, com
    o nome à esquerda e as ações à direita. */
 .module table { width: 100%; table-layout: auto; }
-#content-main .module table caption { display: table-caption; }
+#content-main .module[class*="app-"] table caption { display: table-caption; }
 
 /* Em tela muito estreita "Adicionar" e "Modificar" não cabem ao lado do nome.
    O cartão rola por dentro em vez de cortar o link no meio. */
 #content-main .module[class*="app-"] { overflow-x: auto; }
 
 /* a primeira coluna estica e empurra as ações para a borda */
-#content-main .module table th[scope="row"] { width: 100%; }
-#content-main .module table td { white-space: nowrap; width: 1%; }
+#content-main .module[class*="app-"] table th[scope="row"] { width: 100%; }
+#content-main .module[class*="app-"] table td { white-space: nowrap; width: 1%; }
 
-#content-main .module table th[scope="row"],
-#content-main .module table td {
+#content-main .module[class*="app-"] table th[scope="row"],
+#content-main .module[class*="app-"] table td {
     padding: 11px 16px;
     border-bottom: 1px solid var(--hairline-color);
     vertical-align: middle;
     text-align: left;
 }
-#content-main .module table tr:last-child th[scope="row"],
-#content-main .module table tr:last-child td { border-bottom: 0; }
-#content-main .module table tr:hover th[scope="row"],
-#content-main .module table tr:hover td { background: var(--darkened-bg); }
+#content-main .module[class*="app-"] table tr:last-child th[scope="row"],
+#content-main .module[class*="app-"] table tr:last-child td { border-bottom: 0; }
+#content-main .module[class*="app-"] table tr:hover th[scope="row"],
+#content-main .module[class*="app-"] table tr:hover td { background: var(--darkened-bg); }
 
-#content-main .module table th[scope="row"] a { font-weight: 600; }
+#content-main .module[class*="app-"] table th[scope="row"] a { font-weight: 600; }
 
 /* Adicionar / Modificar como pílulas discretas, do mesmo tamanho */
-#content-main .module table td a {
+#content-main .module[class*="app-"] table td a {
     display: inline-block;
     padding: 5px 12px;
     border: 1px solid var(--border-color);
@@ -392,14 +388,13 @@ html[data-theme="dark"] .inline-group h2,
     font-weight: 600;
     white-space: nowrap;
 }
-#content-main .module table td a:hover {
+#content-main .module[class*="app-"] table td a:hover {
     border-color: var(--verde);
     background: var(--verde-claro);
     color: var(--verde-escuro);
     text-decoration: none;
 }
-html[data-theme="dark"] #content-main .module table td a:hover,
-:root:not([data-theme="light"]) #content-main .module table td a:hover {
+html[data-theme="dark"] #content-main .module[class*="app-"] table td a:hover {
     background: var(--selected-bg);
     color: var(--link-fg);
 }
@@ -470,8 +465,7 @@ a.ficha:hover {
 .ficha__nota { font-size: .78rem; color: var(--body-quiet-color); }
 .ficha--atencao { border-left: 4px solid var(--ouro); }
 .ficha--atencao .ficha__numero { color: #b8730b; }
-html[data-theme="dark"] .ficha--atencao .ficha__numero,
-:root:not([data-theme="light"]) .ficha--atencao .ficha__numero { color: var(--ouro); }
+html[data-theme="dark"] .ficha--atencao .ficha__numero { color: var(--ouro); }
 .ficha--calma { border-left: 4px solid var(--verde); }
 
 /* atalhos de cadastro — mesma lógica: 1, 2 ou 4 */
@@ -494,8 +488,7 @@ html[data-theme="dark"] .ficha--atencao .ficha__numero,
     transition: border-color .12s, background .12s;
 }
 .atalho:hover { border-color: var(--verde); background: var(--verde-claro); text-decoration: none; }
-html[data-theme="dark"] .atalho:hover,
-:root:not([data-theme="light"]) .atalho:hover { background: var(--selected-bg); }
+html[data-theme="dark"] .atalho:hover { background: var(--selected-bg); }
 .atalho__mais {
     display: grid;
     place-items: center;
@@ -585,16 +578,11 @@ html[data-theme="dark"] .atalho:hover,
 .etiqueta--cancelada  { background: #f1f3f2; color: #6b7a80; }
 .etiqueta--fila       { background: #fdecea; color: #b42318; }
 .etiqueta--publicada  { background: #e8f3ec; color: #146c43; }
-html[data-theme="dark"] .etiqueta--pendente,
-:root:not([data-theme="light"]) .etiqueta--pendente { background: #3a2a08; color: #f7c164; }
+html[data-theme="dark"] .etiqueta--pendente { background: #3a2a08; color: #f7c164; }
 html[data-theme="dark"] .etiqueta--confirmada,
-html[data-theme="dark"] .etiqueta--publicada,
-:root:not([data-theme="light"]) .etiqueta--confirmada,
-:root:not([data-theme="light"]) .etiqueta--publicada { background: #10371f; color: #7fdca7; }
-html[data-theme="dark"] .etiqueta--cancelada,
-:root:not([data-theme="light"]) .etiqueta--cancelada { background: #222c27; color: #9fb0aa; }
-html[data-theme="dark"] .etiqueta--fila,
-:root:not([data-theme="light"]) .etiqueta--fila { background: #3d1310; color: #f0a29b; }
+html[data-theme="dark"] .etiqueta--publicada { background: #10371f; color: #7fdca7; }
+html[data-theme="dark"] .etiqueta--cancelada { background: #222c27; color: #9fb0aa; }
+html[data-theme="dark"] .etiqueta--fila { background: #3d1310; color: #f0a29b; }
 
 .estrelas { color: var(--ouro); letter-spacing: .12em; white-space: nowrap; }
 
@@ -639,7 +627,8 @@ html[data-theme="dark"] .etiqueta--fila,
     color: var(--body-quiet-color);
 }
 #changelist table thead th.action-checkbox-column { padding: 8px 10px; }
-#changelist table thead th a { padding: 10px 12px; display: block; color: inherit; }
+#changelist table thead th .text a,
+#changelist table thead th .text span { padding: 12px 12px; display: block; color: inherit; }
 #changelist tbody td, #changelist tbody th {
     padding: 11px 12px;
     border-bottom: 1px solid var(--hairline-color);
@@ -689,17 +678,17 @@ html[data-theme="dark"] .etiqueta--fila,
 
 /* ações em massa */
 #changelist .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
     padding: 10px 14px;
-    margin-bottom: 12px;
-    background: var(--verde-claro);
+    margin: 0;
+    background: var(--cartao);
     border: 1px solid var(--border-color);
-    border-radius: var(--r-md);
-    color: var(--verde-escuro);
-}
-html[data-theme="dark"] #changelist .actions,
-:root:not([data-theme="light"]) #changelist .actions {
-    background: var(--darkened-bg);
-    color: var(--body-fg);
+    border-radius: var(--r-lg);
+    color: var(--body-quiet-color);
+    line-height: 1.4;
 }
 
 .paginator {
@@ -844,8 +833,7 @@ fieldset .description {
     font-size: .8rem;
 }
 .inline-group .add-row a:hover, .add-row a:hover { background: var(--verde); color: #fff; }
-html[data-theme="dark"] .inline-group .add-row a,
-:root:not([data-theme="light"]) .inline-group .add-row a {
+html[data-theme="dark"] .inline-group .add-row a {
     background: var(--selected-bg);
     color: var(--link-fg);
 }
@@ -974,8 +962,8 @@ body.login #content { padding: 12px 0 0; }
     .painel-topo h1 { font-size: 1.3rem; }
     .ficha__numero { font-size: 1.7rem; }
     /* nas listagens o rótulo da coluna já basta; a ação vai para baixo */
-    #content-main .module table th[scope="row"],
-    #content-main .module table td { padding: 9px 12px; }
+    #content-main .module[class*="app-"] table th[scope="row"],
+    #content-main .module[class*="app-"] table td { padding: 9px 12px; }
 }
 
 /* Blog: os 12 meses de "melhor época" como caixinhas lado a lado */
@@ -1127,8 +1115,7 @@ a.ficha:hover { transform: none; box-shadow: var(--sombra-sm); }
 .ficha__numero { font-size: 2.1rem; font-weight: 700; margin: 8px 0 4px; }
 .ficha--calma { border-left: 1px solid var(--border-color); }
 .ficha--atencao .ficha__numero { color: var(--body-loud-color); }
-html[data-theme="dark"] .ficha--atencao .ficha__numero,
-:root:not([data-theme="light"]) .ficha--atencao .ficha__numero { color: var(--body-loud-color); }
+html[data-theme="dark"] .ficha--atencao .ficha__numero { color: var(--body-loud-color); }
 
 .atalho { border-style: solid; border-radius: var(--r-lg); }
 .module { border-radius: var(--r-lg); box-shadow: none; }
@@ -1140,3 +1127,442 @@ html[data-theme="dark"] .ficha--atencao .ficha__numero,
     .pf__acoes { width: 100%; }
     .pf__acoes .pf-btn { flex: 1; justify-content: center; }
 }
+
+
+/* ===== Acabamento das listas e formulários ===============================
+   Ajustes finos para as telas de lista e de edição ficarem no mesmo padrão
+   do painel da agência: cartões com cantos iguais, botões em pílula com a
+   mesma altura, e nada flutuando fora do lugar. */
+
+/* --- Lista: a tela não é um cartão; os cartões são as partes dela ------- */
+#changelist.module { background: none; border: 0; box-shadow: none; overflow: visible; margin: 0; }
+#changelist { gap: 20px; }
+#changelist .changelist-form-container { display: flex; flex-direction: column; gap: 14px; }
+#changelist-form { display: flex; flex-direction: column; gap: 12px; }
+
+/* busca: campo largo e botão verde da mesma altura */
+#toolbar { margin: 0; padding: 0; background: none; border: 0; }
+#changelist-search { margin: 0; padding: 10px 12px; border-radius: var(--r-lg); box-shadow: none; }
+#changelist-search > div { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#changelist-search label { display: inline-flex; margin: 0; }
+#changelist-search label img { width: 18px; height: 18px; opacity: .55; }
+#toolbar #searchbar {
+    flex: 1 1 260px;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    padding: 0 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--body-bg);
+    color: var(--body-fg);
+    font-size: .9rem;
+}
+#toolbar #searchbar:focus { outline: 0; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(20, 108, 67, .15); }
+#toolbar form input[type="submit"] {
+    height: 40px;
+    margin: 0;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--verde);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 700;
+}
+#toolbar form input[type="submit"]:hover { background: var(--verde-escuro); }
+#changelist-search .quiet { font-size: .8rem; color: var(--body-quiet-color); }
+
+/* datas no topo da lista: pílulas, como os filtros do painel da agência */
+#changelist .toplinks,
+.change-list .toplinks { gap: 8px; padding: 0; margin: 0; border: 0; }
+.change-list .toplinks a {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--cartao);
+    font-size: .8rem;
+    font-weight: 600;
+}
+.change-list .toplinks a:hover { border-color: var(--verde); text-decoration: none; }
+.change-list .toplinks .date-back { color: var(--body-quiet-color); }
+#changelist .xfull { margin: 0; }
+
+/* ações em massa: select e botão "Ir" do mesmo tamanho */
+#changelist .actions label { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-weight: 600; color: var(--body-fg); }
+#changelist .actions select {
+    height: 36px;
+    min-width: 240px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 12px;
+    border-radius: 999px;
+}
+#changelist .actions .button {
+    height: 36px;
+    margin: 0;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--verde);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+}
+#changelist .actions .button:hover { background: var(--verde-escuro); }
+#changelist .actions span.all,
+#changelist .actions span.action-counter,
+#changelist .actions span.clear,
+#changelist .actions span.question { margin: 0; font-size: .82rem; }
+
+/* tabela */
+#changelist .results { border-radius: var(--r-lg); box-shadow: none; }
+#changelist table thead th,
+#changelist table thead th.sorted { background: var(--darkened-bg); }
+#changelist table thead th.sorted .text a { color: var(--link-fg); }
+#changelist table thead th .text a:hover { background: none; color: var(--link-fg); }
+#changelist table thead th.sorted .sortoptions { padding: 12px 10px 0 0; }
+#changelist table thead th.sorted .text { padding-right: 40px; }
+#changelist table thead th.action-checkbox-column { padding: 0 8px 0 16px; width: 1%; }
+#changelist tbody td.action-checkbox { padding-left: 16px; }
+#changelist tbody th { font-weight: 600; }
+#changelist tbody td, #changelist tbody th { text-align: left; }
+
+/* rodapé da lista: contagem à esquerda, "Salvar" à direita */
+#changelist .paginator {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0;
+    padding: 2px 4px 0;
+    background: none;
+    border: 0;
+    overflow: visible;
+}
+#changelist .paginator input[type="submit"] { float: none; margin: 0 0 0 auto; height: 40px; padding: 0 24px; }
+
+/* filtros da direita */
+#changelist-filter {
+    flex: 0 0 250px;
+    margin: 0;
+    padding-bottom: 8px;
+    border-radius: var(--r-lg);
+    box-shadow: none;
+    position: sticky;
+    top: 16px;
+}
+#changelist-filter h2 { margin: 0 0 4px; }
+#changelist-filter-extra-actions { margin: 8px 16px 4px !important; padding-bottom: 10px; font-size: .78rem !important; }
+#changelist-filter details > summary {
+    margin: 12px 16px 6px;
+    padding: 0;
+    cursor: pointer;
+}
+#changelist-filter details > summary::before { content: none; }
+#changelist-filter details summary h3 {
+    margin: 0;
+    padding: 0;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--body-quiet-color);
+}
+#changelist-filter ul { margin: 0 10px; padding: 0 0 8px; }
+#changelist-filter li,
+#changelist-filter li.selected { margin: 0; padding: 0; border: 0; }
+#changelist-filter a {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: .85rem;
+    color: var(--body-fg);
+}
+#changelist-filter a:hover { background: var(--darkened-bg); color: var(--link-fg); text-decoration: none; }
+#changelist-filter li.selected a { background: var(--verde-claro); color: var(--verde-escuro); font-weight: 700; }
+html[data-theme="dark"] #changelist-filter li.selected a { background: var(--selected-bg); color: var(--link-fg); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) #changelist-filter li.selected a { background: var(--selected-bg); color: var(--link-fg); }
+}
+
+/* botões do topo ("Adicionar", "Histórico", "Ver no site"): o ícone do
+   Django ficava por cima do texto; vira um sinal escrito */
+.object-tools a.addlink,
+.object-tools a.viewsitelink,
+.object-tools a.historylink { background-image: none; padding: 9px 18px; }
+.object-tools a.addlink::before { content: "+"; margin-right: 6px; font-weight: 800; }
+.object-tools a.viewsitelink::after { content: "\2197"; margin-left: 6px; }
+
+/* --- Formulário -------------------------------------------------------- */
+
+/* A barra de salvar de baixo acompanha a rolagem; a de cima era repetida. */
+#content-main form > div > .submit-row:first-child { display: none; }
+
+/* botões de salvar: mesma altura; "Salvar" cheio, os outros de contorno */
+.submit-row input,
+.submit-row a.deletelink,
+.submit-row a.closelink {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 999px;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1;
+}
+.submit-row input:not(.default) {
+    background: transparent;
+    border: 1px solid var(--verde);
+    color: var(--verde);
+}
+.submit-row input:not(.default):hover { background: var(--verde-claro); }
+html[data-theme="dark"] .submit-row input:not(.default) { border-color: var(--link-fg); color: var(--link-fg); }
+html[data-theme="dark"] .submit-row input:not(.default):hover { background: var(--selected-bg); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .submit-row input:not(.default) { border-color: var(--link-fg); color: var(--link-fg); }
+    :root:not([data-theme="light"]) .submit-row input:not(.default):hover { background: var(--selected-bg); }
+}
+input[type="submit"].default, .button.default { text-transform: none; }
+
+/* campos de texto com largura de leitura, em vez dos 20em fixos do admin */
+.aligned .vTextField,
+.aligned .vURLField,
+.aligned input[type="email"],
+.aligned .vLargeTextField,
+.aligned textarea { width: min(100%, 40rem); box-sizing: border-box; }
+
+/* os ícones de editar/adicionar/remover/ver ao lado de um select */
+.related-widget-wrapper { gap: 4px; align-items: center; }
+.related-widget-wrapper-link { display: inline-flex; padding: 5px; border-radius: 8px; opacity: .6; }
+.related-widget-wrapper-link:hover { opacity: 1; background: var(--darkened-bg); }
+.related-widget-wrapper-link img { width: 15px; height: 15px; filter: grayscale(1); }
+.related-widget-wrapper-link:hover img { filter: none; }
+
+/* envio de arquivo com botão no mesmo estilo do resto */
+input[type="file"] { font-size: .82rem; color: var(--body-quiet-color); }
+input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--cartao);
+    color: var(--body-fg);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover { border-color: var(--verde); }
+p.file-upload { font-size: .82rem; line-height: 1.9; }
+
+/* o calendário do campo de data acompanha o tema */
+html[data-theme="dark"] input { color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) input { color-scheme: dark; } }
+
+/* seções dobráveis: mesma faixa de título dos outros cartões, com seta */
+fieldset.module.collapse details > summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: var(--verde-claro);
+    color: var(--verde-escuro);
+    list-style: none;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+}
+fieldset.module.collapse details > summary::-webkit-details-marker { display: none; }
+fieldset.module.collapse details > summary::before {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-left: 2px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform .15s;
+}
+fieldset.module.collapse details[open] > summary { border-bottom: 1px solid var(--border-color); }
+fieldset.module.collapse details[open] > summary::before { transform: rotate(45deg); }
+fieldset.module.collapse details > summary h2,
+fieldset.module.collapse details > summary .fieldset-heading {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+html[data-theme="dark"] fieldset.module.collapse details > summary { background: var(--darkened-bg); color: var(--body-fg); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) fieldset.module.collapse details > summary { background: var(--darkened-bg); color: var(--body-fg); }
+}
+
+/* blocos em tabela: o nome do item vinha espremido na primeira coluna,
+   por cima do link "Modificar". Fica só o link, alinhado com a linha. */
+.inline-group .tabular tr.has_original td { padding-top: 10px; }
+.inline-group .tabular tr td { vertical-align: middle; }
+.inline-group .tabular td.original { width: 1%; padding-left: 16px; white-space: nowrap; }
+.inline-group .tabular td.original p {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    font-size: 0;
+    overflow: visible;
+}
+.inline-group .tabular td.original p a.inlinechangelink { font-size: .78rem; font-weight: 700; }
+.inline-group .tabular thead th { padding: 10px 12px; }
+
+/* --- Segunda passada ---------------------------------------------------- */
+
+/* a barra de ações não passa por baixo do cartão de filtros */
+#changelist .actions { width: auto; box-sizing: border-box; }
+
+/* os botões do topo ocupam a altura certa e não encostam no cartão de baixo */
+.object-tools li { display: flex; }
+.object-tools a { display: inline-flex; align-items: center; line-height: 1.2; }
+
+/* link "abrir" e outros links curtos das colunas não quebram em duas linhas */
+#changelist tbody td a { white-space: nowrap; }
+
+/* filtros: o título de cada grupo é o texto do <summary> */
+#changelist-filter details > summary,
+#changelist-filter details[open] > summary {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--body-quiet-color);
+}
+#changelist-filter details > summary::before,
+#changelist-filter details[open] > summary::before { content: none; }
+#changelist-filter #changelist-filter-extra-actions a {
+    display: inline-block;
+    padding: 4px 0 4px 22px;
+    background-position: 0 50%;
+    border-radius: 0;
+    font-size: .8rem;
+    color: var(--body-quiet-color);
+}
+#changelist-filter #changelist-filter-extra-actions a:hover { background-color: transparent; color: var(--link-fg); }
+
+/* títulos de seção e de bloco embutido sem a moldura escura do admin */
+fieldset .fieldset-heading,
+fieldset .inline-heading,
+.inline-group h2 { border-top: 0; border-left: 0; border-right: 0; }
+
+/* as barras "/" que o admin escreve entre os botões do topo somem; os
+   botões em pílula já se separam sozinhos */
+#user-tools { font-size: 0; }
+#user-tools .boas-vindas { font-size: .78rem; margin-right: 4px; }
+#user-tools a,
+#user-tools #logout-form button { font-size: .78rem; }
+
+/* o admin trava cada item dos botões do topo em 1rem de altura e cortava o texto */
+.object-tools li { height: auto; float: none; margin: 0; }
+
+/* faixa das seções dobráveis sem as linhas escuras do admin */
+fieldset.module.collapse details > summary { border: 0; margin: 0; }
+fieldset.module.collapse details[open] > summary { border-bottom: 1px solid var(--border-color); }
+
+/* busca de destino (autocompletar) na mesma altura dos outros campos */
+.select2-container--admin-autocomplete .select2-selection--single,
+.select2-container--admin-autocomplete .select2-selection--multiple {
+    min-height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    background: var(--cartao);
+}
+.select2-container--admin-autocomplete .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+    padding-left: 11px;
+    color: var(--body-fg);
+    font-size: .875rem;
+}
+.select2-container--admin-autocomplete .select2-selection--single .select2-selection__arrow { height: 36px; }
+
+/* caixa de escolher grupos/permissões: o lado "escolhidos" em verde, não preto */
+.selector-chosen .selector-chosen-title,
+.selector-chosen h2 {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+.selector-chosen .selector-chosen-title label,
+.selector-chosen .selector-chosen-title .helptext { color: rgba(255, 255, 255, .85); }
+.selector .selector-available-title,
+.selector-available h2 { border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.selector-chosen .selector-chosen-title,
+.selector-chosen h2 { border-radius: var(--r-sm) var(--r-sm) 0 0; }
+
+/* bloco embutido: um cartão só, sem o cartão de dentro repetindo a borda */
+.inline-group .module,
+.inline-group fieldset.module { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+
+/* No celular a barra de salvar empilhava 4 botões e cobria um quarto da
+   tela. Fica numa linha que quebra, e o "Salvar e adicionar outro" (o menos
+   usado) sai de cena em tela pequena. */
+@media (max-width: 900px) {
+    .submit-row { flex-direction: row; align-items: center; gap: 8px; padding: 10px 12px; }
+    .submit-row input { flex: 1 1 auto; justify-content: center; }
+}
+@media (max-width: 560px) {
+    .submit-row input[name="_addanother"] { display: none; }
+    .submit-row input,
+    .submit-row a.deletelink { height: 38px; padding: 0 14px; font-size: .78rem; }
+    .submit-row .deletelink-box { margin-left: 0; }
+}
+
+
+/* Regras do tema escuro automático (quando o dono não escolheu tema no
+   botão do topo). Antes valiam também no tema claro do sistema, e as
+   etiquetas e títulos saíam escuros numa tela clara. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) #nav-sidebar .current-model a { background: var(--selected-bg); }
+    :root:not([data-theme="light"]) .module > h2,
+    :root:not([data-theme="light"]) .module caption,
+    :root:not([data-theme="light"]) .inline-group h2 {
+        background: var(--darkened-bg);
+        color: var(--body-fg);
+    }
+    :root:not([data-theme="light"]) #content-main .module[class*="app-"] table td a:hover {
+        background: var(--selected-bg);
+        color: var(--link-fg);
+    }
+    :root:not([data-theme="light"]) .ficha--atencao .ficha__numero { color: var(--ouro); }
+    :root:not([data-theme="light"]) .atalho:hover { background: var(--selected-bg); }
+    :root:not([data-theme="light"]) .etiqueta--pendente { background: #3a2a08; color: #f7c164; }
+    :root:not([data-theme="light"]) .etiqueta--confirmada,
+    :root:not([data-theme="light"]) .etiqueta--publicada { background: #10371f; color: #7fdca7; }
+    :root:not([data-theme="light"]) .etiqueta--cancelada { background: #222c27; color: #9fb0aa; }
+    :root:not([data-theme="light"]) .etiqueta--fila { background: #3d1310; color: #f0a29b; }
+    :root:not([data-theme="light"]) .inline-group .add-row a {
+        background: var(--selected-bg);
+        color: var(--link-fg);
+    }
+    :root:not([data-theme="light"]) .ficha--atencao .ficha__numero { color: var(--body-loud-color); }
+}
+
+/* "Todos os cadastros": linhas brancas e botões sem os ícones do admin,
+   que ficavam tortos em cima do texto */
+#content-main .module[class*="app-"] table th[scope="row"],
+#content-main .module[class*="app-"] table td { background: var(--cartao); }
+#content-main .module[class*="app-"] table tr:hover th[scope="row"],
+#content-main .module[class*="app-"] table tr:hover td { background: var(--darkened-bg); }
+#content-main .module[class*="app-"] table td a.addlink,
+#content-main .module[class*="app-"] table td a.changelink,
+#content-main .module[class*="app-"] table td a.viewlink { background-image: none; padding: 5px 14px; }
+#content-main .module[class*="app-"] table td a.addlink::before { content: "+"; margin-right: 5px; font-weight: 800; }
+
+/* códigos (SOAR-00009, ORC-00001) numa linha só */
+#changelist .field-codigo { white-space: nowrap; }

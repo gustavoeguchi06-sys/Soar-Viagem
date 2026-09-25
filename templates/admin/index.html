@@ -117,7 +117,7 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
                             <td>{{ r.destino.nome }}</td>
                             <td>{% firstof r.usuario.first_name r.usuario.username "Cliente removido" %}</td>
                             <td class="num">{{ r.pessoas }}</td>
-                            <td class="num">{% if r.total_estimado %}R$ {{ r.total_estimado|floatformat:2 }}{% else %}-{% endif %}</td>
+                            <td class="num">{% if r.total_estimado %}R$ {{ r.total_estimado|floatformat:"2g" }}{% else %}-{% endif %}</td>
                             <td><span class="etiqueta etiqueta--{{ r.status }}">{{ r.get_status_display }}</span></td>
                         </tr>
                     {% empty %}
