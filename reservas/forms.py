@@ -1,5 +1,7 @@
 from django import forms
 
+from soar.mascaras import formatar_telefone
+
 from .models import Reserva
 
 PESSOAS_POR_ACOMODACAO = {'single': 1, 'duplo': 2, 'triplo': 3}
@@ -16,6 +18,7 @@ class ReservaForm(forms.ModelForm):
             'acomodacao': forms.RadioSelect(),
             'pessoas': forms.NumberInput(attrs={'min': 1, 'max': 20}),
             'telefone': forms.TextInput(attrs={'placeholder': '(11) 90000-0000',
+                                               'inputmode': 'tel', 'data-mascara': 'telefone',
                                                'autocomplete': 'tel'}),
             'observacao': forms.Textarea(attrs={
                 'rows': 3, 'maxlength': 1000,
@@ -39,6 +42,9 @@ class ReservaForm(forms.ModelForm):
             return saida['texto']
         return '{} ({} vaga{})'.format(saida['texto'], saida['vagas'],
                                        '' if saida['vagas'] == 1 else 's')
+
+    def clean_telefone(self):
+        return formatar_telefone(self.cleaned_data.get('telefone'))
 
     def clean_pessoas(self):
         pessoas = self.cleaned_data['pessoas']

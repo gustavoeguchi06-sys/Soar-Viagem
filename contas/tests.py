@@ -225,3 +225,34 @@ class ConfirmacaoComOutraContaAbertaTests(TestCase):
         self.assertIn('usuario=karl_x', resposta.url)
         pagina = self.client.get(resposta.url)
         self.assertContains(pagina, 'value="karl_x"')
+
+
+class MascarasTests(TestCase):
+    """Telefone, CNPJ e CADASTUR chegam formatados mesmo sem o JavaScript."""
+
+    def test_formatos(self):
+        from django.core.exceptions import ValidationError
+        from soar.mascaras import formatar_cadastur, formatar_telefone
+        self.assertEqual(formatar_telefone('11988887777'), '(11) 98888-7777')
+        self.assertEqual(formatar_telefone('+55 11 3333-4444'), '(11) 3333-4444')
+        self.assertEqual(formatar_telefone(''), '')
+        with self.assertRaises(ValidationError):
+            formatar_telefone('98888777')
+        self.assertEqual(formatar_cadastur('351234561000013'), '35.123456.10.0001-3')
+        with self.assertRaises(ValidationError):
+            formatar_cadastur('12345')
+
+    def test_cadastro_de_agencia_grava_formatado(self):
+        from contas.models import PerfilAgente
+        resposta = self.client.post(reverse('contas:cadastro_agente'), {
+            'first_name': 'Ana', 'email': 'ana@agencia.com', 'username': 'ana_ag',
+            'password1': 'Senha-forte-123', 'password2': 'Senha-forte-123',
+            'razao_social': 'Ana Turismo', 'cnpj': '11222333000181',
+            'cadastur': '351234561000013', 'whatsapp': '11988887777',
+            'aceite_privacidade': 'on',
+        })
+        self.assertEqual(resposta.status_code, 200)
+        agencia = PerfilAgente.objects.get()
+        self.assertEqual(agencia.cnpj, '11222333000181')
+        self.assertEqual(agencia.cadastur, '35.123456.10.0001-3')
+        self.assertEqual(agencia.whatsapp, '(11) 98888-7777')

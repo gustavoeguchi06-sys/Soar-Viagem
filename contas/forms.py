@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
+from soar.mascaras import formatar_cadastur, formatar_telefone
+
 from .models import PerfilAgente, so_digitos, validar_cnpj
 
 
@@ -166,15 +168,17 @@ class AgenteCadastroForm(UserCreationForm):
     cnpj = forms.CharField(
         label='CNPJ', max_length=18,
         widget=forms.TextInput(attrs={'placeholder': '00.000.000/0000-00',
-                                      'inputmode': 'numeric'}),
+                                      'inputmode': 'numeric', 'data-mascara': 'cnpj'}),
     )
     cadastur = forms.CharField(
         label='CADASTUR', max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': 'Número do CADASTUR'}),
+        widget=forms.TextInput(attrs={'placeholder': '00.000000.00.0000-0',
+                                      'inputmode': 'numeric', 'data-mascara': 'cadastur'}),
     )
     whatsapp = forms.CharField(
         label='WhatsApp', max_length=20,
-        widget=forms.TextInput(attrs={'placeholder': '(11) 99999-9999', 'inputmode': 'tel'}),
+        widget=forms.TextInput(attrs={'placeholder': '(11) 99999-9999', 'inputmode': 'tel',
+                                      'data-mascara': 'telefone'}),
     )
     aceite_privacidade = forms.BooleanField(
         required=True,
@@ -205,6 +209,12 @@ class AgenteCadastroForm(UserCreationForm):
 
     def clean_email(self):
         return self.cleaned_data['email'].strip().lower()
+
+    def clean_cadastur(self):
+        return formatar_cadastur(self.cleaned_data['cadastur'])
+
+    def clean_whatsapp(self):
+        return formatar_telefone(self.cleaned_data['whatsapp'])
 
     def clean_cnpj(self):
         cnpj = so_digitos(self.cleaned_data['cnpj'])

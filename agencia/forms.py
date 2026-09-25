@@ -5,6 +5,8 @@ from destinations.admin import CampoPreco
 from destinations.models import Destino, Saida
 from reservas.models import Reserva
 
+from soar.mascaras import formatar_telefone
+
 from .models import Orcamento
 
 DATA = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
@@ -31,6 +33,7 @@ class OrcamentoForm(forms.ModelForm):
             'validade': DATA,
             'pessoas': forms.NumberInput(attrs={'min': 1, 'max': 60}),
             'cliente_telefone': forms.TextInput(attrs={'placeholder': '(11) 90000-0000',
+                                                       'inputmode': 'tel', 'data-mascara': 'telefone',
                                                        'autocomplete': 'off'}),
             'observacoes': forms.Textarea(attrs={
                 'rows': 3, 'maxlength': 2000,
@@ -60,6 +63,9 @@ class OrcamentoForm(forms.ModelForm):
             [('', 'A combinar')] + [(nome, opcoes) for nome, opcoes in grupos.items()])
         if atual is not None:
             self.initial['saida_escolhida'] = str(atual.pk)
+
+    def clean_cliente_telefone(self):
+        return formatar_telefone(self.cleaned_data.get('cliente_telefone'))
 
     def clean_pessoas(self):
         pessoas = self.cleaned_data['pessoas']
