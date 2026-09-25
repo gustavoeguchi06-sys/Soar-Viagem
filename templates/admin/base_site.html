@@ -37,7 +37,7 @@ todos sem precisar de !important nem de seletor inflado.
 {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
 {% endblock %}
 
-{% block welcome-msg %}Olá, <strong>{% firstof user.first_name user.get_short_name user.get_username %}</strong>{% endblock %}
+{% block welcome-msg %}<span class="boas-vindas">Olá, <strong>{% firstof user.first_name user.get_short_name user.get_username %}</strong></span>{% endblock %}
 
 {% block nav-global %}{% endblock %}
 

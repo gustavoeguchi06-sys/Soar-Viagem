@@ -3,7 +3,15 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from .limpeza_sw import favicon, service_worker
+
 urlpatterns = [
+    # Desliga o service worker que outro sistema deixou em 127.0.0.1:8000
+    # (ver soar/limpeza_sw.py).
+    path('sw.js', service_worker, name='service_worker'),
+    # O navegador pede /favicon.ico em toda página; sem isso, é um 404 a cada clique.
+    path('favicon.ico', favicon),
+
     # O painel do dono do site: cadastrar destinos, fotos, roteiro, hospedagens
     # e acompanhar as reservas. Só entra quem tem conta de equipe (is_staff).
     #
