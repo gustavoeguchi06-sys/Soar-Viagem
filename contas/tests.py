@@ -110,7 +110,7 @@ class ConfirmacaoDeEmailTests(TestCase):
 
         usuario.refresh_from_db()
         self.assertTrue(usuario.is_active)
-        self.assertRedirects(resposta, reverse('contas:entrar'))
+        self.assertRedirects(resposta, reverse('contas:entrar') + '?usuario=novo')
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_link_adulterado_nao_ativa(self):
@@ -207,3 +207,21 @@ class PaginasSemTerceirosTests(TestCase):
             csp = resposta.get('Content-Security-Policy') or resposta.get(
                 'Content-Security-Policy-Report-Only')
             self.assertNotIn('google', csp)
+
+
+class ConfirmacaoComOutraContaAbertaTests(TestCase):
+    """O dono testando o cadastro no mesmo navegador: o link não pode levar
+    para o painel dele, e sim para entrar com a conta nova."""
+
+    def test_link_sai_da_outra_conta_e_preenche_o_usuario(self):
+        dono = User.objects.create_user('dono_x', 'dono@x.com', 'senha-boa-123', is_staff=True)
+        novo = User.objects.create_user('karl_x', 'karl@x.com', 'senha-boa-123', is_active=False)
+        self.client.force_login(dono)
+        uid = urlsafe_base64_encode(force_bytes(novo.pk))
+        token = default_token_generator.make_token(novo)
+        resposta = self.client.get(reverse('contas:ativar', args=[uid, token]))
+        self.assertTrue(User.objects.get(pk=novo.pk).is_active)
+        self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertIn('usuario=karl_x', resposta.url)
+        pagina = self.client.get(resposta.url)
+        self.assertContains(pagina, 'value="karl_x"')

@@ -4,6 +4,7 @@ Quem é dono do site não passa por aqui para administrar: o painel do dono é o
 admin do Django, em /painel/. Estas telas são a porta do cliente.
 """
 import json
+from urllib.parse import urlencode
 import logging
 
 from django.contrib import messages
@@ -70,7 +71,8 @@ def entrar(request):
     if request.user.is_authenticated:
         return redirect(_proxima_pagina(request))
 
-    form = EntrarForm(request)
+    # Vindo do link de confirmação, o usuário já chega preenchido.
+    form = EntrarForm(request, initial={'username': request.GET.get('usuario', '')[:150]})
 
     if request.method == 'POST':
         digitado = request.POST.get('username', '').strip()
@@ -211,8 +213,17 @@ def ativar(request, uidb64, token):
         log.info('e-mail confirmado: usuario=%r ip=%s',
                  usuario.get_username(), ip_do_cliente(request))
 
-    messages.success(request, 'E-mail confirmado! Agora é só entrar com seu usuário e senha.')
-    return redirect('contas:entrar')
+    # Quem abre o link pode estar com OUTRA conta aberta no navegador (o dono
+    # testando o cadastro, por exemplo). Sem sair dela, a tela de entrar
+    # mandava direto para o painel dessa outra conta e parecia que o link
+    # tinha aberto a tela errada.
+    if request.user.is_authenticated and request.user.pk != usuario.pk:
+        logout(request)
+
+    messages.success(request, 'E-mail confirmado! Agora entre com o usuário {} e a senha '
+                              'que você criou.'.format(usuario.get_username()))
+    return redirect('{}?{}'.format(reverse('contas:entrar'),
+                                   urlencode({'usuario': usuario.get_username()})))
 
 
 # --------------------------------------------------------------------------- #
