@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Página não encontrada | Soar Operadora{% endblock %}
+{% block body_class %}pagina-viagem pagina-conta{% endblock %}
+{% block estilos_legado %}{% endblock %}
+{% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/contas.css' %}">{% endblock %}
+
+{% block content %}
+<section class="conta-tela">
+    <div class="wrap">
+        <div class="cartao-form pagina-erro">
+            <span class="pagina-erro__codigo">Erro 404</span>
+            <h1>Essa página não existe</h1>
+            <p class="cartao-form__sub">O endereço pode ter mudado ou ter sido digitado com algum
+               erro. As viagens continuam todas aqui.</p>
+            <div class="pagina-erro__botoes">
+                <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver as viagens</a>
+                <a class="btn btn--contorno" href="{% url 'destinations:home' %}">Ir para o início</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

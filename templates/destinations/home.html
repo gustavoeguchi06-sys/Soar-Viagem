@@ -7,7 +7,7 @@
         <h1>Para onde você quer voar?</h1>
         <p>Descubra destinos incríveis, compare hospedagens e leia avaliações de outros viajantes.</p>
         <form class="busca" action="{% url 'destinations:lista' %}" method="get">
-            <input type="text" name="q" placeholder="Busque por cidade, país ou palavra-chave...">
+            <input type="text" name="q" placeholder="Busque por destino ou estado...">
             <button type="submit">Buscar</button>
         </form>
     </div>
@@ -17,7 +17,7 @@
 <section class="secao">
     <div class="container">
         <div class="secao-titulo">
-            <h2>⭐ Destinos em destaque</h2>
+            <h2>Destinos em destaque</h2>
             <a href="{% url 'destinations:lista' %}">Ver todos →</a>
         </div>
         <div class="grade">

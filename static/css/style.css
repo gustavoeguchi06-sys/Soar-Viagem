@@ -1,7 +1,8 @@
 /* ===== Soar — Site de Viagem ===== */
 :root {
-    --azul-escuro: #10304a;
-    --azul: #1b6d9c;
+    /* os nomes ficaram "azul" por histórico; as cores já são as da marca */
+    --azul-escuro: #14201b;
+    --azul: #146c43;
     --laranja: #f2764c;
     --areia: #faf6f0;
     --texto: #22303c;
@@ -420,3 +421,12 @@ img { max-width: 100%; display: block; }
     flex-wrap: wrap;
 }
 .paginacao__conta { color: var(--cinza, #5c6b78); font-size: .94rem; }
+
+/* ícone de local nos cartões (no lugar do emoji) */
+.card-pais { display: flex; align-items: center; gap: 5px; }
+.card-pais__ic { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 2;
+                 color: var(--azul); }
+
+/* botão da busca no topo verde da página inicial: branco, para aparecer */
+.hero .busca button { background: #fff; color: #0d4f31; font-weight: 700; }
+.hero .busca button:hover { background: #e8f3ec; filter: none; }
