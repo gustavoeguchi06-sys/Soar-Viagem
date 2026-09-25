@@ -9,7 +9,22 @@ fim a lista de tabelas (que é o que o admin mostrava sozinho).
 
 {% block coltype %}colM{% endblock %}
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
-{% block nav-breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs">Painel do dono</div>{% endblock %}
+{% block faixa_titulo %}Olá, {% firstof user.first_name user.get_username %}.{% endblock %}
+{% block faixa_sub %}
+<p class="pf__sub">
+    {% if painel.reservas_pendentes %}
+        Há {{ painel.reservas_pendentes }} pedido{{ painel.reservas_pendentes|pluralize }} de reserva
+        esperando sua resposta.
+    {% else %}
+        Nenhum pedido de reserva esperando resposta. Tudo em dia.
+    {% endif %}
+</p>
+{% endblock %}
+{% block faixa_acoes %}
+<a class="pf-btn pf-btn--verde" href="{{ painel.url_destino_novo }}">+ Novo destino</a>
+<a class="pf-btn" href="{{ painel.url_artigo_novo }}">+ Novo artigo</a>
+{% endblock %}
 
 {% block content %}
 <div id="content-main">
@@ -18,21 +33,6 @@ fim a lista de tabelas (que é o que o admin mostrava sozinho).
 ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
 {% endcomment %}
 <div class="painel-area">
-
-    <div class="painel-topo">
-        <div>
-            <h1>Olá, {% firstof user.first_name user.get_username %}.</h1>
-            <p>
-                {% if painel.reservas_pendentes %}
-                    Há {{ painel.reservas_pendentes }} pedido{{ painel.reservas_pendentes|pluralize }} de reserva
-                    esperando sua resposta.
-                {% else %}
-                    Nenhum pedido de reserva esperando resposta. Tudo em dia.
-                {% endif %}
-            </p>
-        </div>
-        <a class="button" href="{{ site_url|default:'/' }}" target="_blank" rel="noopener">Ver o site &rarr;</a>
-    </div>
 
     {# ---------- Fila de trabalho ---------- #}
     <div class="painel-fila">

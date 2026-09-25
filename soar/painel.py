@@ -18,13 +18,67 @@ from django.contrib.admin.apps import AdminConfig
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
+
+# As abas da faixa do topo: (nome, rota, permissão para ver, contador).
+# Elas fazem o papel do menu lateral do admin, que fica desligado: o dono
+# chega em qualquer parte com um clique, do mesmo jeito que no painel da
+# agência. O que não está aqui continua em "Todos os cadastros", na tela
+# inicial.
+ABAS = [
+    ('Visão geral', 'admin:index', None, None),
+    ('Reservas', 'admin:reservas_reserva_changelist', 'reservas.view_reserva', 'reservas'),
+    ('Orçamentos', 'admin:agencia_orcamento_changelist', 'agencia.view_orcamento', None),
+    ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),
+    ('Hospedagens', 'admin:destinations_hospedagem_changelist',
+     'destinations.view_hospedagem', None),
+    ('Blog Soar', 'admin:blog_artigo_changelist', 'blog.view_artigo', None),
+    ('Avaliações', 'admin:reviews_avaliacao_changelist', 'reviews.view_avaliacao', 'avaliacoes'),
+    ('Agências', 'admin:contas_perfilagente_changelist', 'contas.view_perfilagente', None),
+    ('Usuários', 'admin:auth_user_changelist', 'auth.view_user', None),
+]
 
 
 class PainelSoar(AdminSite):
     site_header = 'Soar | Painel do dono'
     site_title = 'Soar | Painel'
     index_title = 'Gerenciar o site de viagem'
+    # O menu lateral dá lugar às abas da faixa verde (ver ABAS).
+    enable_nav_sidebar = False
+
+    def each_context(self, request):
+        contexto = super().each_context(request)
+        if request.user.is_active and request.user.is_staff:
+            contexto['abas_painel'] = self._abas(request)
+        return contexto
+
+    def _abas(self, request):
+        from reservas.models import Reserva
+        from reviews.models import Avaliacao
+
+        contadores = {
+            'reservas': lambda: Reserva.objects.filter(status='pendente').count(),
+            'avaliacoes': lambda: Avaliacao.objects.filter(publicada=False).count(),
+        }
+        inicio = reverse('admin:index', current_app=self.name)
+        abas = []
+        for nome, rota, permissao, contador in ABAS:
+            if permissao and not request.user.has_perm(permissao):
+                continue
+            try:
+                url = reverse(rota, current_app=self.name)
+            except NoReverseMatch:
+                continue
+            # O blog tem artigos e categorias: a aba acende nos dois.
+            prefixo = url.rsplit('/', 2)[0] + '/' if rota.startswith('admin:blog_') else url
+            ativa = (request.path == inicio) if url == inicio else request.path.startswith(prefixo)
+            abas.append({
+                'nome': nome,
+                'url': url,
+                'ativa': ativa,
+                'contador': contadores[contador]() if contador else 0,
+            })
+        return abas
 
     def login(self, request, extra_context=None):
         """O painel não tem tela de login própria.

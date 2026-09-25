@@ -69,8 +69,8 @@ html[data-theme="light"],
     --delete-button-hover-bg: #8f1c13;
 
     --object-tools-fg: #ffffff;
-    --object-tools-bg: #14201b;
-    --object-tools-hover-bg: #146c43;
+    --object-tools-bg: #146c43;
+    --object-tools-hover-bg: #0d4f31;
 
     --font-family-primary: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
@@ -986,3 +986,157 @@ body.login #content { padding: 12px 0 0; }
 /* O Django fixa todo <select> em 30px de altura; com a margem interna do
    tema, o texto da opção escolhida ficava cortado (ou sumia). */
 .aligned select { height: auto; min-height: 38px; line-height: 1.3; }
+
+/* ===== Faixa verde e abas ================================================
+   O mesmo desenho do painel da agência (static/css/agencia.css): o cabeçalho
+   escuro com a marca, e embaixo uma faixa verde com a trilha, o título da
+   tela, as ações e as abas. A aba da tela atual "encaixa" no fundo cinza da
+   página, como uma pasta de arquivo. */
+
+/* O #container do admin é uma coluna flex. Com o nosso min-height no
+   cabeçalho, o navegador podia encolher o #header até 64px quando a tela
+   apertava, e os botões de "Encerrar sessão" ficavam escondidos embaixo da
+   faixa. flex-shrink: 0 faz o cabeçalho e a faixa sempre caberem inteiros. */
+#header { box-shadow: none; flex-shrink: 0; }
+.pf { flex-shrink: 0; }
+
+/* Botões de "Adicionar", "Histórico" e "Ver no site": o admin os puxa para
+   cima com margem negativa, o que agora os jogava em cima da faixa verde.
+   Ficam alinhados à direita, logo acima do conteúdo. */
+.object-tools {
+    float: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+}
+.object-tools li { margin: 0; }
+#content-main .object-tools + * { clear: none; }
+
+.pf { background: var(--verde-escuro); color: rgba(255, 255, 255, .86); }
+.pf__dentro {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 24px;
+    padding: clamp(20px, 3.2vw, 30px) clamp(16px, 3vw, 28px) 18px;
+}
+.pf__quem { min-width: 0; }
+.pf div.breadcrumbs {
+    padding: 0;
+    margin: 0 0 6px;
+    background: none;
+    border: 0;
+    color: #6ee7a8;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.pf div.breadcrumbs a,
+.pf div.breadcrumbs a:link,
+.pf div.breadcrumbs a:visited { color: rgba(255, 255, 255, .7); font-weight: 800; }
+.pf div.breadcrumbs a:hover { color: #fff; text-decoration: none; }
+.pf h1 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+.pf__sub { margin: 4px 0 0; font-size: .9rem; color: rgba(255, 255, 255, .82); max-width: 70ch; }
+.pf__acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.pf__acoes:empty { display: none; }
+
+.pf-btn,
+.pf-btn:link,
+.pf-btn:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 999px;
+    color: #fff;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+}
+.pf-btn:hover { background: rgba(255, 255, 255, .1); color: #fff; text-decoration: none; }
+.pf-btn--verde,
+.pf-btn--verde:link,
+.pf-btn--verde:visited { background: var(--verde); border-color: var(--verde); }
+.pf-btn--verde:hover { background: #1a8453; border-color: #1a8453; }
+
+.pf-abas {
+    display: flex;
+    gap: 4px;
+    padding: 0 clamp(16px, 3vw, 28px);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.pf-abas::-webkit-scrollbar { display: none; }
+.pf-abas a,
+.pf-abas a:link,
+.pf-abas a:visited {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 16px;
+    border-radius: 10px 10px 0 0;
+    color: rgba(255, 255, 255, .72);
+    font-size: .86rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.pf-abas a:hover { color: #fff; background: rgba(255, 255, 255, .08); text-decoration: none; }
+.pf-abas a[aria-current="page"] { background: var(--body-bg); color: var(--verde-escuro); }
+.pf-abas__conta {
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ouro);
+    color: #14201b;
+    font-size: .7rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+html[data-theme="dark"] .pf { background: #0f3a25; }
+html[data-theme="dark"] .pf-abas a[aria-current="page"] { color: #7fdca7; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .pf { background: #0f3a25; }
+    :root:not([data-theme="light"]) .pf-abas a[aria-current="page"] { color: #7fdca7; }
+}
+
+/* sem o menu lateral, o conteúdo usa a largura toda */
+.main > .content { padding-top: clamp(20px, 3vw, 30px); }
+
+/* números da tela inicial com a cara dos da agência */
+.ficha { border-radius: var(--r-lg); box-shadow: none; }
+a.ficha:hover { transform: none; box-shadow: var(--sombra-sm); }
+.ficha__rotulo { font-size: .8rem; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.ficha__numero { font-size: 2.1rem; font-weight: 700; margin: 8px 0 4px; }
+.ficha--calma { border-left: 1px solid var(--border-color); }
+.ficha--atencao .ficha__numero { color: var(--body-loud-color); }
+html[data-theme="dark"] .ficha--atencao .ficha__numero,
+:root:not([data-theme="light"]) .ficha--atencao .ficha__numero { color: var(--body-loud-color); }
+
+.atalho { border-style: solid; border-radius: var(--r-lg); }
+.module { border-radius: var(--r-lg); box-shadow: none; }
+.painel-titulo { margin: 30px 0 14px; }
+.painel-titulo h2 { font-size: 1.15rem; }
+.painel-titulo a { font-size: .86rem; font-weight: 700; }
+
+@media (max-width: 560px) {
+    .pf__acoes { width: 100%; }
+    .pf__acoes .pf-btn { flex: 1; justify-content: center; }
+}
