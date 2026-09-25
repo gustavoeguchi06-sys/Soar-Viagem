@@ -1,0 +1,30 @@
+{% extends 'agencia/_base.html' %}
+
+{% block titulo %}Reservas dos clientes{% endblock %}
+
+{% block corpo %}
+<div class="ag-titulo">
+    <h2>Reservas dos clientes</h2>
+</div>
+<p class="ag-explica">Pedidos feitos no site por clientes que chegaram pelo seu link de indicação,
+   ou que a Soar passou para a sua agência. Ligue para o cliente, combine a viagem e mude a
+   situação quando fechar.</p>
+
+<nav class="ag-filtros" aria-label="Filtrar por situação">
+    <a href="{% url 'agencia:reservas' %}" {% if not status %}aria-current="true"{% endif %}>Todas <span>{{ total }}</span></a>
+    {% for chave, nome, n in filtros %}
+    <a href="?status={{ chave }}" {% if status == chave %}aria-current="true"{% endif %}>{{ nome }} <span>{{ n }}</span></a>
+    {% endfor %}
+</nav>
+
+{% if reservas %}
+<div class="reservas-lista">
+    {% for r in reservas %}{% include 'agencia/_reserva_item.html' %}{% endfor %}
+</div>
+{% else %}
+<div class="conta-vazio ag-vazio">
+    <p>{% if status %}Nenhuma reserva nesta situação.{% else %}Ainda não chegou nenhuma reserva de cliente seu.
+       Mande seu link de indicação, que está na <a href="{% url 'agencia:painel' %}">visão geral</a>.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}

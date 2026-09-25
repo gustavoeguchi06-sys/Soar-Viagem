@@ -1,0 +1,75 @@
+{% extends 'agencia/_base.html' %}
+{% load agencia %}
+
+{% block titulo %}Visão geral{% endblock %}
+
+{% block corpo %}
+<div class="ag-numeros">
+    <a class="ag-numero ag-numero--atencao" href="{% url 'agencia:reservas' %}?status=pendente">
+        <span>Reservas aguardando contato</span>
+        <strong>{{ numeros.pendentes }}</strong>
+        <small>clientes esperando você ligar</small>
+    </a>
+    <a class="ag-numero" href="{% url 'agencia:reservas' %}?status=confirmada">
+        <span>Reservas confirmadas</span>
+        <strong>{{ numeros.confirmadas }}</strong>
+        <small>viagens fechadas</small>
+    </a>
+    <a class="ag-numero" href="{% url 'agencia:orcamentos' %}?status=enviado">
+        <span>Orçamentos em aberto</span>
+        <strong>{{ numeros.abertos }}</strong>
+        <small>aguardando resposta do cliente</small>
+    </a>
+    <a class="ag-numero" href="{% url 'agencia:orcamentos' %}?status=aceito">
+        <span>Orçamentos aceitos</span>
+        <strong>{{ numeros.aceitos }}</strong>
+        <small>{% if numeros.vendido %}R$ {{ numeros.vendido|reais }} vendidos{% else %}nenhum ainda{% endif %}</small>
+    </a>
+</div>
+
+<div class="ag-indicacao">
+    <div>
+        <h2>Seu link de indicação</h2>
+        <p>Mande este link para os seus clientes. Quem reservar por ele aparece aqui, no seu painel.</p>
+    </div>
+    <div class="ag-copiar">
+        <input type="text" readonly value="{{ link_indicacao }}" id="linkIndicacao" aria-label="Link de indicação">
+        <button type="button" class="btn btn--verde btn--sm" data-copiar="linkIndicacao">Copiar link</button>
+    </div>
+</div>
+
+<div class="ag-duas">
+    <section>
+        <div class="ag-titulo">
+            <h2>Aguardando contato</h2>
+            <a href="{% url 'agencia:reservas' %}">Ver todas as reservas &rarr;</a>
+        </div>
+        {% if pendentes %}
+        <div class="reservas-lista">
+            {% for r in pendentes %}{% include 'agencia/_reserva_item.html' %}{% endfor %}
+        </div>
+        {% else %}
+        <div class="conta-vazio ag-vazio">
+            <p>Nenhum cliente esperando. Os pedidos de quem reservar pelo seu link chegam aqui.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section>
+        <div class="ag-titulo">
+            <h2>Orçamentos em aberto</h2>
+            <a href="{% url 'agencia:orcamentos' %}">Ver todos &rarr;</a>
+        </div>
+        {% if orcamentos_abertos %}
+        <div class="reservas-lista">
+            {% for o in orcamentos_abertos %}{% include 'agencia/_orcamento_item.html' %}{% endfor %}
+        </div>
+        {% else %}
+        <div class="conta-vazio ag-vazio">
+            <p>Nenhum orçamento esperando resposta.</p>
+            <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">Montar um orçamento</a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -17,6 +17,8 @@ Prazos — os mesmos do aviso de privacidade:
 - IP das avaliações: 6 meses. A avaliação fica; só o IP some.
 - Registro de acessos (logs/seguranca.log.*): 6 meses, o mínimo que o Marco
   Civil da Internet (art. 15) exige guardar — nem mais, nem menos.
+- Orçamentos das agências: 1 ano sem mexer quando não viraram venda
+  (enviado ou recusado); 6 anos quando o cliente aceitou, como as reservas.
 - Cadastros nunca confirmados: 30 dias. Conta que nunca foi ativada nem usada
   não tem reserva nem avaliação: é só nome, e-mail e senha de alguém que não
   terminou o cadastro — ou de alguém que usou o e-mail de outra pessoa.
@@ -29,8 +31,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
+from agencia.models import Orcamento
 from reservas.models import Reserva
 from reviews.models import Avaliacao
 
@@ -40,6 +44,7 @@ PRAZO_RESERVA = timedelta(days=6 * 365)
 PRAZO_IP_AVALIACAO = timedelta(days=183)
 PRAZO_LOG = timedelta(days=183)
 PRAZO_CADASTRO_PENDENTE = timedelta(days=30)
+PRAZO_ORCAMENTO_ABERTO = timedelta(days=365)
 
 
 class Command(BaseCommand):
@@ -63,11 +68,15 @@ class Command(BaseCommand):
             date_joined__lt=agora - PRAZO_CADASTRO_PENDENTE,
         )
         logs = self._logs_vencidos()
+        orcamentos = Orcamento.objects.filter(
+            Q(status='aceito', atualizado_em__lt=agora - PRAZO_RESERVA)
+            | (~Q(status='aceito') & Q(atualizado_em__lt=agora - PRAZO_ORCAMENTO_ABERTO)))
 
         totais = {
             'reservas antigas': reservas.count(),
             'IPs de avaliação': ips.count(),
             'cadastros nunca confirmados': pendentes.count(),
+            'orçamentos vencidos': orcamentos.count(),
             'arquivos de log': len(logs),
         }
 
@@ -76,6 +85,7 @@ class Command(BaseCommand):
                 reservas.delete()
                 ips.update(ip=None)
                 pendentes.delete()
+                orcamentos.delete()
             for arquivo in logs:
                 arquivo.unlink(missing_ok=True)
             if any(totais.values()):

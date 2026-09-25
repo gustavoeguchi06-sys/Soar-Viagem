@@ -45,6 +45,15 @@ class Reserva(models.Model):
     saida = models.CharField('Saída pedida', max_length=120, blank=True,
                              help_text='Período que estava anunciado quando o cliente reservou.')
     status = models.CharField('Situação', max_length=12, choices=STATUS, default='pendente')
+    # A agência parceira que atende este cliente: preenchida quando ele chegou
+    # ao site pelo link de indicação dela, ou pelo dono no painel. É o que faz
+    # a reserva aparecer no painel da agência, e só no dela.
+    agencia = models.ForeignKey('contas.PerfilAgente', on_delete=models.SET_NULL,
+                                null=True, blank=True, related_name='reservas',
+                                verbose_name='Agência parceira')
+    nota_agencia = models.TextField(
+        'Anotações do atendimento', blank=True,
+        help_text='Escritas pela agência ou pela Soar. O cliente não vê.')
     criado_em = models.DateTimeField('Pedido em', auto_now_add=True)
     atualizado_em = models.DateTimeField('Atualizado em', auto_now=True)
 

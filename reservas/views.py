@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from agencia.indicacao import agencia_da_sessao
 from destinations.conteudo import montar_viagem
 from destinations.models import Destino
 from soar.seguranca import LIMITE_RESERVA
@@ -20,6 +21,7 @@ def nova(request, slug):
     destino = get_object_or_404(Destino, slug=slug)
     viagem = montar_viagem(destino, list(destino.avaliacoes.all()))
     saidas = viagem['saidas']
+    agencia = agencia_da_sessao(request)
 
     # Todas as datas cadastradas estão lotadas: não tem o que pedir aqui.
     if saidas and not viagem['tem_vaga']:
@@ -56,6 +58,7 @@ def nova(request, slug):
             escolhida_id = form.cleaned_data.get('saida_escolhida')
             saida = next((s for s in saidas if str(s['id']) == escolhida_id), None)
             reserva.saida = saida['texto'] if saida else viagem['proxima_saida']
+            reserva.agencia = agencia
             reserva.save()
             LIMITE_RESERVA.registrar(request, request.user.pk)
             messages.success(
@@ -79,6 +82,7 @@ def nova(request, slug):
         'destino': destino,
         'viagem': viagem,
         'form': form,
+        'agencia': agencia,
     })
 
 

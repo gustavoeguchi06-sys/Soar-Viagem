@@ -1,0 +1,6 @@
+<div class="campo{% if largo %} ag-grade__largo{% endif %}{% if campo.errors %} campo--erro{% endif %}">
+    {{ campo.label_tag }}
+    {{ campo }}
+    {% if campo.help_text %}<small class="campo__ajuda">{{ campo.help_text }}</small>{% endif %}
+    {% for erro in campo.errors %}<small class="campo__erro">{{ erro }}</small>{% endfor %}
+</div>

@@ -1,0 +1,41 @@
+{% extends 'agencia/_base.html' %}
+{% load agencia %}
+
+{% block titulo %}Reserva {{ reserva.codigo }}{% endblock %}
+
+{% block corpo %}
+<p class="voltar"><a href="{% url 'agencia:reservas' %}">&larr; Voltar para as reservas</a></p>
+
+<div class="ag-ficha">
+    <div class="cartao-form">
+        <span class="reserva-item__codigo">{{ reserva.codigo }} · pedido em {{ reserva.criado_em|date:"d/m/Y \à\s H:i" }}</span>
+        <h1>{% if reserva.usuario %}{{ reserva.usuario.get_full_name|default:reserva.usuario.username }}{% else %}Cliente removido{% endif %}</h1>
+
+        <dl class="dados-agente">
+            <dt>E-mail</dt><dd>{% if reserva.usuario.email %}<a href="mailto:{{ reserva.usuario.email }}">{{ reserva.usuario.email }}</a>{% else %}-{% endif %}</dd>
+            <dt>Telefone</dt>
+            <dd>{% with link=reserva.telefone|whatsapp %}{% if link %}<a href="{{ link }}" target="_blank" rel="noopener">{{ reserva.telefone }} (abrir WhatsApp)</a>{% else %}{{ reserva.telefone|default:"-" }}{% endif %}{% endwith %}</dd>
+            <dt>Viagem</dt><dd>{{ reserva.destino.nome }}</dd>
+            <dt>Saída</dt><dd>{{ reserva.saida|default:"a combinar" }}</dd>
+            <dt>Acomodação</dt><dd>{{ reserva.get_acomodacao_display }}</dd>
+            <dt>Pessoas</dt><dd>{{ reserva.pessoas }}</dd>
+            <dt>Estimativa</dt><dd>{% if reserva.total_estimado %}R$ {{ reserva.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd>
+        </dl>
+
+        {% if reserva.observacao %}
+        <p class="ag-obs-cliente"><b>O cliente escreveu:</b> “{{ reserva.observacao }}”</p>
+        {% endif %}
+    </div>
+
+    <div class="cartao-form">
+        <h2>Atendimento</h2>
+        <p class="cartao-form__sub">O cliente vê a situação em "Minha conta". As anotações ficam só
+           entre você e a Soar.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% include 'partials/_campos.html' with form=form %}
+            <button type="submit" class="btn btn--verde btn--bloco">Salvar atendimento</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

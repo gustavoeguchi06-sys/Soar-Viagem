@@ -1,0 +1,131 @@
+/* Painel da agência parceira (/agencia/).
+ *
+ * Tela de trabalho da agência, com cara própria: faixa verde-escura no topo
+ * para deixar claro que não é a área do cliente nem o painel do dono. O resto
+ * reaproveita os cartões e campos do contas.css. */
+
+.ag { background: var(--fundo-suave); min-height: 70vh; padding-bottom: clamp(40px, 6vw, 72px); }
+
+/* faixa do topo */
+.ag-faixa { background: var(--verde-escuro); color: rgba(255, 255, 255, .86); }
+.ag-faixa__dentro { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+                    gap: 18px; padding-top: clamp(24px, 4vw, 36px); padding-bottom: 20px; }
+.ag-faixa__selo { display: inline-block; font-size: .7rem; font-weight: 800; letter-spacing: .1em;
+                  text-transform: uppercase; color: #6ee7a8; margin-bottom: 6px; }
+.ag-faixa h1 { color: #fff; font-size: clamp(1.35rem, 3vw, 1.85rem); }
+.ag-faixa p { margin-top: 4px; font-size: .9rem; max-width: 60ch; }
+.ag-faixa__acoes { display: flex; align-items: center; gap: 10px; }
+.ag-faixa__acoes form { margin: 0; }
+.ag-btn-sair { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+.ag-btn-sair:hover { background: rgba(255, 255, 255, .1); }
+
+/* abas */
+.ag-abas { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.ag-abas::-webkit-scrollbar { display: none; }
+.ag-abas a { flex: none; padding: 12px 16px; font-size: .88rem; font-weight: 600; color: rgba(255, 255, 255, .72);
+             border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.ag-abas a:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.ag-abas a[aria-current="page"] { background: var(--fundo-suave); color: var(--verde-escuro); }
+
+.ag-corpo { padding-top: clamp(22px, 3.5vw, 32px); }
+
+/* números */
+.ag-numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ag-numero { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 1px solid var(--linha);
+             border-radius: var(--r-md); padding: 16px 18px; color: var(--tinta);
+             transition: border-color .15s, box-shadow .15s; }
+.ag-numero:hover { border-color: var(--verde); box-shadow: var(--sombra-sm); }
+.ag-numero span { font-size: .8rem; font-weight: 600; color: var(--tinta-suave); }
+.ag-numero strong { font-family: 'Sora', sans-serif; font-size: 2rem; line-height: 1.1; color: var(--preto); }
+.ag-numero small { font-size: .78rem; color: var(--tinta-suave); }
+.ag-numero--atencao { border-left: 4px solid var(--ouro); }
+
+/* link de indicação */
+.ag-indicacao { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+                margin-top: 18px; background: var(--verde-claro); border: 1px solid #cfe6d8;
+                border-radius: var(--r-md); padding: 18px 20px; }
+.ag-indicacao h2 { font-size: 1.02rem; }
+.ag-indicacao p { margin-top: 2px; font-size: .86rem; color: var(--tinta-suave); max-width: 52ch; }
+.ag-copiar { display: flex; gap: 8px; flex: 1 1 360px; max-width: 520px; }
+.ag-copiar input { flex: 1; min-width: 0; padding: 10px 12px; font: inherit; font-size: .85rem;
+                   border: 1.5px solid var(--linha); border-radius: var(--r-sm); background: #fff; color: var(--tinta); }
+.ag-copiar .btn { flex: none; }
+.ag-dica { display: block; margin-top: 10px; }
+
+/* títulos e listas */
+.ag-duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 30px; }
+.ag-titulo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+             gap: 10px; margin-bottom: 14px; }
+.ag-titulo h2 { font-size: 1.15rem; }
+.ag-titulo a:not(.btn) { font-size: .86rem; font-weight: 700; color: var(--verde); }
+.ag-explica { margin: -4px 0 16px; font-size: .9rem; color: var(--tinta-suave); max-width: 72ch; }
+.ag-vazio { padding: 26px 20px; }
+.ag-vazio p { margin-bottom: 0; }
+.ag-vazio .btn { margin-top: 14px; }
+.ag-vazio a:not(.btn) { color: var(--verde); font-weight: 700; }
+
+.ag-filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.ag-filtros a { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px;
+                background: #fff; border: 1px solid var(--linha); font-size: .84rem; font-weight: 600; color: var(--tinta); }
+.ag-filtros a span { font-size: .75rem; color: var(--tinta-suave); }
+.ag-filtros a:hover { border-color: var(--verde); }
+.ag-filtros a[aria-current="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+.ag-filtros a[aria-current="true"] span { color: rgba(255, 255, 255, .8); }
+
+/* contato dentro do cartão */
+.ag-contato { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 14px;
+              padding-top: 12px; border-top: 1px solid var(--linha); font-size: .86rem; }
+.ag-contato a:not(.btn) { color: var(--verde); font-weight: 600; overflow-wrap: anywhere; }
+.ag-contato__whats { display: inline-flex; align-items: center; gap: 6px; }
+.ag-contato__whats .ic-f { width: 16px; height: 16px; color: var(--whats); }
+.ag-contato__abrir { margin-left: auto; padding: 8px 16px; }
+.ag-nota { margin-top: 10px; font-size: .84rem; color: var(--tinta-suave); }
+
+/* situação dos orçamentos */
+.ag-orc--enviado { border-left-color: var(--ouro); }
+.ag-orc--aceito { border-left-color: var(--verde); }
+.ag-orc--recusado { border-left-color: #d0d5dd; opacity: .8; }
+.ag-selo--enviado { background: #fef4e2; color: #b54708; }
+.ag-selo--aceito { background: var(--verde-claro); color: var(--verde); }
+.ag-selo--recusado { background: #f2f4f7; color: #667085; }
+.ag-vencido { color: #b42318 !important; }
+
+/* ficha da reserva e formulário */
+.ag-ficha { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.ag-ficha .cartao-form { padding: clamp(20px, 3vw, 28px); }
+.ag-ficha h1 { margin-top: 4px; }
+.ag-ficha h2 { font-size: 1.1rem; margin-bottom: 6px; }
+.ag-obs-cliente { margin-top: 18px; padding: 12px 14px; background: var(--fundo-suave);
+                  border-radius: var(--r-sm); font-size: .88rem; color: var(--tinta); }
+.ag-ajuda { color: var(--tinta-suave); border-top-color: var(--linha); }
+.ag-ajuda a { color: var(--verde); }
+
+.ag-form { max-width: 880px; }
+.ag-bloco { border: 0; margin: 0; padding: 0; min-width: 0; }
+.ag-bloco legend { padding: 0; margin-bottom: 12px; font-family: 'Sora', sans-serif; font-size: 1rem;
+                   font-weight: 700; color: var(--preto); }
+.ag-bloco + .ag-bloco { padding-top: 18px; border-top: 1px solid var(--linha); }
+.ag-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.ag-grade__largo { grid-column: 1 / -1; }
+.ag-form .campo input[type="date"] { width: 100%; padding: 12px 14px; font: inherit; font-size: .95rem;
+                                     border: 1.5px solid var(--linha); border-radius: var(--r-sm); background: #fff; }
+
+@media (max-width: 960px) {
+    .ag-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ag-duas, .ag-ficha { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+    .ag-faixa__acoes { width: 100%; }
+    .ag-faixa__acoes .btn { flex: 1; justify-content: center; }
+    .ag-faixa__acoes form { flex: 1; display: flex; }
+    .ag-numeros { gap: 10px; }
+    .ag-numero { padding: 14px; }
+    .ag-numero strong { font-size: 1.6rem; }
+    .ag-copiar { flex-direction: column; }
+    .ag-grade { grid-template-columns: 1fr; }
+    .ag-contato__abrir { margin-left: 0; width: 100%; justify-content: center; }
+}
+
+/* o reset da página zera a margem dos parágrafos: devolve o respiro antes do formulário */
+.ag .cartao-form__sub { margin-bottom: 18px; }

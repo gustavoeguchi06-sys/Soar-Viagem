@@ -174,3 +174,17 @@
     .conta-dados { flex-direction: column; align-items: stretch; }
     .conta-dados .conta-topo__acoes { width: 100%; }
 }
+
+/* --------------------------------------------------------------------- */
+/* Dados da agência (área B2B e painel da agência)                        */
+/* --------------------------------------------------------------------- */
+.dados-agente { display: grid; grid-template-columns: max-content minmax(0, 1fr);
+                gap: 10px 20px; margin: 16px 0 0; font-size: .92rem; }
+.dados-agente dt { color: var(--tinta-suave); font-weight: 600; }
+.dados-agente dd { margin: 0; color: var(--preto); font-weight: 600; overflow-wrap: anywhere; }
+.dados-agente a { color: var(--verde); }
+
+@media (max-width: 520px) {
+    .dados-agente { grid-template-columns: 1fr; gap: 2px; }
+    .dados-agente dd { margin-bottom: 10px; }
+}

@@ -6,6 +6,7 @@ e WhatsApp — os dados que a Soar precisa para conferir a agência e trabalhar 
 comissão. O nome completo e o e-mail ficam no próprio `User`.
 """
 import re
+import secrets
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -41,6 +42,14 @@ def validar_cnpj(valor):
         raise ValidationError('CNPJ inválido: os dígitos verificadores não conferem.')
 
 
+# Sem 0/O e 1/I/L: o código é lido em voz alta e digitado à mão.
+_LETRAS_CODIGO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+
+
+def gerar_codigo_indicacao():
+    return ''.join(secrets.choice(_LETRAS_CODIGO) for _ in range(8))
+
+
 class PerfilAgente(models.Model):
     """Dados da agência parceira, presos ao usuário que faz login."""
 
@@ -54,6 +63,11 @@ class PerfilAgente(models.Model):
     whatsapp = models.CharField('WhatsApp', max_length=20)
     aprovado = models.BooleanField('Aprovado pela Soar', default=False,
                                    help_text='Marque depois de conferir o CNPJ e o CADASTUR da agência.')
+    codigo = models.CharField(
+        'Código de indicação', max_length=12, unique=True, default=gerar_codigo_indicacao,
+        editable=False,
+        help_text='Vai no link que a agência manda para os clientes. Quem reserva '
+                  'por esse link aparece no painel da agência.')
     criado_em = models.DateTimeField('Cadastrado em', auto_now_add=True)
 
     class Meta:

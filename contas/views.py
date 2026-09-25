@@ -57,7 +57,13 @@ def _proxima_pagina(request):
         if equipe or not _e_do_painel(destino):
             return destino
 
-    return reverse('admin:index') if equipe else reverse('destinations:home')
+    if equipe:
+        return reverse('admin:index')
+    # Agência aprovada vai direto para o painel dela, o lugar onde ela trabalha.
+    agencia = getattr(request.user, 'agente', None) if request.user.is_authenticated else None
+    if agencia is not None and agencia.aprovado:
+        return reverse('agencia:painel')
+    return reverse('destinations:home')
 
 
 def entrar(request):
@@ -298,6 +304,7 @@ def meus_dados(request):
                 'observacao': r.observacao,
                 'preco_estimado': str(r.preco_estimado) if r.preco_estimado else None,
                 'saida': r.saida,
+                'agencia_parceira': r.agencia.razao_social if r.agencia else None,
                 'situacao': r.get_status_display(),
                 'pedido_em': r.criado_em.isoformat(),
             }
@@ -337,7 +344,8 @@ def excluir_conta(request):
             # comercial e fiscal — mas sem nada que ligue a pessoa a elas: o
             # telefone e as observações saem aqui, e o vínculo com a conta vira
             # NULL quando ela é apagada (Reserva.usuario é SET_NULL).
-            usuario.reservas.update(telefone='', observacao='[dados removidos a pedido do cliente]')
+            usuario.reservas.update(telefone='', nota_agencia='',
+                                    observacao='[dados removidos a pedido do cliente]')
             usuario.avaliacoes.update(nome_autor='Cliente removido', publicada=False)
 
             logout(request)
@@ -430,13 +438,15 @@ def cadastro_agente(request):
 
 @login_required
 def agente_area(request):
-    """Área da agência parceira.
+    """Porta da agência parceira.
 
-    Por enquanto é uma tela de boas-vindas com os dados da agência. O conteúdo
-    de verdade (tabela B2B, comissão, pedidos) entra quando for definido.
+    Aprovada, a agência vai para o painel dela (app `agencia`). Enquanto a Soar
+    confere o cadastro, fica nesta tela de espera com os dados enviados.
     """
     agente = getattr(request.user, 'agente', None)
     if agente is None:
         messages.info(request, 'Esta área é exclusiva das agências parceiras.')
         return redirect('contas:minha_conta')
+    if agente.aprovado:
+        return redirect('agencia:painel')
     return render(request, 'contas/agente_area.html', {'agente': agente})

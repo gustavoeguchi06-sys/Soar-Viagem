@@ -1,0 +1,30 @@
+{% load agencia %}
+<article class="reserva-item ag-orc ag-orc--{{ o.status }}">
+    <div class="reserva-item__topo">
+        <div>
+            <span class="reserva-item__codigo">{{ o.codigo }} · criado em {{ o.criado_em|date:"d/m/Y" }}</span>
+            <h3>{{ o.cliente_nome }}</h3>
+        </div>
+        <span class="selo-status ag-selo--{{ o.status }}">{{ o.get_status_display }}</span>
+    </div>
+
+    <dl class="reserva-item__dados">
+        <div><dt>Viagem</dt><dd>{{ o.destino.nome }}</dd></div>
+        <div><dt>Saída</dt><dd>{{ o.saida_texto|default:"a combinar" }}</dd></div>
+        <div><dt>Acomodação</dt><dd>{{ o.get_acomodacao_display }}</dd></div>
+        <div><dt>Pessoas</dt><dd>{{ o.pessoas }}</dd></div>
+        <div><dt>Valor</dt><dd>{% if o.valor %}R$ {{ o.valor|reais }}{% else %}a definir{% endif %}</dd></div>
+        {% if o.validade %}<div><dt>Válido até</dt>
+            <dd{% if o.vencido %} class="ag-vencido"{% endif %}>{{ o.validade|date:"d/m/Y" }}{% if o.vencido %} (vencido){% endif %}</dd></div>{% endif %}
+    </dl>
+
+    <div class="ag-contato">
+        {% if o.cliente_email %}<a href="mailto:{{ o.cliente_email }}">{{ o.cliente_email }}</a>{% endif %}
+        {% with link=o.cliente_telefone|whatsapp %}
+        {% if link %}<a class="ag-contato__whats" href="{{ link }}" target="_blank" rel="noopener">
+            <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>{{ o.cliente_telefone }}</a>
+        {% elif o.cliente_telefone %}<span>{{ o.cliente_telefone }}</span>{% endif %}
+        {% endwith %}
+        <a class="btn btn--contorno btn--sm ag-contato__abrir" href="{% url 'agencia:orcamento_editar' o.pk %}">Abrir</a>
+    </div>
+</article>

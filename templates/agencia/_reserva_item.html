@@ -1,0 +1,31 @@
+{% load agencia %}
+<article class="reserva-item reserva-item--{{ r.status }}">
+    <div class="reserva-item__topo">
+        <div>
+            <span class="reserva-item__codigo">{{ r.codigo }} · pedido em {{ r.criado_em|date:"d/m/Y" }}</span>
+            <h3>{% if r.usuario %}{{ r.usuario.get_full_name|default:r.usuario.username }}{% else %}Cliente removido{% endif %}</h3>
+        </div>
+        <span class="selo-status selo-status--{{ r.status }}">{{ r.get_status_display }}</span>
+    </div>
+
+    <dl class="reserva-item__dados">
+        <div><dt>Viagem</dt><dd>{{ r.destino.nome }}</dd></div>
+        <div><dt>Saída</dt><dd>{{ r.saida|default:"a combinar" }}</dd></div>
+        <div><dt>Acomodação</dt><dd>{{ r.get_acomodacao_display }}</dd></div>
+        <div><dt>Pessoas</dt><dd>{{ r.pessoas }}</dd></div>
+        <div><dt>Estimativa</dt>
+            <dd>{% if r.total_estimado %}R$ {{ r.total_estimado|reais }}{% else %}sob consulta{% endif %}</dd></div>
+    </dl>
+
+    <div class="ag-contato">
+        {% if r.usuario.email %}<a href="mailto:{{ r.usuario.email }}">{{ r.usuario.email }}</a>{% endif %}
+        {% with link=r.telefone|whatsapp %}
+        {% if link %}<a class="ag-contato__whats" href="{{ link }}" target="_blank" rel="noopener">
+            <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>{{ r.telefone }}</a>
+        {% elif r.telefone %}<span>{{ r.telefone }}</span>{% endif %}
+        {% endwith %}
+        <a class="btn btn--contorno btn--sm ag-contato__abrir" href="{% url 'agencia:reserva' r.pk %}">Atender</a>
+    </div>
+
+    {% if r.nota_agencia %}<p class="ag-nota"><b>Sua anotação:</b> {{ r.nota_agencia|truncatechars:160 }}</p>{% endif %}
+</article>

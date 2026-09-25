@@ -1,0 +1,30 @@
+{% extends 'agencia/_base.html' %}
+
+{% block titulo %}Orçamentos{% endblock %}
+
+{% block corpo %}
+<div class="ag-titulo">
+    <h2>Orçamentos</h2>
+    <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">+ Novo orçamento</a>
+</div>
+<p class="ag-explica">Os orçamentos que você montou para os seus clientes. Quando o cliente
+   responder, abra o orçamento e marque se foi aceito ou recusado.</p>
+
+<nav class="ag-filtros" aria-label="Filtrar por situação">
+    <a href="{% url 'agencia:orcamentos' %}" {% if not status %}aria-current="true"{% endif %}>Todos <span>{{ total }}</span></a>
+    {% for chave, nome, n in filtros %}
+    <a href="?status={{ chave }}" {% if status == chave %}aria-current="true"{% endif %}>{{ nome }} <span>{{ n }}</span></a>
+    {% endfor %}
+</nav>
+
+{% if orcamentos %}
+<div class="reservas-lista">
+    {% for o in orcamentos %}{% include 'agencia/_orcamento_item.html' %}{% endfor %}
+</div>
+{% else %}
+<div class="conta-vazio ag-vazio">
+    <p>{% if status %}Nenhum orçamento nesta situação.{% else %}Você ainda não montou nenhum orçamento.{% endif %}</p>
+    <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">Montar um orçamento</a>
+</div>
+{% endif %}
+{% endblock %}
