@@ -9,9 +9,9 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
@@ -22,10 +22,11 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import (url_has_allowed_host_and_scheme, urlsafe_base64_decode,
                                urlsafe_base64_encode)
 
-from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, ip_do_cliente
+from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, LIMITE_SENHA, ip_do_cliente
 
 from . import google
 from .forms import AgenteCadastroForm, CadastroForm, EntrarForm, ExcluirContaForm
+from .tokens import token_ativacao
 
 log = logging.getLogger('soar.seguranca')
 
@@ -170,7 +171,7 @@ def _enviar_confirmacao(request, usuario):
     """
     caminho = reverse('contas:ativar', kwargs={
         'uidb64': urlsafe_base64_encode(force_bytes(usuario.pk)),
-        'token': default_token_generator.make_token(usuario),
+        'token': token_ativacao.make_token(usuario),
     })
     corpo = render_to_string('contas/email/confirmar.txt', {
         'usuario': usuario,
@@ -204,7 +205,7 @@ def ativar(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         usuario = None
 
-    if usuario is None or not default_token_generator.check_token(usuario, token):
+    if usuario is None or not token_ativacao.check_token(usuario, token):
         return render(request, 'contas/ativacao_invalida.html', status=400)
 
     if not usuario.is_active:
@@ -461,3 +462,28 @@ def agente_area(request):
     if agente.aprovado:
         return redirect('agencia:painel')
     return render(request, 'contas/agente_area.html', {'agente': agente})
+
+
+# --------------------------------------------------------------------------- #
+# Esqueci minha senha
+# --------------------------------------------------------------------------- #
+class PedirNovaSenha(auth_views.PasswordResetView):
+    """A tela do Django, com limite de pedidos.
+
+    Cada pedido manda um e-mail. Sem limite, alguém enchia a caixa de outra
+    pessoa de "troque sua senha" e gastava a cota de envio do Gmail da Soar.
+    Conta por IP e por e-mail digitado, e a mensagem é a mesma exista a conta
+    ou não, para a tela não virar consulta de "quem é cliente".
+    """
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email'].strip().lower()
+        if LIMITE_SENHA.estourou(self.request, email):
+            log.warning('pedido de nova senha bloqueado por limite: email=%r ip=%s',
+                        email, ip_do_cliente(self.request))
+            messages.error(self.request, 'Muitos pedidos de nova senha agora há pouco. '
+                                         'Confira a caixa de entrada (e o spam) ou tente '
+                                         'de novo mais tarde.')
+            return self.form_invalid(form)
+        LIMITE_SENHA.registrar(self.request, email)
+        return super().form_valid(form)

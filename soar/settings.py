@@ -16,7 +16,7 @@ caro é subir um servidor achando que ele está protegido, não o contrário.
     SOAR_HSTS_PRELOAD   1 para entrar na lista de pré-carregamento dos navegadores
     SOAR_SSL_REDIRECT   1 (padrão) para forçar HTTPS quando SOAR_DEBUG=0
     SOAR_ATRAS_DE_PROXY 1 quando um Nginx/balanceador termina o HTTPS
-    SOAR_CSP_SOMENTE_RELATORIO  1 (padrão) reporta violações de CSP sem bloquear
+    SOAR_CSP_SOMENTE_RELATORIO  0 (padrão) a CSP bloqueia; 1 só reporta, para depurar
 
     SOAR_DB_ENGINE      postgresql para usar Postgres (padrão: sqlite3)
     SOAR_DB_NAME/USER/PASSWORD/HOST/PORT
@@ -129,6 +129,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'soar.middleware.ContentSecurityPolicyMiddleware',
+    'soar.middleware.LimiteDeEnvioMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -273,6 +274,17 @@ LIMITE_LOGIN_JANELA = int(os.environ.get('SOAR_LIMITE_LOGIN_JANELA', 900))      
 LIMITE_CADASTRO_POR_HORA = int(os.environ.get('SOAR_LIMITE_CADASTRO', 5))
 LIMITE_AVALIACAO_POR_HORA = int(os.environ.get('SOAR_LIMITE_AVALIACAO', 5))
 LIMITE_RESERVA_POR_HORA = int(os.environ.get('SOAR_LIMITE_RESERVA', 10))
+# Cada pedido destes manda um e-mail: sem limite, dava para lotar a caixa de
+# alguém com "troque sua senha" ou "confirme a newsletter" e, de quebra,
+# estourar a cota diária do Gmail da Soar.
+LIMITE_SENHA_POR_HORA = int(os.environ.get('SOAR_LIMITE_SENHA', 5))
+LIMITE_NEWSLETTER_POR_HORA = int(os.environ.get('SOAR_LIMITE_NEWSLETTER', 5))
+
+# Verificação em duas etapas para a equipe (contas/dois_fatores.py): quem é
+# is_staff só entra no painel depois de digitar o código do aplicativo
+# autenticador do celular. A conta do dono é superusuário; só a senha era
+# pouco para ela. Desligar (0) só para demonstração, nunca no servidor.
+DOIS_FATORES_EQUIPE = _ligado('SOAR_2FA_EQUIPE', True)
 
 # --------------------------------------------------------------------------- #
 # Segurança
@@ -293,6 +305,11 @@ SESSION_SAVE_EVERY_REQUEST = True           # a semana conta a partir do último
 # Limites de upload. A foto da avaliação é o único arquivo que entra pela
 # frente do site, e 2 MB é de sobra para uma foto de viagem.
 TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024
+# Teto de qualquer envio ao site, conferido antes de ler o corpo
+# (soar.middleware.LimiteDeEnvioMiddleware). Cobre as fotos do painel, que
+# são maiores que as das avaliações. Use o mesmo valor no client_max_body_size
+# do Nginx.
+TAMANHO_MAXIMO_ENVIO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_ENVIO_MB', 10)) * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
@@ -302,7 +319,10 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
 # em arquivos sob static/. Os estilos ainda precisam de inline por causa dos
 # `style="..."` nos templates. As fontes são servidas pelo próprio site
 # (static/fonts/), então nenhum domínio de fora entra na política.
-CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', True)
+# Bloqueando de verdade desde 28/09/2026: as páginas do site, da agência e do
+# painel foram abertas com a política valendo e nenhuma violação apareceu.
+# Ligue o modo relatório (1) só para investigar algo que parou de funcionar.
+CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', False)
 CSP_DIRETIVAS = {
     'default-src': "'self'",
     'script-src': "'self'",

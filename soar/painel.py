@@ -19,6 +19,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import NoReverseMatch, reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 # As abas da faixa do topo: (nome, rota, permissão para ver, contador).
 # Elas fazem o papel do menu lateral do admin, que fica desligado: o dono
@@ -80,6 +81,11 @@ class PainelSoar(AdminSite):
             })
         return abas
 
+    def has_permission(self, request):
+        """Equipe, e com o código do celular já digitado nesta sessão."""
+        from contas.dois_fatores import pendente
+        return super().has_permission(request) and not pendente(request)
+
     def login(self, request, extra_context=None):
         """O painel não tem tela de login própria.
 
@@ -91,10 +97,21 @@ class PainelSoar(AdminSite):
         """
         destino = reverse('admin:index', current_app=self.name)
 
+        pedido = request.GET.get(REDIRECT_FIELD_NAME) or ''
+        # Só destino dentro do site: sem isto, /painel/login/?next=https://golpe
+        # mandava quem já estava logado para fora (redirecionamento aberto).
+        if not url_has_allowed_host_and_scheme(pedido, allowed_hosts={request.get_host()},
+                                               require_https=request.is_secure()):
+            pedido = destino
         if self.has_permission(request):          # já é da equipe e já entrou
-            return HttpResponseRedirect(request.GET.get(REDIRECT_FIELD_NAME) or destino)
+            return HttpResponseRedirect(pedido)
 
-        pedido = request.GET.get(REDIRECT_FIELD_NAME) or destino
+        # Senha certa, mas falta o código do celular (contas/dois_fatores.py).
+        from contas.dois_fatores import pendente
+        if request.user.is_active and request.user.is_staff and pendente(request):
+            return HttpResponseRedirect('{}?{}'.format(
+                reverse('contas:dois_fatores'), urlencode({REDIRECT_FIELD_NAME: pedido})))
+
         return HttpResponseRedirect('{}?{}'.format(
             reverse('contas:entrar'), urlencode({REDIRECT_FIELD_NAME: pedido})))
 

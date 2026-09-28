@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from . import views
+from . import dois_fatores, views
 
 app_name = 'contas'
 
@@ -26,6 +26,7 @@ urlpatterns = [
     path('entrar/google/', views.google_iniciar, name='google_iniciar'),
     path('entrar/google/retorno/', views.google_retorno, name='google_retorno'),
     path('minha-conta/', views.minha_conta, name='minha_conta'),
+    path('painel-codigo/', dois_fatores.dois_fatores, name='dois_fatores'),
 
     # Dados pessoais (LGPD)
     path('privacidade/', views.privacidade, name='privacidade'),
@@ -33,7 +34,7 @@ urlpatterns = [
     path('minha-conta/excluir/', views.excluir_conta, name='excluir_conta'),
 
     # Esqueci minha senha
-    path('senha/', auth_views.PasswordResetView.as_view(
+    path('senha/', views.PedirNovaSenha.as_view(
         template_name='contas/senha_pedir.html',
         email_template_name='contas/email/senha_reset.txt',
         subject_template_name='contas/email/senha_reset_assunto.txt',

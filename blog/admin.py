@@ -197,16 +197,25 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(Inscricao)
 class InscricaoAdmin(admin.ModelAdmin):
-    """Quem pediu as novidades do blog. Dá para baixar a lista para o envio."""
+    """Quem pediu as novidades do blog. Dá para baixar a lista para o envio.
 
-    list_display = ['email', 'criado_em', 'origem']
+    Só entra na planilha quem confirmou pelo link do e-mail: sem isso, a lista
+    teria endereços que outra pessoa digitou no site.
+    """
+
+    list_display = ['email', 'confirmada', 'criado_em', 'origem']
+    list_filter = [('confirmada_em', admin.EmptyFieldListFilter)]
     search_fields = ['email']
     date_hierarchy = 'criado_em'
-    readonly_fields = ['criado_em']
+    readonly_fields = ['criado_em', 'confirmada_em']
+
+    @admin.display(boolean=True, description='Confirmou', ordering='confirmada_em')
+    def confirmada(self, inscricao):
+        return inscricao.confirmada
     actions = ['baixar_csv']
     list_per_page = 50
 
-    @admin.action(description='Baixar os e-mails selecionados (planilha CSV)')
+    @admin.action(description='Baixar os e-mails confirmados selecionados (planilha CSV)')
     def baixar_csv(self, request, queryset):
         import csv
 
@@ -216,6 +225,6 @@ class InscricaoAdmin(admin.ModelAdmin):
         resposta.write('\ufeff')
         escritor = csv.writer(resposta, delimiter=';')
         escritor.writerow(['E-mail', 'Inscrito em'])
-        for inscricao in queryset:
+        for inscricao in queryset.filter(confirmada_em__isnull=False):
             escritor.writerow([inscricao.email, inscricao.criado_em.strftime('%d/%m/%Y %H:%M')])
         return resposta

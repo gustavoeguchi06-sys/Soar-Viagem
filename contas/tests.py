@@ -9,13 +9,14 @@ from unittest import mock
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth.models import User
-from django.contrib.auth.tokens import default_token_generator
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+
+from contas.tokens import token_ativacao
 
 from destinations.models import Destino
 from reservas.models import Reserva
@@ -103,7 +104,7 @@ class ConfirmacaoDeEmailTests(TestCase):
                                            is_active=False)
         link = reverse('contas:ativar', kwargs={
             'uidb64': urlsafe_base64_encode(force_bytes(usuario.pk)),
-            'token': default_token_generator.make_token(usuario),
+            'token': token_ativacao.make_token(usuario),
         })
 
         resposta = self.client.get(link)
@@ -218,7 +219,7 @@ class ConfirmacaoComOutraContaAbertaTests(TestCase):
         novo = User.objects.create_user('karl_x', 'karl@x.com', 'senha-boa-123', is_active=False)
         self.client.force_login(dono)
         uid = urlsafe_base64_encode(force_bytes(novo.pk))
-        token = default_token_generator.make_token(novo)
+        token = token_ativacao.make_token(novo)
         resposta = self.client.get(reverse('contas:ativar', args=[uid, token]))
         self.assertTrue(User.objects.get(pk=novo.pk).is_active)
         self.assertNotIn('_auth_user_id', self.client.session)

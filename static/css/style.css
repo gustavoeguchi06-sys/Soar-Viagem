@@ -433,3 +433,11 @@ img { max-width: 100%; display: block; }
 
 .filtros-ativos { margin: -6px 0 18px; color: var(--texto-suave); font-size: .92rem; }
 .filtros-ativos a { font-weight: 700; }
+
+/* Formulário sendo enviado (static/js/envio.js): o botão fica travado até a
+   próxima página chegar, para o clique duplo não mandar o pedido duas vezes. */
+form[aria-busy="true"] button:disabled,
+form[aria-busy="true"] input[type="submit"]:disabled {
+    opacity: .6;
+    cursor: progress;
+}
