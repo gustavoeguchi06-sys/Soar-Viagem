@@ -104,7 +104,7 @@ obrigatórias.
 | `SOAR_HSTS_SECONDS` | validade do HSTS. Começa em `3600` de propósito |
 | `SOAR_HSTS_PRELOAD` | `1` entra na lista de preload dos navegadores (só depois do HSTS em 1 ano) |
 | `SOAR_ATRAS_DE_PROXY` | `1` quando um Nginx/Heroku/Render fala HTTPS no lugar do Django |
-| `SOAR_CSP_SOMENTE_RELATORIO` | `0` faz a CSP bloquear de verdade (padrão: só relatar) |
+| `SOAR_CSP_SOMENTE_RELATORIO` | `1` faz a CSP só relatar, sem bloquear (padrão: bloquear) |
 | `SOAR_DB_ENGINE` | `postgresql` no servidor — veja abaixo |
 | `SOAR_REDIS_URL` | onde os limites de tentativa são contados |
 | `SOAR_EMAIL_BACKEND` | `smtp` para enviar confirmação e recuperação de senha de verdade |
@@ -136,9 +136,10 @@ HTTPS está firme, suba para `31536000` (um ano) e só então ligue o
 
 ### Content-Security-Policy
 
-Sai em modo de relatório por padrão: o navegador reclama no console mas não
-bloqueia nada. Rode assim alguns dias, veja o que aparece no console, e então
-mude `SOAR_CSP_SOMENTE_RELATORIO=0` para a política passar a valer.
+Vale de verdade por padrão: o navegador bloqueia script de fora, script
+escrito dentro do HTML e o site aberto dentro de iframe. Para investigar algo
+que parou de funcionar, `SOAR_CSP_SOMENTE_RELATORIO=1` troca para o modo
+relatório (só reclama no console).
 
 ### Banco de dados
 
@@ -171,6 +172,10 @@ serve é o Nginx — e é ele que precisa mandar os cabeçalhos, porque o Django
 participa dessas requisições:
 
 ```nginx
+# Mesmo teto do SOAR_TAMANHO_MAXIMO_ENVIO_MB (padrão 10). O Nginx recusa o
+# envio grande antes de ele chegar ao Django.
+client_max_body_size 10m;
+
 location /media/ {
     alias /caminho/do/projeto/media/;
 

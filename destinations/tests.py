@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -210,6 +210,9 @@ class PaginaInicialTests(TestCase):
         self.assertNotContains(self.client.get('/destinos/?estilo=Cultura'), '/destinos/bonito/')
 
 
+# O que se testa aqui é o conteúdo do painel; o código do celular tem os
+# testes dele em contas/tests.py (DoisFatoresTests).
+@override_settings(DOIS_FATORES_EQUIPE=False)
 class SemPrecoTests(TestCase):
     def test_destino_sem_preco_mostra_sob_consulta(self):
         d = Destino.objects.create(nome='Caraça', slug='caraca', descricao='Santuário.')

@@ -40,13 +40,16 @@ class Limite:
         if limite.estourou(request, usuario):    # bloqueado?
             ...
         limite.registrar(request, usuario)       # +1 tentativa
-        limite.limpar(request, usuario)          # deu certo, zera
+        limite.limpar(request, usuario)          # deu certo, zera a conta (o IP fica)
     """
 
     def __init__(self, nome, tentativas, janela):
         self.nome = nome
         self.tentativas = tentativas
         self.janela = janela
+
+    def _chave_id(self, identificador):
+        return 'limite:{}:id:{}'.format(self.nome, str(identificador).lower())
 
     def _chaves(self, request, identificador=None):
         """Conta por IP e, quando existe, também por identificador.
@@ -57,7 +60,7 @@ class Limite:
         """
         chaves = ['limite:{}:ip:{}'.format(self.nome, ip_do_cliente(request))]
         if identificador:
-            chaves.append('limite:{}:id:{}'.format(self.nome, str(identificador).lower()))
+            chaves.append(self._chave_id(identificador))
         return chaves
 
     def estourou(self, request, identificador=None):
@@ -78,7 +81,15 @@ class Limite:
                 )
 
     def limpar(self, request, identificador=None):
-        cache.delete_many(self._chaves(request, identificador))
+        """Zera só a contagem do identificador (a conta que acertou a senha).
+
+        A do IP fica. Antes as duas eram apagadas, e dava para driblar o limite:
+        errar senha em várias contas, entrar na própria para zerar o IP e
+        continuar. Quem digita certo não perde nada, porque a contagem do IP
+        só bloqueia depois de várias falhas seguidas dentro da janela.
+        """
+        if identificador:
+            cache.delete(self._chave_id(identificador))
 
     def segundos_restantes(self, request, identificador=None):
         """Quanto falta para liberar — só para a mensagem ao usuário."""
@@ -93,6 +104,11 @@ LIMITE_LOGIN = Limite('login',
 LIMITE_CADASTRO = Limite('cadastro', settings.LIMITE_CADASTRO_POR_HORA, 3600)
 LIMITE_AVALIACAO = Limite('avaliacao', settings.LIMITE_AVALIACAO_POR_HORA, 3600)
 LIMITE_RESERVA = Limite('reserva', settings.LIMITE_RESERVA_POR_HORA, 3600)
+LIMITE_SENHA = Limite('senha', settings.LIMITE_SENHA_POR_HORA, 3600)
+LIMITE_NEWSLETTER = Limite('newsletter', settings.LIMITE_NEWSLETTER_POR_HORA, 3600)
+# Código de 6 dígitos: 5 erros a cada 15 minutos por conta tornam o chute
+# (1 em 1 milhão por tentativa) inútil.
+LIMITE_2FA = Limite('2fa', 5, 900)
 
 
 def registrar_login_falho(sender, credentials, request=None, **kwargs):

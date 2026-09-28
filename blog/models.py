@@ -269,13 +269,17 @@ class Atracao(models.Model):
 class Inscricao(models.Model):
     """E-mail de quem pediu para receber as novidades do blog.
 
-    Base legal é o consentimento (LGPD, art. 7º, I): a pessoa digitou o e-mail
-    e apertou o botão sabendo para quê. Fica até ela pedir para sair.
+    Base legal é o consentimento (LGPD, art. 7º, I). Digitar o e-mail no site
+    não prova que ele é de quem digitou: qualquer um cadastrava o endereço de
+    outra pessoa. Por isso a inscrição só vale depois que o dono do e-mail
+    clica no link de confirmação (`confirmada_em`). A que nunca é confirmada
+    some sozinha no `expurgar_dados`.
     """
 
     email = models.EmailField('E-mail', unique=True)
     origem = models.CharField('Onde se inscreveu', max_length=120, blank=True)
     criado_em = models.DateTimeField('Inscrito em', auto_now_add=True)
+    confirmada_em = models.DateTimeField('Confirmada em', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Inscrição na newsletter'
@@ -284,3 +288,7 @@ class Inscricao(models.Model):
 
     def __str__(self):
         return self.email
+
+    @property
+    def confirmada(self):
+        return self.confirmada_em is not None

@@ -1,15 +1,31 @@
 """Páginas públicas do Blog Soar: o índice de artigos e cada artigo."""
+import logging
+
 from django import forms
 from django.contrib import messages
+from django.core import signing
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from soar.seguranca import LIMITE_NEWSLETTER, ip_do_cliente
+
 from .models import Artigo, Categoria, Inscricao
+
+log = logging.getLogger('soar.seguranca')
+
+# O link de confirmação é o próprio e-mail assinado com a SECRET_KEY: não
+# precisa de tabela de tokens e ninguém consegue montar um link para o e-mail
+# de outra pessoa.
+SAL_NEWSLETTER = 'blog.newsletter.confirmar'
+VALIDADE_CONFIRMACAO = 7 * 24 * 3600
 
 POR_PAGINA = 8
 TAMANHO_MAXIMO_BUSCA = 80
@@ -103,7 +119,14 @@ class _EmailForm(forms.Form):
 
 @require_POST
 def inscrever(request):
-    """Recebe o e-mail dos formulários de newsletter do blog."""
+    """Recebe o e-mail dos formulários de newsletter do blog.
+
+    A inscrição só vale depois que o dono do e-mail clica no link que chega
+    na caixa dele. A tela diz sempre a mesma coisa, esteja o e-mail inscrito
+    ou não: senão ela respondia a qualquer um se tal endereço recebe a
+    newsletter da Soar. E cada IP (e cada e-mail) tem um limite de pedidos por
+    hora, porque cada pedido manda um e-mail.
+    """
     voltar = request.POST.get('voltar') or ''
     if not url_has_allowed_host_and_scheme(voltar, allowed_hosts={request.get_host()},
                                            require_https=request.is_secure()):
@@ -116,9 +139,43 @@ def inscrever(request):
         return redirect(voltar)
 
     email = form.cleaned_data['email'].strip().lower()
-    _, nova = Inscricao.objects.get_or_create(email=email, defaults={'origem': voltar[:120]})
-    if nova:
-        messages.success(request, 'Pronto! Você vai receber as novidades da Soar nesse e-mail.')
-    else:
-        messages.info(request, 'Esse e-mail já recebe as novidades da Soar.')
+    if LIMITE_NEWSLETTER.estourou(request, email):
+        log.warning('newsletter bloqueada por limite: email=%r ip=%s',
+                    email, ip_do_cliente(request))
+        messages.error(request, 'Muitos pedidos daqui agora há pouco. Tente de novo mais tarde.')
+        return redirect(voltar)
+    LIMITE_NEWSLETTER.registrar(request, email)
+
+    inscricao, _ = Inscricao.objects.get_or_create(email=email, defaults={'origem': voltar[:120]})
+    if not inscricao.confirmada:
+        _enviar_confirmacao_newsletter(request, inscricao)
+    messages.success(request, 'Quase lá! Enviamos um link para {}. Clique nele para '
+                              'começar a receber as novidades da Soar.'.format(email))
     return redirect(voltar)
+
+
+def _enviar_confirmacao_newsletter(request, inscricao):
+    token = signing.dumps(inscricao.email, salt=SAL_NEWSLETTER)
+    link = request.build_absolute_uri(reverse('blog:confirmar', args=[token]))
+    corpo = render_to_string('blog/email/newsletter_confirmar.txt', {'link': link})
+    send_mail('Confirme sua inscrição | Soar Operadora', corpo, None, [inscricao.email])
+
+
+def confirmar(request, token):
+    """Link do e-mail: liga a inscrição na newsletter."""
+    try:
+        email = signing.loads(token, salt=SAL_NEWSLETTER, max_age=VALIDADE_CONFIRMACAO)
+    except signing.BadSignature:          # inclui SignatureExpired
+        messages.error(request, 'Esse link de confirmação é inválido ou expirou. '
+                                'Inscreva-se de novo aqui no blog.')
+        return redirect('blog:indice')
+
+    inscricao = Inscricao.objects.filter(email=email).first()
+    if inscricao is None:
+        messages.error(request, 'Essa inscrição não existe mais. Inscreva-se de novo aqui no blog.')
+        return redirect('blog:indice')
+    if not inscricao.confirmada:
+        inscricao.confirmada_em = timezone.now()
+        inscricao.save(update_fields=['confirmada_em'])
+    messages.success(request, 'Inscrição confirmada! Você vai receber as novidades da Soar.')
+    return redirect('blog:indice')

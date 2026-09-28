@@ -84,3 +84,25 @@ class PerfilAgente(models.Model):
         if len(c) == 14:
             return '{}.{}.{}/{}-{}'.format(c[:2], c[2:5], c[5:8], c[8:12], c[12:])
         return c
+
+
+class DoisFatores(models.Model):
+    """Segredo do aplicativo autenticador de uma conta (contas/totp.py).
+
+    Só a equipe é obrigada a ter (SOAR_2FA_EQUIPE). A senha sozinha não basta
+    para o painel do dono: quem a descobrir ainda precisaria do celular.
+    """
+
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE,
+                                   related_name='dois_fatores')
+    segredo = models.CharField(max_length=64)
+    # Passo (janela de 30 s) do último código aceito: o mesmo código não entra duas vezes.
+    ultimo_passo = models.BigIntegerField(default=0)
+    ativado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Verificação em duas etapas'
+        verbose_name_plural = 'Verificação em duas etapas'
+
+    def __str__(self):
+        return self.usuario.get_username()

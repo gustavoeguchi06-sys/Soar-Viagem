@@ -5,7 +5,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -126,6 +126,9 @@ class SegurancaDoTextoTests(BlogBase):
         self.assertIn('&lt;script&gt;', html)
 
 
+# O que se testa aqui é o conteúdo do painel; o código do celular tem os
+# testes dele em contas/tests.py (DoisFatoresTests).
+@override_settings(DOIS_FATORES_EQUIPE=False)
 class PainelTests(BlogBase):
     def test_meses_viram_caixinhas_e_voltam(self):
         a = self.artigo('meses')

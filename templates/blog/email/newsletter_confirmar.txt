@@ -1,0 +1,15 @@
+Olá!
+
+Alguém (esperamos que você) pediu para receber as novidades do Blog Soar neste
+e-mail. Para confirmar a inscrição, abra o link abaixo:
+
+{{ link }}
+
+O link vale por 7 dias.
+
+Se não foi você, ignore esta mensagem: sem a confirmação, este e-mail não
+recebe nada da Soar e é apagado da lista.
+
+--
+Soar Operadora
+Viagens em grupo pelos destinos mais bonitos do Brasil.
