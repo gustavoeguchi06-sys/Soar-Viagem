@@ -125,13 +125,13 @@ class HospedagemInline(admin.StackedInline):
     """A hospedagem é parte do pacote: cadastra-se dentro do destino.
 
     A Soar não vende hospedagem avulsa, então ela não tem tela própria no
-    painel. Nome, endereço e foto principal ficam aqui; as fotos extras (os
+    painel. Nome e foto principal ficam aqui; as fotos extras (os
     quartos) abrem pelo link "mais fotos" de cada hospedagem.
     """
 
     model = Hospedagem
     extra = 0
-    fields = ['nome', 'endereco', 'imagem', 'previa']
+    fields = ['nome', 'imagem', 'previa']
     readonly_fields = ['previa']
     show_change_link = True
     verbose_name = 'hospedagem'
@@ -203,8 +203,9 @@ class DestinoAdmin(admin.ModelAdmin):
         }),
         ('Textos da página', {
             'classes': ['collapse'],
-            'fields': ['hospedagem_sub', 'incluso', 'informacoes'],
-            'description': 'Nos dois últimos, escreva um item por linha.',
+            'fields': ['hospedagem_sub', 'incluso', 'nao_incluso', 'informacoes'],
+            'description': 'Em "incluso", "não incluso" e "informações", escreva um '
+                           'item por linha.',
         }),
         ('Registro', {
             'classes': ['collapse'],
@@ -271,7 +272,7 @@ class HospedagemAdmin(admin.ModelAdmin):
     destino); abre pelo link "mais fotos" na tela do destino.
     """
 
-    list_display = ['foto', 'nome', 'destino', 'endereco']
+    list_display = ['foto', 'nome', 'destino']
     list_display_links = ['nome']
     list_filter = ['destino']
     search_fields = ['nome', 'destino__nome']
@@ -284,7 +285,7 @@ class HospedagemAdmin(admin.ModelAdmin):
 
     fieldsets = [
         ('A hospedagem', {
-            'fields': ['destino', 'nome', 'endereco'],
+            'fields': ['destino', 'nome'],
         }),
         ('Foto', {
             'fields': ['imagem', 'previa_imagem'],

@@ -425,6 +425,7 @@ def montar_viagem(destino, avaliacoes):
         'destaques': destaques,
         'roteiro': roteiro,
         'incluso': destino.linhas('incluso') or INCLUSO,
+        'nao_incluso': destino.linhas('nao_incluso'),
         'informacoes': destino.linhas('informacoes') or INFORMACOES,
         'faq': faq,
         'preco': _moeda(preco_base) if preco_base is not None else '',

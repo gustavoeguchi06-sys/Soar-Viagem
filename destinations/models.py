@@ -109,6 +109,10 @@ class Destino(models.Model):
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,
                                help_text='Um item por linha.')
+    nao_incluso = models.TextField('O que não está incluso', blank=True,
+                                   help_text='Um item por linha. Ex.: Passagem aérea até o '
+                                             'ponto de encontro. Em branco, a página só '
+                                             'mostra o que está incluso.')
     informacoes = models.TextField('Informações importantes', blank=True,
                                    help_text='Um item por linha.')
 
