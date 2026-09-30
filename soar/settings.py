@@ -239,7 +239,7 @@ if os.environ.get('SOAR_EMAIL_BACKEND', 'console').strip() == 'smtp':
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = os.environ.get('SOAR_EMAIL_REMETENTE', 'Soar Operadora <nao-responda@soaroperadora.com.br>')
+DEFAULT_FROM_EMAIL = os.environ.get('SOAR_EMAIL_REMETENTE', 'Soar Operadora <contato@operadorasoar.com.br>')
 EMAIL_TIMEOUT = 15   # segundos; sem isso um SMTP fora do ar trava a tela de cadastro
 
 # Entrar com Google. As duas vêm do Google Cloud Console (ver README). Sem

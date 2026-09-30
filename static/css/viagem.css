@@ -267,6 +267,13 @@ body.pagina-viagem {
 .dia[open] .chev { transform: rotate(180deg); }
 .dia__corpo { padding: 0 18px 16px 102px; font-size: .9rem; color: var(--tinta-suave); }
 
+/* dias do roteiro: sem foto, o texto começa na borda e o detalhe vem em tópicos */
+.dia--roteiro > summary { padding: 11px 14px 11px 16px; }
+.dia--roteiro .dia__corpo { padding: 0 18px 16px 16px; }
+.dia__topicos { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 5px; }
+.dia__topicos li { list-style: disc; line-height: 1.5; }
+.dia__topicos li::marker { color: var(--verde); }
+
 .btn-roteiro { margin-top: 14px; }
 
 /* ===== Card de reserva =================================================== */

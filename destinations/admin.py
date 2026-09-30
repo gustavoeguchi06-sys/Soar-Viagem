@@ -104,7 +104,7 @@ class DestaqueViagemInline(admin.TabularInline):
 class DiaRoteiroInline(admin.StackedInline):
     model = DiaRoteiro
     extra = 0
-    fields = ['ordem', 'titulo', 'resumo', 'detalhe', 'imagem']
+    fields = ['ordem', 'titulo', 'resumo', 'detalhe']
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     verbose_name = 'dia'
     verbose_name_plural = 'Roteiro dia a dia'

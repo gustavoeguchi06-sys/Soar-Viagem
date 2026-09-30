@@ -209,6 +209,19 @@ class PaginaInicialTests(TestCase):
         self.assertNotContains(self.client.get(f'/destinos/?mes={outro}'), '/destinos/bonito/')
         self.assertNotContains(self.client.get('/destinos/?estilo=Cultura'), '/destinos/bonito/')
 
+    def test_busca_so_com_destinos_e_meses_que_tem_saida(self):
+        from .models import MESES
+        Destino.objects.create(nome='Sem Data', slug='sem-data', descricao='x')
+        ida = self.s.data_ida
+        valor = '{}-{:02d}'.format(ida.year, ida.month)
+        pagina = self.client.get('/')
+        self.assertNotContains(pagina, '<option value="Sem Data">')
+        self.assertContains(pagina, '{} de {}</option>'.format(MESES[ida.month], ida.year))
+        self.assertContains(pagina, 'value="{}" data-destinos="Bonito"'.format(valor))
+        self.assertContains(self.client.get(f'/destinos/?mes={valor}'), '/destinos/bonito/')
+        self.assertNotContains(self.client.get('/destinos/?mes={}-{:02d}'.format(ida.year + 1, ida.month)),
+                               '/destinos/bonito/')
+
 
 # O que se testa aqui é o conteúdo do painel; o código do celular tem os
 # testes dele em contas/tests.py (DoisFatoresTests).

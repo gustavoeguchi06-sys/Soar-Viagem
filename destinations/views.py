@@ -47,10 +47,16 @@ def lista_destinos(request):
     filtros = []
     hoje = timezone.localdate()
     saidas = Saida.objects.filter(data_ida__gte=hoje)
-    mes = request.GET.get('mes', '')
-    if mes.isdigit() and 1 <= int(mes) <= 12:
-        saidas = saidas.filter(data_ida__month=int(mes))
-        filtros.append('saídas em {}'.format(MESES[int(mes)].lower()))
+    # "2027-03" (mês e ano, como vem da página inicial) ou só "3" (qualquer ano)
+    mes = request.GET.get('mes', '').strip()
+    ano, _, numero = mes.rpartition('-')
+    if numero.isdigit() and 1 <= int(numero) <= 12 and (not ano or (ano.isdigit() and len(ano) == 4)):
+        saidas = saidas.filter(data_ida__month=int(numero))
+        if ano:
+            saidas = saidas.filter(data_ida__year=int(ano))
+            filtros.append('saídas em {} de {}'.format(MESES[int(numero)].lower(), ano))
+        else:
+            filtros.append('saídas em {}'.format(MESES[int(numero)].lower()))
     else:
         mes = ''
     if mes:

@@ -54,6 +54,24 @@
         });
     });
 
+    /* ---------- Busca: o "Quando?" mostra só os meses do destino escolhido ---------- */
+    var buscaDestino = document.getElementById('buscaDestino');
+    var buscaMes = document.getElementById('buscaMes');
+    if (buscaDestino && buscaMes) {
+        var opcoesMes = Array.prototype.slice.call(buscaMes.options, 1);
+        var filtrarMeses = function () {
+            var destino = buscaDestino.value;
+            opcoesMes.forEach(function (op) {
+                var serve = !destino || op.dataset.destinos.split('|').indexOf(destino) !== -1;
+                op.hidden = !serve;
+                op.disabled = !serve;
+                if (!serve && op.selected) { buscaMes.value = ''; }
+            });
+        };
+        buscaDestino.addEventListener('change', filtrarMeses);
+        filtrarMeses();
+    }
+
     /* ---------- Depoimentos ---------- */
     var itens = Array.prototype.slice.call(document.querySelectorAll('.in-depo__item'));
     var depo = 0;

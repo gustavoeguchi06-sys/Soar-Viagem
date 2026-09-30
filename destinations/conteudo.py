@@ -6,6 +6,8 @@ campos do model — roteiro, acomodações, FAQ...  Aqui ficam
 esses textos: um bloco padrão que serve para qualquer destino e ajustes por
 destino (chave = slug), fáceis de editar depois.
 """
+import re
+
 from django.templatetags.static import static
 
 # --------------------------------------------------------------------------- #
@@ -326,9 +328,17 @@ def _roteiro_do_banco(destino, cfg):
     """Roteiro cadastrado no painel; sem isso, o editorial; sem isso, o genérico."""
     dias = list(destino.roteiro.all())
     if dias:
-        return [{'titulo': d.titulo, 'resumo': d.resumo, 'detalhe': d.detalhe,
-                 'foto_propria': d.imagem.url if d.imagem else ''} for d in dias]
+        return [{'titulo': d.titulo, 'resumo': d.resumo, 'detalhe': d.detalhe} for d in dias]
     return [dict(d) for d in (cfg.get('roteiro') or _roteiro_generico(destino))]
+
+
+def topicos(texto):
+    """O detalhe do dia em tópicos: uma linha por tópico; texto corrido, uma frase por tópico."""
+    linhas = [l.strip().lstrip('-•*–').strip() for l in (texto or '').splitlines()]
+    linhas = [l for l in linhas if l]
+    if len(linhas) == 1:
+        linhas = [f.strip() for f in re.split(r'(?<=[.!?])\s+(?=[A-ZÀ-Ý])', linhas[0]) if f.strip()]
+    return linhas
 
 
 def montar_viagem(destino, avaliacoes):
@@ -356,8 +366,8 @@ def montar_viagem(destino, avaliacoes):
     total = len(avaliacoes)
 
     roteiro = _roteiro_do_banco(destino, cfg)
-    for i, dia in enumerate(roteiro):
-        dia['foto'] = dia.get('foto_propria') or fotos[(i + 1) % len(fotos)]
+    for dia in roteiro:
+        dia['topicos'] = topicos(dia.get('detalhe'))
 
     hospedagem_db = destino.hospedagens.first()
     fotos_hosp = []

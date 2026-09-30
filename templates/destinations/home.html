@@ -64,16 +64,16 @@
         <div class="in-busca__campos">
             <label class="in-campo">
                 <span>Para onde?</span>
-                <select name="q">
+                <select name="q" id="buscaDestino">
                     <option value="">Todos os destinos</option>
                     {% for d in i.destinos %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
                 </select>
             </label>
             <label class="in-campo">
                 <span>Quando?</span>
-                <select name="mes">
+                <select name="mes" id="buscaMes">
                     <option value="">Escolha o mês</option>
-                    {% for n, nome in i.meses %}<option value="{{ n }}">{{ nome }}</option>{% endfor %}
+                    {% for m in i.meses %}<option value="{{ m.valor }}" data-destinos="{{ m.destinos }}">{{ m.nome }}</option>{% endfor %}
                 </select>
             </label>
             <label class="in-campo">
