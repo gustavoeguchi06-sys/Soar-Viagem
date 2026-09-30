@@ -20,13 +20,14 @@ Só usa a biblioteca padrão do Python — nada novo para instalar.
 """
 import json
 import logging
-import re
 import secrets
 from urllib import error, parse, request as http
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.urls import reverse
+
+from .acesso import MENSAGEM_SEM_ACESSO, pode_entrar
 
 log = logging.getLogger('soar.seguranca')
 
@@ -123,7 +124,7 @@ def concluir(request):
     if not email or not perfil.get('email_verified'):
         # Sem e-mail verificado não dá para saber de quem é a conta.
         raise ErroGoogle('Sua conta Google não tem um e-mail verificado. '
-                         'Use o cadastro com e-mail e senha.')
+                         'Entre com seu usuário e senha.')
 
     usuario, criado = _usuario_para(email, perfil.get('given_name') or perfil.get('name') or '')
     log.info('login google %s: usuario=%r email=%s', 'criou conta' if criado else 'ok',
@@ -132,58 +133,43 @@ def concluir(request):
 
 
 def _usuario_para(email, nome):
-    """Acha a conta pelo e-mail ou cria uma nova, já ativa."""
+    """Acha a conta da agência ou da equipe pelo e-mail.
+
+    Não cria conta nova: cliente (pessoa física) não tem mais login no site.
+    """
     usuario = User.objects.filter(email__iexact=email).first()
-    if usuario:
-        mudou = []
-        if not usuario.is_active and usuario.last_login is not None:
-            # Já entrou antes e hoje está inativa: foi desligada no painel, de
-            # propósito. O Google prova quem é a pessoa, não que ela pode voltar.
-            log.warning('login google recusado, conta desativada: usuario=%r email=%s',
-                        usuario.get_username(), email)
-            raise ErroGoogle('Esta conta está desativada. Fale com a Soar pelo WhatsApp.')
-        if not usuario.is_active:
-            # O Google confirmou o e-mail; é a mesma prova que o link daria.
-            usuario.is_active = True
-            mudou.append('is_active')
-            # Mas a senha desta conta não é confiável. Conta inativa é conta que
-            # nunca teve o e-mail confirmado — e o cadastro aceita qualquer
-            # endereço. Alguém pode ter cadastrado o e-mail de outra pessoa com
-            # uma senha só dele e esperado: quando o dono de verdade entrasse
-            # pelo Google, a conta ligaria e a senha do intruso passaria a valer.
-            # Anular a senha fecha essa porta: a partir daqui a conta entra pelo
-            # Google, como as que nascem por ele.
-            if usuario.has_usable_password():
-                usuario.set_unusable_password()
-                mudou.append('password')
-                log.warning('login google ativou conta nunca confirmada e anulou a senha '
-                            'antiga: usuario=%r email=%s', usuario.get_username(), email)
-        if not usuario.first_name and nome:
-            usuario.first_name = nome[:60]
-            mudou.append('first_name')
-        if mudou:
-            usuario.save(update_fields=mudou)
-        return usuario, False
-
-    usuario = User(username=_username_livre(email), email=email,
-                   first_name=nome[:60], is_active=True)
-    # Sem senha: esta conta entra pelo Google. (O "esqueci minha senha" do
-    # Django ignora contas sem senha, de propósito — a pessoa continua
-    # entrando pelo Google, que foi o que ela escolheu.)
-    usuario.set_unusable_password()
-    usuario.save()
-    return usuario, True
-
-
-def _username_livre(email):
-    """Deriva um nome de usuário do e-mail e garante que não existe outro igual."""
-    base = re.sub(r'[^\w.@+-]', '', email.split('@', 1)[0])[:140] or 'viajante'
-    candidato = base
-    n = 1
-    while User.objects.filter(username__iexact=candidato).exists():
-        n += 1
-        candidato = '{}{}'.format(base[:140 - len(str(n))], n)
-    return candidato
+    if usuario is None or not pode_entrar(usuario):
+        log.info('login google recusado, sem acesso: email=%s', email)
+        raise ErroGoogle(MENSAGEM_SEM_ACESSO)
+    mudou = []
+    if not usuario.is_active and usuario.last_login is not None:
+        # Já entrou antes e hoje está inativa: foi desligada no painel, de
+        # propósito. O Google prova quem é a pessoa, não que ela pode voltar.
+        log.warning('login google recusado, conta desativada: usuario=%r email=%s',
+                    usuario.get_username(), email)
+        raise ErroGoogle('Esta conta está desativada. Fale com a Soar pelo WhatsApp.')
+    if not usuario.is_active:
+        # O Google confirmou o e-mail; é a mesma prova que o link daria.
+        usuario.is_active = True
+        mudou.append('is_active')
+        # Mas a senha desta conta não é confiável. Conta inativa é conta que
+        # nunca teve o e-mail confirmado — e o cadastro aceita qualquer
+        # endereço. Alguém pode ter cadastrado o e-mail de outra pessoa com
+        # uma senha só dele e esperado: quando o dono de verdade entrasse
+        # pelo Google, a conta ligaria e a senha do intruso passaria a valer.
+        # Anular a senha fecha essa porta: a partir daqui a conta entra pelo
+        # Google, como as que nascem por ele.
+        if usuario.has_usable_password():
+            usuario.set_unusable_password()
+            mudou.append('password')
+            log.warning('login google ativou conta nunca confirmada e anulou a senha '
+                        'antiga: usuario=%r email=%s', usuario.get_username(), email)
+    if not usuario.first_name and nome:
+        usuario.first_name = nome[:60]
+        mudou.append('first_name')
+    if mudou:
+        usuario.save(update_fields=mudou)
+    return usuario, False
 
 
 def usuario_entra_pelo_google(usuario):

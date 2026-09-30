@@ -148,7 +148,8 @@ class FuncionalidadesTests(TestCase):
         resposta = self.client.get('/calendario/')
         self.assertContains(resposta, 'Bonito')
         self.assertContains(resposta, self.saida.texto)
-        self.assertContains(resposta, f'/reservar/bonito/?saida={self.saida.pk}')
+        self.assertContains(resposta, 'Ver viagem')
+        self.assertNotContains(resposta, '/reservar/bonito/')
 
     def test_newsletter_grava_o_email(self):
         from blog.models import Inscricao

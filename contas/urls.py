@@ -13,7 +13,6 @@ app_name = 'contas'
 # existe e fica quieto quando não, sempre com a mesma tela. É de propósito.
 urlpatterns = [
     path('entrar/', views.entrar, name='entrar'),
-    path('cadastro/', views.cadastro, name='cadastro'),
     path('cadastro/confirmar/<uidb64>/<token>/', views.ativar, name='ativar'),
     path('sair/', views.sair, name='sair'),
 
