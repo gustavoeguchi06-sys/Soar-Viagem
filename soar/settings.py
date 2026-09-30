@@ -279,6 +279,7 @@ LIMITE_RESERVA_POR_HORA = int(os.environ.get('SOAR_LIMITE_RESERVA', 10))
 # estourar a cota diária do Gmail da Soar.
 LIMITE_SENHA_POR_HORA = int(os.environ.get('SOAR_LIMITE_SENHA', 5))
 LIMITE_NEWSLETTER_POR_HORA = int(os.environ.get('SOAR_LIMITE_NEWSLETTER', 5))
+LIMITE_INTERESSE_POR_HORA = int(os.environ.get('SOAR_LIMITE_INTERESSE', 5))
 
 # Verificação em duas etapas para a equipe (contas/dois_fatores.py). Desligada
 # por pedido do cliente: o dono entra no painel só com a senha, sem o código do

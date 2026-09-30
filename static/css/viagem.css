@@ -272,6 +272,23 @@ body.pagina-viagem {
 .btn-roteiro { margin-top: 14px; }
 .reserva__orcamento { margin-top: 16px; }
 
+/* "Saiba mais" de quem não tem login */
+.interesse { margin-top: 16px; }
+.interesse > summary { list-style: none; cursor: pointer; }
+.interesse > summary::-webkit-details-marker { display: none; }
+.interesse[open] > summary { display: none; }
+.interesse__form { display: flex; flex-direction: column; gap: 12px; }
+.interesse__lgpd { font-size: .76rem; color: var(--tinta-suave); line-height: 1.4; }
+.interesse__lgpd a { color: var(--verde); }
+.interesse__ok {
+    margin-top: 16px; display: flex; gap: 10px; align-items: flex-start;
+    padding: 14px; border-radius: var(--r-md); background: var(--verde-claro);
+    color: var(--preto); font-size: .9rem; line-height: 1.45;
+}
+.interesse__ok .ic { width: 20px; height: 20px; color: var(--verde); flex: none; margin-top: 1px; }
+.campo__erro { font-size: .78rem; font-weight: 600; color: #b91c1c; }
+.campo--erro input { border-color: #d92d20; }
+
 /* ===== Card de reserva =================================================== */
 .lateral { position: sticky; top: calc(var(--topo) + 16px); display: flex; flex-direction: column; gap: 14px; }
 
@@ -426,7 +443,7 @@ body.pagina-viagem {
 .campo { display: flex; flex-direction: column; gap: 6px; }
 .campo--full { grid-column: 1 / -1; }
 .campo label { font-size: .82rem; font-weight: 600; color: var(--tinta); }
-.campo input[type=text], .campo input[type=file], .campo select, .campo textarea {
+.campo input[type=text], .campo input[type=email], .campo input[type=file], .campo select, .campo textarea {
     font-family: inherit; font-size: .9rem; color: var(--tinta); padding: 11px 13px;
     border: 1px solid var(--linha); border-radius: var(--r-sm); background: #fff; width: 100%;
 }

@@ -236,9 +236,30 @@
                 </form>
                 {% else %}
                 </div>
+                {% if user.is_authenticated %}
                 <p class="reserva__aviso">
                     As reservas são feitas pelas agências de viagem parceiras da Soar.
                 </p>
+                {% elif interesse_enviado %}
+                <div class="interesse__ok" role="status">
+                    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                    <p>A Operadora Soar é uma empresa B2B, especializada em atender agências de
+                       viagens e profissionais do turismo.</p>
+                </div>
+                {% else %}
+                {# Sem login: "Saiba mais" abre o formulário de contato (sem JavaScript) #}
+                <details class="interesse"{% if form_interesse.errors %} open{% endif %}>
+                    <summary class="btn btn--verde btn--bloco">Saiba mais</summary>
+                    <form method="post" action="{% url 'destinations:interesse' destino.slug %}"
+                          class="interesse__form" novalidate>
+                        {% csrf_token %}
+                        {% include 'partials/_campos.html' with form=form_interesse %}
+                        <button type="submit" class="btn btn--verde btn--bloco">Enviar</button>
+                        <small class="interesse__lgpd">Usamos seus dados só para falar com você
+                            sobre esta viagem. <a href="{% url 'contas:privacidade' %}">Privacidade</a></small>
+                    </form>
+                </details>
+                {% endif %}
                 {% endif %}
             </div>
 

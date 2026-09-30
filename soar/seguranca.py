@@ -106,6 +106,7 @@ LIMITE_AVALIACAO = Limite('avaliacao', settings.LIMITE_AVALIACAO_POR_HORA, 3600)
 LIMITE_RESERVA = Limite('reserva', settings.LIMITE_RESERVA_POR_HORA, 3600)
 LIMITE_SENHA = Limite('senha', settings.LIMITE_SENHA_POR_HORA, 3600)
 LIMITE_NEWSLETTER = Limite('newsletter', settings.LIMITE_NEWSLETTER_POR_HORA, 3600)
+LIMITE_INTERESSE = Limite('interesse', settings.LIMITE_INTERESSE_POR_HORA, 3600)
 # Código de 6 dígitos: 5 erros a cada 15 minutos por conta tornam o chute
 # (1 em 1 milhão por tentativa) inútil.
 LIMITE_2FA = Limite('2fa', 5, 900)
