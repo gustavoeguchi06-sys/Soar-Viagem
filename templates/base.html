@@ -52,7 +52,6 @@
                     {% if user.agente.aprovado %}
                     <a href="{% url 'agencia:painel' %}">Painel da agência</a>
                     {% endif %}
-                    <a href="{% url 'contas:minha_conta' %}">Minha conta e reservas</a>
                     {% if user.is_staff %}
                     <a href="{% url 'admin:index' %}">Painel do dono</a>
                     {% endif %}
@@ -62,16 +61,18 @@
                     </form>
                 </div>
             </details>
-            {% else %}
-            <a class="btn btn--linha btn--entrar" href="{% url 'contas:entrar' %}?next={{ request.get_full_path|urlencode }}">
-                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-usuario"></use></svg>
-                <span>Entrar</span>
-            </a>
             {% endif %}
 
-            <a class="btn btn--verde btn--reservar" href="{% block reservar_href %}{% url 'destinations:lista' %}{% endblock %}">
-                <span>Reservar</span> <span class="btn__resto">agora</span>
+            {# Só agências e a equipe têm login; quem reserva é a agência parceira. #}
+            {% if user.agente.aprovado %}
+            <a class="btn btn--verde btn--reservar" href="{% block orcamento_href %}{% url 'agencia:orcamento_novo' %}{% endblock %}">
+                <span class="btn__resto">Criar</span> <span>orçamento</span>
             </a>
+            {% else %}
+            <a class="btn btn--verde btn--reservar" href="{% url 'destinations:calendario' %}">
+                <span class="btn__resto">Ver</span> <span>viagens</span>
+            </a>
+            {% endif %}
             <button class="menu-botao" type="button" id="menuBotao"
                     aria-expanded="false" aria-controls="menuMovel" aria-label="Abrir menu">
                 <span></span><span></span><span></span>
@@ -91,15 +92,11 @@
             <div class="menu-movel__conta">
                 {% if user.is_authenticated %}
                 {% if user.agente.aprovado %}<a href="{% url 'agencia:painel' %}">Painel da agência</a>{% endif %}
-                <a href="{% url 'contas:minha_conta' %}">Minha conta e reservas</a>
                 {% if user.is_staff %}<a href="{% url 'admin:index' %}">Painel do dono</a>{% endif %}
                 <form action="{% url 'contas:sair' %}" method="post">
                     {% csrf_token %}
                     <button type="submit">Sair</button>
                 </form>
-                {% else %}
-                <a href="{% url 'contas:entrar' %}?next={{ request.get_full_path|urlencode }}">Entrar</a>
-                <a href="{% url 'contas:cadastro' %}">Criar conta</a>
                 {% endif %}
             </div>
         </div>

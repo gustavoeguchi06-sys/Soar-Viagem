@@ -11,8 +11,7 @@
     <div class="wrap conta-tela__grade">
         <div class="cartao-form">
             <h1>Entrar</h1>
-            <p class="cartao-form__sub">Sua conta guarda as reservas que você pediu e agiliza o
-               contato com a nossa equipe.</p>
+            <p class="cartao-form__sub">Acesso exclusivo das agências parceiras e da equipe da Soar.</p>
 
             {% if next %}
             <div class="form-nota">
@@ -35,23 +34,21 @@
             </p>
 
             <p class="cartao-form__rodape">
-                Ainda não tem conta?
-                <a href="{% url 'contas:cadastro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Criar minha conta</a>
+                É agência e ainda não tem acesso?
+                <a href="{% url 'contas:cadastro_agente' %}">Cadastrar minha agência</a>
             </p>
         </div>
 
         <aside class="conta-lado">
-            <h2>Por que criar uma conta?</h2>
+            <h2>Quer viajar com a Soar?</h2>
             <ul>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Reserve sua vaga na viagem em poucos cliques.</li>
+                    As reservas são feitas pelas agências de viagem parceiras.</li>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Acompanhe a situação de cada pedido pelo site.</li>
-                <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Seus dados já vão preenchidos, sem repetir tudo a cada viagem.</li>
+                    Veja as viagens e as datas no site e fale com a sua agência.</li>
             </ul>
             <p class="conta-lado__ajuda">
-                Prefere falar com gente?
+                Ficou com dúvida?
                 <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Chame no WhatsApp</a>.
             </p>
         </aside>

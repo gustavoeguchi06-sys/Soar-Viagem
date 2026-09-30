@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from contas.models import PerfilAgente
 from contas.tokens import token_ativacao
 
 from destinations.models import Destino
@@ -23,6 +24,13 @@ from reservas.models import Reserva
 from reviews.models import Avaliacao
 
 GOOGLE = override_settings(GOOGLE_CLIENT_ID='id-de-teste', GOOGLE_CLIENT_SECRET='segredo-de-teste')
+
+
+def _virar_agencia(usuario, cnpj='11222333000181'):
+    """Só agência e equipe têm login: os testes de conta usam uma agência."""
+    PerfilAgente.objects.create(usuario=usuario, razao_social='Agência Teste', cnpj=cnpj,
+                                cadastur='123', whatsapp='11999990000', aprovado=True)
+    return usuario
 
 
 def _respostas_google(email, verificado=True, nome='Ana'):
@@ -47,8 +55,8 @@ class LoginGoogleTests(TestCase):
 
     def test_conta_pre_cadastrada_perde_a_senha_do_intruso(self):
         # alguém cadastrou o e-mail da vítima com uma senha só dele e nunca confirmou
-        intruso = User.objects.create_user('intruso', 'vitima@gmail.com', 'senha-do-intruso-123',
-                                           is_active=False)
+        intruso = _virar_agencia(User.objects.create_user(
+            'intruso', 'vitima@gmail.com', 'senha-do-intruso-123', is_active=False))
 
         self._entrar_pelo_google('vitima@gmail.com')
 
@@ -66,10 +74,19 @@ class LoginGoogleTests(TestCase):
 
     def test_conta_ja_ativa_mantem_a_senha(self):
         # quem já confirmou o e-mail escolheu a senha — ela é da própria pessoa
-        dona = User.objects.create_user('dona', 'dona@gmail.com', 'senha-da-dona-123')
+        dona = _virar_agencia(User.objects.create_user('dona', 'dona@gmail.com',
+                                                       'senha-da-dona-123'))
         self._entrar_pelo_google('dona@gmail.com')
         dona.refresh_from_db()
         self.assertTrue(dona.check_password('senha-da-dona-123'))
+        self.assertEqual(int(self.client.session['_auth_user_id']), dona.pk)
+
+    def test_google_nao_cria_conta_nem_deixa_cliente_entrar(self):
+        self._entrar_pelo_google('novo@gmail.com')
+        self.assertFalse(User.objects.filter(email='novo@gmail.com').exists())
+        User.objects.create_user('cliente', 'cliente@gmail.com', 'senha-do-cliente-123')
+        self._entrar_pelo_google('cliente@gmail.com')
+        self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_conta_desativada_no_painel_nao_volta_pelo_google(self):
         banida = User.objects.create_user('banida', 'banida@gmail.com', 'x-senha-123',
@@ -257,3 +274,34 @@ class MascarasTests(TestCase):
         self.assertEqual(agencia.cnpj, '11222333000181')
         self.assertEqual(agencia.cadastur, '35.123456.10.0001-3')
         self.assertEqual(agencia.whatsapp, '(11) 98888-7777')
+
+
+class SoAgenciaEEquipeEntramTests(TestCase):
+    """Cliente pessoa física não tem mais login: só agências e a equipe da Soar."""
+
+    def test_cliente_nao_entra_nem_pela_tela_de_entrar_nem_pelo_b2b(self):
+        User.objects.create_user('cliente', 'c@x.com', 'senha-boa-123')
+        for tela in ('contas:entrar', 'contas:b2b'):
+            resposta = self.client.post(reverse(tela), {'username': 'cliente',
+                                                        'password': 'senha-boa-123'})
+            self.assertContains(resposta, 'exclusivo das agências parceiras')
+            self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_agencia_e_equipe_entram(self):
+        _virar_agencia(User.objects.create_user('agencia', 'a@x.com', 'senha-boa-123'))
+        User.objects.create_user('tuca', 't@x.com', 'senha-boa-123', is_staff=True)
+        for nome in ('agencia', 'tuca'):
+            self.client.post(reverse('contas:entrar'), {'username': nome,
+                                                        'password': 'senha-boa-123'})
+            self.assertEqual(self.client.session['_auth_user_id'],
+                             str(User.objects.get(username=nome).pk))
+            self.client.post(reverse('contas:sair'))
+
+    def test_site_sem_cadastro_nem_botao_de_entrar(self):
+        self.assertEqual(self.client.get('/cadastro/').status_code, 404)
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        for pagina in ('/', destino.get_absolute_url()):
+            resposta = self.client.get(pagina)
+            self.assertNotContains(resposta, reverse('contas:entrar'))
+            self.assertNotContains(resposta, 'Criar conta')
+            self.assertNotContains(resposta, 'Deixe sua avaliação')

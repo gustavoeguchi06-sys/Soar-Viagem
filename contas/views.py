@@ -1,7 +1,8 @@
-"""Entrar, cadastrar, confirmar e-mail, sair e cuidar dos próprios dados.
+"""Entrar, confirmar e-mail, sair e cuidar dos próprios dados.
 
-Quem é dono do site não passa por aqui para administrar: o painel do dono é o
-admin do Django, em /painel/. Estas telas são a porta do cliente.
+Login só para as agências parceiras e para a equipe da Soar (contas/acesso.py):
+cliente pessoa física não tem mais conta no site, quem reserva é a agência.
+O painel do dono é o admin do Django, em /painel/.
 """
 import json
 from urllib.parse import urlencode
@@ -25,7 +26,8 @@ from django.utils.http import (url_has_allowed_host_and_scheme, urlsafe_base64_d
 from soar.seguranca import LIMITE_CADASTRO, LIMITE_LOGIN, LIMITE_SENHA, ip_do_cliente
 
 from . import google
-from .forms import AgenteCadastroForm, CadastroForm, EntrarForm, ExcluirContaForm
+from .acesso import MENSAGEM_SEM_ACESSO, pode_entrar
+from .forms import AgenteCadastroForm, EntrarForm, ExcluirContaForm
 from .tokens import token_ativacao
 
 log = logging.getLogger('soar.seguranca')
@@ -95,6 +97,13 @@ def entrar(request):
             })
 
         form = EntrarForm(request, data=request.POST)
+        if form.is_valid() and not pode_entrar(form.get_user()):
+            log.info('login recusado, conta sem acesso: usuario=%r ip=%s',
+                     digitado, ip_do_cliente(request))
+            messages.error(request, MENSAGEM_SEM_ACESSO)
+            return render(request, 'contas/entrar.html', {
+                'form': EntrarForm(request), 'next': request.GET.get('next', ''),
+            })
         if form.is_valid():
             LIMITE_LOGIN.limpar(request, digitado)
             login(request, form.get_user())
@@ -107,53 +116,6 @@ def entrar(request):
         LIMITE_LOGIN.registrar(request, digitado)
 
     return render(request, 'contas/entrar.html', {
-        'form': form,
-        'next': request.GET.get('next', ''),
-    })
-
-
-def cadastro(request):
-    if request.user.is_authenticated:
-        return redirect(_proxima_pagina(request))
-
-    if request.method == 'POST':
-        if LIMITE_CADASTRO.estourou(request):
-            messages.error(request, 'Muitos cadastros a partir daqui agora há pouco. '
-                                    'Tente de novo mais tarde.')
-            return render(request, 'contas/cadastro.html',
-                          {'form': CadastroForm(), 'next': request.GET.get('next', '')})
-
-        form = CadastroForm(request.POST)
-        if form.is_valid():
-            LIMITE_CADASTRO.registrar(request)
-            email = form.cleaned_data['email']
-
-            existente = User.objects.filter(email__iexact=email).first()
-            if existente:
-                # O endereço já tem conta. Não dá para dizer isso na tela sem
-                # transformar o cadastro num consultor de "quem é cliente da
-                # Soar". Quem precisa saber é o dono do e-mail, e é para ele
-                # que a informação vai.
-                _avisar_conta_existente(request, existente)
-            else:
-                try:
-                    with transaction.atomic():
-                        usuario = form.save()
-                except IntegrityError:
-                    # Corrida com outro cadastro do mesmo e-mail; o índice
-                    # único do banco pegou. A resposta na tela não muda.
-                    pass
-                else:
-                    _enviar_confirmacao(request, usuario)
-                    log.info('conta criada: usuario=%r ip=%s',
-                             usuario.get_username(), ip_do_cliente(request))
-
-            # Mesma resposta nos dois caminhos — é isso que impede a enumeração.
-            return render(request, 'contas/verifique_email.html', {'email': email})
-    else:
-        form = CadastroForm()
-
-    return render(request, 'contas/cadastro.html', {
         'form': form,
         'next': request.GET.get('next', ''),
     })
@@ -245,18 +207,14 @@ def google_retorno(request):
     if not google.configurado():
         return redirect('contas:entrar')
     try:
-        usuario, proxima, criado = google.concluir(request)
+        usuario, proxima, _ = google.concluir(request)
     except google.ErroGoogle as e:
         messages.error(request, str(e))
         return redirect('contas:entrar')
 
     login(request, usuario)
-    if criado:
-        messages.success(request, 'Conta criada com o Google. Bem-vindo(a), {}!'.format(
-            usuario.first_name or usuario.username))
-    else:
-        messages.success(request, 'Bem-vindo(a) de volta, {}!'.format(
-            usuario.first_name or usuario.username))
+    messages.success(request, 'Bem-vindo(a) de volta, {}!'.format(
+        usuario.first_name or usuario.username))
 
     # Reaproveita a regra do `?next=` (só destino dentro do site, painel só
     # para a equipe) passando o destino guardado na sessão.
@@ -394,6 +352,11 @@ def b2b(request):
                           {'form': EntrarForm(request), 'bloqueado': True})
 
         form = EntrarForm(request, data=request.POST)
+        if form.is_valid() and not pode_entrar(form.get_user()):
+            log.info('login b2b recusado, conta sem acesso: usuario=%r ip=%s',
+                     digitado, ip_do_cliente(request))
+            messages.error(request, MENSAGEM_SEM_ACESSO)
+            return render(request, 'contas/b2b.html', {'form': EntrarForm(request)})
         if form.is_valid():
             LIMITE_LOGIN.limpar(request, digitado)
             login(request, form.get_user())

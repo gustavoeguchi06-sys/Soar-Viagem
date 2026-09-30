@@ -65,7 +65,7 @@ class TokenDeAtivacaoTests(Base):
 
 class ForcaBrutaTests(Base):
     def test_entrar_na_propria_conta_nao_zera_o_limite_do_ip(self):
-        User.objects.create_user('meu', 'm@x.com', SENHA)
+        User.objects.create_user('meu', 'm@x.com', SENHA, is_staff=True)
         for rodada in range(2):
             for i in range(3):
                 self.client.post(reverse('contas:entrar'),
@@ -77,7 +77,7 @@ class ForcaBrutaTests(Base):
         self.assertContains(resposta, 'Muitas tentativas')
 
     def test_acertar_a_senha_zera_so_a_contagem_da_conta(self):
-        User.objects.create_user('ana', 'a@x.com', SENHA)
+        User.objects.create_user('ana', 'a@x.com', SENHA, is_staff=True)
         for _ in range(3):
             self.client.post(reverse('contas:entrar'), {'username': 'ana', 'password': 'x'})
         self.client.post(reverse('contas:entrar'), {'username': 'ana', 'password': SENHA})
@@ -232,8 +232,8 @@ class DoisFatoresTests(Base):
         self.assertEqual(self.client.get(self.painel).status_code, 302)
 
     def test_cliente_nao_e_afetado(self):
-        User.objects.create_user('cliente', 'c@x.com', SENHA)
-        self.client.post(reverse('contas:entrar'), {'username': 'cliente', 'password': SENHA})
+        # conta antiga de cliente, com sessão aberta de antes do fim do login
+        self.client.force_login(User.objects.create_user('cliente', 'c@x.com', SENHA))
         resposta = self.client.get(reverse('contas:dois_fatores'))
         self.assertRedirects(resposta, reverse('contas:minha_conta'))
 

@@ -1,14 +1,8 @@
-from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-from django.urls import reverse
 from urllib.parse import urlencode
-
-from reviews.forms import AvaliacaoForm
-from soar.seguranca import LIMITE_AVALIACAO, ip_do_cliente
 
 from .conteudo import montar_viagem
 from .inicio import montar_inicio
@@ -107,88 +101,22 @@ def soar_60(request):
 
 
 def detalhe_destino(request, slug):
-    """Detalhe do destino: galeria, hospedagens e avaliações (com formulário)."""
+    """Detalhe do destino: galeria, hospedagens e avaliações.
+
+    As avaliações são só as que o Tuca cadastra e publica no painel: sem conta
+    de cliente no site, não tem mais formulário de avaliar aqui.
+    """
     destino = get_object_or_404(
         Destino.objects.prefetch_related('imagens', 'hospedagens'),
         slug=slug,
     )
-
-    if request.method == 'POST':
-        return _receber_avaliacao(request, destino)
-
-    form = AvaliacaoForm() if request.user.is_authenticated else None
-
-    # Só o que o dono aprovou no painel aparece aqui.
     avaliacoes = list(destino.avaliacoes.publicadas())
-
     return render(request, 'destinations/detalhe.html', {
         'destino': destino,
         'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
         'viagem': montar_viagem(destino, avaliacoes),
-        'form': form,
-        'ja_avaliou': _ja_avaliou(request, destino),
     })
-
-
-def _ja_avaliou(request, destino):
-    if not request.user.is_authenticated:
-        return False
-    return destino.avaliacoes.filter(autor=request.user).exists()
-
-
-def _receber_avaliacao(request, destino):
-    """Grava a avaliação enviada pelo formulário do destino.
-
-    Exige conta: era aberto a anônimos, com o nome do autor em campo livre, e
-    isso permitia assinar como a própria operadora e mexer na nota da vitrine
-    sem deixar rastro.
-    """
-    destino_url = destino.get_absolute_url()
-
-    if not request.user.is_authenticated:
-        entrar = '{}?next={}#form-avaliacao'.format(reverse('contas:entrar'), destino_url)
-        messages.info(request, 'Entre na sua conta para avaliar este destino.')
-        return redirect(entrar)
-
-    if _ja_avaliou(request, destino):
-        messages.error(request, 'Você já avaliou este destino. Fale com a Soar para alterar.')
-        return redirect(destino_url + '#avaliacoes')
-
-    if LIMITE_AVALIACAO.estourou(request, request.user.pk):
-        messages.error(request, 'Você enviou muitas avaliações agora há pouco. '
-                                'Tente de novo daqui a pouco.')
-        return redirect(destino_url + '#avaliacoes')
-
-    form = AvaliacaoForm(request.POST, request.FILES)
-    if not form.is_valid():
-        avaliacoes = list(destino.avaliacoes.publicadas())
-        return render(request, 'destinations/detalhe.html', {
-            'destino': destino,
-            'hospedagens': destino.hospedagens.all(),
-            'avaliacoes': avaliacoes,
-            'viagem': montar_viagem(destino, avaliacoes),
-            'form': form,
-            'ja_avaliou': False,
-        })
-
-    avaliacao = form.save(commit=False)
-    avaliacao.destino = destino
-    avaliacao.autor = request.user
-    avaliacao.nome_autor = request.user.get_full_name() or request.user.username
-    avaliacao.ip = ip_do_cliente(request)
-    avaliacao.publicada = False          # entra na fila de moderação do painel
-    try:
-        avaliacao.save()
-    except IntegrityError:
-        # corrida entre dois envios simultâneos da mesma pessoa
-        messages.error(request, 'Você já avaliou este destino.')
-        return redirect(destino_url + '#avaliacoes')
-
-    LIMITE_AVALIACAO.registrar(request, request.user.pk)
-    messages.success(request, 'Obrigado! Sua avaliação foi enviada e aparece no site '
-                              'assim que a Soar revisar.')
-    return redirect(destino_url + '#avaliacoes')
 
 
 def calendario(request):

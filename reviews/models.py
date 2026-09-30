@@ -55,7 +55,7 @@ class Avaliacao(models.Model):
                               null=True, blank=True, related_name='avaliacoes',
                               verbose_name='Cliente')
     nome_autor = models.CharField('Nome exibido', max_length=80,
-                                  help_text='Preenchido a partir da conta de quem avaliou.')
+                                  help_text='O nome de quem viajou, como vai aparecer no site.')
     nota = models.PositiveSmallIntegerField(
         'Nota (1 a 5)',
         validators=[MinValueValidator(1), MaxValueValidator(5)],

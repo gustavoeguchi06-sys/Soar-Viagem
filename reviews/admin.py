@@ -1,7 +1,8 @@
 """Moderação das avaliações no painel do dono.
 
-A avaliação chega despublicada e fica numa fila: enquanto o dono não aprova,
-ela não conta para a nota que aparece na vitrine. Por isso a lista abre com as
+O site não recebe mais avaliação (cliente não tem conta): o dono cadastra aqui
+as avaliações de quem viajou. As antigas, que chegaram pelo site, continuam na
+fila: enquanto o dono não aprova, ela não conta para a nota que aparece na vitrine. Por isso a lista abre com as
 pendentes no topo e o trabalho todo cabe em duas ações em massa.
 """
 from django.contrib import admin, messages
@@ -20,7 +21,7 @@ class AvaliacaoAdmin(admin.ModelAdmin):
     date_hierarchy = 'criado_em'
     actions = ['publicar', 'despublicar']
     list_per_page = 30
-    readonly_fields = ['autor', 'nome_autor', 'ip', 'criado_em', 'previa_foto']
+    readonly_fields = ['autor', 'ip', 'criado_em', 'previa_foto']
 
     fieldsets = [
         ('Moderação', {
@@ -29,11 +30,11 @@ class AvaliacaoAdmin(admin.ModelAdmin):
                            'do destino, depois de publicada.',
         }),
         ('A avaliação', {
-            'fields': ['destino', 'nota', 'comentario', 'foto', 'previa_foto'],
+            'fields': ['destino', 'nome_autor', 'nota', 'comentario', 'foto', 'previa_foto'],
         }),
         ('Quem enviou', {
             'classes': ['collapse'],
-            'fields': ['autor', 'nome_autor', 'ip', 'criado_em'],
+            'fields': ['autor', 'ip', 'criado_em'],
             'description': 'Registrado no envio. Serve para apurar abuso.',
         }),
     ]

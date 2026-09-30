@@ -32,8 +32,10 @@
                 {% else %}
                 <span class="pill-vagas">{{ s.vagas }} vaga{{ s.vagas|pluralize }}</span>
                 {% endif %}
-                {% if not s.esgotada %}
-                <a class="btn btn--verde btn--sm calendario__botao" href="{% url 'reservas:nova' s.destino.slug %}?saida={{ s.pk }}">Reservar esta data</a>
+                {% if user.agente.aprovado and not s.esgotada %}
+                <a class="btn btn--verde btn--sm calendario__botao" href="{% url 'agencia:orcamento_novo' %}?destino={{ s.destino.slug }}&amp;saida={{ s.pk }}">Criar orçamento</a>
+                {% else %}
+                <a class="btn btn--contorno btn--sm calendario__botao" href="{{ s.destino.get_absolute_url }}">Ver viagem</a>
                 {% endif %}
             </article>
             {% endfor %}

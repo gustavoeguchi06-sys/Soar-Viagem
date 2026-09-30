@@ -50,7 +50,7 @@ class PainelAgenciaTests(TestCase):
 
     def test_card_da_viagem_cria_orcamento_para_agencia(self):
         pagina = self.destino.get_absolute_url()
-        self.assertContains(self.client.get(pagina), 'Entrar para reservar')
+        self.assertContains(self.client.get(pagina), 'As reservas são feitas pelas agências')
         self.entrar(self.ag1)
         resposta = self.client.get(pagina)
         self.assertContains(resposta, 'Criar orçamento')
