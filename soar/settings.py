@@ -280,11 +280,11 @@ LIMITE_RESERVA_POR_HORA = int(os.environ.get('SOAR_LIMITE_RESERVA', 10))
 LIMITE_SENHA_POR_HORA = int(os.environ.get('SOAR_LIMITE_SENHA', 5))
 LIMITE_NEWSLETTER_POR_HORA = int(os.environ.get('SOAR_LIMITE_NEWSLETTER', 5))
 
-# Verificação em duas etapas para a equipe (contas/dois_fatores.py): quem é
-# is_staff só entra no painel depois de digitar o código do aplicativo
-# autenticador do celular. A conta do dono é superusuário; só a senha era
-# pouco para ela. Desligar (0) só para demonstração, nunca no servidor.
-DOIS_FATORES_EQUIPE = _ligado('SOAR_2FA_EQUIPE', True)
+# Verificação em duas etapas para a equipe (contas/dois_fatores.py). Desligada
+# por pedido do cliente: o dono entra no painel só com a senha, sem o código do
+# aplicativo autenticador. O código continua pronto: SOAR_2FA_EQUIPE=1 no .env
+# volta a exigir o código do celular de quem é is_staff.
+DOIS_FATORES_EQUIPE = _ligado('SOAR_2FA_EQUIPE', False)
 
 # --------------------------------------------------------------------------- #
 # Segurança

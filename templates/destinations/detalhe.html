@@ -349,13 +349,31 @@
                 <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
-                <div class="destaques" style="grid-template-columns:1fr 1fr">
-                    {% for i in viagem.incluso %}
-                    <div class="destaque-item">
-                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                        <span>{{ i }}</span>
+                <div class="incl-grade{% if not viagem.nao_incluso %} incl-grade--so{% endif %}">
+                    <div>
+                        <h4 class="incl-titulo">Incluso</h4>
+                        <ul class="incl-lista">
+                            {% for i in viagem.incluso %}
+                            <li class="destaque-item">
+                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                                <span>{{ i }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                    {% endfor %}
+                    {% if viagem.nao_incluso %}
+                    <div>
+                        <h4 class="incl-titulo incl-titulo--nao">Não incluso</h4>
+                        <ul class="incl-lista">
+                            {% for i in viagem.nao_incluso %}
+                            <li class="destaque-item destaque-item--nao">
+                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-x"></use></svg>
+                                <span>{{ i }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </details>

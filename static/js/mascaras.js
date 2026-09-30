@@ -1,4 +1,4 @@
-/* Soar Operadora — máscaras de telefone, CNPJ e CADASTUR.
+/* Soar Operadora — máscaras de telefone, CNPJ, CADASTUR e preço em reais.
 
    A pessoa digita só os números; os parênteses, pontos, barra e traço entram
    sozinhos. Vale para todo campo com data-mascara="telefone|cnpj|cadastur".
@@ -66,6 +66,58 @@
         });
         if (campo.value) { campo.value = formatar(campo.value); }
     }
+
+    /* Preço em reais: "3500" vira "3.500" enquanto digita e "3.500,00" ao sair
+       do campo. A vírgula é digitada pela pessoa e separa os centavos (no
+       máximo 2). Vale para todo campo com a classe preco-brl, que é a do
+       CampoPreco (destinations/admin.py): preço do destino, também na lista,
+       e valor do orçamento da agência. O servidor lê "3.500,00", "3500" e
+       "R$ 3.500" do mesmo jeito, então a máscara é só conforto. */
+    function formatarMoeda(valor) {
+        var limpo = (valor || '').replace(/[^\d,]/g, '');
+        var virgula = limpo.indexOf(',');
+        var inteiro = virgula === -1 ? limpo : limpo.slice(0, virgula);
+        var centavos = virgula === -1 ? null : limpo.slice(virgula + 1).replace(/,/g, '').slice(0, 2);
+        inteiro = inteiro.replace(/^0+(?=\d)/, '');
+        if (!inteiro && centavos !== null) { inteiro = '0'; }
+        inteiro = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return centavos === null ? inteiro : inteiro + ',' + centavos;
+    }
+
+    function completarCentavos(valor) {
+        if (!valor) { return ''; }
+        var partes = valor.split(',');
+        var centavos = ((partes[1] || '') + '00').slice(0, 2);
+        return (partes[0] || '0') + ',' + centavos;
+    }
+
+    function aplicarMoeda(campo) {
+        if (campo.dataset.mascaraPronta) { return; }
+        campo.dataset.mascaraPronta = '1';
+        campo.setAttribute('inputmode', 'decimal');
+        campo.addEventListener('input', function () {
+            // Devolve o cursor contando o que vem DEPOIS dele: a máscara mexe
+            // no começo (pontos, o "0" de ",75"), nunca no fim.
+            var depois = campo.value.slice(campo.selectionEnd).replace(/[^\d,]/g, '').length;
+            campo.value = formatarMoeda(campo.value);
+            var pos = campo.value.length, contados = 0;
+            while (pos > 0 && contados < depois) {
+                pos--;
+                if (/[\d,]/.test(campo.value[pos])) { contados++; }
+            }
+            campo.setSelectionRange(pos, pos);
+        });
+        campo.addEventListener('blur', function () {
+            campo.value = completarCentavos(formatarMoeda(campo.value));
+        });
+        if (campo.value) { campo.value = completarCentavos(formatarMoeda(campo.value)); }
+    }
+
+    var moedas = function (raiz) {
+        raiz.querySelectorAll('input.preco-brl, input[data-mascara="moeda"]').forEach(aplicarMoeda);
+    };
+    moedas(document);
+    document.addEventListener('formset:added', function (e) { moedas(e.target); });
 
     document.querySelectorAll('input[data-mascara]').forEach(function (campo) {
         if (FORMATOS[campo.dataset.mascara]) { aplicar(campo, campo.dataset.mascara); }

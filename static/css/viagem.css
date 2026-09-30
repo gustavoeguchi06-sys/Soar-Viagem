@@ -674,3 +674,17 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .btn-voltar:hover { background: rgba(255, 255, 255, .18); border-color: #fff; }
 .btn-voltar .ic { width: 16px; height: 16px; stroke-width: 2.2; }
 @media (pointer: coarse) { .btn-voltar { min-height: 40px; } }
+
+/* Incluso / Não incluso: duas colunas lado a lado; no celular, uma embaixo da outra */
+.incl-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; }
+.incl-grade--so { grid-template-columns: 1fr; }
+.incl-grade > div { background: var(--fundo-suave); border-radius: var(--r-md); padding: 15px 20px; }
+.incl-titulo { font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+               color: var(--verde); margin: 0 0 12px 0; }
+.incl-titulo--nao { color: #b42318; }
+.incl-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px 18px; }
+.incl-grade--so .incl-lista { grid-template-columns: 1fr 1fr; }
+.destaque-item--nao .ic { color: #b42318; }
+@media (max-width: 640px) {
+    .incl-grade, .incl-grade--so .incl-lista { grid-template-columns: 1fr; }
+}

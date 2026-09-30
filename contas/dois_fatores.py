@@ -68,7 +68,8 @@ def dois_fatores(request):
     usuario = request.user
     if not usuario.is_staff:
         return redirect('contas:minha_conta')
-    if verificado(request):
+    if not exigido(usuario) or verificado(request):
+        # Com o código desligado (SOAR_2FA_EQUIPE), a tela não tem o que pedir.
         return redirect(_proxima(request))
 
     cadastro = DoisFatores.objects.filter(usuario=usuario).first()
