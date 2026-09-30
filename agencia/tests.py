@@ -137,3 +137,50 @@ class PainelAgenciaTests(TestCase):
         })
         self.assertEqual(resposta.status_code, 200)
         self.assertFalse(Orcamento.objects.exists())
+
+
+class InteressadosTests(TestCase):
+    """Pessoa física que pediu "Saiba mais": só o dono vê e escolhe a agência."""
+
+    def setUp(self):
+        from destinations.models import Interessado
+        self.destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        self.ag1 = _agencia('alfa', '11222333000181')
+        self.ag2 = _agencia('beta', '11444777000161')
+        self.pessoa = Interessado.objects.create(destino=self.destino, nome='Ana Souza',
+                                                 email='ana@exemplo.com',
+                                                 whatsapp='(11) 98888-7777', cep='01310-100')
+
+    def test_agencia_ve_so_quem_foi_mandado_para_ela(self):
+        self.pessoa.agencias.add(self.ag1)
+        self.client.force_login(self.ag1.usuario)
+        self.assertContains(self.client.get(reverse('agencia:interessados')), 'Ana Souza')
+        form = self.client.get(reverse('agencia:orcamento_novo'),
+                               {'interessado': self.pessoa.pk}).context['form']
+        self.assertEqual((form.initial['cliente_nome'], form.initial['destino']),
+                         ('Ana Souza', self.destino.pk))
+
+        self.client.force_login(self.ag2.usuario)
+        self.assertNotContains(self.client.get(reverse('agencia:interessados')), 'Ana Souza')
+        form = self.client.get(reverse('agencia:orcamento_novo'),
+                               {'interessado': self.pessoa.pk}).context['form']
+        self.assertNotIn('cliente_nome', form.initial)
+
+    def _entrar_no_painel(self, usuario):
+        """Entra já com o código do celular conferido (contas/dois_fatores.py)."""
+        from contas.dois_fatores import CHAVE_OK
+        self.client.force_login(usuario)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = usuario.pk
+        sessao.save()
+
+    def test_so_o_dono_ve_no_painel(self):
+        lista = reverse('admin:destinations_interessado_changelist')
+        self._entrar_no_painel(User.objects.create_user('equipe', 'e@x.com', SENHA,
+                                                        is_staff=True))
+        self.assertEqual(self.client.get(lista).status_code, 403)
+
+        self._entrar_no_painel(User.objects.create_superuser('dono', 'd@x.com', SENHA))
+        self.assertContains(self.client.get(lista), 'Ana Souza')
+        editar = reverse('admin:destinations_interessado_change', args=[self.pessoa.pk])
+        self.assertContains(self.client.get(editar), 'Enviar para as agências')
