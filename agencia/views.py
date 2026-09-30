@@ -123,12 +123,31 @@ def orcamentos(request):
     })
 
 
+@agencia_aprovada
+def interessados(request):
+    """Pessoas que pediram "Saiba mais" e que a Soar mandou para esta agência."""
+    return render(request, 'agencia/interessados.html', {
+        'aba': 'interessados',
+        'interessados': request.agencia.interessados.select_related('destino'),
+    })
+
+
 def _inicial_da_viagem(request):
     """O que a agência escolheu no card da viagem ("Criar orçamento") já vem preenchido.
 
-    Valor que não existe é ignorado: o formulário só aceita as opções dele.
+    Vindo de um interessado (`?interessado=`), os dados da pessoa também entram,
+    mas só se a Soar mandou esse interessado para esta agência. Valor que não
+    existe é ignorado: o formulário só aceita as opções dele.
     """
     inicial = {}
+    pk = request.GET.get('interessado', '')
+    interessado = (request.agencia.interessados.select_related('destino').filter(pk=pk).first()
+                   if pk.isdigit() else None)
+    if interessado:
+        inicial.update(cliente_nome=interessado.nome, cliente_email=interessado.email,
+                       cliente_telefone=interessado.whatsapp)
+        if interessado.destino:
+            inicial['destino'] = interessado.destino.pk
     destino = Destino.objects.filter(slug=request.GET.get('destino', '')).first()
     if destino:
         inicial['destino'] = destino.pk

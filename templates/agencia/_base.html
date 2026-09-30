@@ -33,6 +33,7 @@
         <nav class="wrap ag-abas" aria-label="Seções do painel da agência">
             <a href="{% url 'agencia:painel' %}" {% if aba == 'painel' %}aria-current="page"{% endif %}>Visão geral</a>
             <a href="{% url 'agencia:reservas' %}" {% if aba == 'reservas' %}aria-current="page"{% endif %}>Reservas dos clientes</a>
+            <a href="{% url 'agencia:interessados' %}" {% if aba == 'interessados' %}aria-current="page"{% endif %}>Interessados</a>
             <a href="{% url 'agencia:orcamentos' %}" {% if aba == 'orcamentos' %}aria-current="page"{% endif %}>Orçamentos</a>
             <a href="{% url 'agencia:minha_agencia' %}" {% if aba == 'agencia' %}aria-current="page"{% endif %}>Minha agência</a>
         </nav>

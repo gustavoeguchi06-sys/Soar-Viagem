@@ -1,0 +1,48 @@
+{% extends 'agencia/_base.html' %}
+{% load agencia %}
+
+{% block titulo %}Interessados{% endblock %}
+
+{% block corpo %}
+<div class="ag-titulo">
+    <h2>Interessados</h2>
+</div>
+<p class="ag-explica">Pessoas que pediram informação sobre uma viagem no site da Soar e que a Soar
+   passou para a sua agência. Fale com elas e monte o orçamento.</p>
+
+{% if interessados %}
+<div class="reservas-lista">
+    {% for i in interessados %}
+    <article class="reserva-item">
+        <div class="reserva-item__topo">
+            <div>
+                <span class="reserva-item__codigo">pedido em {{ i.criado_em|date:"d/m/Y" }}</span>
+                <h3>{{ i.nome }}</h3>
+            </div>
+        </div>
+
+        <dl class="reserva-item__dados">
+            <div><dt>Viagem</dt><dd>{{ i.destino.nome|default:"viagem removida" }}</dd></div>
+            <div><dt>CEP</dt><dd>{{ i.cep }}</dd></div>
+        </dl>
+
+        <div class="ag-contato">
+            <a href="mailto:{{ i.email }}">{{ i.email }}</a>
+            {% with link=i.whatsapp|whatsapp %}
+            {% if link %}<a class="ag-contato__whats" href="{{ link }}" target="_blank" rel="noopener">
+                <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>{{ i.whatsapp }}</a>
+            {% else %}<span>{{ i.whatsapp }}</span>{% endif %}
+            {% endwith %}
+            <a class="btn btn--contorno btn--sm ag-contato__abrir"
+               href="{% url 'agencia:orcamento_novo' %}?interessado={{ i.pk }}">Criar orçamento</a>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="conta-vazio ag-vazio">
+    <p>Ainda não chegou nenhum interessado. Quando a Soar passar uma pessoa para a sua agência,
+       ela aparece aqui.</p>
+</div>
+{% endif %}
+{% endblock %}

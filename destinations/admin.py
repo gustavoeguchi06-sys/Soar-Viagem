@@ -349,17 +349,54 @@ class SlideInicioAdmin(admin.ModelAdmin):
 
 @admin.register(Interessado)
 class InteressadoAdmin(admin.ModelAdmin):
-    """Quem pediu "Saiba mais" numa viagem: contato para encaminhar a uma agência."""
-    list_display = ['nome', 'destino', 'whatsapp_link', 'email', 'cep', 'criado_em']
-    list_filter = ['destino']
+    """Quem pediu "Saiba mais" numa viagem.
+
+    Pessoa física só o dono vê (superusuário), e é ele quem escolhe para quais
+    agências mandar cada uma. Outro usuário da equipe não enxerga esta lista.
+    """
+    list_display = ['nome', 'destino', 'whatsapp_link', 'email', 'cep', 'enviado_para',
+                    'criado_em']
+    list_filter = ['destino', ('agencias', admin.EmptyFieldListFilter), 'agencias']
     search_fields = ['nome', 'email', 'whatsapp', 'cep']
     date_hierarchy = 'criado_em'
     readonly_fields = ['destino', 'nome', 'email', 'whatsapp', 'cep', 'criado_em']
+    fields = ['destino', 'nome', 'email', 'whatsapp', 'cep', 'criado_em', 'agencias']
     list_per_page = 30
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('destino').prefetch_related(
+            'agencias')
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'agencias':
+            from contas.models import PerfilAgente
+            kwargs['queryset'] = PerfilAgente.objects.filter(aprovado=True).order_by(
+                'razao_social')
+            kwargs['widget'] = forms.CheckboxSelectMultiple
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    # só o dono
+    def has_module_permission(self, request):
+        return request.user.is_active and request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_active and request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_active and request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_active and request.user.is_superuser
 
     def has_add_permission(self, request):
         # o pedido chega só pelo site
         return False
+
+    @admin.display(description='Enviado para')
+    def enviado_para(self, interessado):
+        nomes = [a.razao_social for a in interessado.agencias.all()]
+        return ', '.join(nomes) if nomes else format_html(
+            '<span class="etiqueta etiqueta--fila">ainda não enviado</span>')
 
     @admin.display(description='WhatsApp', ordering='whatsapp')
     def whatsapp_link(self, interessado):

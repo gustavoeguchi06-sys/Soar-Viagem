@@ -344,8 +344,9 @@ class Saida(models.Model):
 class Interessado(models.Model):
     """Quem pediu "Saiba mais" na página de uma viagem sem ter login.
 
-    A Soar é B2B e não vende direto; o contato fica aqui para o dono encaminhar
-    a pessoa a uma agência parceira. Sai sozinho depois de 1 ano
+    A Soar é B2B e não vende direto. Só o dono (superusuário) vê esta lista no
+    painel, e ele escolhe para quais agências parceiras mandar cada pessoa; a
+    agência vê só quem foi mandado para ela. Sai sozinho depois de 1 ano
     (expurgar_dados), como promete o aviso de privacidade.
     """
 
@@ -355,6 +356,11 @@ class Interessado(models.Model):
     email = models.EmailField('E-mail')
     whatsapp = models.CharField('WhatsApp', max_length=20)
     cep = models.CharField('CEP', max_length=9)
+    agencias = models.ManyToManyField(
+        'contas.PerfilAgente', blank=True, related_name='interessados',
+        verbose_name='Enviar para as agências',
+        help_text='Marque as agências que vão atender esta pessoa. Ela aparece no '
+                  'painel de cada agência marcada.')
     criado_em = models.DateTimeField('Pedido em', auto_now_add=True)
 
     class Meta:
