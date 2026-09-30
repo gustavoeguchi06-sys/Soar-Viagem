@@ -1,12 +1,21 @@
+import logging
+
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from urllib.parse import urlencode
 
+from soar.seguranca import LIMITE_INTERESSE, ip_do_cliente
+
 from .conteudo import montar_viagem
+from .forms import InteresseForm
 from .inicio import montar_inicio
 from .models import MESES, Destino, Saida
+
+log = logging.getLogger('soar.seguranca')
 
 # Uma busca útil cabe numa linha. Acima disso é só custo: o filtro varre a
 # tabela inteira comparando substring em três colunas.
@@ -110,13 +119,45 @@ def detalhe_destino(request, slug):
         Destino.objects.prefetch_related('imagens', 'hospedagens'),
         slug=slug,
     )
+    return _pagina_da_viagem(request, destino, InteresseForm(),
+                             enviado=request.GET.get('enviado') == '1')
+
+
+def _pagina_da_viagem(request, destino, form_interesse, enviado=False):
     avaliacoes = list(destino.avaliacoes.publicadas())
     return render(request, 'destinations/detalhe.html', {
         'destino': destino,
         'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
         'viagem': montar_viagem(destino, avaliacoes),
+        'form_interesse': form_interesse,
+        'interesse_enviado': enviado,
     })
+
+
+@require_POST
+def interesse(request, slug):
+    """Recebe o "Saiba mais" de quem não tem login e responde que a Soar é B2B.
+
+    O contato fica no painel (Interessados) para o dono encaminhar a uma
+    agência parceira. Cada IP tem um limite por hora, para ninguém encher a
+    lista com pedido falso.
+    """
+    destino = get_object_or_404(Destino, slug=slug)
+    form = InteresseForm(request.POST)
+    if not form.is_valid():
+        return _pagina_da_viagem(request, destino, form)
+
+    if LIMITE_INTERESSE.estourou(request):
+        log.warning('saiba mais bloqueado por limite: ip=%s', ip_do_cliente(request))
+        messages.error(request, 'Muitos pedidos daqui agora há pouco. Tente de novo mais tarde.')
+        return redirect(destino.get_absolute_url() + '#reservar')
+    LIMITE_INTERESSE.registrar(request)
+
+    interessado = form.save(commit=False)
+    interessado.destino = destino
+    interessado.save()
+    return redirect(destino.get_absolute_url() + '?enviado=1#reservar')
 
 
 def calendario(request):

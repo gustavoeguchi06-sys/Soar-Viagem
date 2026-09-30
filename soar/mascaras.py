@@ -1,4 +1,4 @@
-"""Formato brasileiro de telefone, CNPJ e CADASTUR, do lado do servidor.
+"""Formato brasileiro de telefone, CEP, CNPJ e CADASTUR, do lado do servidor.
 
 O navegador já aplica a máscara enquanto a pessoa digita (static/js/
 mascaras.js). Isto aqui é a outra metade: garante o mesmo formato mesmo quando
@@ -28,6 +28,14 @@ def formatar_telefone(valor):
                               'como (11) 98888-7777.')
     ddd, resto = numeros[:2], numeros[2:]
     return '({}) {}-{}'.format(ddd, resto[:-4], resto[-4:])
+
+
+def formatar_cep(valor):
+    """'01310100' -> '01310-100'."""
+    numeros = digitos(valor)
+    if len(numeros) != 8:
+        raise ValidationError('O CEP tem 8 números, como 01310-100.')
+    return '{}-{}'.format(numeros[:5], numeros[5:])
 
 
 def formatar_cadastur(valor):

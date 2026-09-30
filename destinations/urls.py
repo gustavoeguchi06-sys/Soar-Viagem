@@ -10,4 +10,5 @@ urlpatterns = [
     path('destinos/', views.lista_destinos, name='lista'),
     path('calendario/', views.calendario, name='calendario'),
     path('destinos/<slug:slug>/', views.detalhe_destino, name='detalhe'),
+    path('destinos/<slug:slug>/saiba-mais/', views.interesse, name='interesse'),
 ]

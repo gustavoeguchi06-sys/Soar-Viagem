@@ -22,7 +22,7 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, PerguntaFrequente, Saida, SlideInicio)
+                     ImagemHospedagem, Interessado, PerguntaFrequente, Saida, SlideInicio)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -345,3 +345,24 @@ class SlideInicioAdmin(admin.ModelAdmin):
             return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
                                'Sem foto: a página usa as fotos de exemplo do site.</span>')
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">', slide.imagem.url)
+
+
+@admin.register(Interessado)
+class InteressadoAdmin(admin.ModelAdmin):
+    """Quem pediu "Saiba mais" numa viagem: contato para encaminhar a uma agência."""
+    list_display = ['nome', 'destino', 'whatsapp_link', 'email', 'cep', 'criado_em']
+    list_filter = ['destino']
+    search_fields = ['nome', 'email', 'whatsapp', 'cep']
+    date_hierarchy = 'criado_em'
+    readonly_fields = ['destino', 'nome', 'email', 'whatsapp', 'cep', 'criado_em']
+    list_per_page = 30
+
+    def has_add_permission(self, request):
+        # o pedido chega só pelo site
+        return False
+
+    @admin.display(description='WhatsApp', ordering='whatsapp')
+    def whatsapp_link(self, interessado):
+        numeros = ''.join(c for c in interessado.whatsapp if c.isdigit())
+        return format_html('<a href="https://wa.me/55{}" target="_blank" rel="noopener">{}</a>',
+                           numeros, interessado.whatsapp)

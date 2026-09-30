@@ -242,3 +242,49 @@ class SemPrecoTests(TestCase):
         tela = self.client.get(f'/painel/destinations/destino/{d.pk}/change/')
         self.assertContains(tela, 'Hospedagem do pacote')
         self.assertNotContains(self.client.get('/painel/'), '/painel/destinations/hospedagem/')
+
+
+class SaibaMaisTests(TestCase):
+    """Sem login, o card da viagem tem "Saiba mais": nome, e-mail, WhatsApp e CEP."""
+
+    MENSAGEM = 'A Operadora Soar é uma empresa B2B'
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        self.url = reverse('destinations:interesse', args=['bonito'])
+
+    def dados(self, **extra):
+        return {'nome': 'Ana Souza', 'email': 'ana@exemplo.com',
+                'whatsapp': '11988887777', 'cep': '01310100', **extra}
+
+    def test_sem_login_aparece_saiba_mais(self):
+        resposta = self.client.get(self.destino.get_absolute_url())
+        self.assertContains(resposta, 'Saiba mais</summary>')
+        self.assertContains(resposta, 'name="cep"')
+        self.assertNotContains(resposta, 'Criar orçamento')
+        self.assertNotContains(resposta, self.MENSAGEM)
+
+    def test_enviar_guarda_os_dados_e_mostra_a_mensagem(self):
+        from .models import Interessado
+        resposta = self.client.post(self.url, self.dados(), follow=True)
+        self.assertContains(resposta, self.MENSAGEM)
+        self.assertNotContains(resposta, 'Saiba mais</summary>')
+        pedido = Interessado.objects.get()
+        self.assertEqual((pedido.destino, pedido.whatsapp, pedido.cep),
+                         (self.destino, '(11) 98888-7777', '01310-100'))
+
+    def test_campo_errado_volta_com_o_erro_e_nao_grava(self):
+        from .models import Interessado
+        resposta = self.client.post(self.url, self.dados(cep='123'))
+        self.assertContains(resposta, 'O CEP tem 8 números')
+        self.assertContains(resposta, '<details class="interesse" open>')
+        self.assertFalse(Interessado.objects.exists())
+
+    def test_tem_limite_por_hora(self):
+        from soar.seguranca import LIMITE_INTERESSE
+        from .models import Interessado
+        for _ in range(LIMITE_INTERESSE.tentativas + 2):
+            self.client.post(self.url, self.dados())
+        self.assertEqual(Interessado.objects.count(), LIMITE_INTERESSE.tentativas)

@@ -341,6 +341,31 @@ class Saida(models.Model):
         return self.vagas == 0
 
 
+class Interessado(models.Model):
+    """Quem pediu "Saiba mais" na página de uma viagem sem ter login.
+
+    A Soar é B2B e não vende direto; o contato fica aqui para o dono encaminhar
+    a pessoa a uma agência parceira. Sai sozinho depois de 1 ano
+    (expurgar_dados), como promete o aviso de privacidade.
+    """
+
+    destino = models.ForeignKey(Destino, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='interessados', verbose_name='Viagem')
+    nome = models.CharField('Nome', max_length=120)
+    email = models.EmailField('E-mail')
+    whatsapp = models.CharField('WhatsApp', max_length=20)
+    cep = models.CharField('CEP', max_length=9)
+    criado_em = models.DateTimeField('Pedido em', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Interessado'
+        verbose_name_plural = 'Interessados ("Saiba mais" da viagem)'
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return self.nome
+
+
 class SlideInicio(models.Model):
     """Uma foto do carrossel do topo da página inicial.
 

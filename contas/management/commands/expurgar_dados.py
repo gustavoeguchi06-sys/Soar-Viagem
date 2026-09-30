@@ -22,6 +22,7 @@ Prazos — os mesmos do aviso de privacidade:
 - Cadastros nunca confirmados: 30 dias. Conta que nunca foi ativada nem usada
   não tem reserva nem avaliação: é só nome, e-mail e senha de alguém que não
   terminou o cadastro — ou de alguém que usou o e-mail de outra pessoa.
+- "Saiba mais" das viagens (Interessado): 1 ano.
 - Newsletter nunca confirmada: 7 dias, a validade do link. Depois disso o
   e-mail não tem consentimento nenhum para continuar guardado.
 """
@@ -38,6 +39,7 @@ from django.utils import timezone
 
 from agencia.models import Orcamento
 from blog.models import Inscricao
+from destinations.models import Interessado
 from reservas.models import Reserva
 from reviews.models import Avaliacao
 
@@ -49,6 +51,7 @@ PRAZO_LOG = timedelta(days=183)
 PRAZO_CADASTRO_PENDENTE = timedelta(days=30)
 PRAZO_ORCAMENTO_ABERTO = timedelta(days=365)
 PRAZO_NEWSLETTER_PENDENTE = timedelta(days=7)
+PRAZO_INTERESSADO = timedelta(days=365)
 
 
 class Command(BaseCommand):
@@ -78,6 +81,7 @@ class Command(BaseCommand):
 
         newsletter = Inscricao.objects.filter(
             confirmada_em__isnull=True, criado_em__lt=agora - PRAZO_NEWSLETTER_PENDENTE)
+        interessados = Interessado.objects.filter(criado_em__lt=agora - PRAZO_INTERESSADO)
 
         totais = {
             'reservas antigas': reservas.count(),
@@ -85,6 +89,7 @@ class Command(BaseCommand):
             'cadastros nunca confirmados': pendentes.count(),
             'orçamentos vencidos': orcamentos.count(),
             'newsletter não confirmada': newsletter.count(),
+            'interessados (saiba mais)': interessados.count(),
             'arquivos de log': len(logs),
         }
 
@@ -95,6 +100,7 @@ class Command(BaseCommand):
                 pendentes.delete()
                 orcamentos.delete()
                 newsletter.delete()
+                interessados.delete()
             for arquivo in logs:
                 arquivo.unlink(missing_ok=True)
             if any(totais.values()):
