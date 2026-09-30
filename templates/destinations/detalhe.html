@@ -167,6 +167,12 @@
 
                 {% comment %}GET e nao POST de proposito: a escolha vai na URL e
                 sobrevive ao desvio pelo login de quem ainda nao entrou na conta.{% endcomment %}
+                {% comment %}Agência aprovada não reserva por aqui: monta um orçamento
+                no painel dela, já com a data e a acomodação escolhidas abaixo.{% endcomment %}
+                {% if user.agente.aprovado %}
+                <form method="get" action="{% url 'agencia:orcamento_novo' %}" class="reserva__form">
+                    <input type="hidden" name="destino" value="{{ destino.slug }}">
+                {% else %}
                 <form method="get" action="{% url 'reservas:nova' destino.slug %}" class="reserva__form">
                     <button type="submit" class="btn btn--verde btn--bloco">
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-calendario"></use></svg>
@@ -174,6 +180,7 @@
                     </button>
 
                 <div class="reserva__divisor"></div>
+                {% endif %}
 
                 {% if viagem.saidas %}
                 <div class="saidas">
@@ -226,6 +233,13 @@
                     </label>
                     {% endfor %}
                 </div>
+
+                {% if user.agente.aprovado %}
+                <button type="submit" class="btn btn--verde btn--bloco reserva__orcamento">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-doc"></use></svg>
+                    Criar orçamento
+                </button>
+                {% endif %}
                 </form>
 
                 {% if not user.is_authenticated %}
@@ -472,7 +486,7 @@
             <p>Garanta sua vaga e venha descobrir {{ viagem.curto }} com a Soar.</p>
         </div>
         <div class="cta-final__botoes">
-            <a class="btn btn--verde" href="#reservar">Reservar agora</a>
+            <a class="btn btn--verde" href="#reservar">{% if user.agente.aprovado %}Criar orçamento{% else %}Reservar agora{% endif %}</a>
             <a class="btn btn--branco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
                 <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
                 Falar com a Soar

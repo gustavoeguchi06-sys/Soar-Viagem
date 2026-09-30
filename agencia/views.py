@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
+from destinations.models import Destino
 from reservas.models import Reserva
 
 from .forms import AtendimentoForm, OrcamentoForm
@@ -122,9 +123,26 @@ def orcamentos(request):
     })
 
 
+def _inicial_da_viagem(request):
+    """O que a agência escolheu no card da viagem ("Criar orçamento") já vem preenchido.
+
+    Valor que não existe é ignorado: o formulário só aceita as opções dele.
+    """
+    inicial = {}
+    destino = Destino.objects.filter(slug=request.GET.get('destino', '')).first()
+    if destino:
+        inicial['destino'] = destino.pk
+        saida = request.GET.get('saida', '')
+        if saida.isdigit() and destino.saidas.filter(pk=saida).exists():
+            inicial['saida_escolhida'] = saida
+    if request.GET.get('acomodacao') in dict(Orcamento._meta.get_field('acomodacao').choices):
+        inicial['acomodacao'] = request.GET['acomodacao']
+    return inicial
+
+
 @agencia_aprovada
 def orcamento_novo(request):
-    form = OrcamentoForm(request.POST or None)
+    form = OrcamentoForm(request.POST or None, initial=_inicial_da_viagem(request))
     if request.method == 'POST' and form.is_valid():
         orcamento = form.save(commit=False)
         orcamento.agencia = request.agencia

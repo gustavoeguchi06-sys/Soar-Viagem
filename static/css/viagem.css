@@ -103,11 +103,6 @@ body.pagina-viagem {
 }
 .menu-movel a:last-child { border-bottom: 0; }
 .menu-movel a:hover { color: #fff; }
-.btn-whats-circ {
-    width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
-    background: rgba(255, 255, 255, .14); color: #fff; border: 1px solid rgba(255, 255, 255, .22);
-}
-.btn-whats-circ:hover { background: var(--whats); border-color: var(--whats); }
 
 /* ===== Botões ============================================================ */
 .btn {
@@ -275,6 +270,7 @@ body.pagina-viagem {
 .dia__topicos li::marker { color: var(--verde); }
 
 .btn-roteiro { margin-top: 14px; }
+.reserva__orcamento { margin-top: 16px; }
 
 /* ===== Card de reserva =================================================== */
 .lateral { position: sticky; top: calc(var(--topo) + 16px); display: flex; flex-direction: column; gap: 14px; }
@@ -580,12 +576,10 @@ body.pagina-viagem {
     .galeria-grade { grid-template-columns: 1fr 1fr; }
     .galeria-grade img { height: 120px; }
     .comodidades { gap: 12px 16px; }
-    /* o cabecalho tem que caber sem rolagem lateral: os rotulos encolhem e o
-       atalho do WhatsApp sai (ele continua no rodape e no card de reserva) */
+    /* o cabecalho tem que caber sem rolagem lateral: os rotulos encolhem */
     .btn--reservar .btn__resto { display: none; }
     .btn--reservar { padding: 11px 14px; }
     .topbar__acoes { gap: 9px; }
-    .btn-whats-circ { display: none; }
     .btn--entrar span { display: none; }
     .btn--entrar { padding: 11px 12px; }
     .conta__nome, .conta__seta { display: none; }

@@ -48,6 +48,24 @@ class PainelAgenciaTests(TestCase):
     def entrar(self, agencia):
         self.client.force_login(agencia.usuario)
 
+    def test_card_da_viagem_cria_orcamento_para_agencia(self):
+        pagina = self.destino.get_absolute_url()
+        self.assertContains(self.client.get(pagina), 'Entrar para reservar')
+        self.entrar(self.ag1)
+        resposta = self.client.get(pagina)
+        self.assertContains(resposta, 'Criar orçamento')
+        self.assertNotContains(resposta, 'Reservar agora')
+        self.assertNotContains(resposta, 'Falar com a Soar no WhatsApp')
+        form = self.client.get(reverse('agencia:orcamento_novo'), {
+            'destino': 'bonito', 'saida': self.saida.pk, 'acomodacao': 'triplo'}).context['form']
+        self.assertEqual(form.initial['destino'], self.destino.pk)
+        self.assertEqual(form.initial['saida_escolhida'], str(self.saida.pk))
+        self.assertEqual(form.initial['acomodacao'], 'triplo')
+        # data de outro destino não entra
+        form = self.client.get(reverse('agencia:orcamento_novo'), {
+            'destino': 'bonito', 'saida': self.saida_outro.pk}).context['form']
+        self.assertNotIn('saida_escolhida', form.initial)
+
     def test_agencia_ve_so_as_reservas_dela(self):
         self.entrar(self.ag1)
         resposta = self.client.get(reverse('agencia:reservas'))
