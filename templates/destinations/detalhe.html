@@ -127,16 +127,21 @@
                 </h2>
                 <div class="roteiro" id="roteiroLista">
                     {% for dia in viagem.roteiro %}
-                    <details class="dia">
+                    <details class="dia dia--roteiro">
                         <summary>
-                            <img class="dia__foto" src="{{ dia.foto }}" alt="{{ dia.titulo }}">
                             <span class="dia__texto">
                                 <b>{{ dia.titulo }}</b>
                                 <small>{{ dia.resumo }}</small>
                             </span>
                             <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
                         </summary>
-                        <div class="dia__corpo">{{ dia.detalhe }}</div>
+                        <div class="dia__corpo">
+                            {% if dia.topicos %}
+                            <ul class="dia__topicos">
+                                {% for t in dia.topicos %}<li>{{ t }}</li>{% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
                     </details>
                     {% endfor %}
                 </div>

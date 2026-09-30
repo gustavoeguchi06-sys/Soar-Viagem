@@ -98,6 +98,22 @@ def _viagens(hoje):
     return viagens
 
 
+def _meses_com_saida(viagens):
+    """Os meses do "Quando?": só os que têm saída, com o ano ("Março de 2027").
+
+    Cada mês leva os destinos que saem nele, para a página esconder os meses
+    que não servem ao destino escolhido em "Para onde?".
+    """
+    meses = {}
+    for v in viagens:
+        for s in v['destino'].futuras:
+            meses.setdefault((s.data_ida.year, s.data_ida.month), set()).add(v['nome'])
+    return [{'valor': '{}-{:02d}'.format(ano, mes),
+             'nome': '{} de {}'.format(MESES[mes], ano),
+             'destinos': '|'.join(sorted(nomes))}
+            for (ano, mes), nomes in sorted(meses.items())]
+
+
 def _fotos_viajantes(slides, viagens, artigos):
     """As fotos do bloco #ViajantesSoar: primeiro as de verdade, depois ilustrações."""
     fotos = []
@@ -168,10 +184,10 @@ def montar_inicio():
         'subtitulo': SUBTITULO,
         'slides': slides,
         'nomes': [v['curto'] for v in sorted(viagens, key=lambda v: (not v['destaque'], v['nome']))][:6],
-        'meses': [(n, MESES[n]) for n in range(1, 13)],
+        'meses': _meses_com_saida(viagens),
         'estilos': estilos,
-        # "Para onde?": todos os destinos do site, em ordem alfabética
-        'destinos': sorted(v['nome'] for v in viagens),
+        # "Para onde?": só os destinos com saída marcada, em ordem alfabética
+        'destinos': sorted(v['nome'] for v in viagens if v['destino'].futuras),
         'experiencias': experiencias,
         'amados': amados,
         'motivos': MOTIVOS,

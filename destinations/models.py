@@ -267,7 +267,8 @@ class DiaRoteiro(models.Model):
     resumo = models.CharField('Resumo', max_length=200,
                               help_text='A linha que aparece com o dia fechado.')
     detalhe = models.TextField('Detalhe', blank=True,
-                               help_text='O texto que abre quando a pessoa clica no dia.')
+                               help_text='O texto que abre quando a pessoa clica no dia. '
+                                         'Cada linha vira um tópico no site.')
     imagem = models.ImageField('Foto do dia', upload_to='roteiro/', blank=True, null=True,
                                help_text='Opcional: sem foto, usa uma da galeria do destino.')
 
