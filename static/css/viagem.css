@@ -286,6 +286,7 @@ body.pagina-viagem {
     color: var(--preto); font-size: .9rem; line-height: 1.45;
 }
 .interesse__ok .ic { width: 20px; height: 20px; color: var(--verde); flex: none; margin-top: 1px; }
+.interesse__ok p + p { margin-top: 8px; }
 .campo__erro { font-size: .78rem; font-weight: 600; color: #b91c1c; }
 .campo--erro input { border-color: #d92d20; }
 

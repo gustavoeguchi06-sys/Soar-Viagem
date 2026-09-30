@@ -270,6 +270,8 @@ class SaibaMaisTests(TestCase):
         from .models import Interessado
         resposta = self.client.post(self.url, self.dados(), follow=True)
         self.assertContains(resposta, self.MENSAGEM)
+        self.assertContains(resposta, 'agência conveniada mais próxima de você')
+        self.assertContains(resposta, 'Seja muito bem-vindo(a) à Operadora Soar!')
         self.assertNotContains(resposta, 'Saiba mais</summary>')
         pedido = Interessado.objects.get()
         self.assertEqual((pedido.destino, pedido.whatsapp, pedido.cep),
