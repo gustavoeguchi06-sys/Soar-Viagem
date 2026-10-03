@@ -60,6 +60,17 @@ class PainelAgenciaTests(TestCase):
         self.assertEqual(self.client.get('/agencia/orcamentos/').status_code, 404)
         self.assertEqual(self.client.get('/agencia/reservas/').status_code, 404)
 
+    def test_painel_e_b2b_levam_ao_sistema_de_reservas(self):
+        endereco = 'http://www.reservassoar.com.br/login'
+        with self.settings(SISTEMA_RESERVAS_URL=endereco):
+            self.assertContains(self.client.get(reverse('contas:b2b')), endereco)
+            self.entrar(self.ag1)
+            resposta = self.client.get(reverse('agencia:painel'))
+            self.assertContains(resposta, 'href="{}"'.format(endereco))
+            self.assertContains(resposta, 'rel="noopener noreferrer"')
+        with self.settings(SISTEMA_RESERVAS_URL=''):
+            self.assertNotContains(self.client.get(reverse('agencia:painel')), 'Sistema de reservas')
+
     def test_card_da_viagem_tem_o_orcamento(self):
         pagina = self.destino.get_absolute_url()
         resposta = self.client.get(pagina)

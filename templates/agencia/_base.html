@@ -21,6 +21,11 @@
             </div>
             <div class="ag-faixa__acoes">
                 <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Ver viagens</a>
+                {% if sistema_reservas_url %}
+                <a class="btn btn--sm ag-btn-claro" href="{{ sistema_reservas_url }}"
+                   target="_blank" rel="noopener noreferrer"
+                   title="Abre o sistema de reservas da Soar numa nova aba">Sistema de reservas</a>
+                {% endif %}
                 <form action="{% url 'contas:sair' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn--sm ag-btn-sair">
