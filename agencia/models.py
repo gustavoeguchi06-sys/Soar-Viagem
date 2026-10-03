@@ -36,7 +36,7 @@ class Orcamento(models.Model):
     # deles, e o preço depende da idade. Guardado como "4, 7".
     idades_criancas = models.CharField(
         'Idades das crianças (CHD)', max_length=60, blank=True,
-        help_text='Separadas por vírgula, ex.: 4, 7. Em branco se não vai criança.')
+        help_text='De 0 a 8 anos, separadas por vírgula, ex.: 4, 7. Em branco se não vai criança.')
     valor = models.DecimalField('Valor total (R$)', max_digits=10, decimal_places=2,
                                 null=True, blank=True,
                                 help_text='O valor que a agência passou ao cliente.')

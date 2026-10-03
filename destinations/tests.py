@@ -111,7 +111,7 @@ class CriancaAdicionalTests(TestCase):
         destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
                                          preco_base=3000)
         resposta = self.client.get(destino.get_absolute_url())
-        self.assertContains(resposta, 'Crianças (CHD)')
+        self.assertContains(resposta, 'Crianças até 8 anos (CHD)')
         self.assertContains(resposta, 'Viajam acompanhadas de um adulto')
         self.assertNotContains(resposta, 'Grátis')
         # não é uma acomodação que dê para marcar sozinha

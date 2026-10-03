@@ -151,8 +151,8 @@ class PainelAgenciaTests(TestCase):
         dados = {'cliente_nome': 'Bruno', 'destino': self.destino.pk, 'acomodacao': 'casal',
                  'pessoas': 2, 'status': 'enviado'}
         resposta = self.client.post(reverse('agencia:orcamento_novo'),
-                                    {**dados, 'idades_criancas': '4, 20'})
-        self.assertContains(resposta, 'de 0 a 17 anos')
+                                    {**dados, 'idades_criancas': '4, 9'})
+        self.assertContains(resposta, 'de 0 a 8 anos')
         self.client.post(reverse('agencia:orcamento_novo'), {**dados, 'idades_criancas': '4; 7'})
         orcamento = Orcamento.objects.get()
         self.assertEqual(orcamento.idades_criancas, '4, 7')

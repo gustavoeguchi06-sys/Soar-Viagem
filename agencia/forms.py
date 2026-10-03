@@ -14,14 +14,15 @@ from .models import Orcamento
 DATA = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
 
 MAX_CRIANCAS = 10
+IDADE_MAXIMA_CHD = 8   # acima disso já paga como adulto
 
 
 def idades_das_criancas(texto):
-    """'4, 7' (ou '4 e 7', '4;7') -> [4, 7]. Algo que não é idade de 0 a 17 -> None."""
+    """'4, 7' (ou '4 e 7', '4;7') -> [4, 7]. Algo que não é idade de CHD (0 a 8) -> None."""
     partes = re.split(r'[,;/\s]+|\be\b', (texto or '').strip())
     idades = []
     for parte in filter(None, partes):
-        if not parte.isdigit() or int(parte) > 17:
+        if not parte.isdigit() or int(parte) > IDADE_MAXIMA_CHD:
             return None
         idades.append(int(parte))
     return idades
@@ -87,8 +88,8 @@ class OrcamentoForm(forms.ModelForm):
     def clean_idades_criancas(self):
         idades = idades_das_criancas(self.cleaned_data.get('idades_criancas'))
         if idades is None:
-            raise forms.ValidationError('Digite só as idades, de 0 a 17 anos, separadas por '
-                                        'vírgula. Ex.: 4, 7')
+            raise forms.ValidationError('Digite só as idades, de 0 a {} anos, separadas por '
+                                        'vírgula. Ex.: 4, 7'.format(IDADE_MAXIMA_CHD))
         if len(idades) > MAX_CRIANCAS:
             raise forms.ValidationError('No máximo {} crianças por orçamento.'.format(MAX_CRIANCAS))
         return ', '.join(str(i) for i in idades)
