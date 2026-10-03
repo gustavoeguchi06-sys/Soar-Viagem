@@ -93,5 +93,9 @@ class OrcamentoViagemForm(forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        self.instance.saida = self._saidas.get(dados.get('saida') or '')
+        self.instance.saida = saida = self._saidas.get(dados.get('saida') or '')
+        # o tipo de quarto que o dono marcou com 0 nesta data acabou
+        acomodacao = dados.get('acomodacao')
+        if saida and acomodacao and getattr(saida, 'quartos_' + acomodacao, None) == 0:
+            self.add_error('acomodacao', 'Esse quarto está esgotado nesta data. Escolha outro.')
         return dados

@@ -75,6 +75,20 @@ class PainelAgenciaTests(TestCase):
         resposta = self.client.get(pagina, {'saida': self.saida.pk})
         self.assertEqual(resposta.context['saida_marcada'], str(self.saida.pk))
 
+    def test_quarto_esgotado_na_data_nao_vira_orcamento(self):
+        self.saida.quartos_casal = 0
+        self.saida.quartos_triplo = 2
+        self.saida.save()
+        self.entrar(self.ag1)
+        # a data leva os quartos de cada tipo para a lista de acomodações
+        resposta = self.client.get(self.destino.get_absolute_url())
+        self.assertContains(resposta, 'data-quartos="casal:0,triplo:2"')
+        resposta = self.client.post(self.criar, self.dados)
+        self.assertContains(resposta, 'Esse quarto está esgotado nesta data.')
+        self.assertFalse(Orcamento.objects.exists())
+        self.client.post(self.criar, {**self.dados, 'acomodacao': 'triplo'})
+        self.assertTrue(Orcamento.objects.exists())
+
     def test_cria_orcamento_na_viagem_com_72_horas_e_aviso(self):
         self.entrar(self.ag1)
         antes = timezone.now()

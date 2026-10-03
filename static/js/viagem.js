@@ -152,6 +152,42 @@
         }, 4500);
     });
 
+    /* ---------- Quartos de cada tipo na data escolhida ---------- */
+    // Cada data traz em data-quartos o que o dono cadastrou ("casal:4,triplo:0").
+    // O tipo sem número cadastrado na data não mostra nada; com 0, fica
+    // esgotado e não dá para marcar.
+    var datas = document.querySelectorAll('input[name="saida"]');
+    var acoms = document.querySelectorAll('.acom');
+
+    function mostrarQuartos() {
+        var marcada = document.querySelector('input[name="saida"]:checked');
+        var quartos = {};
+        if (marcada && marcada.dataset.quartos) {
+            marcada.dataset.quartos.split(',').forEach(function (par) {
+                var p = par.split(':');
+                quartos[p[0]] = parseInt(p[1], 10);
+            });
+        }
+        acoms.forEach(function (acom) {
+            var radio = acom.querySelector('input');
+            var texto = acom.querySelector('[data-vagas-quarto]');
+            var n = quartos[radio.value];
+            var esgotado = n === 0;
+            acom.classList.toggle('acom--esgotada', esgotado);
+            radio.disabled = esgotado;
+            if (esgotado && radio.checked) { radio.checked = false; }
+            if (!texto) { return; }
+            texto.hidden = n === undefined;
+            texto.textContent = n === undefined ? '' : esgotado ? 'Esgotado nesta data'
+                : n === 1 ? 'Último quarto nesta data' : n + ' quartos nesta data';
+        });
+    }
+
+    if (datas.length && acoms.length) {
+        datas.forEach(function (d) { d.addEventListener('change', mostrarQuartos); });
+        mostrarQuartos();
+    }
+
     /* ---------- Pop-ups do orçamento da agência ---------- */
     // Os <dialog> vêm com `open` para funcionar sem JavaScript (aparecem no
     // lugar). Aqui eles fecham e passam a abrir como pop-up de verdade: o do
