@@ -176,6 +176,19 @@ psql -h localhost -U soar -d soar_restauracao -c "select count(*) from destinati
 sudo -u postgres dropdb soar_restauracao
 ```
 
+### Fotos do Instagram (#ViajantesSoar)
+
+Copie a linha `SOAR_INSTAGRAM_TOKEN=` do `.env` local para o `.env` do servidor e rode
+`manage.py migrate`. O token vence em 60 dias; o site renova sozinho a cada 7 dias quando busca
+as fotos, e o cron abaixo garante a renovação mesmo numa semana sem visitas:
+
+```bash
+sudo crontab -u soar -e     # 30 4 * * * cd /srv/soar/app && /srv/soar/venv/bin/python manage.py renovar_token_instagram >> /var/log/soar/instagram.log 2>&1
+```
+
+Se o token vencer ou for revogado, gere outro no painel da Meta e troque no `.env`; o novo
+passa na frente do que estava guardado no banco.
+
 ## 10. Monitoramento (checklist 17)
 
 - **UptimeRobot** (grátis): monitor HTTPS de `https://operadorasoar.com.br/` a cada 5 min,

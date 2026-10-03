@@ -10,6 +10,7 @@ from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.text import slugify
 
+from . import instagram
 from .models import MESES, Destino, ImagemDestino, Saida, SlideInicio
 
 TITULO = 'O Brasil começa onde termina o óbvio.'
@@ -139,6 +140,15 @@ def _fotos_viajantes(slides, viagens, artigos):
     return unicas[:7]
 
 
+def _viajantes(slides, viagens, artigos):
+    """A grade #ViajantesSoar: as últimas do Instagram ou, sem elas, as fotos do site."""
+    fotos = instagram.ultimas_fotos()
+    if fotos:
+        return fotos
+    return [{'foto': url, 'link': instagram.PERFIL, 'legenda': ''}
+            for url in _fotos_viajantes(slides, viagens, artigos)]
+
+
 def _fotos_de_avaliacoes():
     from reviews.models import Avaliacao
     return [a.foto.url for a in Avaliacao.objects.publicadas().exclude(foto='')
@@ -195,7 +205,7 @@ def montar_inicio():
         'amados': amados,
         'motivos': MOTIVOS,
         'depoimentos': depoimentos,
-        'viajantes': _fotos_viajantes(slides, viagens, artigos),
+        'viajantes': _viajantes(slides, viagens, artigos),
         'artigos': artigos,
         'fundo_cta': slides[-1]['url'],
     }
