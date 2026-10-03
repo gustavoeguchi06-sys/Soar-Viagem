@@ -133,3 +133,9 @@
 /* sem o quadro do link, os blocos da visão geral encostam nos números */
 .ag-duas--topo { margin-top: 26px; }
 .ag-ficha--uma { grid-template-columns: minmax(0, 720px); }
+
+/* Visão geral: o passo a passo do orçamento, que agora é feito na página da viagem */
+.ag-como { margin-bottom: 28px; padding: clamp(20px, 3vw, 28px); }
+.ag-como h2 { margin-bottom: 10px; }
+.ag-como ol { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.ag-como .ag-explica { margin: 0 0 14px; }

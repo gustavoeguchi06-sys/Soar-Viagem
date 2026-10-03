@@ -16,11 +16,11 @@
             <div class="ag-faixa__quem">
                 <span class="ag-faixa__selo">Painel da agência</span>
                 <h1>{{ request.agencia.razao_social }}</h1>
-                <p>Olá, {{ user.first_name|default:user.username }}. Aqui ficam os pedidos dos
-                   seus clientes e os orçamentos que você montou.</p>
+                <p>Olá, {{ user.first_name|default:user.username }}. Para orçar, abra a viagem e
+                   preencha o card dela: não precisa passar por aqui.</p>
             </div>
             <div class="ag-faixa__acoes">
-                <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">+ Novo orçamento</a>
+                <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Ver viagens</a>
                 <form action="{% url 'contas:sair' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn--sm ag-btn-sair">
@@ -32,9 +32,6 @@
         </div>
         <nav class="wrap ag-abas" aria-label="Seções do painel da agência">
             <a href="{% url 'agencia:painel' %}" {% if aba == 'painel' %}aria-current="page"{% endif %}>Visão geral</a>
-            <a href="{% url 'agencia:reservas' %}" {% if aba == 'reservas' %}aria-current="page"{% endif %}>Reservas dos clientes</a>
-            <a href="{% url 'agencia:interessados' %}" {% if aba == 'interessados' %}aria-current="page"{% endif %}>Interessados</a>
-            <a href="{% url 'agencia:orcamentos' %}" {% if aba == 'orcamentos' %}aria-current="page"{% endif %}>Orçamentos</a>
             <a href="{% url 'agencia:minha_agencia' %}" {% if aba == 'agencia' %}aria-current="page"{% endif %}>Minha agência</a>
         </nav>
     </div>
@@ -45,4 +42,3 @@
 </section>
 {% endblock %}
 
-{% block scripts %}<script src="{% static 'js/agencia.js' %}" defer></script>{% endblock %}

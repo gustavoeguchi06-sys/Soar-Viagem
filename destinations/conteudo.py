@@ -285,6 +285,12 @@ def _acomodacoes(preco_base):
     ]
 
 
+def tabela_de_precos(destino):
+    """{'casal': 3588, ...}: o preço por adulto de cada acomodação, ou None sem preço."""
+    base = int(destino.preco_base) if destino.preco_base is not None else None
+    return {a['chave']: a['valor'] for a in _acomodacoes(base)}
+
+
 def _estrelas(nota):
     """4.9 (ou '4,9') -> [True, True, True, True, True]"""
     cheias = int(round(float(str(nota).replace(',', '.'))))

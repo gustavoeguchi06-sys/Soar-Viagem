@@ -151,4 +151,30 @@
             setTimeout(function () { aviso.remove(); }, 400);
         }, 4500);
     });
+
+    /* ---------- Pop-ups do orçamento da agência ---------- */
+    // Os <dialog> vêm com `open` para funcionar sem JavaScript (aparecem no
+    // lugar). Aqui eles fecham e passam a abrir como pop-up de verdade: o do
+    // "Criar orçamento" no clique, e o que tem data-abrir-ja (aviso depois de
+    // criar, ou campo com erro) assim que a página carrega.
+    var popups = document.querySelectorAll('dialog[data-popup]');
+    popups.forEach(function (popup) {
+        if (typeof popup.showModal !== 'function') { return; }
+        popup.close();
+        popup.classList.add('popup--modal');
+        if (popup.hasAttribute('data-abrir-ja')) { popup.showModal(); }
+        // clicar no fundo escuro fecha
+        popup.addEventListener('click', function (ev) {
+            if (ev.target === popup) { popup.close(); }
+        });
+    });
+    document.querySelectorAll('[data-abrir-popup]').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            var popup = document.getElementById(botao.dataset.abrirPopup);
+            if (popup && typeof popup.showModal === 'function') { popup.showModal(); }
+        });
+    });
+    document.querySelectorAll('[data-fechar-popup]').forEach(function (botao) {
+        botao.addEventListener('click', function () { botao.closest('dialog').close(); });
+    });
 }());

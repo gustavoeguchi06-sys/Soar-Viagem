@@ -166,11 +166,50 @@
                 {% endif %}
 
                 {% comment %}O público só consulta datas e preços: quem reserva é a
-                agência parceira. Agência aprovada monta um orçamento no painel dela,
-                já com a data e a acomodação escolhidas abaixo.{% endcomment %}
+                agência parceira. A agência aprovada faz o orçamento aqui mesmo, sem
+                abrir o painel (agencia/views.py, orcamento_criar).{% endcomment %}
                 {% if user.agente.aprovado %}
-                <form method="get" action="{% url 'agencia:orcamento_novo' %}" class="reserva__form">
-                    <input type="hidden" name="destino" value="{{ destino.slug }}">
+                {% if orcamento_criado %}
+                {% with o=orcamento_criado %}
+                <div class="orc-ok" role="status" id="orcamento-criado">
+                    <p class="orc-ok__titulo"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                        Orçamento {{ o.codigo }} criado</p>
+                    <dl class="orc-ok__dados">
+                        <dt>Cliente</dt><dd>{{ o.cliente_nome }}{% if o.cliente_telefone %} · {{ o.cliente_telefone }}{% endif %}</dd>
+                        <dt>Saída</dt><dd>{{ o.saida_texto|default:"a combinar" }}</dd>
+                        <dt>Acomodação</dt><dd>{{ o.get_acomodacao_display }}</dd>
+                        <dt>Adultos</dt><dd>{{ o.pessoas }}</dd>
+                        {% if o.idades_criancas %}<dt>Crianças (CHD)</dt><dd>{{ o.criancas_texto }}</dd>{% endif %}
+                        <dt>Valor</dt><dd>{% if o.valor %}R$ {{ o.valor|floatformat:"2g" }}{% if o.idades_criancas %} + crianças sob consulta{% endif %}{% else %}sob consulta{% endif %}</dd>
+                        <dt>Válido até</dt><dd>{{ o.valido_ate|date:"d/m/Y \à\s H:i" }}</dd>
+                    </dl>
+                    {% if o.enviado_em %}
+                    <p class="orc-ok__envio">PDF enviado para <b>{{ o.cliente_email }}</b>.</p>
+                    {% else %}
+                    <p class="orc-ok__envio orc-ok__envio--falhou">Não conseguimos enviar o e-mail para
+                        <b>{{ o.cliente_email }}</b>. Baixe o PDF e mande ao cliente por outro caminho.</p>
+                    {% endif %}
+                    <div class="orc-ok__links">
+                        <a href="{% url 'agencia:orcamento_pdf' o.pk %}" target="_blank" rel="noopener">Ver PDF</a>
+                        <a href="{{ destino.get_absolute_url }}#reservar">Fazer outro orçamento</a>
+                    </div>
+                </div>
+
+                {% comment %}O aviso abre como pop-up logo depois do orçamento (viagem.js).
+                Sem JavaScript, o `open` mostra o mesmo texto no lugar.{% endcomment %}
+                <dialog class="popup popup--aviso" data-popup data-abrir-ja open aria-labelledby="avisoTitulo">
+                    <p class="popup__titulo" id="avisoTitulo">IMPORTANTE:</p>
+                    <p>{{ aviso_orcamento.0 }}</p>
+                    <p>{{ aviso_orcamento.1 }}</p>
+                    <form method="dialog">
+                        <button type="submit" class="btn btn--verde btn--bloco" autofocus>Entendi</button>
+                    </form>
+                </dialog>
+                {% endwith %}
+                {% else %}
+                <form method="post" action="{% url 'agencia:orcamento_criar' destino.slug %}" class="reserva__form" novalidate>
+                    {% csrf_token %}
+                {% endif %}
                 {% else %}
                 <div class="reserva__form">
                 {% endif %}
@@ -188,7 +227,7 @@
                     {% for s in viagem.saidas %}
                     <label class="saida-op{% if s.esgotada %} saida-op--esgotada{% endif %}">
                         <input type="radio" name="saida" value="{{ s.id }}"
-                               {% if s.padrao %}checked{% endif %}{% if s.esgotada %} disabled{% endif %}>
+                               {% if s.id|stringformat:"s" == saida_marcada and not s.esgotada %}checked{% endif %}{% if s.esgotada %} disabled{% endif %}>
                         <span class="saida-op__data">{{ s.texto }}</span>
                         {% if s.esgotada %}
                         <span class="pill-vagas pill-vagas--esgotada">Esgotada</span>
@@ -199,6 +238,7 @@
                         {% endif %}
                     </label>
                     {% endfor %}
+                    {% for e in form_orcamento.saida.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
                 </div>
                 {% else %}
                 <div class="saida">
@@ -221,11 +261,12 @@
                     {% for a in viagem.acomodacoes %}
                     <label class="acom">
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"
-                               {% if a.padrao %}checked{% endif %}>
+                               {% if a.chave == acomodacao_marcada %}checked{% endif %}>
                         <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small></span>
                         <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
                     </label>
                     {% endfor %}
+                    {% for e in form_orcamento.acomodacao.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
                 </div>
 
                 {% comment %}Criança não é acomodação: é um adicional que viaja com os
@@ -236,21 +277,54 @@
                         <span><b>+ Crianças até 8 anos (CHD)</b><small>Viajam acompanhadas de um adulto. Preço conforme a idade.</small></span>
                         <span class="acom__preco consulte">Consulte</span>
                     </div>
-                    {% if user.agente.aprovado %}
-                    <label class="chd__idades">
-                        <span>Idades das crianças</span>
-                        <input type="text" name="idades" maxlength="60"
-                               autocomplete="off" placeholder="Ex.: 4, 7">
+                    {% if user.agente.aprovado and not orcamento_criado %}
+                    {% with campo=form_orcamento.idades_criancas %}
+                    <label class="chd__idades" for="{{ campo.id_for_label }}">
+                        <span>{{ campo.label }}</span>
+                        {{ campo }}
                     </label>
+                    {% for e in campo.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                    {% endwith %}
                     {% endif %}
                 </div>
 
                 {% if user.agente.aprovado %}
-                <button type="submit" class="btn btn--verde btn--bloco reserva__orcamento">
+                {% if not orcamento_criado %}
+                {% with campo=form_orcamento.pessoas %}
+                <label class="orc-campo orc-campo--adultos{% if campo.errors %} orc-campo--erro{% endif %}" for="{{ campo.id_for_label }}">
+                    <span>{{ campo.label }}</span>
+                    {{ campo }}
+                </label>
+                {% for e in campo.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                {% endwith %}
+                <button type="button" class="btn btn--verde btn--bloco reserva__orcamento" data-abrir-popup="orcPopup">
                     <svg class="ic" viewBox="0 0 24 24"><use href="#ic-doc"></use></svg>
                     Criar orçamento
                 </button>
+                <small class="reserva__aviso">Válido por 72 horas. O valor sai da tabela acima; crianças sob consulta.</small>
+
+                {% comment %}Pop-up do "Criar orçamento": responsável e e-mail para onde vai o
+                PDF. Fica dentro do <form>, então os campos seguem junto com a data e a
+                acomodação. Sem JavaScript, o `open` mostra os campos no lugar.{% endcomment %}
+                <dialog class="popup" id="orcPopup" data-popup open aria-labelledby="orcPopupTitulo"
+                        {% if form_orcamento.erro_no_popup %}data-abrir-ja{% endif %}>
+                    <p class="popup__titulo" id="orcPopupTitulo">Enviar orçamento</p>
+                    <p class="popup__sub">O orçamento vai em PDF para o e-mail abaixo, com os dados da viagem e do responsável.</p>
+                    {% for e in form_orcamento.non_field_errors %}<p class="orc-erro">{{ e }}</p>{% endfor %}
+                    {% for campo in form_orcamento.campos_do_popup %}
+                    <label class="orc-campo{% if campo.errors %} orc-campo--erro{% endif %}" for="{{ campo.id_for_label }}">
+                        <span>{{ campo.label }}</span>
+                        {{ campo }}
+                    </label>
+                    {% for e in campo.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                    {% endfor %}
+                    <div class="popup__acoes">
+                        <button type="button" class="btn btn--contorno" data-fechar-popup>Cancelar</button>
+                        <button type="submit" class="btn btn--verde">Enviar orçamento</button>
+                    </div>
+                </dialog>
                 </form>
+                {% endif %}
                 {% else %}
                 </div>
                 {% if user.is_authenticated %}

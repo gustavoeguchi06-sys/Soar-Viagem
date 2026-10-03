@@ -117,7 +117,7 @@ class CriancaAdicionalTests(TestCase):
         # não é uma acomodação que dê para marcar sozinha
         self.assertNotContains(resposta, 'value="crianca"')
         # o campo de idades é só para a agência, que monta o orçamento
-        self.assertNotContains(resposta, 'name="idades"')
+        self.assertNotContains(resposta, 'name="idades_criancas"')
         self.assertNotContains(resposta, 'Falar com o agente')
 
 

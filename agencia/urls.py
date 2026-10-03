@@ -6,11 +6,8 @@ app_name = 'agencia'
 
 urlpatterns = [
     path('', views.painel, name='painel'),
-    path('reservas/', views.reservas, name='reservas'),
-    path('reservas/<int:pk>/', views.reserva, name='reserva'),
-    path('interessados/', views.interessados, name='interessados'),
-    path('orcamentos/', views.orcamentos, name='orcamentos'),
-    path('orcamentos/novo/', views.orcamento_novo, name='orcamento_novo'),
-    path('orcamentos/<int:pk>/', views.orcamento_editar, name='orcamento_editar'),
     path('minha-agencia/', views.minha_agencia, name='minha_agencia'),
+    # O orçamento é feito no card da página da viagem, sem abrir o painel.
+    path('orcamentos/criar/<slug:slug>/', views.orcamento_criar, name='orcamento_criar'),
+    path('orcamentos/<int:pk>/pdf/', views.orcamento_pdf, name='orcamento_pdf'),
 ]

@@ -4,61 +4,60 @@
 {% block titulo %}Visão geral{% endblock %}
 
 {% block corpo %}
-<div class="ag-numeros">
-    <a class="ag-numero ag-numero--atencao" href="{% url 'agencia:reservas' %}?status=pendente">
-        <span>Reservas aguardando contato</span>
-        <strong>{{ numeros.pendentes }}</strong>
-        <small>clientes esperando você ligar</small>
-    </a>
-    <a class="ag-numero" href="{% url 'agencia:reservas' %}?status=confirmada">
-        <span>Reservas confirmadas</span>
-        <strong>{{ numeros.confirmadas }}</strong>
-        <small>viagens fechadas</small>
-    </a>
-    <a class="ag-numero" href="{% url 'agencia:orcamentos' %}?status=enviado">
-        <span>Orçamentos em aberto</span>
-        <strong>{{ numeros.abertos }}</strong>
-        <small>aguardando resposta do cliente</small>
-    </a>
-    <a class="ag-numero" href="{% url 'agencia:orcamentos' %}?status=aceito">
-        <span>Orçamentos aceitos</span>
-        <strong>{{ numeros.aceitos }}</strong>
-        <small>{% if numeros.vendido %}R$ {{ numeros.vendido|reais }} vendidos{% else %}nenhum ainda{% endif %}</small>
-    </a>
-</div>
+<section class="cartao-form ag-como">
+    <h2>Como fazer um orçamento</h2>
+    <ol>
+        <li>Abra a viagem em <a href="{% url 'destinations:calendario' %}">Ver viagens</a>.</li>
+        <li>No card da direita, escolha a data, a acomodação e, se for, as idades das crianças.</li>
+        <li>Preencha o nome do cliente e os adultos e clique em <b>Criar orçamento</b>.</li>
+    </ol>
+    <p class="ag-explica">O valor sai da tabela da viagem e o orçamento vale por <b>72 horas</b>.</p>
+    <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Ver viagens</a>
+</section>
 
-<div class="ag-duas ag-duas--topo">
-    <section>
-        <div class="ag-titulo">
-            <h2>Aguardando contato</h2>
-            <a href="{% url 'agencia:reservas' %}">Ver todas as reservas &rarr;</a>
-        </div>
-        {% if pendentes %}
-        <div class="reservas-lista">
-            {% for r in pendentes %}{% include 'agencia/_reserva_item.html' %}{% endfor %}
-        </div>
-        {% else %}
-        <div class="conta-vazio ag-vazio">
-            <p>Nenhum cliente esperando. Quando a Soar passar um pedido para a sua agência, ele aparece aqui.</p>
-        </div>
-        {% endif %}
-    </section>
+<section>
+    <div class="ag-titulo">
+        <h2>Interessados enviados pela Soar</h2>
+    </div>
+    <p class="ag-explica">Pessoas que pediram informação no site e que a Soar passou para a sua
+       agência. Fale com elas e faça o orçamento na página da viagem.</p>
 
-    <section>
-        <div class="ag-titulo">
-            <h2>Orçamentos em aberto</h2>
-            <a href="{% url 'agencia:orcamentos' %}">Ver todos &rarr;</a>
-        </div>
-        {% if orcamentos_abertos %}
-        <div class="reservas-lista">
-            {% for o in orcamentos_abertos %}{% include 'agencia/_orcamento_item.html' %}{% endfor %}
-        </div>
-        {% else %}
-        <div class="conta-vazio ag-vazio">
-            <p>Nenhum orçamento esperando resposta.</p>
-            <a class="btn btn--verde btn--sm" href="{% url 'agencia:orcamento_novo' %}">Montar um orçamento</a>
-        </div>
-        {% endif %}
-    </section>
-</div>
+    {% if interessados %}
+    <div class="reservas-lista">
+        {% for i in interessados %}
+        <article class="reserva-item">
+            <div class="reserva-item__topo">
+                <div>
+                    <span class="reserva-item__codigo">pedido em {{ i.criado_em|date:"d/m/Y" }}</span>
+                    <h3>{{ i.nome }}</h3>
+                </div>
+            </div>
+
+            <dl class="reserva-item__dados">
+                <div><dt>Viagem</dt><dd>{{ i.destino.nome|default:"viagem removida" }}</dd></div>
+                <div><dt>CEP</dt><dd>{{ i.cep }}</dd></div>
+            </dl>
+
+            <div class="ag-contato">
+                <a href="mailto:{{ i.email }}">{{ i.email }}</a>
+                {% with link=i.whatsapp|whatsapp %}
+                {% if link %}<a class="ag-contato__whats" href="{{ link }}" target="_blank" rel="noopener">
+                    <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>{{ i.whatsapp }}</a>
+                {% else %}<span>{{ i.whatsapp }}</span>{% endif %}
+                {% endwith %}
+                {% if i.destino %}
+                <a class="btn btn--contorno btn--sm ag-contato__abrir"
+                   href="{{ i.destino.get_absolute_url }}?interessado={{ i.pk }}#reservar">Fazer orçamento</a>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="conta-vazio ag-vazio">
+        <p>Ainda não chegou nenhum interessado. Quando a Soar passar uma pessoa para a sua agência,
+           ela aparece aqui.</p>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}

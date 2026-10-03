@@ -65,7 +65,7 @@
 
             {# Só agências e a equipe têm login; quem reserva é a agência parceira. #}
             {% if user.agente.aprovado %}
-            <a class="btn btn--verde btn--reservar" href="{% block orcamento_href %}{% url 'agencia:orcamento_novo' %}{% endblock %}">
+            <a class="btn btn--verde btn--reservar" href="{% block orcamento_href %}{% url 'destinations:calendario' %}{% endblock %}">
                 <span class="btn__resto">Criar</span> <span>orçamento</span>
             </a>
             {% else %}

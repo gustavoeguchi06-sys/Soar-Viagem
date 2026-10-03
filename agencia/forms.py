@@ -1,17 +1,10 @@
 import re
 
 from django import forms
-from django.utils import timezone
-
-from destinations.admin import CampoPreco
-from destinations.models import Destino, Saida
-from reservas.models import Reserva
 
 from soar.mascaras import formatar_telefone
 
 from .models import Orcamento
-
-DATA = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
 
 MAX_CRIANCAS = 10
 IDADE_MAXIMA_CHD = 8   # acima disso já paga como adulto
@@ -28,59 +21,57 @@ def idades_das_criancas(texto):
     return idades
 
 
-class OrcamentoForm(forms.ModelForm):
-    """Orçamento montado pela agência.
+class OrcamentoViagemForm(forms.ModelForm):
+    """Orçamento que a agência monta no card da página da viagem.
 
-    A data de saída vem das saídas cadastradas pela Soar, agrupadas por destino
-    (o JavaScript da tela mostra só as do destino escolhido). Com o JavaScript
-    desligado continua funcionando: o `clean` recusa uma data de outro destino.
+    O destino é o da página e as datas são as saídas dela que ainda têm vaga.
+    O valor não é digitado: a view calcula pela tabela da viagem.
     """
 
-    saida_escolhida = forms.ChoiceField(label='Data de saída', required=False)
-    valor = CampoPreco(label='Valor total (R$)', required=False, max_digits=10,
-                       decimal_places=2, help_text='O valor que você passou ao cliente.')
+    saida = forms.ChoiceField(label='Data de saída', required=False,
+                              error_messages={'invalid_choice': 'Escolha uma das datas da viagem.'})
 
     class Meta:
         model = Orcamento
-        fields = ['cliente_nome', 'cliente_telefone', 'cliente_email', 'destino',
-                  'saida_escolhida', 'acomodacao', 'pessoas', 'idades_criancas', 'valor',
-                  'validade', 'observacoes', 'status']
+        fields = ['cliente_nome', 'cliente_email', 'cliente_telefone', 'acomodacao', 'pessoas',
+                  'idades_criancas']
+        labels = {'cliente_nome': 'Nome do responsável',
+                  'cliente_email': 'E-mail para enviar o orçamento',
+                  'cliente_telefone': 'WhatsApp (opcional)',
+                  'pessoas': 'Adultos', 'idades_criancas': 'Idades das crianças'}
         widgets = {
-            'validade': DATA,
-            'idades_criancas': forms.TextInput(attrs={'placeholder': 'Ex.: 4, 7',
-                                                      'autocomplete': 'off'}),
-            'pessoas': forms.NumberInput(attrs={'min': 1, 'max': 60}),
+            'cliente_nome': forms.TextInput(attrs={'autocomplete': 'off', 'maxlength': 120}),
+            'cliente_email': forms.EmailInput(attrs={'autocomplete': 'off',
+                                                     'placeholder': 'cliente@gmail.com'}),
             'cliente_telefone': forms.TextInput(attrs={'placeholder': '(11) 90000-0000',
                                                        'inputmode': 'tel', 'data-mascara': 'telefone',
                                                        'autocomplete': 'off'}),
-            'observacoes': forms.Textarea(attrs={
-                'rows': 3, 'maxlength': 2000,
-                'placeholder': 'Condições combinadas, forma de pagamento, pedidos do cliente...'}),
+            'pessoas': forms.NumberInput(attrs={'min': 1, 'max': 60}),
+            'idades_criancas': forms.TextInput(attrs={'placeholder': 'Ex.: 4, 7',
+                                                      'autocomplete': 'off'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, destino, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['destino'].queryset = Destino.objects.order_by('nome')
-        self.fields['destino'].empty_label = 'Escolha o destino'
-        # Só o nome: o JavaScript da tela casa este texto com o grupo de datas.
-        self.fields['destino'].label_from_instance = lambda destino: destino.nome
-        self.fields['validade'].input_formats = ['%Y-%m-%d']
-        self.fields['valor'].widget.attrs.pop('style', None)
+        self.fields['cliente_nome'].error_messages['required'] = 'Informe o nome do responsável.'
+        # o PDF vai para este endereço: sem ele não há para onde mandar
+        self.fields['cliente_email'].required = True
+        self.fields['cliente_email'].error_messages.update(
+            required='Informe o e-mail para onde vai o orçamento.',
+            invalid='Esse e-mail não parece certo. Confira e tente de novo.')
+        self._saidas = {str(s.pk): s for s in destino.saidas_futuras if not s.esgotada}
+        self.fields['saida'].choices = [('', 'A combinar')] + [
+            (chave, s.texto) for chave, s in self._saidas.items()]
 
-        saidas = Saida.objects.filter(data_ida__gte=timezone.localdate())
-        atual = self.instance.saida if self.instance.pk else None
-        if atual is not None:
-            saidas = saidas | Saida.objects.filter(pk=atual.pk)
-        self._saidas = {str(s.pk): s for s in saidas.select_related('destino')
-                        .order_by('destino__nome', 'data_ida')}
+    @property
+    def campos_do_popup(self):
+        """O que a agência preenche no pop-up que abre em "Criar orçamento"."""
+        return [self['cliente_nome'], self['cliente_email'], self['cliente_telefone']]
 
-        grupos = {}
-        for chave, s in self._saidas.items():
-            grupos.setdefault(s.destino.nome, []).append((chave, s.texto))
-        self.fields['saida_escolhida'].choices = (
-            [('', 'A combinar')] + [(nome, opcoes) for nome, opcoes in grupos.items()])
-        if atual is not None:
-            self.initial['saida_escolhida'] = str(atual.pk)
+    @property
+    def erro_no_popup(self):
+        """Com erro num destes campos, o pop-up já abre de novo ao voltar a página."""
+        return any(campo.errors for campo in self.campos_do_popup) or bool(self.non_field_errors())
 
     def clean_cliente_telefone(self):
         return formatar_telefone(self.cleaned_data.get('cliente_telefone'))
@@ -97,31 +88,10 @@ class OrcamentoForm(forms.ModelForm):
     def clean_pessoas(self):
         pessoas = self.cleaned_data['pessoas']
         if not 1 <= pessoas <= 60:
-            raise forms.ValidationError('Informe de 1 a 60 pessoas.')
+            raise forms.ValidationError('Informe de 1 a 60 adultos.')
         return pessoas
 
     def clean(self):
         dados = super().clean()
-        saida = self._saidas.get(dados.get('saida_escolhida') or '')
-        destino = dados.get('destino')
-        if saida and destino and saida.destino_id != destino.pk:
-            self.add_error('saida_escolhida', 'Essa data é de outro destino. Escolha uma '
-                                              'data de {}.'.format(destino.nome))
-        self.instance.saida = saida
-        if saida is None:
-            self.instance.saida_texto = ''
+        self.instance.saida = self._saidas.get(dados.get('saida') or '')
         return dados
-
-
-class AtendimentoForm(forms.ModelForm):
-    """O que a agência muda numa reserva do cliente dela."""
-
-    class Meta:
-        model = Reserva
-        fields = ['status', 'nota_agencia']
-        widgets = {
-            'nota_agencia': forms.Textarea(attrs={
-                'rows': 4, 'maxlength': 2000,
-                'placeholder': 'Ex.: liguei dia 25, cliente vai pagar no Pix até sexta.'}),
-        }
-        labels = {'status': 'Situação do pedido'}
