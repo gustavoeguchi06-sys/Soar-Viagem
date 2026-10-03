@@ -13,7 +13,7 @@ from soar.seguranca import LIMITE_INTERESSE, ip_do_cliente
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
-from .models import MESES, Destino, Saida, VideoSoar60
+from .models import MESES, Destino, PaginaSobre, Saida, VideoSoar60
 
 log = logging.getLogger('soar.seguranca')
 
@@ -83,6 +83,17 @@ def lista_destinos(request):
         'regioes': Destino.REGIOES,
         'filtros': filtros,
         'qs_filtros': urlencode(mantidos),
+    })
+
+
+def sobre(request):
+    """A página "Sobre a Soar": tudo nela é editado no painel (aba Sobre a Soar)."""
+    pagina = PaginaSobre.atual()
+    return render(request, 'destinations/sobre.html', {
+        'pagina': pagina,
+        'diferenciais': pagina.diferenciais.all(),
+        'numeros': pagina.numeros.all(),
+        'fotos': pagina.fotos.all(),
     })
 
 

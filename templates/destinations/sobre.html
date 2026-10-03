@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% comment %}
+A página "Sobre a Soar". Todo o conteúdo vem do painel (aba Sobre a Soar):
+capa com foto ou vídeo, texto principal, diferenciais, números e fotos. Bloco
+sem conteúdo não aparece, para a página nunca ficar com buraco.
+{% endcomment %}
+
+{% block title %}{{ pagina.titulo }} | Soar Operadora{% endblock %}
+
+{% block content %}
+
+{# ===== Capa ===== #}
+<section class="p60-capa sobre-capa">
+    {% if pagina.video_capa %}
+    <video class="p60-capa__foto" src="{{ pagina.video_capa.url }}" muted loop playsinline autoplay
+           {% if pagina.capa %}poster="{{ pagina.capa.url }}"{% endif %} aria-hidden="true"></video>
+    {% elif pagina.capa %}
+    <img class="p60-capa__foto" src="{{ pagina.capa.url }}" alt="">
+    {% else %}
+    <img class="p60-capa__foto" src="{% static 'img/hero-jalapao.svg' %}" alt="">
+    {% endif %}
+    <div class="container p60-capa__conteudo">
+        <span class="soar60__selo">Operadora Soar</span>
+        <h1>{{ pagina.titulo }}</h1>
+        {% if pagina.subtitulo %}<p>{{ pagina.subtitulo }}</p>{% endif %}
+    </div>
+</section>
+
+{# ===== Quem somos ===== #}
+{% if pagina.paragrafos %}
+<section class="secao">
+    <div class="container sobre-historia{% if pagina.historia_foto %} sobre-historia--foto{% endif %}">
+        <div>
+            <div class="secao-titulo"><h2>{{ pagina.historia_titulo }}</h2></div>
+            {% for paragrafo in pagina.paragrafos %}<p>{{ paragrafo }}</p>{% endfor %}
+        </div>
+        {% if pagina.historia_foto %}
+        <img class="sobre-historia__foto" src="{{ pagina.historia_foto.url }}" alt="" loading="lazy">
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{# ===== Números ===== #}
+{% if numeros %}
+<section class="secao secao--sem-topo">
+    <div class="container">
+        <div class="sobre-numeros">
+            {% for n in numeros %}
+            <div><strong>{{ n.valor }}</strong><span>{{ n.legenda }}</span></div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ===== Diferenciais ===== #}
+{% if diferenciais %}
+<section class="secao{% if pagina.paragrafos or numeros %} secao--sem-topo{% endif %}">
+    <div class="container">
+        <div class="secao-titulo"><h2>{{ pagina.diferenciais_titulo }}</h2></div>
+        <div class="p60-grade">
+            {% for d in diferenciais %}
+            <div class="p60-item">
+                <svg class="ic p60-item__ic" viewBox="0 0 24 24"><use href="#{{ d.icone }}"></use></svg>
+                <h3>{{ d.titulo }}</h3>
+                {% if d.texto %}<p>{{ d.texto }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ===== Fotos ===== #}
+{% if fotos %}
+<section class="secao secao--sem-topo">
+    <div class="container">
+        <div class="sobre-fotos">
+            {% for f in fotos %}
+            <figure>
+                <img src="{{ f.imagem.url }}" alt="{{ f.legenda }}" loading="lazy">
+                {% if f.legenda %}<figcaption>{{ f.legenda }}</figcaption>{% endif %}
+            </figure>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ===== Próximo passo ===== #}
+<section class="secao secao--sem-topo">
+    <div class="container sobre-proximo">
+        <a class="btn btn--verde" href="{% url 'destinations:calendario' %}">Ver as viagens</a>
+        <a class="btn btn--contorno" href="{% url 'contas:b2b' %}">Sou agência de viagens</a>
+    </div>
+</section>
+{% endblock %}
