@@ -153,6 +153,12 @@ html[data-tema="escuro"] .btn--contorno:hover { background: var(--verde-claro); 
 html[data-tema="escuro"] input,
 html[data-tema="escuro"] select,
 html[data-tema="escuro"] textarea { color: var(--tinta); }
+/* A lista que abre no <select> é desenhada pelo navegador: com o campo de fundo
+   transparente, ela herdava o texto claro sobre fundo branco e ficava ilegível
+   (ex.: "Para onde?" da busca da página inicial). Cores próprias para as opções. */
+html[data-tema="escuro"] select option,
+html[data-tema="escuro"] select optgroup { background-color: var(--cartao); color: var(--tinta); }
+html[data-tema="escuro"] select option:disabled { color: #6f817a; }
 html[data-tema="escuro"] input::placeholder,
 html[data-tema="escuro"] textarea::placeholder { color: #6f817a; }
 html[data-tema="escuro"] .busca input { background: var(--cartao); border: 1px solid var(--linha); }
