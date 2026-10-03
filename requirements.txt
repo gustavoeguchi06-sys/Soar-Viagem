@@ -1,8 +1,30 @@
 # Versoes exatas: o que foi testado e o que vai para o servidor e a mesma coisa.
 # Para atualizar, troque o numero aqui, rode os testes e so entao faca o commit.
-# (Conferido em 22/09/2026: sao as versoes mais recentes, sem falha de seguranca
-# publicada em aberto.)
+# (Conferido em 03/10/2026.)
+
+# --- o site ---
 Django==5.2.17
 Pillow==12.3.0
-reportlab==5.0.1          # PDF do orçamento que vai por e-mail
-charset-normalizer==3.5.2  # dependência do reportlab
+reportlab==5.0.1           # PDF do orcamento que vai por e-mail
+
+# --- servidor de producao ---
+gunicorn==26.2.0           # roda o Django atras do Nginx (deploy/gunicorn.conf.py)
+psycopg[binary]==3.3.6     # PostgreSQL (SOAR_DB_ENGINE=postgresql)
+redis==8.1.0               # cache e limite de tentativas (SOAR_REDIS_URL)
+
+# --- fotos e videos no Cloudflare R2 (SOAR_R2_*) ---
+django-storages==1.14.6
+boto3==1.43.108
+
+# --- dependencias das de cima, fixadas para o servidor instalar igual ---
+asgiref==3.12.1
+botocore==1.43.108
+charset-normalizer==3.5.2
+jmespath==1.1.0
+psycopg-binary==3.3.6
+python-dateutil==2.9.0.post0
+s3transfer==0.19.2
+six==1.17.0
+sqlparse==0.6.0
+tzdata==2026.3
+urllib3==2.8.0

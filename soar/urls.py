@@ -21,7 +21,6 @@ urlpatterns = [
     # de tentativa no login, e restringir este caminho por IP ou VPN.
     path('painel/', admin.site.urls),
     path('', include('contas.urls')),
-    path('', include('reservas.urls')),
     path('blog/', include('blog.urls')),
     path('agencia/', include('agencia.urls')),
     path('', include('destinations.urls')),

@@ -1,0 +1,4 @@
+# Scripts e configs do servidor (Linux) sempre com quebra de linha LF,
+# mesmo editados no Windows: com CRLF o bash e o Nginx quebram.
+*.sh text eol=lf
+deploy/** text eol=lf

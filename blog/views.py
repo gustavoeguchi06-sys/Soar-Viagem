@@ -45,7 +45,8 @@ def _lateral():
 
 
 def indice(request):
-    artigos = Artigo.objects.no_ar().select_related('categoria')
+    # o tempo de leitura do cartão soma as seções: vêm todas numa consulta só
+    artigos = Artigo.objects.no_ar().select_related('categoria').prefetch_related('secoes')
 
     busca = request.GET.get('q', '').strip()[:TAMANHO_MAXIMO_BUSCA]
     if busca:

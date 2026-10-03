@@ -224,6 +224,53 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# --------------------------------------------------------------------------- #
+# Fotos e vídeos no Cloudflare R2 (opcional)
+# --------------------------------------------------------------------------- #
+# Com SOAR_R2_BUCKET definido, tudo o que o painel envia (fotos, vídeos, PDFs
+# de capa) vai para o R2 em vez do disco da VPS: o servidor não enche de vídeo
+# e o backup dos arquivos fica por conta do R2. Sem a variável, continua no
+# disco (MEDIA_ROOT), do jeito de sempre.
+#
+#   SOAR_R2_BUCKET          nome do bucket
+#   SOAR_R2_ACCOUNT_ID      ID da conta Cloudflare (vai no endereço da API)
+#   SOAR_R2_ACCESS_KEY      chave de acesso (token de API do R2 com permissão
+#   SOAR_R2_SECRET_KEY      só de leitura e escrita neste bucket)
+#   SOAR_R2_DOMINIO         domínio público do bucket, ex.: midia.soar.com.br
+R2_BUCKET = os.environ.get('SOAR_R2_BUCKET', '').strip()
+R2_DOMINIO = os.environ.get('SOAR_R2_DOMINIO', '').strip()
+if R2_BUCKET:
+    for _variavel in ('SOAR_R2_ACCOUNT_ID', 'SOAR_R2_ACCESS_KEY', 'SOAR_R2_SECRET_KEY',
+                      'SOAR_R2_DOMINIO'):
+        if not os.environ.get(_variavel, '').strip():
+            raise ImproperlyConfigured(
+                'SOAR_R2_BUCKET está definido, mas falta {}.'.format(_variavel))
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'bucket_name': R2_BUCKET,
+                'endpoint_url': 'https://{}.r2.cloudflarestorage.com'.format(
+                    os.environ['SOAR_R2_ACCOUNT_ID'].strip()),
+                'access_key': os.environ['SOAR_R2_ACCESS_KEY'].strip(),
+                'secret_key': os.environ['SOAR_R2_SECRET_KEY'].strip(),
+                'region_name': 'auto',
+                'signature_version': 's3v4',
+                # As fotos são públicas por natureza (estão no site); o bucket
+                # só é lido pelo domínio público, nunca listado.
+                'custom_domain': R2_DOMINIO,
+                'url_protocol': 'https:',
+                'querystring_auth': False,
+                'default_acl': None,
+                # Nunca sobrescreve: dois envios com o mesmo nome viram dois arquivos.
+                'file_overwrite': False,
+                'object_parameters': {'CacheControl': 'public, max-age=2592000'},
+            },
+        },
+        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+    }
+    MEDIA_URL = 'https://{}/'.format(R2_DOMINIO)
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --------------------------------------------------------------------------- #
@@ -274,8 +321,6 @@ LOGOUT_REDIRECT_URL = 'destinations:home'
 LIMITE_LOGIN_TENTATIVAS = int(os.environ.get('SOAR_LIMITE_LOGIN', 5))
 LIMITE_LOGIN_JANELA = int(os.environ.get('SOAR_LIMITE_LOGIN_JANELA', 900))       # 15 min
 LIMITE_CADASTRO_POR_HORA = int(os.environ.get('SOAR_LIMITE_CADASTRO', 5))
-LIMITE_AVALIACAO_POR_HORA = int(os.environ.get('SOAR_LIMITE_AVALIACAO', 5))
-LIMITE_RESERVA_POR_HORA = int(os.environ.get('SOAR_LIMITE_RESERVA', 10))
 # Cada pedido destes manda um e-mail: sem limite, dava para lotar a caixa de
 # alguém com "troque sua senha" ou "confirme a newsletter" e, de quebra,
 # estourar a cota diária do Gmail da Soar.
@@ -306,9 +351,7 @@ CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = int(os.environ.get('SOAR_SESSAO_SEGUNDOS', 7 * 24 * 3600))
 SESSION_SAVE_EVERY_REQUEST = True           # a semana conta a partir do último acesso
 
-# Limites de upload. A foto da avaliação é o único arquivo que entra pela
-# frente do site, e 2 MB é de sobra para uma foto de viagem.
-TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024
+# Limites de upload. Fora do painel, o site não recebe arquivo nenhum.
 # Teto de qualquer envio ao site, conferido antes de ler o corpo
 # (soar.middleware.LimiteDeEnvioMiddleware). Cobre as fotos do painel, que
 # são maiores que as das avaliações. Use o mesmo valor no client_max_body_size
@@ -319,6 +362,8 @@ TAMANHO_MAXIMO_ENVIO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_ENVIO_MB', 10)) *
 # Nginx, use este valor (+ 5 MB de folga) no client_max_body_size do /painel/.
 TAMANHO_MAXIMO_VIDEO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_VIDEO_MB', 100)) * 1024 * 1024
 TAMANHO_MAXIMO_ENVIO_PAINEL = TAMANHO_MAXIMO_VIDEO + 5 * 1024 * 1024
+# Cada foto enviada pelo painel (capa, galeria, blog...). Foto de site não precisa de mais.
+TAMANHO_MAXIMO_FOTO_PAINEL = int(os.environ.get('SOAR_TAMANHO_MAXIMO_FOTO_MB', 10)) * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 # O formulário do destino no painel junta muitos blocos (preços por quarto,
@@ -341,7 +386,8 @@ CSP_DIRETIVAS = {
     'script-src': "'self'",
     'style-src': "'self' 'unsafe-inline'",
     'font-src': "'self'",
-    'img-src': "'self' data:",
+    'img-src': "'self' data:" + (' https://' + R2_DOMINIO if R2_DOMINIO else ''),
+    'media-src': "'self'" + (' https://' + R2_DOMINIO if R2_DOMINIO else ''),
     'connect-src': "'self'",
     'form-action': "'self'",
     'frame-ancestors': "'none'",
@@ -429,6 +475,12 @@ LOGGING = {
         'django.request': {
             'handlers': ['arquivo_seguranca', 'console'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        # Falha ao apagar do disco/R2 um arquivo que ficou sem uso (soar/arquivos.py).
+        'soar.arquivos': {
+            'handlers': ['arquivo_seguranca', 'console'],
+            'level': 'WARNING',
             'propagate': False,
         },
     },

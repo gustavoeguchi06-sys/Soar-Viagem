@@ -69,7 +69,7 @@ def _viagens(hoje):
     destinos = (Destino.objects
                 .annotate(n_avaliacoes=Count('avaliacoes', filter=Q(avaliacoes__publicada=True)),
                           nota=Avg('avaliacoes__nota', filter=Q(avaliacoes__publicada=True)))
-                .prefetch_related(futuras))
+                .prefetch_related(futuras, 'imagens'))
     viagens = []
     for d in destinos:
         proxima = next((s for s in d.futuras if s.vagas != 0), None)
