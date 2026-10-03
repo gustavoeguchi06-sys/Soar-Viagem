@@ -34,6 +34,7 @@ ABAS = [
     ('Orçamentos', 'admin:agencia_orcamento_changelist', 'agencia.view_orcamento', None),
     ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),
     ('Blog Soar', 'admin:blog_artigo_changelist', 'blog.view_artigo', None),
+    ('Soar 60+', 'admin:destinations_videosoar60_changelist', 'destinations.view_videosoar60', None),
     ('Avaliações', 'admin:reviews_avaliacao_changelist', 'reviews.view_avaliacao', 'avaliacoes'),
     ('Agências', 'admin:contas_perfilagente_changelist', 'contas.view_perfilagente', None),
     ('Usuários', 'admin:auth_user_changelist', 'auth.view_user', None),

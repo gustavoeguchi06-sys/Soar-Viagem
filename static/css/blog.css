@@ -290,3 +290,7 @@ figure.blog-foto { margin: 8px 0 28px; }
               padding: 40px 24px; text-align: center; }
 .blog-vazio p { margin: 6px 0 0; color: var(--body-quiet-color, #6b7a80); }
 .blog-vazio a { color: var(--verde, #146c43); }
+
+/* vídeo da seção do artigo, depois da foto */
+.blog-video { margin: 8px 0 28px; }
+.blog-video video { width: 100%; max-height: 70vh; border-radius: 14px; background: #000; display: block; }

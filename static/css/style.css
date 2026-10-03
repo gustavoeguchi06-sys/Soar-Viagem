@@ -441,3 +441,9 @@ form[aria-busy="true"] input[type="submit"]:disabled {
     opacity: .6;
     cursor: progress;
 }
+
+/* Soar 60+: vídeos cadastrados no painel */
+.p60-videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px; }
+.p60-videos figure { margin: 0; }
+.p60-videos video { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: #000; display: block; }
+.p60-videos figcaption { margin-top: 8px; font-weight: 600; }

@@ -14,8 +14,15 @@
 <section class="in-hero" aria-roledescription="carrossel" aria-label="Fotos de destinos">
     <div class="in-hero__fotos">
         {% for s in i.slides %}
+        {% if s.video %}
+        {# sem som e em repetição; o inicio.js só deixa tocar o slide que está na tela #}
+        <video class="in-hero__foto{% if forloop.first %} ativo{% endif %}" src="{{ s.video }}" poster="{{ s.url }}"
+               muted loop playsinline preload="{% if forloop.first %}auto{% else %}none{% endif %}"
+               {% if forloop.first %}autoplay{% endif %} aria-label="{{ s.legenda }}"></video>
+        {% else %}
         <img class="in-hero__foto{% if forloop.first %} ativo{% endif %}" src="{{ s.url }}" alt="{{ s.legenda }}"
              {% if not forloop.first %}loading="lazy"{% endif %}>
+        {% endif %}
         {% endfor %}
     </div>
     {% if i.slides|length > 1 %}

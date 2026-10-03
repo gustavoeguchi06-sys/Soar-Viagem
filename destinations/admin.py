@@ -22,7 +22,8 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, Interessado, PerguntaFrequente, Saida, SlideInicio)
+                     ImagemHospedagem, Interessado, PerguntaFrequente, Saida, SlideInicio,
+                     VideoDestino, VideoSoar60)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -76,6 +77,14 @@ def miniatura(imagem, alt=''):
     return format_html('<img class="miniatura" src="{}" alt="{}">', imagem.url, alt)
 
 
+def previa_video(arquivo):
+    """O vídeo enviado, pequeno e com os controles, para conferir antes de salvar de novo."""
+    if not arquivo:
+        return format_html('<span class="miniatura miniatura--vazia">sem vídeo</span>')
+    return format_html('<video class="miniatura miniatura--video" src="{}" controls '
+                       'preload="metadata"></video>', arquivo.url)
+
+
 # --------------------------------------------------------------------------- #
 # Blocos embutidos no formulário do destino
 # --------------------------------------------------------------------------- #
@@ -91,6 +100,19 @@ class ImagemDestinoInline(admin.TabularInline):
     @admin.display(description='Prévia')
     def previa(self, obj):
         return miniatura(obj.imagem, obj.legenda)
+
+
+class VideoDestinoInline(admin.TabularInline):
+    model = VideoDestino
+    extra = 0
+    fields = ['arquivo', 'previa', 'capa', 'legenda', 'ordem']
+    readonly_fields = ['previa']
+    verbose_name = 'vídeo'
+    verbose_name_plural = 'Vídeos da galeria'
+
+    @admin.display(description='Prévia')
+    def previa(self, obj):
+        return previa_video(obj.arquivo)
 
 
 class DestaqueViagemInline(admin.TabularInline):
@@ -179,8 +201,8 @@ class DestinoAdmin(admin.ModelAdmin):
     save_on_top = True
     list_per_page = 30
     readonly_fields = ['previa_capa', 'criado_em']
-    inlines = [SaidaInline, HospedagemInline, ImagemDestinoInline, DestaqueViagemInline,
-               DiaRoteiroInline, PerguntaFrequenteInline]
+    inlines = [SaidaInline, HospedagemInline, ImagemDestinoInline, VideoDestinoInline,
+               DestaqueViagemInline, DiaRoteiroInline, PerguntaFrequenteInline]
 
     fieldsets = [
         ('O destino no catálogo', {
@@ -327,13 +349,21 @@ class HospedagemAdmin(admin.ModelAdmin):
 
 @admin.register(SlideInicio)
 class SlideInicioAdmin(admin.ModelAdmin):
-    """As fotos que giram no topo da página inicial."""
+    """As fotos (e vídeos) que giram no topo da página inicial."""
 
-    list_display = ['foto', 'legenda', 'ordem', 'ativo']
+    list_display = ['foto', 'legenda', 'tem_video', 'ordem', 'ativo']
     list_display_links = ['foto', 'legenda']
     list_editable = ['ordem', 'ativo']
-    fields = ['imagem', 'previa', 'legenda', 'ordem', 'ativo']
-    readonly_fields = ['previa']
+    fields = ['imagem', 'previa', 'legenda', 'video', 'previa_do_video', 'ordem', 'ativo']
+    readonly_fields = ['previa', 'previa_do_video']
+
+    @admin.display(description='Vídeo', boolean=True)
+    def tem_video(self, slide):
+        return bool(slide.video)
+
+    @admin.display(description='Vídeo enviado')
+    def previa_do_video(self, slide):
+        return previa_video(slide.video)
 
     @admin.display(description='')
     def foto(self, slide):
@@ -403,3 +433,17 @@ class InteressadoAdmin(admin.ModelAdmin):
         numeros = ''.join(c for c in interessado.whatsapp if c.isdigit())
         return format_html('<a href="https://wa.me/55{}" target="_blank" rel="noopener">{}</a>',
                            numeros, interessado.whatsapp)
+
+
+@admin.register(VideoSoar60)
+class VideoSoar60Admin(admin.ModelAdmin):
+    """Os vídeos da página do Soar 60+ (/soar-60/)."""
+
+    list_display = ['titulo', 'ordem', 'ativo']
+    list_editable = ['ordem', 'ativo']
+    fields = ['titulo', 'arquivo', 'previa', 'capa', 'ordem', 'ativo']
+    readonly_fields = ['previa']
+
+    @admin.display(description='Vídeo enviado')
+    def previa(self, video):
+        return previa_video(video.arquivo)

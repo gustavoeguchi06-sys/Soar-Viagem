@@ -10,12 +10,28 @@
     var pontos = hero ? Array.prototype.slice.call(hero.querySelectorAll('.in-hero__pontos button')) : [];
     var atual = 0, relogio = null;
 
+    // Slide de vídeo: só o que está na tela toca. Quem pediu menos movimento
+    // no aparelho vê só a capa (a foto), sem o vídeo andar.
+    function tocarVideos() {
+        fotos.forEach(function (f, k) {
+            if (f.tagName !== 'VIDEO') { return; }
+            if (k === atual && !reduzir) {
+                f.preload = 'auto';
+                var tentativa = f.play();
+                if (tentativa && tentativa.catch) { tentativa.catch(function () {}); }
+            } else {
+                f.pause();
+            }
+        });
+    }
     function mostrar(i) {
         if (fotos.length < 2) { return; }
         atual = (i + fotos.length) % fotos.length;
         fotos.forEach(function (f, k) { f.classList.toggle('ativo', k === atual); });
         pontos.forEach(function (p, k) { p.classList.toggle('ativo', k === atual); });
+        tocarVideos();
     }
+    tocarVideos();
     function tocar() {
         parar();
         if (!reduzir && fotos.length > 1) { relogio = setInterval(function () { mostrar(atual + 1); }, 6000); }

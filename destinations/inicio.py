@@ -151,7 +151,10 @@ def montar_inicio():
 
     hoje = timezone.localdate()
 
-    slides = [{'url': s.imagem.url, 'legenda': s.legenda}
+    # 'url' é sempre a foto: com vídeo, ela vira a capa (e segue servindo aos
+    # outros blocos da página que usam as fotos do topo)
+    slides = [{'url': s.imagem.url, 'legenda': s.legenda,
+               'video': s.video.url if s.video else ''}
               for s in SlideInicio.objects.filter(ativo=True).exclude(imagem='')]
     if not slides:
         slides = [{'url': static(f), 'legenda': legenda} for f, legenda in SLIDES_PADRAO]

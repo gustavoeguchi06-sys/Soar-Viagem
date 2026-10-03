@@ -129,11 +129,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'soar.middleware.ContentSecurityPolicyMiddleware',
-    'soar.middleware.LimiteDeEnvioMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Depois do login, para saber se é a equipe (que pode mandar vídeo). Nenhum
+    # dos de cima lê o corpo do envio, então ele ainda é recusado sem ser lido.
+    'soar.middleware.LimiteDeEnvioMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -312,6 +314,11 @@ TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024
 # são maiores que as das avaliações. Use o mesmo valor no client_max_body_size
 # do Nginx.
 TAMANHO_MAXIMO_ENVIO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_ENVIO_MB', 10)) * 1024 * 1024
+# Vídeos do painel (galeria da viagem, carrossel da página inicial, blog e
+# Soar 60+). O teto de envio maior vale só para a equipe logada no painel; no
+# Nginx, use este valor (+ 5 MB de folga) no client_max_body_size do /painel/.
+TAMANHO_MAXIMO_VIDEO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_VIDEO_MB', 100)) * 1024 * 1024
+TAMANHO_MAXIMO_ENVIO_PAINEL = TAMANHO_MAXIMO_VIDEO + 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200

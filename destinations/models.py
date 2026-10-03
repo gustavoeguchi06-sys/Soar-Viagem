@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.urls import reverse
 from django.utils.text import slugify
 
+from soar.videos import ajuda as ajuda_video, validar_video
+
 
 MESES = {
     1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
@@ -205,6 +207,27 @@ class ImagemDestino(models.Model):
         return self.legenda or f'Imagem de {self.destino.nome}'
 
 
+class VideoDestino(models.Model):
+    """Vídeo da galeria da página da viagem, ao lado das fotos."""
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='videos', verbose_name='Destino')
+    arquivo = models.FileField('Vídeo', upload_to='destinos/videos/',
+                               validators=[validar_video], help_text=ajuda_video())
+    capa = models.ImageField('Foto de capa', upload_to='destinos/videos/capas/', blank=True,
+                             null=True, help_text='Opcional. Aparece antes de o vídeo tocar.')
+    legenda = models.CharField('Legenda', max_length=200, blank=True)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Vídeo do destino'
+        verbose_name_plural = 'Vídeos do destino'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.legenda or f'Vídeo de {self.destino.nome}'
+
+
 class Hospedagem(models.Model):
     destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
                                 related_name='hospedagens', verbose_name='Destino')
@@ -386,13 +409,41 @@ class SlideInicio(models.Model):
                   'título aparece à esquerda.')
     legenda = models.CharField('Descrição da foto', max_length=120, blank=True,
                                help_text='Ex.: Cachoeira no Jalapão. Lida por quem usa leitor de tela.')
+    # A foto continua obrigatória: é a capa enquanto o vídeo carrega, o que
+    # aparece para quem pede menos movimento no celular, e é usada em outros
+    # blocos da página (fundo da chamada final, #ViajantesSoar).
+    video = models.FileField(
+        'Vídeo (opcional)', upload_to='inicio/videos/', blank=True,
+        validators=[validar_video],
+        help_text=ajuda_video('Toca sem som e em repetição no lugar da foto, que vira a capa.'))
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
     ativo = models.BooleanField('Aparece no site', default=True)
 
     class Meta:
-        verbose_name = 'Foto do topo da página inicial'
-        verbose_name_plural = 'Fotos do topo da página inicial'
+        verbose_name = 'Foto ou vídeo do topo da página inicial'
+        verbose_name_plural = 'Fotos e vídeos do topo da página inicial'
         ordering = ['ordem', 'id']
 
     def __str__(self):
         return self.legenda or 'Foto {}'.format(self.pk)
+
+
+class VideoSoar60(models.Model):
+    """Vídeo da página do Soar 60+ (/soar-60/)."""
+
+    titulo = models.CharField('Título', max_length=120,
+                              help_text='Ex.: Como é uma viagem 60+ com a Soar.')
+    arquivo = models.FileField('Vídeo', upload_to='soar60/videos/',
+                               validators=[validar_video], help_text=ajuda_video())
+    capa = models.ImageField('Foto de capa', upload_to='soar60/capas/', blank=True, null=True,
+                             help_text='Opcional. Aparece antes de o vídeo tocar.')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+    ativo = models.BooleanField('Aparece no site', default=True)
+
+    class Meta:
+        verbose_name = 'Vídeo do Soar 60+'
+        verbose_name_plural = 'Vídeos do Soar 60+'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.titulo
