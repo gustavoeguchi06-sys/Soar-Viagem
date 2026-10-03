@@ -40,6 +40,13 @@
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
                     Atendimento direto com a nossa equipe.</li>
             </ul>
+            {% if sistema_reservas_url %}
+            <p class="conta-lado__ajuda">
+                Já vende os pacotes pelo sistema de reservas?
+                <a href="{{ sistema_reservas_url }}" target="_blank" rel="noopener noreferrer">Acessar o
+                   sistema de reservas</a> (abre numa nova aba, com o login de lá).
+            </p>
+            {% endif %}
             <p class="conta-lado__ajuda">
                 Dúvidas sobre a parceria?
                 <a href="https://wa.me/5511999999999" target="_blank" rel="noopener">Chame no WhatsApp</a>.

@@ -24,6 +24,7 @@ caro é subir um servidor achando que ele está protegido, não o contrário.
     SOAR_EMAIL_BACKEND  smtp para enviar de verdade (padrão: console)
     SOAR_EMAIL_HOST/PORT/USER/PASSWORD/TLS, SOAR_EMAIL_REMETENTE
     SOAR_GOOGLE_CLIENT_ID/SECRET  liga o botão "Continuar com Google"
+    SOAR_RESERVAS_URL   endereço do sistema de reservas das agências (vazio esconde o botão)
 
 Para desenvolver, copie `.env.example` para `.env` (já vem com SOAR_DEBUG=1):
 
@@ -153,6 +154,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'contas.context_processors.google_login',
+                'contas.context_processors.sistema_reservas',
             ],
         },
     },
@@ -295,6 +297,12 @@ EMAIL_TIMEOUT = 15   # segundos; sem isso um SMTP fora do ar trava a tela de cad
 # elas o botão não aparece e o site segue só com e-mail e senha.
 GOOGLE_CLIENT_ID = os.environ.get('SOAR_GOOGLE_CLIENT_ID', '').strip()
 GOOGLE_CLIENT_SECRET = os.environ.get('SOAR_GOOGLE_CLIENT_SECRET', '').strip()
+
+# Sistema de reservas da operadora, onde as agências vendem os pacotes. É outro
+# sistema, com banco e login próprios: o site só leva o agente até lá. Quando
+# ele passar a ter HTTPS, troque o endereço aqui pelo https. Vazio esconde o botão.
+SISTEMA_RESERVAS_URL = os.environ.get('SOAR_RESERVAS_URL',
+                                      'http://www.reservassoar.com.br/login').strip()
 
 # --------------------------------------------------------------------------- #
 # Contas

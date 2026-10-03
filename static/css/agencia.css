@@ -14,10 +14,10 @@
                   text-transform: uppercase; color: #6ee7a8; margin-bottom: 6px; }
 .ag-faixa h1 { color: #fff; font-size: clamp(1.35rem, 3vw, 1.85rem); }
 .ag-faixa p { margin-top: 4px; font-size: .9rem; max-width: 60ch; }
-.ag-faixa__acoes { display: flex; align-items: center; gap: 10px; }
+.ag-faixa__acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .ag-faixa__acoes form { margin: 0; }
-.ag-btn-sair { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
-.ag-btn-sair:hover { background: rgba(255, 255, 255, .1); }
+.ag-btn-sair, .ag-btn-claro { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+.ag-btn-sair:hover, .ag-btn-claro:hover { background: rgba(255, 255, 255, .1); }
 
 /* abas */
 .ag-abas { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
