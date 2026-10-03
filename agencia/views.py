@@ -1,26 +1,32 @@
-"""Painel da agência parceira.
+"""Área da agência parceira.
 
-Uma tela de trabalho só da agência, separada do painel do dono: ela vê as
-reservas que a Soar passou para ela e os orçamentos que montou.
+O painel ficou só com a visão geral e os dados da agência. O orçamento é feito
+direto no card da página da viagem (`orcamento_criar`), sem abrir o painel, e
+sai em PDF para o e-mail que a agência digitar no pop-up.
 
 Toda consulta daqui passa por `request.agencia`. É isso que impede uma agência
-de ver cliente de outra: o `get_object_or_404(..., agencia=request.agencia)`
-devolve 404 para qualquer reserva ou orçamento que não seja dela, mesmo que
-alguém troque o número na barra de endereço.
+de ver cliente de outra.
 """
 import logging
 from functools import wraps
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q, Sum
+from django.core.mail import EmailMessage
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 
+from destinations.conteudo import tabela_de_precos
 from destinations.models import Destino
-from reservas.models import Reserva
+from soar.seguranca import LIMITE_ORCAMENTO
 
-from .forms import MAX_CRIANCAS, AtendimentoForm, OrcamentoForm, idades_das_criancas
-from .models import Orcamento
+from .forms import OrcamentoViagemForm
+from .models import AVISO, Orcamento
+from .pdf import gerar_pdf
 
 log = logging.getLogger('soar.seguranca')
 
@@ -41,151 +47,11 @@ def agencia_aprovada(view):
     return envolta
 
 
-def _filtro_status(request, escolhas):
-    status = request.GET.get('status', '')
-    return status if status in dict(escolhas) else ''
-
-
 @agencia_aprovada
 def painel(request):
-    agencia = request.agencia
-    reservas = Reserva.objects.filter(agencia=agencia)
-    orcamentos = Orcamento.objects.filter(agencia=agencia)
-
-    r = reservas.aggregate(
-        pendentes=Count('pk', filter=Q(status='pendente')),
-        confirmadas=Count('pk', filter=Q(status='confirmada')),
-    )
-    o = orcamentos.aggregate(
-        abertos=Count('pk', filter=Q(status='enviado')),
-        aceitos=Count('pk', filter=Q(status='aceito')),
-        vendido=Sum('valor', filter=Q(status='aceito')),
-    )
-
     return render(request, 'agencia/painel.html', {
         'aba': 'painel',
-        'numeros': {**r, **o},
-        'pendentes': reservas.filter(status='pendente')
-                             .select_related('destino', 'usuario')[:5],
-        'orcamentos_abertos': orcamentos.filter(status='enviado')
-                                        .select_related('destino')[:5],
-    })
-
-
-@agencia_aprovada
-def reservas(request):
-    status = _filtro_status(request, Reserva.STATUS)
-    lista = (Reserva.objects.filter(agencia=request.agencia)
-             .select_related('destino', 'usuario'))
-    contagem = dict(lista.values_list('status').annotate(n=Count('pk')))
-    if status:
-        lista = lista.filter(status=status)
-    return render(request, 'agencia/reservas.html', {
-        'aba': 'reservas',
-        'reservas': lista,
-        'status': status,
-        'filtros': [(chave, nome, contagem.get(chave, 0)) for chave, nome in Reserva.STATUS],
-        'total': sum(contagem.values()),
-    })
-
-
-@agencia_aprovada
-def reserva(request, pk):
-    reserva = get_object_or_404(Reserva.objects.select_related('destino', 'usuario'),
-                                pk=pk, agencia=request.agencia)
-    form = AtendimentoForm(request.POST or None, instance=reserva)
-    if request.method == 'POST' and form.is_valid():
-        mudou_status = 'status' in form.changed_data
-        form.save()
-        if mudou_status:
-            log.info('agencia mudou reserva: agencia=%s reserva=%s status=%s',
-                     request.agencia.pk, reserva.codigo, reserva.status)
-        messages.success(request, 'Reserva {} atualizada.'.format(reserva.codigo))
-        return redirect('agencia:reservas')
-    return render(request, 'agencia/reserva.html', {
-        'aba': 'reservas', 'reserva': reserva, 'form': form,
-    })
-
-
-@agencia_aprovada
-def orcamentos(request):
-    status = _filtro_status(request, Orcamento.STATUS)
-    lista = Orcamento.objects.filter(agencia=request.agencia).select_related('destino')
-    contagem = dict(lista.values_list('status').annotate(n=Count('pk')))
-    if status:
-        lista = lista.filter(status=status)
-    return render(request, 'agencia/orcamentos.html', {
-        'aba': 'orcamentos',
-        'orcamentos': lista,
-        'status': status,
-        'filtros': [(chave, nome, contagem.get(chave, 0)) for chave, nome in Orcamento.STATUS],
-        'total': sum(contagem.values()),
-    })
-
-
-@agencia_aprovada
-def interessados(request):
-    """Pessoas que pediram "Saiba mais" e que a Soar mandou para esta agência."""
-    return render(request, 'agencia/interessados.html', {
-        'aba': 'interessados',
         'interessados': request.agencia.interessados.select_related('destino'),
-    })
-
-
-def _inicial_da_viagem(request):
-    """O que a agência escolheu no card da viagem ("Criar orçamento") já vem preenchido.
-
-    Vindo de um interessado (`?interessado=`), os dados da pessoa também entram,
-    mas só se a Soar mandou esse interessado para esta agência. Valor que não
-    existe é ignorado: o formulário só aceita as opções dele.
-    """
-    inicial = {}
-    pk = request.GET.get('interessado', '')
-    interessado = (request.agencia.interessados.select_related('destino').filter(pk=pk).first()
-                   if pk.isdigit() else None)
-    if interessado:
-        inicial.update(cliente_nome=interessado.nome, cliente_email=interessado.email,
-                       cliente_telefone=interessado.whatsapp)
-        if interessado.destino:
-            inicial['destino'] = interessado.destino.pk
-    destino = Destino.objects.filter(slug=request.GET.get('destino', '')).first()
-    if destino:
-        inicial['destino'] = destino.pk
-        saida = request.GET.get('saida', '')
-        if saida.isdigit() and destino.saidas.filter(pk=saida).exists():
-            inicial['saida_escolhida'] = saida
-    if request.GET.get('acomodacao') in dict(Orcamento._meta.get_field('acomodacao').choices):
-        inicial['acomodacao'] = request.GET['acomodacao']
-    idades = idades_das_criancas(request.GET.get('idades', '')[:60])
-    if idades and len(idades) <= MAX_CRIANCAS:
-        inicial['idades_criancas'] = ', '.join(str(i) for i in idades)
-    return inicial
-
-
-@agencia_aprovada
-def orcamento_novo(request):
-    form = OrcamentoForm(request.POST or None, initial=_inicial_da_viagem(request))
-    if request.method == 'POST' and form.is_valid():
-        orcamento = form.save(commit=False)
-        orcamento.agencia = request.agencia
-        orcamento.save()
-        messages.success(request, 'Orçamento {} criado.'.format(orcamento.codigo))
-        return redirect('agencia:orcamentos')
-    return render(request, 'agencia/orcamento_form.html', {
-        'aba': 'orcamentos', 'form': form, 'orcamento': None,
-    })
-
-
-@agencia_aprovada
-def orcamento_editar(request, pk):
-    orcamento = get_object_or_404(Orcamento, pk=pk, agencia=request.agencia)
-    form = OrcamentoForm(request.POST or None, instance=orcamento)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        messages.success(request, 'Orçamento {} salvo.'.format(orcamento.codigo))
-        return redirect('agencia:orcamentos')
-    return render(request, 'agencia/orcamento_form.html', {
-        'aba': 'orcamentos', 'form': form, 'orcamento': orcamento,
     })
 
 
@@ -194,3 +60,75 @@ def minha_agencia(request):
     return render(request, 'agencia/minha_agencia.html', {
         'aba': 'agencia',
     })
+
+
+@require_POST
+@agencia_aprovada
+def orcamento_criar(request, slug):
+    """Recebe o orçamento do card da viagem e volta para a mesma página.
+
+    O valor sai da tabela da viagem: preço por adulto da acomodação escolhida
+    vezes o número de adultos. Criança é sob consulta e fica fora da conta.
+    """
+    from destinations.views import pagina_da_viagem
+
+    destino = get_object_or_404(Destino, slug=slug)
+    form = OrcamentoViagemForm(request.POST, destino=destino)
+    if form.is_valid() and LIMITE_ORCAMENTO.estourou(request, request.agencia.pk):
+        log.warning('orcamento bloqueado por limite: agencia=%s', request.agencia.pk)
+        form.add_error(None, 'Muitos orçamentos enviados na última hora. Espere um pouco e '
+                             'tente de novo.')
+    if not form.is_valid():
+        return pagina_da_viagem(request, destino, form_orcamento=form)
+
+    orcamento = form.save(commit=False)
+    orcamento.agencia = request.agencia
+    orcamento.destino = destino
+    preco = tabela_de_precos(destino).get(orcamento.acomodacao)
+    orcamento.valor = preco * orcamento.pessoas if preco is not None else None
+    orcamento.save()
+    LIMITE_ORCAMENTO.registrar(request, request.agencia.pk)
+    log.info('orcamento criado: agencia=%s orcamento=%s destino=%s',
+             request.agencia.pk, orcamento.codigo, destino.slug)
+
+    # O orçamento fica salvo mesmo se o e-mail falhar: a página avisa e oferece
+    # o PDF para baixar e mandar por outro caminho.
+    try:
+        _enviar_por_email(orcamento)
+    except Exception:
+        log.exception('orcamento sem e-mail: orcamento=%s', orcamento.codigo)
+    else:
+        orcamento.enviado_em = timezone.now()
+        orcamento.save(update_fields=['enviado_em'])
+    return redirect('{}?orcamento={}#reservar'.format(destino.get_absolute_url(), orcamento.pk))
+
+
+def _enviar_por_email(orcamento):
+    """Manda o PDF para o e-mail do responsável; a resposta cai na agência."""
+    agencia = orcamento.agencia
+    corpo = render_to_string('agencia/email/orcamento.txt', {
+        'orcamento': orcamento, 'agencia': agencia, 'aviso': AVISO,
+        'valido_ate': timezone.localtime(orcamento.valido_ate),
+    })
+    mensagem = EmailMessage(
+        'Orçamento {} - {} | {}'.format(orcamento.codigo, orcamento.destino.nome,
+                                        agencia.razao_social),
+        corpo, settings.DEFAULT_FROM_EMAIL, [orcamento.cliente_email],
+        reply_to=[agencia.usuario.email] if agencia.usuario.email else None,
+    )
+    mensagem.attach(_nome_do_pdf(orcamento), gerar_pdf(orcamento), 'application/pdf')
+    mensagem.send()
+
+
+def _nome_do_pdf(orcamento):
+    return 'orcamento-{}.pdf'.format(orcamento.codigo)
+
+
+@agencia_aprovada
+def orcamento_pdf(request, pk):
+    """O mesmo PDF do e-mail, para a agência baixar. Só o orçamento dela."""
+    orcamento = get_object_or_404(Orcamento.objects.select_related('destino', 'agencia__usuario'),
+                                  pk=pk, agencia=request.agencia)
+    resposta = HttpResponse(gerar_pdf(orcamento), content_type='application/pdf')
+    resposta['Content-Disposition'] = 'inline; filename="{}"'.format(_nome_do_pdf(orcamento))
+    return resposta

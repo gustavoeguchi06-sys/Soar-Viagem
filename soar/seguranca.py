@@ -107,6 +107,9 @@ LIMITE_RESERVA = Limite('reserva', settings.LIMITE_RESERVA_POR_HORA, 3600)
 LIMITE_SENHA = Limite('senha', settings.LIMITE_SENHA_POR_HORA, 3600)
 LIMITE_NEWSLETTER = Limite('newsletter', settings.LIMITE_NEWSLETTER_POR_HORA, 3600)
 LIMITE_INTERESSE = Limite('interesse', settings.LIMITE_INTERESSE_POR_HORA, 3600)
+# Cada orçamento manda um e-mail para o endereço que a agência digitar: sem
+# teto, uma conta de agência vira canhão de spam com o Gmail da Soar.
+LIMITE_ORCAMENTO = Limite('orcamento', settings.LIMITE_ORCAMENTO_POR_HORA, 3600)
 # Código de 6 dígitos: 5 erros a cada 15 minutos por conta tornam o chute
 # (1 em 1 milhão por tentativa) inútil.
 LIMITE_2FA = Limite('2fa', 5, 900)

@@ -119,20 +119,59 @@ def detalhe_destino(request, slug):
         Destino.objects.prefetch_related('imagens', 'hospedagens'),
         slug=slug,
     )
-    return _pagina_da_viagem(request, destino, InteresseForm(),
-                             enviado=request.GET.get('enviado') == '1')
+    return pagina_da_viagem(request, destino, enviado=request.GET.get('enviado') == '1')
 
 
-def _pagina_da_viagem(request, destino, form_interesse, enviado=False):
+def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None, enviado=False):
+    """Monta a página da viagem.
+
+    Para a agência aprovada, o card traz o formulário de orçamento (agencia/views.py
+    recebe o envio) e, logo depois de criar, o resumo do orçamento com o aviso.
+    """
     avaliacoes = list(destino.avaliacoes.publicadas())
-    return render(request, 'destinations/detalhe.html', {
+    viagem = montar_viagem(destino, avaliacoes)
+    contexto = {
         'destino': destino,
         'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
-        'viagem': montar_viagem(destino, avaliacoes),
-        'form_interesse': form_interesse,
+        'viagem': viagem,
+        'form_interesse': form_interesse or InteresseForm(),
         'interesse_enviado': enviado,
-    })
+        # o que fica marcado no card: o que veio no envio, o link do calendário
+        # (?saida=) ou o padrão da viagem
+        'saida_marcada': next((str(s['id']) for s in viagem['saidas'] if s.get('padrao')), ''),
+        'acomodacao_marcada': 'casal',
+    }
+
+    agencia = getattr(request.user, 'agente', None)
+    if agencia is not None and agencia.aprovado:
+        from agencia.forms import OrcamentoViagemForm
+        from agencia.models import AVISO
+
+        if form_orcamento is None:
+            inicial = {'pessoas': 2}
+            pk = request.GET.get('interessado', '')
+            interessado = agencia.interessados.filter(pk=pk).first() if pk.isdigit() else None
+            if interessado:
+                inicial.update(cliente_nome=interessado.nome,
+                               cliente_telefone=interessado.whatsapp)
+            form_orcamento = OrcamentoViagemForm(destino=destino, initial=inicial)
+            saida = request.GET.get('saida', '')
+            if saida in dict(form_orcamento.fields['saida'].choices) and saida:
+                contexto['saida_marcada'] = saida
+        else:
+            contexto['saida_marcada'] = form_orcamento.data.get('saida', '')
+            contexto['acomodacao_marcada'] = form_orcamento.data.get('acomodacao', '')
+
+        pk = request.GET.get('orcamento', '')
+        contexto.update(
+            form_orcamento=form_orcamento,
+            orcamento_criado=(agencia.orcamentos.filter(pk=pk, destino=destino).first()
+                              if pk.isdigit() else None),
+            aviso_orcamento=AVISO,
+        )
+
+    return render(request, 'destinations/detalhe.html', contexto)
 
 
 @require_POST
@@ -146,7 +185,7 @@ def interesse(request, slug):
     destino = get_object_or_404(Destino, slug=slug)
     form = InteresseForm(request.POST)
     if not form.is_valid():
-        return _pagina_da_viagem(request, destino, form)
+        return pagina_da_viagem(request, destino, form_interesse=form)
 
     if LIMITE_INTERESSE.estourou(request):
         log.warning('saiba mais bloqueado por limite: ip=%s', ip_do_cliente(request))

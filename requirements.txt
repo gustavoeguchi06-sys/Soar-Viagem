@@ -4,3 +4,5 @@
 # publicada em aberto.)
 Django==5.2.17
 Pillow==12.3.0
+reportlab==5.0.1          # PDF do orçamento que vai por e-mail
+charset-normalizer==3.5.2  # dependência do reportlab

@@ -1,14 +1,24 @@
 """Orçamentos que as agências parceiras montam para os clientes delas.
 
-O orçamento é da agência: ela registra o cliente, a viagem e o valor que passou,
-e acompanha se o cliente aceitou. A Soar enxerga todos no painel do dono; cada
-agência enxerga só os seus.
+A agência monta o orçamento direto no card da página da viagem, sem abrir o
+painel: escolhe a data, a acomodação, quantos adultos e as idades das crianças,
+e o valor sai da tabela da viagem. Vale por 72 horas. A Soar enxerga todos no
+painel do dono.
 """
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 
 from destinations.models import Destino, Saida
 from reservas.models import Reserva
+
+VALIDADE = timedelta(hours=72)
+
+AVISO = ('Este orçamento não garante a reserva ou a disponibilidade dos serviços '
+         'apresentados.',
+         'A cotação é válida por 72 horas, estando sujeita à disponibilidade e à '
+         'alteração de valores após esse período.')
 
 
 class Orcamento(models.Model):
@@ -36,11 +46,14 @@ class Orcamento(models.Model):
     # deles, e o preço depende da idade. Guardado como "4, 7".
     idades_criancas = models.CharField(
         'Idades das crianças (CHD)', max_length=60, blank=True,
-        help_text='Separadas por vírgula, ex.: 4, 7. Em branco se não vai criança.')
+        help_text='De 0 a 8 anos, separadas por vírgula, ex.: 4, 7. Em branco se não vai criança.')
     valor = models.DecimalField('Valor total (R$)', max_digits=10, decimal_places=2,
                                 null=True, blank=True,
-                                help_text='O valor que a agência passou ao cliente.')
-    validade = models.DateField('Válido até', null=True, blank=True)
+                                help_text='Adultos pela tabela da viagem; crianças sob consulta.')
+    valido_ate = models.DateTimeField('Válido até', null=True, blank=True,
+                                      help_text='72 horas depois de criado.')
+    enviado_em = models.DateTimeField('PDF enviado por e-mail em', null=True, blank=True,
+                                      help_text='Em branco: o e-mail não saiu.')
     observacoes = models.TextField('Observações', blank=True)
     status = models.CharField('Situação', max_length=10, choices=STATUS, default='enviado')
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)
@@ -55,6 +68,8 @@ class Orcamento(models.Model):
         return '{} - {} ({})'.format(self.codigo, self.cliente_nome, self.destino.nome)
 
     def save(self, *args, **kwargs):
+        if self.valido_ate is None:
+            self.valido_ate = timezone.now() + VALIDADE
         # A data fica gravada em texto: se a saída for apagada depois, o
         # orçamento continua dizendo para quando foi.
         if self.saida_id:
@@ -82,5 +97,5 @@ class Orcamento(models.Model):
 
     @property
     def vencido(self):
-        return (self.status == 'enviado' and self.validade is not None
-                and self.validade < timezone.localdate())
+        return (self.status == 'enviado' and self.valido_ate is not None
+                and self.valido_ate < timezone.now())

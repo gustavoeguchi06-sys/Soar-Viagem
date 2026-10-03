@@ -712,3 +712,45 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 @media (max-width: 640px) {
     .incl-grade, .incl-grade--so .incl-lista { grid-template-columns: 1fr; }
 }
+
+/* Orçamento da agência direto no card da viagem */
+.orc-cliente { margin: 14px 0 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px; }
+.orc-cliente legend { padding: 0; margin-bottom: 8px; font-size: 1rem; font-weight: 700; color: var(--preto); }
+.orc-campo { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; font-weight: 600;
+             color: var(--tinta-suave); }
+.orc-campo input { width: 100%; padding: 9px 11px; font: inherit; font-size: .92rem; font-weight: 400;
+                   color: var(--tinta); background: transparent; border: 1.5px solid var(--linha);
+                   border-radius: var(--r-sm); }
+.orc-campo input:focus, .chd__idades input:focus { outline: none; border-color: var(--verde);
+                                                   box-shadow: 0 0 0 3px rgba(20, 108, 67, .14); }
+.orc-campo--erro input { border-color: #d92d20; }
+.orc-erro { display: block; margin-top: 2px; font-size: .78rem; font-weight: 600; color: #d92d20; }
+
+.orc-ok { margin-top: 14px; padding: 14px; border-radius: var(--r-md); background: var(--verde-claro);
+          color: var(--preto); font-size: .86rem; line-height: 1.45; }
+.orc-ok__titulo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: .95rem; }
+.orc-ok__titulo .ic { width: 20px; height: 20px; color: var(--verde); flex: none; }
+.orc-ok__dados { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 10px 0 0; }
+.orc-ok__dados dt { color: var(--tinta-suave); }
+.orc-ok__dados dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.orc-ok__envio { margin-top: 10px; font-size: .84rem; overflow-wrap: anywhere; }
+.orc-ok__envio--falhou { color: #b42318; }
+.orc-ok__links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; }
+.orc-ok__links a { color: var(--verde); font-weight: 700; text-decoration: underline; }
+.orc-campo--adultos { margin-top: 12px; }
+
+/* Pop-ups do orçamento (<dialog>). Sem JavaScript aparecem no lugar; com ele,
+   ganham .popup--modal e abrem no meio da tela, com fundo escuro. */
+.popup { position: static; width: 100%; margin: 14px 0 0; padding: 18px; border: 1px solid var(--linha);
+         border-radius: var(--r-lg); background: var(--fundo); color: var(--tinta);
+         display: flex; flex-direction: column; gap: 8px; }
+.popup:not([open]) { display: none; }
+.popup--modal { position: fixed; inset: 0; margin: auto; width: min(440px, calc(100vw - 32px));
+                max-height: calc(100vh - 32px); overflow: auto; box-shadow: var(--sombra-md); }
+.popup::backdrop { background: rgba(10, 18, 14, .55); }
+.popup__titulo { font-size: 1.1rem; font-weight: 700; color: var(--preto); }
+.popup__sub { font-size: .84rem; color: var(--tinta-suave); line-height: 1.45; margin-bottom: 4px; }
+.popup__acoes { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+.popup--aviso { border-top: 4px solid #d97706; font-size: .92rem; line-height: 1.5; }
+.popup--aviso .popup__titulo { color: #b45309; }
+.popup--aviso form { margin-top: 8px; }
