@@ -231,6 +231,7 @@
                     {% for s in viagem.saidas %}
                     <label class="saida-op{% if s.esgotada %} saida-op--esgotada{% endif %}">
                         <input type="radio" name="saida" value="{{ s.id }}"
+                               data-quartos="{% for q in s.quartos %}{{ q.chave }}:{{ q.quantidade }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                {% if s.id|stringformat:"s" == saida_marcada and not s.esgotada %}checked{% endif %}{% if s.esgotada %} disabled{% endif %}>
                         <span class="saida-op__data">{{ s.texto }}
                             {% if s.quartos and not s.esgotada %}
@@ -272,7 +273,9 @@
                     <label class="acom">
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"
                                {% if a.chave == acomodacao_marcada %}checked{% endif %}>
-                        <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small></span>
+                        <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small>
+                            {# quantos quartos deste tipo há na data marcada (viagem.js) #}
+                            <small class="acom__vagas" data-vagas-quarto hidden></small></span>
                         <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
                     </label>
                     {% endfor %}

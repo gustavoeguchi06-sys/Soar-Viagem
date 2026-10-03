@@ -752,6 +752,15 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
                      font-weight: 500; color: var(--tinta-suave); }
 .saida-op__quarto--zero { text-decoration: line-through; opacity: .7; }
 
+/* quantos quartos do tipo há na data marcada; com 0, o tipo fica esgotado */
+.acom__nome small.acom__vagas { margin-top: 2px; font-weight: 600; color: var(--verde-texto); }
+.acom--esgotada { cursor: not-allowed; }
+.acom--esgotada:hover { background: none; }
+.acom--esgotada .acom__nome b, .acom--esgotada .acom__preco { color: var(--tinta-suave); text-decoration: line-through; }
+.acom--esgotada .acom__nome small.acom__vagas { color: #b42318; }
+.acom--esgotada input { cursor: not-allowed; background: var(--fundo-suave); }
+html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: #f0a29b; }
+
 /* Só as fotos que o dono cadastrou: com número ímpar, a última ocupa a linha
    inteira, em vez de deixar um buraco ao lado. */
 .galeria-grade a:last-child:nth-child(odd) { grid-column: 1 / -1; }
