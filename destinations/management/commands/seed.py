@@ -5,7 +5,7 @@ Uso: python manage.py seed
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-from destinations.models import Destino, Hospedagem
+from destinations.models import Destino, Hospedagem, precos_a_partir_do_casal
 from reviews.models import Avaliacao
 
 
@@ -79,6 +79,8 @@ class Command(BaseCommand):
             slug = item.pop('slug', None) or slugify(f'{item["nome"]}-{item["pais"]}')
 
             destino, novo = Destino.objects.get_or_create(slug=slug, defaults=item)
+            if item.get('preco_base') and not destino.precos.exists():
+                precos_a_partir_do_casal(destino, item['preco_base'])
             if not novo:
                 self.stdout.write(self.style.WARNING(f'· Já existia: {destino}'))
                 continue

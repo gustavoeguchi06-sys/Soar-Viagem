@@ -90,3 +90,6 @@ abaixo. A tela inicial troca o título e as ações pelos blocos faixa_*.
 
 {% block content_title %}{% endblock %}
 {% block content_subtitle %}{% endblock %}
+
+{% comment %}O sprite de ícones do site, para o seletor de ícones da faixa de serviços.{% endcomment %}
+{% block footer %}{{ block.super }}{% include 'partials/_icones.html' %}{% endblock %}

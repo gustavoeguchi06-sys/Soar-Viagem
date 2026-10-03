@@ -1569,3 +1569,20 @@ fieldset.module.collapse details[open] > summary { border-bottom: 1px solid var(
 
 /* prévia do vídeo enviado: grande o bastante para dar play e conferir */
 .miniatura--video { width: 220px; height: 124px; object-fit: contain; background: #000; }
+
+/* números curtos nas linhas de data (vagas e quartos de cada tipo) */
+.campo-curto { width: 5.5em; }
+
+/* seletor de ícone da faixa de serviços da viagem */
+.seletor-icone { display: flex; flex-wrap: wrap; gap: 6px; max-width: 760px; }
+.seletor-icone .seletor-icone__op { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 78px;
+                     padding: 8px 4px; border: 1px solid var(--border-color); border-radius: var(--r-sm);
+                     cursor: pointer; font-size: .7rem; text-align: center; line-height: 1.2;
+                     color: var(--body-quiet-color); float: none; min-width: 0; margin: 0; }
+.seletor-icone__op input { position: absolute; opacity: 0; pointer-events: none; }
+.seletor-icone__op .ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7;
+                         stroke-linecap: round; stroke-linejoin: round; color: var(--body-fg); }
+.seletor-icone__op:hover { border-color: var(--primary); }
+.seletor-icone__op:has(input:checked) { border-color: var(--primary); background: var(--selected-bg);
+                                        color: var(--body-fg); font-weight: 600; }
+.seletor-icone__op:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }

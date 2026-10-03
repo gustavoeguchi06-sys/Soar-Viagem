@@ -321,7 +321,11 @@ TAMANHO_MAXIMO_VIDEO = int(os.environ.get('SOAR_TAMANHO_MAXIMO_VIDEO_MB', 100)) 
 TAMANHO_MAXIMO_ENVIO_PAINEL = TAMANHO_MAXIMO_VIDEO + 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
+# O formulário do destino no painel junta muitos blocos (preços por quarto,
+# datas com os quartos de cada tipo, roteiro, fotos, vídeos, serviços...): uma
+# viagem completa passa de 200 campos, e com 200 o painel recusava o salvar
+# (TooManyFieldsSent). 1000 é o padrão do Django e ainda barra envio abusivo.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
 # Content-Security-Policy — a rede que apara o que passar pelo escape dos
 # templates. Sem 'unsafe-inline' em script-src: todo o JavaScript do site está

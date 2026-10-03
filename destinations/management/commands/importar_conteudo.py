@@ -16,7 +16,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from destinations.conteudo import FAQ, INCLUSO, INFORMACOES, POR_DESTINO
-from destinations.models import Destino, DestaqueViagem, DiaRoteiro, PerguntaFrequente
+from destinations.models import (Destino, DestaqueViagem, DiaRoteiro, PerguntaFrequente,
+                                 precos_a_partir_do_casal)
 
 CAMPOS_SIMPLES = ['selo', 'subtitulo', 'regiao', 'estado', 'periodo', 'mes_ano',
                   'dias', 'noites', 'proxima_saida', 'hospedagem_sub']
@@ -51,6 +52,8 @@ class Command(BaseCommand):
             if cfg.get('preco_base') and (forcar or destino.preco_base is None):
                 destino.preco_base = cfg['preco_base']
                 mudou.append('preco_base')
+                if not destino.precos.exists():
+                    precos_a_partir_do_casal(destino, cfg['preco_base'])
 
             # as duas listas são iguais para todos os destinos hoje
             if forcar or not destino.incluso:

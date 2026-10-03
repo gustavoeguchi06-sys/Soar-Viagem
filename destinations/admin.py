@@ -22,8 +22,8 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, Interessado, PerguntaFrequente, Saida, SlideInicio,
-                     VideoDestino, VideoSoar60)
+                     ImagemHospedagem, Interessado, PerguntaFrequente, PrecoQuarto, Saida,
+                     ServicoViagem, SlideInicio, VideoDestino, VideoSoar60)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -169,17 +169,21 @@ class HospedagemInline(admin.StackedInline):
 # --------------------------------------------------------------------------- #
 
 class SaidaInline(admin.TabularInline):
-    """As datas de saída do destino, uma por linha, com calendário."""
+    """As datas de saída do destino, uma por linha, com calendário e os quartos de cada tipo."""
 
     model = Saida
     extra = 1
-    fields = ['data_ida', 'data_volta', 'vagas']
+    fields = ['data_ida', 'data_volta', 'vagas', 'quartos_single', 'quartos_casal',
+              'quartos_duplo', 'quartos_triplo']
     formfield_overrides = {
         models.DateField: {'widget': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')},
+        models.PositiveSmallIntegerField: {
+            'widget': forms.NumberInput(attrs={'min': 0, 'class': 'campo-curto'})},
     }
     verbose_name = 'saída'
-    verbose_name_plural = ('Datas de saída (o site mostra todas as que ainda vão acontecer; '
-                           'as que já passaram somem sozinhas)')
+    verbose_name_plural = ('Datas de saída: as que já passaram somem sozinhas. Em "Quartos", '
+                           'quantos quartos de cada tipo ainda há na data (em branco, o tipo não '
+                           'aparece; 0, aparece como esgotado)')
 
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
@@ -188,20 +192,73 @@ class SaidaInline(admin.TabularInline):
         return formset
 
 
+class PrecoQuartoInline(admin.TabularInline):
+    """O preço por pessoa de cada tipo de quarto: cada um com o seu valor."""
+
+    model = PrecoQuarto
+    fields = ['tipo', 'preco']
+    formfield_overrides = {**PRECO_BRL}
+    verbose_name = 'preço'
+    verbose_name_plural = ('Preços por quarto (valor por pessoa; só aparecem no site os tipos '
+                           'cadastrados aqui)')
+
+    def get_extra(self, request, obj=None, **kwargs):
+        # destino novo ou ainda sem preço: já abre com linhas para preencher
+        return 0 if obj is not None and obj.precos.exists() else 4
+
+
+class SeletorDeIcone(forms.RadioSelect):
+    """A lista de ícones como botões com o desenho, em vez de uma lista de nomes."""
+
+    def render(self, name, value, attrs=None, renderer=None):
+        opcoes = []
+        for valor, rotulo in self.choices:
+            if not valor:
+                continue
+            id_op = '{}_{}'.format((attrs or {}).get('id', name), valor)
+            opcoes.append(format_html(
+                '<label class="seletor-icone__op" for="{}" title="{}">'
+                '<input type="radio" name="{}" value="{}" id="{}"{}>'
+                '<svg class="ic" aria-hidden="true"><use href="#{}"></use></svg>'
+                '<span>{}</span></label>',
+                id_op, rotulo, name, valor, id_op,
+                format_html(' checked') if str(value) == str(valor) else '',
+                valor, rotulo))
+        return format_html('<div class="seletor-icone">{}</div>',
+                           format_html(''.join(['{}'] * len(opcoes)), *opcoes))
+
+
+class ServicoViagemInline(admin.StackedInline):
+    """A faixa de ícones da página da viagem (Transporte confortável, Guias...)."""
+
+    model = ServicoViagem
+    extra = 0
+    fields = ['icone', ('titulo', 'sub'), 'ordem']
+    formfield_overrides = {}
+    verbose_name = 'serviço'
+    verbose_name_plural = ('Faixa de serviços da página (ícone e duas linhas de texto; sem nenhum '
+                           'cadastrado, a página usa a faixa padrão da Soar)')
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'icone':
+            kwargs['widget'] = SeletorDeIcone
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
 @admin.register(Destino)
 class DestinoAdmin(admin.ModelAdmin):
-    list_display = ['capa', 'nome', 'regiao', 'preco_base',
+    list_display = ['capa', 'nome', 'regiao', 'a_partir_de',
                     'saidas_no_site', 'destaque', 'soar_60', 'situacao', 'no_site']
     list_display_links = ['nome']
-    list_editable = ['preco_base', 'destaque', 'soar_60']
+    list_editable = ['destaque', 'soar_60']
     list_filter = ['destaque', 'soar_60', 'regiao']
     search_fields = ['nome', 'regiao', 'descricao']
     prepopulated_fields = {'slug': ['nome']}
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
     list_per_page = 30
-    readonly_fields = ['previa_capa', 'criado_em']
-    inlines = [SaidaInline, HospedagemInline, ImagemDestinoInline, VideoDestinoInline,
+    readonly_fields = ['previa_capa', 'criado_em', 'a_partir_de']
+    inlines = [PrecoQuartoInline, SaidaInline, ServicoViagemInline, HospedagemInline, ImagemDestinoInline, VideoDestinoInline,
                DestaqueViagemInline, DiaRoteiroInline, PerguntaFrequenteInline]
 
     fieldsets = [
@@ -213,10 +270,10 @@ class DestinoAdmin(admin.ModelAdmin):
                            'tem texto padrão e pode ficar para depois.',
         }),
         ('Preços', {
-            'fields': ['preco_base'],
-            'description': 'O preço por pessoa em quarto de casal abre o card de reserva; os '
-                           'outros quartos são calculados a partir dele. Em branco, a '
-                           'página mostra “sob consulta”.',
+            'fields': ['a_partir_de'],
+            'description': 'Os preços ficam no bloco <b>Preços por quarto</b>, mais abaixo: um '
+                           'valor por pessoa para cada tipo de quarto. O "a partir de" do site é '
+                           'o menor deles e se atualiza sozinho ao salvar.',
         }),
         ('Capa da página de viagem', {
             'classes': ['collapse'],
@@ -246,6 +303,13 @@ class DestinoAdmin(admin.ModelAdmin):
                                'Sem capa: a página usa uma ilustração da Soar.</span>')
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
                            destino.imagem_capa.url, destino.nome)
+
+    @admin.display(description='A partir de', ordering='preco_base')
+    def a_partir_de(self, destino):
+        if destino.preco_base is None:
+            return 'sob consulta'
+        inteiro, centavos = f'{destino.preco_base:,.2f}'.split('.')
+        return 'R$ {},{} por pessoa'.format(inteiro.replace(',', '.'), centavos)
 
     @admin.display(description='Saídas')
     def saidas_no_site(self, destino):

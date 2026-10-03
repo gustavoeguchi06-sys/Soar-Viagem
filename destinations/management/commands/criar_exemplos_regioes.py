@@ -19,7 +19,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from destinations.models import Destino, Hospedagem, Saida
+from destinations.models import Destino, Hospedagem, Saida, precos_a_partir_do_casal
 
 EXEMPLOS = [
     {
@@ -81,6 +81,7 @@ class Command(BaseCommand):
                 descricao=ex['descricao'], melhor_epoca=ex['melhor_epoca'],
                 preco_base=ex['preco_base'], destaque=True,
             )
+            precos_a_partir_do_casal(destino, ex['preco_base'])
             for ida, volta, vagas in ex['saidas']:
                 Saida.objects.create(destino=destino, data_ida=date(*ida),
                                      data_volta=date(*volta), vagas=vagas)
