@@ -144,6 +144,29 @@ class PainelAgenciaTests(TestCase):
         self.assertContains(pagina, 'Não conseguimos enviar o e-mail')
         self.assertContains(pagina, reverse('agencia:orcamento_pdf', args=[orcamento.pk]))
 
+    def test_pdf_tem_todas_as_informacoes_do_pacote(self):
+        from destinations.conteudo import montar_viagem
+        from .pdf import _estilos, _pacote
+
+        def textos(flowables):
+            for f in flowables:
+                if hasattr(f, '_content'):          # KeepTogether
+                    yield from textos(f._content)
+                elif hasattr(f, 'getPlainText'):
+                    yield f.getPlainText()
+
+        viagem = montar_viagem(self.destino, [])
+        texto = '\n'.join(textos(_pacote(self.destino, viagem, _estilos())))
+        for secao in ('Sobre a viagem', 'Destaques da viagem', 'Roteiro dia a dia',
+                      'O pacote inclui', 'Hospedagem', 'Informações importantes',
+                      'Perguntas frequentes'):
+            self.assertIn(secao, texto)
+        dia = viagem['roteiro'][0]
+        self.assertIn(dia['resumo'], texto)
+        for topico in dia['topicos']:                 # o roteiro vai completo
+            self.assertIn(topico.replace('→', '-'), texto)
+        self.assertIn(viagem['faq'][0]['pergunta'], texto)
+
     def test_pdf_so_para_a_agencia_dona(self):
         self.entrar(self.ag1)
         self.client.post(self.criar, self.dados)

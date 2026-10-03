@@ -16,7 +16,8 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import (Image, KeepTogether, Paragraph, SimpleDocTemplate, Spacer,
+                                Table, TableStyle)
 
 from destinations.conteudo import montar_viagem
 
@@ -34,11 +35,15 @@ TROCAS = {'→': '-', '←': '-', '–': '-', '—': '-', '•': '-', '“': '"'
           '‘': "'", '’': "'", '…': '...'}
 
 
+def _sem_simbolos(valor):
+    """Só os caracteres que a Helvetica tem; a seta do roteiro vira hífen."""
+    texto = ''.join(TROCAS.get(c, c) for c in str(valor or ''))
+    return texto.encode('cp1252', 'ignore').decode('cp1252')
+
+
 def _texto(valor):
     """Texto seguro para o Paragraph: sem HTML e só com caracteres da Helvetica."""
-    texto = ''.join(TROCAS.get(c, c) for c in str(valor or ''))
-    texto = texto.encode('cp1252', 'ignore').decode('cp1252')
-    return escape(texto)
+    return escape(_sem_simbolos(valor))
 
 
 def _reais(valor):
@@ -53,13 +58,18 @@ def _estilos():
                                  spaceAfter=2),
         'sub': ParagraphStyle('sub', parent=base['Normal'], fontSize=9, textColor=CINZA),
         'secao': ParagraphStyle('secao', parent=base['Heading2'], fontName='Helvetica-Bold',
-                                fontSize=11.5, textColor=VERDE, spaceBefore=9, spaceAfter=4),
+                                fontSize=11.5, textColor=VERDE, spaceBefore=9, spaceAfter=4,
+                                keepWithNext=1),
         'normal': ParagraphStyle('normal', parent=base['Normal'], fontSize=9.5, leading=13),
         'rotulo': ParagraphStyle('rotulo', parent=base['Normal'], fontSize=9, leading=12,
                                  textColor=CINZA),
         'codigo': ParagraphStyle('codigo', parent=base['Normal'], fontSize=9, textColor=CINZA,
                                  alignment=TA_RIGHT),
         'aviso': ParagraphStyle('aviso', parent=base['Normal'], fontSize=9, leading=12.5),
+        'item': ParagraphStyle('item', parent=base['Normal'], fontSize=9.5, leading=13,
+                               leftIndent=8),
+        'dia': ParagraphStyle('dia', parent=base['Normal'], fontSize=9.5, leading=13,
+                              spaceBefore=6),
     }
 
 
@@ -135,18 +145,6 @@ def gerar_pdf(orcamento):
     ]))
     corpo.append(aviso)
 
-    if viagem['incluso']:
-        corpo.append(Paragraph('O pacote inclui', e['secao']))
-        corpo += [Paragraph('- ' + _texto(item), e['normal']) for item in viagem['incluso']]
-    if viagem['nao_incluso']:
-        corpo.append(Paragraph('Não incluso', e['secao']))
-        corpo += [Paragraph('- ' + _texto(item), e['normal']) for item in viagem['nao_incluso']]
-    if viagem['roteiro']:
-        corpo.append(Paragraph('Roteiro resumido', e['secao']))
-        corpo += [Paragraph('<b>{}</b> {}'.format(_texto(dia.get('titulo')),
-                                                 _texto(dia.get('resumo'))), e['normal'])
-                  for dia in viagem['roteiro']]
-
     corpo.append(Paragraph('Cliente', e['secao']))
     corpo.append(_ficha([
         ('Responsável', '<b>{}</b>'.format(_texto(orcamento.cliente_nome))),
@@ -164,9 +162,90 @@ def gerar_pdf(orcamento):
         ('WhatsApp', _texto(agencia.whatsapp)),
     ], e))
 
+    corpo += _pacote(destino, viagem, e)
+
+    def rodape(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(CINZA)
+        canvas.drawString(18 * mm, 9 * mm, _sem_simbolos(
+            'Orçamento {} - {} - Soar Operadora'.format(orcamento.codigo, destino.nome)))
+        canvas.drawRightString(A4[0] - 18 * mm, 9 * mm, 'Página {}'.format(doc.page))
+        canvas.restoreState()
 
     saida = BytesIO()
     SimpleDocTemplate(saida, pagesize=A4, title='Orçamento {}'.format(orcamento.codigo),
                       author='Soar Operadora', leftMargin=18 * mm, rightMargin=18 * mm,
-                      topMargin=14 * mm, bottomMargin=14 * mm).build(corpo)
+                      topMargin=14 * mm, bottomMargin=16 * mm).build(
+        corpo, onFirstPage=rodape, onLaterPages=rodape)
     return saida.getvalue()
+
+
+def _lista(itens, e):
+    return [Paragraph('- ' + _texto(item), e['item']) for item in itens if item]
+
+
+def _pacote(destino, viagem, e):
+    """Tudo o que a página da viagem mostra sobre o pacote, menos fotos e avaliações."""
+    partes = [Paragraph('Sobre a viagem', e['secao'])]
+    # o subtítulo costuma ser o começo da descrição: não repete
+    if viagem['subtitulo'] and not (destino.descricao or '').startswith(viagem['subtitulo']):
+        partes.append(Paragraph('<b>{}</b>'.format(_texto(viagem['subtitulo'])), e['normal']))
+    if destino.descricao:
+        partes += [Spacer(1, 3), Paragraph(_texto(destino.descricao), e['normal'])]
+    servicos = ' | '.join('{} {}'.format(s['titulo'], s['sub']) for s in viagem['servicos'])
+    if servicos:
+        partes += [Spacer(1, 4), Paragraph(_texto(servicos), e['rotulo'])]
+
+    # "E muito mais" é chamada da vitrine, não um destaque de verdade
+    destaques = [d for d in viagem['destaques'] if d.strip().lower() != 'e muito mais']
+    if destaques:
+        partes.append(Paragraph('Destaques da viagem', e['secao']))
+        partes += _lista(destaques, e)
+
+    if viagem['roteiro']:
+        dias = []
+        for dia in viagem['roteiro']:
+            bloco = [Paragraph('<b>{}</b>'.format(_texto(dia.get('titulo'))), e['dia'])]
+            if dia.get('resumo'):
+                bloco.append(Paragraph(_texto(dia['resumo']), e['normal']))
+            topicos = dia.get('topicos') or ([dia['detalhe']] if dia.get('detalhe') else [])
+            bloco += _lista(topicos, e)
+            dias.append(bloco)
+        partes += _com_titulo(Paragraph('Roteiro dia a dia', e['secao']), dias)
+
+    if viagem['incluso']:
+        partes.append(Paragraph('O pacote inclui', e['secao']))
+        partes += _lista(viagem['incluso'], e)
+    if viagem['nao_incluso']:
+        partes.append(Paragraph('Não incluso', e['secao']))
+        partes += _lista(viagem['nao_incluso'], e)
+
+    hospedagem = viagem['hospedagem']
+    partes.append(Paragraph('Hospedagem', e['secao']))
+    partes.append(Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal']))
+    if hospedagem['sub']:
+        partes.append(Paragraph(_texto(hospedagem['sub']), e['normal']))
+    comodidades = ', '.join(c['nome'] for c in hospedagem['comodidades'])
+    if comodidades:
+        partes.append(Paragraph(_texto('Comodidades: ' + comodidades), e['rotulo']))
+
+    if viagem['informacoes']:
+        partes.append(Paragraph('Informações importantes', e['secao']))
+        partes += _lista(viagem['informacoes'], e)
+
+    if viagem['faq']:
+        partes += _com_titulo(Paragraph('Perguntas frequentes', e['secao']), [
+            [Paragraph('<b>{}</b>'.format(_texto(item['pergunta'])), e['dia']),
+             Paragraph(_texto(item['resposta']), e['normal'])]
+            for item in viagem['faq']])
+    return partes
+
+
+def _com_titulo(titulo, blocos):
+    """Cada bloco fica inteiro numa página, e o título vai junto com o primeiro.
+
+    O keepWithNext do título não segura um KeepTogether logo depois; sem isto,
+    o título podia ficar sozinho no pé da página.
+    """
+    return [KeepTogether([titulo] + blocos[0])] + [KeepTogether(b) for b in blocos[1:]]
