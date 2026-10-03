@@ -6,6 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from destinations.models import Destino
+from soar.videos import validar_foto
 
 EXTENSOES_FOTO = ('.jpg', '.jpeg', '.png', '.webp', '.gif')
 
@@ -19,8 +20,8 @@ def caminho_foto_avaliacao(avaliacao, nome_enviado):
     dado pessoal ("joao-silva-cpf.jpg"). Com 32 caracteres aleatórios, o
     endereço só aparece para quem o painel mostra.
 
-    A extensão já chega corrigida pelo formulário (a do formato real da
-    imagem); a lista aqui é só a segunda trava.
+    O painel só aceita imagem de verdade (ImageField + soar.videos.validar_foto);
+    a lista de extensões aqui é a segunda trava.
     """
     extensao = os.path.splitext(nome_enviado)[1].lower()
     if extensao not in EXTENSOES_FOTO:
@@ -62,7 +63,7 @@ class Avaliacao(models.Model):
         default=5,
     )
     comentario = models.TextField('Comentário')
-    foto = models.ImageField('Foto da viagem (opcional)', upload_to=caminho_foto_avaliacao,
+    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto da viagem (opcional)', upload_to=caminho_foto_avaliacao,
                              blank=True, null=True)
     publicada = models.BooleanField(
         'Publicada', default=False,

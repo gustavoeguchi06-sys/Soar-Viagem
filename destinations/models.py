@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.utils.text import slugify
 
-from soar.videos import ajuda as ajuda_video, validar_video
+from soar.videos import ajuda as ajuda_video, validar_foto, validar_video
 
 from .quartos import ESCOLHAS as TIPOS_DE_QUARTO, ICONES, ORDEM as ORDEM_DOS_QUARTOS, POR_CHAVE
 
@@ -67,7 +67,7 @@ class Destino(models.Model):
                             help_text='Preenchido automaticamente a partir do nome.')
     pais = models.CharField('País', max_length=80, default='Brasil')
     descricao = models.TextField('Descrição')
-    imagem_capa = models.ImageField('Imagem de capa', upload_to='destinos/', blank=True, null=True)
+    imagem_capa = models.ImageField(validators=[validar_foto], verbose_name='Imagem de capa', upload_to='destinos/', blank=True, null=True)
     melhor_epoca = models.CharField('Melhor época para visitar', max_length=120, blank=True)
     destaque = models.BooleanField('Destaque na página inicial', default=False)
     soar_60 = models.BooleanField(
@@ -157,7 +157,8 @@ class Destino(models.Model):
         sem nenhuma, a mesma ilustração que abre a página da viagem."""
         if self.imagem_capa:
             return self.imagem_capa.url
-        foto = self.imagens.exclude(imagem='').first() if self.pk else None
+        # .all() e não .exclude(): aproveita o prefetch_related das listas
+        foto = next((i for i in self.imagens.all() if i.imagem), None) if self.pk else None
         if foto:
             return foto.imagem.url
         from django.templatetags.static import static
@@ -193,7 +194,8 @@ class Destino(models.Model):
         So conta as publicadas: enquanto uma avaliacao esta na fila de
         moderacao ela nao pode mexer na nota que aparece na vitrine.
         """
-        notas = [a.nota for a in self.avaliacoes.publicadas()]
+        # .all() e não .publicadas(): aproveita o prefetch_related das listas
+        notas = [a.nota for a in self.avaliacoes.all() if a.publicada]
         if not notas:
             return None
         return round(sum(notas) / len(notas), 1)
@@ -202,7 +204,7 @@ class Destino(models.Model):
 class ImagemDestino(models.Model):
     destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
                                 related_name='imagens', verbose_name='Destino')
-    imagem = models.ImageField('Imagem', upload_to='destinos/galeria/')
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Imagem', upload_to='destinos/galeria/')
     legenda = models.CharField('Legenda', max_length=200, blank=True)
 
     class Meta:
@@ -220,7 +222,7 @@ class VideoDestino(models.Model):
                                 related_name='videos', verbose_name='Destino')
     arquivo = models.FileField('Vídeo', upload_to='destinos/videos/',
                                validators=[validar_video], help_text=ajuda_video())
-    capa = models.ImageField('Foto de capa', upload_to='destinos/videos/capas/', blank=True,
+    capa = models.ImageField(validators=[validar_foto], verbose_name='Foto de capa', upload_to='destinos/videos/capas/', blank=True,
                              null=True, help_text='Opcional. Aparece antes de o vídeo tocar.')
     legenda = models.CharField('Legenda', max_length=200, blank=True)
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
@@ -240,7 +242,7 @@ class Hospedagem(models.Model):
     nome = models.CharField('Nome', max_length=120)
     endereco = models.CharField('Endereço', max_length=200, blank=True,
                                 help_text='Onde a hospedagem fica.')
-    imagem = models.ImageField('Imagem principal', upload_to='hospedagens/', blank=True, null=True)
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Imagem principal', upload_to='hospedagens/', blank=True, null=True)
     pacote_completo = models.BooleanField('Incluso no pacote completo', default=True,
                                           help_text='A hospedagem já está inclusa no pacote da viagem.')
 
@@ -256,7 +258,7 @@ class Hospedagem(models.Model):
 class ImagemHospedagem(models.Model):
     hospedagem = models.ForeignKey(Hospedagem, on_delete=models.CASCADE,
                                    related_name='imagens', verbose_name='Hospedagem')
-    imagem = models.ImageField('Imagem', upload_to='hospedagens/galeria/')
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Imagem', upload_to='hospedagens/galeria/')
     legenda = models.CharField('Legenda', max_length=200, blank=True)
 
     class Meta:
@@ -298,7 +300,7 @@ class DiaRoteiro(models.Model):
     detalhe = models.TextField('Detalhe', blank=True,
                                help_text='O texto que abre quando a pessoa clica no dia. '
                                          'Cada linha vira um tópico no site.')
-    imagem = models.ImageField('Foto do dia', upload_to='roteiro/', blank=True, null=True,
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Foto do dia', upload_to='roteiro/', blank=True, null=True,
                                help_text='Opcional: sem foto, usa uma da galeria do destino.')
 
     class Meta:
@@ -427,8 +429,7 @@ class SlideInicio(models.Model):
     nenhuma foto cadastrada, a página usa as fotos de exemplo do site.
     """
 
-    imagem = models.ImageField(
-        'Foto', upload_to='inicio/',
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='inicio/',
         help_text='Foto deitada e grande (pelo menos 1600 px de largura). Ela ocupa a tela '
                   'inteira, então o assunto principal deve ficar mais para a direita: o '
                   'título aparece à esquerda.')
@@ -460,7 +461,7 @@ class VideoSoar60(models.Model):
                               help_text='Ex.: Como é uma viagem 60+ com a Soar.')
     arquivo = models.FileField('Vídeo', upload_to='soar60/videos/',
                                validators=[validar_video], help_text=ajuda_video())
-    capa = models.ImageField('Foto de capa', upload_to='soar60/capas/', blank=True, null=True,
+    capa = models.ImageField(validators=[validar_foto], verbose_name='Foto de capa', upload_to='soar60/capas/', blank=True, null=True,
                              help_text='Opcional. Aparece antes de o vídeo tocar.')
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
     ativo = models.BooleanField('Aparece no site', default=True)
@@ -564,7 +565,7 @@ class PaginaSobre(models.Model):
     subtitulo = models.CharField(
         'Frase da capa', max_length=200, blank=True,
         default='Viagens em grupo pelo Brasil, para quem quer ir além do óbvio.')
-    capa = models.ImageField('Foto da capa', upload_to='sobre/', blank=True, null=True,
+    capa = models.ImageField(validators=[validar_foto], verbose_name='Foto da capa', upload_to='sobre/', blank=True, null=True,
                              help_text='Foto deitada e grande (1920 x 1080 px). Sem foto, usa '
                                        'uma ilustração da Soar.')
     video_capa = models.FileField(
@@ -576,7 +577,7 @@ class PaginaSobre(models.Model):
     historia = models.TextField(
         'Texto principal', blank=True,
         help_text='A história da Soar. Para começar um parágrafo novo, deixe uma linha em branco.')
-    historia_foto = models.ImageField('Foto ao lado do texto', upload_to='sobre/', blank=True,
+    historia_foto = models.ImageField(validators=[validar_foto], verbose_name='Foto ao lado do texto', upload_to='sobre/', blank=True,
                                       null=True)
     diferenciais_titulo = models.CharField('Título dos diferenciais', max_length=80,
                                            default='Por que viajar com a Soar')
@@ -631,7 +632,7 @@ class NumeroSobre(models.Model):
 
 class FotoSobre(models.Model):
     pagina = models.ForeignKey(PaginaSobre, on_delete=models.CASCADE, related_name='fotos')
-    imagem = models.ImageField('Foto', upload_to='sobre/galeria/')
+    imagem = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='sobre/galeria/')
     legenda = models.CharField('Legenda', max_length=120, blank=True)
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
 

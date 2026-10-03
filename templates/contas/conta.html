@@ -57,13 +57,6 @@
                 <p class="reserva-item__obs">“{{ reserva.observacao }}”</p>
                 {% endif %}
 
-                {% if reserva.status == 'pendente' %}
-                <form action="{% url 'reservas:cancelar' reserva.pk %}" method="post"
-                      data-confirmar="Cancelar a reserva {{ reserva.codigo }}?">
-                    {% csrf_token %}
-                    <button type="submit" class="link-cancelar">Cancelar este pedido</button>
-                </form>
-                {% endif %}
             </article>
             {% endfor %}
         </div>

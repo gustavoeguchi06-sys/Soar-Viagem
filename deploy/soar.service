@@ -1,0 +1,35 @@
+# Serviço do site no VPS: /etc/systemd/system/soar.service
+#
+#   sudo cp deploy/soar.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now soar
+#   sudo systemctl status soar        # conferir
+#   sudo journalctl -u soar -f        # acompanhar
+#
+# Roda com o usuário "soar", sem privilégio de administrador.
+
+[Unit]
+Description=Soar Operadora (Django + Gunicorn)
+After=network.target postgresql.service redis-server.service
+Requires=postgresql.service
+
+[Service]
+User=soar
+Group=soar
+WorkingDirectory=/srv/soar/app
+# As variáveis (SOAR_SECRET_KEY, banco, e-mail, R2...) ficam neste arquivo,
+# legível só pelo usuário soar (chmod 600). Nunca vão para o Git.
+EnvironmentFile=/srv/soar/app/.env
+ExecStart=/srv/soar/venv/bin/gunicorn soar.wsgi:application -c /srv/soar/app/deploy/gunicorn.conf.py
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+# Endurecimento: o processo só escreve onde precisa.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/soar/app/media /srv/soar/app/logs /var/log/soar
+
+[Install]
+WantedBy=multi-user.target

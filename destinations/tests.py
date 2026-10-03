@@ -44,32 +44,27 @@ class SaidasTests(TestCase):
         resposta = self.client.get(self.destino.get_absolute_url())
         self.assertEqual(resposta.context['viagem']['periodo'], self.livre.textos['periodo'])
 
-    def test_reserva_grava_a_saida_escolhida(self):
+    def test_rotas_antigas_de_reserva_do_cliente_nao_existem_mais(self):
+        # Antes de a venda passar para as agências, o cliente reservava aqui.
+        # Sem conta de cliente, a rota só servia para alguém criar pedido
+        # digitando o endereço direto.
         cliente = User.objects.create_user('cli', 'cli@exemplo.com', 'senha-boa-123')
         self.client.force_login(cliente)
-        url = reverse('reservas:nova', args=[self.destino.slug])
-        resposta = self.client.get(url + f'?saida={self.outra.pk}')
-        self.assertEqual(resposta.context['form']['saida_escolhida'].value(), str(self.outra.pk))
-        self.client.post(url, {'saida_escolhida': self.outra.pk, 'acomodacao': 'casal',
-                               'pessoas': 2})
-        self.assertEqual(Reserva.objects.get().saida, self.outra.texto)
-
-    def test_saida_esgotada_nao_pode_ser_escolhida(self):
-        cliente = User.objects.create_user('cli', 'cli@exemplo.com', 'senha-boa-123')
-        self.client.force_login(cliente)
-        url = reverse('reservas:nova', args=[self.destino.slug])
-        resposta = self.client.post(url, {'saida_escolhida': self.lotada.pk,
-                                          'acomodacao': 'casal', 'pessoas': 2})
-        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(self.client.get('/reservar/bonito/').status_code, 404)
+        self.assertEqual(self.client.post('/reservar/bonito/', {'acomodacao': 'casal'}).status_code,
+                         404)
+        self.assertEqual(self.client.post('/reservas/1/cancelar/').status_code, 404)
         self.assertFalse(Reserva.objects.exists())
 
-    def test_tudo_esgotado_volta_para_a_pagina(self):
-        Saida.objects.filter(pk__in=[self.livre.pk, self.outra.pk]).update(vagas=0)
-        cliente = User.objects.create_user('cli', 'cli@exemplo.com', 'senha-boa-123')
-        self.client.force_login(cliente)
-        resposta = self.client.get(reverse('reservas:nova', args=[self.destino.slug]))
-        self.assertRedirects(resposta, self.destino.get_absolute_url(),
-                             fetch_redirect_response=False)
+    def test_saida_esgotada_nao_entra_no_orcamento(self):
+        from agencia.forms import OrcamentoViagemForm
+        form = OrcamentoViagemForm({'cliente_nome': 'Bruno', 'cliente_email': 'b@gmail.com',
+                                    'acomodacao': 'casal', 'pessoas': 2,
+                                    'saida': self.lotada.pk}, destino=self.destino)
+        self.assertFalse(form.is_valid())
+        self.assertIn('saida', form.errors)
+        self.assertNotIn(str(self.lotada.pk), dict(form.fields['saida'].choices))
+        self.assertIn(str(self.livre.pk), dict(form.fields['saida'].choices))
 
     def test_sem_saidas_cadastradas_mantem_o_texto_antigo(self):
         Saida.objects.all().delete()

@@ -28,7 +28,10 @@ def ip_do_cliente(request):
     if getattr(settings, 'SECURE_PROXY_SSL_HEADER', None):
         encaminhado = request.META.get('HTTP_X_FORWARDED_FOR', '')
         if encaminhado:
-            return encaminhado.split(',')[0].strip()
+            # O ÚLTIMO da lista é o que o nosso Nginx escreveu. O primeiro pode
+            # vir do próprio visitante ("X-Forwarded-For: 1.2.3.4"), e confiar
+            # nele deixava trocar de IP falso a cada tentativa de senha.
+            return encaminhado.split(',')[-1].strip()
     return request.META.get('REMOTE_ADDR', '') or 'desconhecido'
 
 
@@ -102,8 +105,6 @@ LIMITE_LOGIN = Limite('login',
                       settings.LIMITE_LOGIN_TENTATIVAS,
                       settings.LIMITE_LOGIN_JANELA)
 LIMITE_CADASTRO = Limite('cadastro', settings.LIMITE_CADASTRO_POR_HORA, 3600)
-LIMITE_AVALIACAO = Limite('avaliacao', settings.LIMITE_AVALIACAO_POR_HORA, 3600)
-LIMITE_RESERVA = Limite('reserva', settings.LIMITE_RESERVA_POR_HORA, 3600)
 LIMITE_SENHA = Limite('senha', settings.LIMITE_SENHA_POR_HORA, 3600)
 LIMITE_NEWSLETTER = Limite('newsletter', settings.LIMITE_NEWSLETTER_POR_HORA, 3600)
 LIMITE_INTERESSE = Limite('interesse', settings.LIMITE_INTERESSE_POR_HORA, 3600)

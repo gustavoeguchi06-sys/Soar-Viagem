@@ -25,7 +25,7 @@ from django.utils.text import slugify
 
 from destinations.models import Destino
 
-from soar.videos import ajuda as ajuda_video, validar_video
+from soar.videos import ajuda as ajuda_video, validar_foto, validar_video
 
 # Ícones do sprite do site (templates/partials/_icones.html) que fazem sentido
 # no blog. O dono escolhe pelo nome; o código do ícone não aparece para ele.
@@ -112,7 +112,7 @@ class Artigo(models.Model):
     resumo = models.CharField('Resumo', max_length=240,
                               help_text='Uma ou duas frases. Aparece no cartão do blog e embaixo '
                                         'do título do artigo.')
-    capa = models.ImageField('Foto de capa', upload_to='blog/capas/', blank=True, null=True,
+    capa = models.ImageField(validators=[validar_foto], verbose_name='Foto de capa', upload_to='blog/capas/', blank=True, null=True,
                              help_text='Foto larga (deitada). Sem foto, a página usa o fundo '
                                        'verde da Soar.')
     autor = models.CharField('Autor', max_length=80, default='Equipe Soar')
@@ -203,7 +203,7 @@ class Secao(models.Model):
     icone = models.CharField('Ícone do atalho', max_length=20, choices=ICONES, default='info')
     texto = models.TextField('Texto', blank=True,
                              help_text='Para começar um parágrafo novo, deixe uma linha em branco.')
-    foto = models.ImageField('Foto', upload_to='blog/secoes/', blank=True, null=True,
+    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='blog/secoes/', blank=True, null=True,
                              help_text='Opcional. Aparece depois do texto.')
     video = models.FileField('Vídeo', upload_to='blog/videos/', blank=True,
                              validators=[validar_video],
@@ -260,7 +260,7 @@ class Atracao(models.Model):
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
     nome = models.CharField('Nome', max_length=80)
     descricao = models.CharField('Frase curta', max_length=140, blank=True)
-    foto = models.ImageField('Foto', upload_to='blog/atracoes/', blank=True, null=True)
+    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='blog/atracoes/', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Atração'

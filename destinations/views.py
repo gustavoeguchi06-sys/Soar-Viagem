@@ -30,7 +30,8 @@ def home(request):
 
 def lista_destinos(request):
     """Lista de todos os destinos, com busca e filtro por região."""
-    destinos = Destino.objects.all()
+    # o card usa fotos e avaliações: busca tudo junto, não uma consulta por card
+    destinos = Destino.objects.prefetch_related('imagens', 'avaliacoes')
 
     busca = request.GET.get('q', '').strip()[:TAMANHO_MAXIMO_BUSCA]
     if busca:
@@ -109,10 +110,10 @@ def soar_60(request):
     o catálogo inteiro — melhor do que uma página vazia, e é verdade: toda
     viagem da Soar pode ser feita no ritmo 60+, é só combinar.
     """
-    viagens = Destino.objects.filter(soar_60=True)
+    viagens = Destino.objects.filter(soar_60=True).prefetch_related('imagens', 'avaliacoes')
     escolhidas = viagens.exists()
     if not escolhidas:
-        viagens = Destino.objects.all()
+        viagens = Destino.objects.prefetch_related('imagens', 'avaliacoes')
 
     return render(request, 'destinations/soar_60.html', {
         'viagens': viagens[:POR_PAGINA],

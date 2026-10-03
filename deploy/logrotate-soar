@@ -1,0 +1,16 @@
+# /etc/logrotate.d/soar — gira os logs do Gunicorn e do backup (os do Nginx o
+# Ubuntu já gira sozinho). O log de segurança do Django gira por conta própria
+# (183 dias, ver LOGGING no settings.py).
+/var/log/soar/*.log {
+    weekly
+    rotate 26
+    compress
+    delaycompress
+    missingok
+    notifempty
+    su soar soar
+    create 0640 soar soar
+    postrotate
+        systemctl kill -s USR1 soar.service >/dev/null 2>&1 || true
+    endscript
+}

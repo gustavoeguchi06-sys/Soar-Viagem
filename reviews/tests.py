@@ -1,31 +1,15 @@
-"""N6 — a foto da avaliação ganha nome sorteado e extensão do formato real."""
-import io
+"""A foto da avaliação ganha nome sorteado, e só imagem de verdade entra."""
 import re
 
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from PIL import Image
 
-from reviews.forms import AvaliacaoForm
-from reviews.models import caminho_foto_avaliacao
-
-
-def _imagem(formato):
-    buffer = io.BytesIO()
-    Image.new('RGB', (8, 8), 'green').save(buffer, format=formato)
-    return buffer.getvalue()
+from reviews.models import Avaliacao, caminho_foto_avaliacao
 
 
 class FotoDaAvaliacaoTests(TestCase):
-
-    def _form(self, nome, conteudo):
-        return AvaliacaoForm(data={'nota': 5, 'comentario': 'Viagem excelente, recomendo.'},
-                             files={'foto': SimpleUploadedFile(nome, conteudo)})
-
-    def test_extensao_vem_do_conteudo_e_nao_do_nome(self):
-        form = self._form('IMG_2031.gif', _imagem('PNG'))   # PNG disfarçado de GIF
-        self.assertTrue(form.is_valid(), form.errors)
-        self.assertEqual(form.cleaned_data['foto'].name, 'foto.png')
+    """A avaliação é cadastrada pelo dono no painel; estas regras valem lá."""
 
     def test_nome_gravado_e_sorteado(self):
         caminho = caminho_foto_avaliacao(None, 'joao-silva-cpf.jpg')
@@ -38,6 +22,7 @@ class FotoDaAvaliacaoTests(TestCase):
                                      caminho_foto_avaliacao(None, 'x.html')))
 
     def test_arquivo_que_nao_e_imagem_e_recusado(self):
-        form = self._form('foto.jpg', b'<script>alert(1)</script>')
-        self.assertFalse(form.is_valid())
-        self.assertIn('foto', form.errors)
+        campo = Avaliacao._meta.get_field('foto')
+        falso = SimpleUploadedFile('foto.jpg', b'<script>alert(1)</script>')
+        with self.assertRaises(ValidationError):
+            campo.formfield().clean(falso)
