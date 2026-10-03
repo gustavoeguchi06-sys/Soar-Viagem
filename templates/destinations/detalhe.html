@@ -217,15 +217,32 @@
 
                 <div class="acomodacoes">
                     <b>Escolha sua acomodação</b>
-                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por pessoa.</small>
+                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por adulto.</small>
                     {% for a in viagem.acomodacoes %}
                     <label class="acom">
                         <input type="radio" name="acomodacao" value="{{ a.chave }}"
                                {% if a.padrao %}checked{% endif %}>
                         <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small></span>
-                        <span class="acom__preco {% if a.consulte %}consulte{% endif %}{% if a.gratis %} gratis{% endif %}">{{ a.preco }}</span>
+                        <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
                     </label>
                     {% endfor %}
+                </div>
+
+                {% comment %}Criança não é acomodação: é um adicional que viaja com os
+                adultos, no quarto deles. A agência digita as idades, que seguem
+                para o orçamento.{% endcomment %}
+                <div class="chd">
+                    <div class="chd__topo">
+                        <span><b>+ Crianças (CHD)</b><small>Viajam acompanhadas de um adulto. Preço conforme a idade.</small></span>
+                        <span class="acom__preco consulte">Consulte</span>
+                    </div>
+                    {% if user.agente.aprovado %}
+                    <label class="chd__idades">
+                        <span>Idades das crianças</span>
+                        <input type="text" name="idades" maxlength="60"
+                               autocomplete="off" placeholder="Ex.: 4, 7">
+                    </label>
+                    {% endif %}
                 </div>
 
                 {% if user.agente.aprovado %}

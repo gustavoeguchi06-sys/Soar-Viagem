@@ -282,9 +282,6 @@ def _acomodacoes(preco_base):
          'padrao': False, **preco(base)},
         {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas', 'padrao': False,
          **preco(base - 200)},
-        # Criança até 8 anos não paga a viagem.
-        {'chave': 'crianca', 'nome': 'Criança até 8 anos', 'pessoas': 'Não paga a viagem',
-         'preco': 'Grátis', 'valor': 0, 'padrao': False, 'consulte': False, 'gratis': True},
     ]
 
 
