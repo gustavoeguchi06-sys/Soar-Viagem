@@ -252,8 +252,8 @@
         </div>
         <div class="in-insta">
             {% for f in i.viajantes %}
-            <a href="https://instagram.com/operadorasoar" target="_blank" rel="noopener" aria-label="Instagram da Soar">
-                <img src="{{ f }}" alt="" loading="lazy">
+            <a href="{{ f.link }}" target="_blank" rel="noopener" aria-label="{% if f.legenda %}{{ f.legenda }} (Instagram da Soar){% else %}Instagram da Soar{% endif %}">
+                <img src="{{ f.foto }}" alt="" loading="lazy" referrerpolicy="no-referrer">
             </a>
             {% endfor %}
         </div>

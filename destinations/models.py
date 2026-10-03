@@ -643,3 +643,27 @@ class FotoSobre(models.Model):
 
     def __str__(self):
         return self.legenda or 'Foto {}'.format(self.pk)
+
+
+class TokenInstagram(models.Model):
+    """O token do Instagram em uso, depois da primeira renovação.
+
+    O token nasce no .env (SOAR_INSTAGRAM_TOKEN), mas vence em 60 dias e cada
+    renovação devolve um token novo, que precisa ficar guardado em algum lugar
+    que o site consiga escrever: aqui. Fica uma linha só. Não aparece no
+    painel de propósito, porque é como uma senha da conta.
+    """
+
+    token = models.TextField()
+    # sha256 do token do .env de onde este veio: se alguém gerar outro token
+    # no painel da Meta e trocar o .env, o novo passa na frente deste
+    origem = models.CharField(max_length=64)
+    renovado_em = models.DateTimeField()
+    expira_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Token do Instagram'
+        verbose_name_plural = 'Token do Instagram'
+
+    def __str__(self):
+        return 'Token do Instagram (renovado em {:%d/%m/%Y})'.format(self.renovado_em)

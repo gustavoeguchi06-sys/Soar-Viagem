@@ -32,6 +32,7 @@ Para desenvolver, copie `.env.example` para `.env` (já vem com SOAR_DEBUG=1):
     python manage.py runserver
 """
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -389,12 +390,20 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 # painel foram abertas com a política valendo e nenhuma violação apareceu.
 # Ligue o modo relatório (1) só para investigar algo que parou de funcionar.
 CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', False)
+# Token do Instagram para as fotos do #ViajantesSoar (destinations/instagram.py).
+# Os testes nunca falam com o Instagram de verdade: os que precisam ligam um
+# token falso com override_settings.
+INSTAGRAM_TOKEN = ('' if sys.argv[1:2] == ['test']
+                   else os.environ.get('SOAR_INSTAGRAM_TOKEN', '').strip())
+
 CSP_DIRETIVAS = {
     'default-src': "'self'",
     'script-src': "'self'",
     'style-src': "'self' 'unsafe-inline'",
     'font-src': "'self'",
-    'img-src': "'self' data:" + (' https://' + R2_DOMINIO if R2_DOMINIO else ''),
+    'img-src': "'self' data:" + (' https://' + R2_DOMINIO if R2_DOMINIO else '')
+               # fotos do #ViajantesSoar vêm direto do Instagram (destinations/instagram.py)
+               + (' https://*.cdninstagram.com https://*.fbcdn.net' if INSTAGRAM_TOKEN else ''),
     'media-src': "'self'" + (' https://' + R2_DOMINIO if R2_DOMINIO else ''),
     'connect-src': "'self'",
     'form-action': "'self'",
@@ -489,6 +498,12 @@ LOGGING = {
         'soar.arquivos': {
             'handlers': ['arquivo_seguranca', 'console'],
             'level': 'WARNING',
+            'propagate': False,
+        },
+        # Fotos do Instagram que não vieram e renovação do token (destinations/instagram.py).
+        'soar.instagram': {
+            'handlers': ['arquivo_seguranca', 'console'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
