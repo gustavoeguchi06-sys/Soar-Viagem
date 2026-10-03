@@ -138,6 +138,34 @@ class PainelAgenciaTests(TestCase):
         self.assertEqual(resposta.status_code, 200)
         self.assertFalse(Orcamento.objects.exists())
 
+    def test_criancas_vao_como_adicional_dos_adultos(self):
+        self.entrar(self.ag1)
+        self.assertContains(self.client.get(self.destino.get_absolute_url()), 'name="idades"')
+        form = self.client.get(reverse('agencia:orcamento_novo'), {
+            'destino': 'bonito', 'acomodacao': 'casal', 'idades': '4 e 7'}).context['form']
+        self.assertEqual(form.initial['acomodacao'], 'casal')
+        self.assertEqual(form.initial['idades_criancas'], '4, 7')
+        # criança não é acomodação: sozinha não dá
+        self.assertNotIn('crianca', dict(form.fields['acomodacao'].choices))
+
+        dados = {'cliente_nome': 'Bruno', 'destino': self.destino.pk, 'acomodacao': 'casal',
+                 'pessoas': 2, 'status': 'enviado'}
+        resposta = self.client.post(reverse('agencia:orcamento_novo'),
+                                    {**dados, 'idades_criancas': '4, 20'})
+        self.assertContains(resposta, 'de 0 a 17 anos')
+        self.client.post(reverse('agencia:orcamento_novo'), {**dados, 'idades_criancas': '4; 7'})
+        orcamento = Orcamento.objects.get()
+        self.assertEqual(orcamento.idades_criancas, '4, 7')
+        self.assertContains(self.client.get(reverse('agencia:orcamentos')), '2 (4 e 7 anos)')
+
+    def test_orcamento_sem_crianca(self):
+        self.entrar(self.ag1)
+        self.client.post(reverse('agencia:orcamento_novo'), {
+            'cliente_nome': 'Bruno', 'destino': self.destino.pk, 'acomodacao': 'casal',
+            'pessoas': 2, 'status': 'enviado'})
+        self.assertEqual(Orcamento.objects.get().idades_criancas, '')
+        self.assertNotContains(self.client.get(reverse('agencia:orcamentos')), 'Crianças (CHD)')
+
 
 class InteressadosTests(TestCase):
     """Pessoa física que pediu "Saiba mais": só o dono vê e escolhe a agência."""

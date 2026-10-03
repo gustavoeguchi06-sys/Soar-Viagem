@@ -660,8 +660,16 @@ body:not(.pagina-viagem) .filtro.ativo { background: var(--verde); border-color:
    quem tem cor propria (.btn--verde, .filtro.ativo...) continua mandando. */
 :where(body:not(.pagina-viagem)) a { color: var(--verde); }
 
-/* criança até 8 anos não paga: o preço aparece em verde */
-.acom__preco.gratis { color: var(--verde); }
+/* Crianças (CHD): adicional que viaja com os adultos, abaixo das acomodações */
+.chd { margin-top: 10px; padding: 10px 11px; border: 1px dashed currentColor; border-radius: var(--r-sm);
+       border-color: color-mix(in srgb, currentColor 25%, transparent); }
+.chd__topo { display: flex; align-items: center; gap: 11px; justify-content: space-between; }
+.chd__topo b { display: block; font-size: .88rem; font-weight: 600; line-height: 1.35; }
+.chd__topo small { display: block; font-size: .78rem; color: var(--tinta-suave); line-height: 1.3; }
+.chd__idades { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: .82rem;
+               color: var(--tinta-suave); }
+.chd__idades input { width: 110px; padding: 6px 8px; font: inherit; color: inherit; background: transparent;
+                     border: 1px solid currentColor; border-radius: var(--r-sm); }
 
 /* botão de tema (lua no claro, sol no escuro) */
 .btn-tema { display: grid; place-items: center; width: 38px; height: 38px; flex: none; padding: 0;

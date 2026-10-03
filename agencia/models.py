@@ -31,7 +31,12 @@ class Orcamento(models.Model):
     saida_texto = models.CharField('Saída', max_length=120, blank=True, editable=False)
     acomodacao = models.CharField('Acomodação', max_length=20,
                                   choices=Reserva.ACOMODACOES, default='casal')
-    pessoas = models.PositiveSmallIntegerField('Quantidade de pessoas', default=2)
+    pessoas = models.PositiveSmallIntegerField('Adultos', default=2)
+    # Criança (CHD) não é acomodação: viaja junto com os adultos, no quarto
+    # deles, e o preço depende da idade. Guardado como "4, 7".
+    idades_criancas = models.CharField(
+        'Idades das crianças (CHD)', max_length=60, blank=True,
+        help_text='Separadas por vírgula, ex.: 4, 7. Em branco se não vai criança.')
     valor = models.DecimalField('Valor total (R$)', max_digits=10, decimal_places=2,
                                 null=True, blank=True,
                                 help_text='O valor que a agência passou ao cliente.')
@@ -59,6 +64,21 @@ class Orcamento(models.Model):
     @property
     def codigo(self):
         return 'ORC-{:05d}'.format(self.pk or 0)
+
+    @property
+    def criancas(self):
+        """'4, 7' -> [4, 7]"""
+        return [int(i) for i in self.idades_criancas.split(',') if i.strip()]
+
+    @property
+    def criancas_texto(self):
+        """[4, 7] -> '2 (4 e 7 anos)'; [1] -> '1 (1 ano)'"""
+        idades = self.criancas
+        if not idades:
+            return ''
+        lista = ', '.join(str(i) for i in idades[:-1])
+        lista = '{} e {}'.format(lista, idades[-1]) if lista else str(idades[-1])
+        return '{} ({} {})'.format(len(idades), lista, 'ano' if idades == [1] else 'anos')
 
     @property
     def vencido(self):

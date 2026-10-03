@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.utils import timezone
 
@@ -10,6 +12,19 @@ from soar.mascaras import formatar_telefone
 from .models import Orcamento
 
 DATA = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
+
+MAX_CRIANCAS = 10
+
+
+def idades_das_criancas(texto):
+    """'4, 7' (ou '4 e 7', '4;7') -> [4, 7]. Algo que não é idade de 0 a 17 -> None."""
+    partes = re.split(r'[,;/\s]+|\be\b', (texto or '').strip())
+    idades = []
+    for parte in filter(None, partes):
+        if not parte.isdigit() or int(parte) > 17:
+            return None
+        idades.append(int(parte))
+    return idades
 
 
 class OrcamentoForm(forms.ModelForm):
@@ -27,10 +42,12 @@ class OrcamentoForm(forms.ModelForm):
     class Meta:
         model = Orcamento
         fields = ['cliente_nome', 'cliente_telefone', 'cliente_email', 'destino',
-                  'saida_escolhida', 'acomodacao', 'pessoas', 'valor', 'validade',
-                  'observacoes', 'status']
+                  'saida_escolhida', 'acomodacao', 'pessoas', 'idades_criancas', 'valor',
+                  'validade', 'observacoes', 'status']
         widgets = {
             'validade': DATA,
+            'idades_criancas': forms.TextInput(attrs={'placeholder': 'Ex.: 4, 7',
+                                                      'autocomplete': 'off'}),
             'pessoas': forms.NumberInput(attrs={'min': 1, 'max': 60}),
             'cliente_telefone': forms.TextInput(attrs={'placeholder': '(11) 90000-0000',
                                                        'inputmode': 'tel', 'data-mascara': 'telefone',
@@ -66,6 +83,15 @@ class OrcamentoForm(forms.ModelForm):
 
     def clean_cliente_telefone(self):
         return formatar_telefone(self.cleaned_data.get('cliente_telefone'))
+
+    def clean_idades_criancas(self):
+        idades = idades_das_criancas(self.cleaned_data.get('idades_criancas'))
+        if idades is None:
+            raise forms.ValidationError('Digite só as idades, de 0 a 17 anos, separadas por '
+                                        'vírgula. Ex.: 4, 7')
+        if len(idades) > MAX_CRIANCAS:
+            raise forms.ValidationError('No máximo {} crianças por orçamento.'.format(MAX_CRIANCAS))
+        return ', '.join(str(i) for i in idades)
 
     def clean_pessoas(self):
         pessoas = self.cleaned_data['pessoas']

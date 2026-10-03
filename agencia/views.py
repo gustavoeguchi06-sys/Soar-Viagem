@@ -19,7 +19,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from destinations.models import Destino
 from reservas.models import Reserva
 
-from .forms import AtendimentoForm, OrcamentoForm
+from .forms import MAX_CRIANCAS, AtendimentoForm, OrcamentoForm, idades_das_criancas
 from .models import Orcamento
 
 log = logging.getLogger('soar.seguranca')
@@ -156,6 +156,9 @@ def _inicial_da_viagem(request):
             inicial['saida_escolhida'] = saida
     if request.GET.get('acomodacao') in dict(Orcamento._meta.get_field('acomodacao').choices):
         inicial['acomodacao'] = request.GET['acomodacao']
+    idades = idades_das_criancas(request.GET.get('idades', '')[:60])
+    if idades and len(idades) <= MAX_CRIANCAS:
+        inicial['idades_criancas'] = ', '.join(str(i) for i in idades)
     return inicial
 
 
