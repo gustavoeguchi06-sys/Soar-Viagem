@@ -107,3 +107,19 @@ class FaixaDeServicosTests(TestCase):
         self.assertContains(resposta, 'Preços por quarto')
         self.assertContains(resposta, 'Faixa de serviços da página')
         self.assertContains(resposta, 'symbol id="ic-aviao"')
+
+
+class SoFotosDoDonoTests(TestCase):
+    """A página mostra só as fotos cadastradas, sem completar com ilustrações."""
+
+    def test_sem_foto_nao_tem_galeria_nem_miniaturas(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        resposta = self.client.get(destino.get_absolute_url())
+        self.assertNotContains(resposta, 'id="galeria"')
+        self.assertNotContains(resposta, 'class="hero__thumbs"')
+        self.assertNotContains(resposta, 'data-hero="1"')
+        # o topo ainda tem uma imagem, só uma
+        self.assertEqual(len(resposta.context['viagem']['fotos']), 1)
+        self.assertEqual(resposta.context['viagem']['galeria'], [])
+        # a hospedagem também não completa com desenhos de quarto
+        self.assertNotContains(resposta, 'class="hosp-mini"')

@@ -454,17 +454,6 @@ body.pagina-viagem {
 }
 .campo-erro { font-size: .78rem; color: #b91c1c; }
 
-/* ===== Chamada final ===================================================== */
-.cta-final { position: relative; overflow: hidden; margin-top: 10px; }
-.cta-final__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cta-final::after { content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(12, 20, 16, .35) 0%, rgba(12, 20, 16, .72) 34%, rgba(12, 20, 16, .78) 100%); }
-.cta-final__inner { position: relative; z-index: 5; display: flex; align-items: center;
-                    justify-content: center; gap: 40px; padding: 30px 24px; color: #fff; }
-.cta-final h2 { color: #fff; font-size: 1.75rem; font-weight: 700; margin-bottom: 4px; }
-.cta-final p { font-size: .95rem; color: rgba(255, 255, 255, .88); }
-.cta-final__botoes { display: flex; gap: 14px; flex: none; }
-
 /* ===== Rodapé ============================================================ */
 .rodape { background: var(--preto); color: rgba(255, 255, 255, .72); padding: 44px 0 26px; }
 .rodape__grade { display: grid; gap: 28px; margin-bottom: 30px;
@@ -571,8 +560,6 @@ body.pagina-viagem {
     .depoimentos { padding: 22px 16px; }
     .depoimentos__grade { grid-template-columns: 1fr; }
     .depo { flex: 0 0 84%; }
-    .cta-final__inner { flex-direction: column; text-align: center; gap: 18px; }
-    .cta-final__botoes { justify-content: center; }
     .form-grade { grid-template-columns: 1fr; }
     .hosp-mini img { height: 78px; }
     .painel, .form-avaliacao { padding: 16px; }
@@ -587,8 +574,6 @@ body.pagina-viagem {
     .destaques { grid-template-columns: 1fr; }
     .hero__thumbs button { width: 96px; height: 64px; }
     .hero__thumbs .mais { width: 76px; height: 64px; }
-    .cta-final__botoes { flex-direction: column; width: 100%; }
-    .cta-final__botoes .btn { width: 100%; }
     .galeria-grade { grid-template-columns: 1fr 1fr; }
     .galeria-grade img { height: 120px; }
     .comodidades { gap: 12px 16px; }
@@ -766,3 +751,12 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .saida-op__quartos { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 3px; font-size: .74rem;
                      font-weight: 500; color: var(--tinta-suave); }
 .saida-op__quarto--zero { text-decoration: line-through; opacity: .7; }
+
+/* Só as fotos que o dono cadastrou: com número ímpar, a última ocupa a linha
+   inteira, em vez de deixar um buraco ao lado. */
+.galeria-grade a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.galeria-grade a:last-child:nth-child(odd) img { height: 170px; }
+.hosp-mini img:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* hospedagem sem miniaturas: a foto principal ocupa a largura toda */
+.hosp-galeria:not(:has(.hosp-mini)) { grid-template-columns: 1fr; }
+.hosp-galeria:not(:has(.hosp-mini)) .hosp-principal img { min-height: 220px; max-height: 300px; }

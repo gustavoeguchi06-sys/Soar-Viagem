@@ -329,15 +329,16 @@ def _estrelas(nota):
     return [i < cheias for i in range(5)]
 
 
-def _fotos_do_destino(destino, cfg):
-    """Fotos cadastradas no admin; completa com os SVGs de exemplo do destino."""
+def _fotos_do_destino(destino):
+    """Só as fotos que o dono cadastrou: a capa primeiro, depois a galeria.
+
+    Antes a lista era completada com ilustrações até 6, e a galeria mostrava
+    desenhos misturados com as fotos de verdade. Agora aparece só o que existe.
+    """
     fotos = [img.imagem.url for img in destino.imagens.all() if img.imagem]
     if destino.imagem_capa:
         fotos.insert(0, destino.imagem_capa.url)
-    reserva = cfg.get('fotos') or FOTOS_PADRAO
-    if len(fotos) < 6:
-        fotos += [static(f) for f in reserva[len(fotos):]]
-    return fotos
+    return list(dict.fromkeys(fotos))         # sem repetir a mesma foto
 
 
 def _roteiro_generico(destino):
@@ -385,7 +386,9 @@ def montar_viagem(destino, avaliacoes):
     a página inteira montada, e cada campo preenchido vai substituindo o padrão.
     """
     cfg = POR_DESTINO.get(destino.slug, {})
-    fotos = _fotos_do_destino(destino, cfg)
+    galeria = _fotos_do_destino(destino)
+    # o topo da página precisa de uma imagem: sem nenhuma foto, uma ilustração só
+    fotos = galeria or [static((cfg.get('fotos') or FOTOS_PADRAO)[0])]
 
     # Sem preço cadastrado a página diz "sob consulta": preço inventado na
     # vitrine é oferta que a operadora teria de cumprir (CDC, art. 30).
@@ -410,8 +413,8 @@ def montar_viagem(destino, avaliacoes):
         if hospedagem_db.imagem:
             fotos_hosp.append(hospedagem_db.imagem.url)
         fotos_hosp += [i.imagem.url for i in hospedagem_db.imagens.all() if i.imagem]
-    if len(fotos_hosp) < 5:
-        fotos_hosp += [static(f) for f in FOTOS_HOSPEDAGEM[len(fotos_hosp):]]
+    # só as fotos cadastradas; sem nenhuma, uma ilustração no lugar da principal
+    fotos_hosp = list(dict.fromkeys(fotos_hosp)) or [static(FOTOS_HOSPEDAGEM[0])]
 
     depoimentos = []
     for i, av in enumerate(sorted(avaliacoes, key=lambda a: a.criado_em)[:6]):
@@ -462,8 +465,8 @@ def montar_viagem(destino, avaliacoes):
         'estrelas': _estrelas(nota or 0),
         'total_avaliacoes': total,
         'fotos': fotos,
-        'thumbs': fotos[1:5] if len(fotos) > 4 else fotos,
-        'galeria': fotos,
+        'thumbs': (fotos[1:5] if len(fotos) > 4 else fotos) if len(galeria) > 1 else [],
+        'galeria': galeria,
         # as fotos que não cabem nas miniaturas do topo; o botão leva à galeria
         'mais_fotos': max(len(fotos) - 5, 0),
         'servicos': _servicos(destino),

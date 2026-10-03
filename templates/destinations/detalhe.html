@@ -11,12 +11,14 @@
 {# ===================== HERO ===================== #}
 <section class="hero">
     <img class="hero__foto" id="heroFoto" src="{{ viagem.fotos.0 }}" alt="{{ destino.nome }}">
+    {% if viagem.thumbs %}
     <button class="seta seta--esq" type="button" data-hero="-1" aria-label="Foto anterior">
         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
     </button>
     <button class="seta seta--dir" type="button" data-hero="1" aria-label="Próxima foto">
         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
     </button>
+    {% endif %}
 
     <div class="hero__conteudo">
         <div class="wrap">
@@ -66,6 +68,7 @@
                 {% endif %}
             </div>
 
+            {% if viagem.thumbs %}
             <div class="hero__thumbs">
                 {% for foto in viagem.thumbs %}
                 <button type="button" class="{% if forloop.first %}ativo{% endif %}" data-foto="{{ foto }}">
@@ -78,6 +81,7 @@
                 </a>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -390,22 +394,26 @@
             <div class="hosp-galeria">
                 <div class="hosp-principal">
                     <img id="hospFoto" src="{{ viagem.hospedagem.fotos.0 }}" alt="{{ viagem.hospedagem.nome }}">
+                    {% if viagem.hospedagem.fotos|length > 1 %}
                     <button class="seta seta--esq" type="button" data-hosp="-1" aria-label="Foto anterior">
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
                     </button>
                     <button class="seta seta--dir" type="button" data-hosp="1" aria-label="Próxima foto">
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
                     </button>
+                    {% endif %}
                     <div class="hosp-legenda">
                         <b>{{ viagem.hospedagem.nome }}</b>
                         <small>{{ viagem.hospedagem.sub }}</small>
                     </div>
                 </div>
+                {% if viagem.hospedagem.miniaturas %}
                 <div class="hosp-mini">
                     {% for f in viagem.hospedagem.miniaturas %}
                     <img src="{{ f }}" alt="Quarto da {{ viagem.hospedagem.nome }}">
                     {% endfor %}
                 </div>
+                {% endif %}
             </div>
             <div class="comodidades">
                 {% for c in viagem.hospedagem.comodidades %}
@@ -417,12 +425,13 @@
             </div>
         </section>
 
+        {% with videos=destino.videos.all %}
+        {% if viagem.galeria or videos %}
         <section class="painel" id="galeria">
             <h3 class="painel__titulo">
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-imagem"></use></svg>
                 Galeria
             </h3>
-            {% with videos=destino.videos.all %}
             {% if videos %}
             <div class="galeria-videos">
                 {% for v in videos %}
@@ -435,7 +444,7 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% endwith %}
+            {% if viagem.galeria %}
             <div class="galeria-grade">
                 {% for f in viagem.galeria %}
                 <a href="{{ f }}" target="_blank" rel="noopener">
@@ -443,7 +452,10 @@
                 </a>
                 {% endfor %}
             </div>
+            {% endif %}
         </section>
+        {% endif %}
+        {% endwith %}
     </div>
 
     {# ===================== DEPOIMENTOS ===================== #}
@@ -556,23 +568,6 @@
 
 </div>
 
-{# ===================== CHAMADA FINAL ===================== #}
-<section class="cta-final">
-    <img class="cta-final__foto" src="{% static 'img/cta-van.svg' %}" alt="">
-    <div class="wrap cta-final__inner">
-        <div>
-            <h2>Pronto para viver essa experiência?</h2>
-            <p>Garanta sua vaga com uma agência parceira e venha descobrir {{ viagem.curto }} com a Soar.</p>
-        </div>
-        <div class="cta-final__botoes">
-            {% if user.agente.aprovado %}<a class="btn btn--verde" href="#reservar">Criar orçamento</a>{% endif %}
-            <a class="btn btn--branco" href="https://wa.me/5511999999999" target="_blank" rel="noopener">
-                <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>
-                Falar com a Soar
-            </a>
-        </div>
-    </div>
-</section>
 {% endblock %}
 
 {% block scripts %}
