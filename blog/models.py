@@ -25,6 +25,8 @@ from django.utils.text import slugify
 
 from destinations.models import Destino
 
+from soar.videos import ajuda as ajuda_video, validar_video
+
 # Ícones do sprite do site (templates/partials/_icones.html) que fazem sentido
 # no blog. O dono escolhe pelo nome; o código do ícone não aparece para ele.
 ICONES = [
@@ -203,6 +205,9 @@ class Secao(models.Model):
                              help_text='Para começar um parágrafo novo, deixe uma linha em branco.')
     foto = models.ImageField('Foto', upload_to='blog/secoes/', blank=True, null=True,
                              help_text='Opcional. Aparece depois do texto.')
+    video = models.FileField('Vídeo', upload_to='blog/videos/', blank=True,
+                             validators=[validar_video],
+                             help_text=ajuda_video('Opcional. Aparece depois da foto.'))
     nota = models.TextField('Caixa de destaque', blank=True,
                             help_text='Opcional. Um recado em caixa verde, ex.: uma dica importante.')
     dicas = models.TextField('Lista com ✓', blank=True,

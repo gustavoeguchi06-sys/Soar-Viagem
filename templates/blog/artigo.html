@@ -82,6 +82,10 @@
       {% if secao.foto %}
       <figure class="blog-foto tem-foto"><img src="{{ secao.foto.url }}" alt="{{ secao.titulo }}" loading="lazy"></figure>
       {% endif %}
+      {% if secao.video %}
+      <figure class="blog-video"><video src="{{ secao.video.url }}" controls playsinline preload="metadata"
+              aria-label="{{ secao.titulo }}"></video></figure>
+      {% endif %}
 
       {% if secao.nota %}
       <div class="blog-nota">

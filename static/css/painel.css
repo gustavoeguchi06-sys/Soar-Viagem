@@ -1566,3 +1566,6 @@ fieldset.module.collapse details[open] > summary { border-bottom: 1px solid var(
 
 /* códigos (SOAR-00009, ORC-00001) numa linha só */
 #changelist .field-codigo { white-space: nowrap; }
+
+/* prévia do vídeo enviado: grande o bastante para dar play e conferir */
+.miniatura--video { width: 220px; height: 124px; object-fit: contain; background: #000; }

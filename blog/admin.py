@@ -57,7 +57,7 @@ class SecaoInline(admin.StackedInline):
     model = Secao
     form = SecaoForm
     extra = 0
-    fields = ['ordem', 'titulo', 'icone', 'texto', 'foto', 'nota', 'dicas',
+    fields = ['ordem', 'titulo', 'icone', 'texto', 'foto', 'video', 'nota', 'dicas',
               'melhores_meses', 'meses_bons', 'mostrar_atracoes']
     verbose_name = 'seção'
     verbose_name_plural = 'Seções do artigo (cada uma vira um atalho no topo do artigo)'

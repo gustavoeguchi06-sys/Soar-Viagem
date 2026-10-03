@@ -416,6 +416,20 @@
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-imagem"></use></svg>
                 Galeria
             </h3>
+            {% with videos=destino.videos.all %}
+            {% if videos %}
+            <div class="galeria-videos">
+                {% for v in videos %}
+                <figure>
+                    <video src="{{ v.arquivo.url }}" controls playsinline preload="metadata"
+                           {% if v.capa %}poster="{{ v.capa.url }}"{% endif %}
+                           aria-label="{{ v.legenda|default:destino.nome }}"></video>
+                    {% if v.legenda %}<figcaption>{{ v.legenda }}</figcaption>{% endif %}
+                </figure>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
             <div class="galeria-grade">
                 {% for f in viagem.galeria %}
                 <a href="{{ f }}" target="_blank" rel="noopener">

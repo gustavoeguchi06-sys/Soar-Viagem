@@ -754,3 +754,10 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .popup--aviso { border-top: 4px solid #d97706; font-size: .92rem; line-height: 1.5; }
 .popup--aviso .popup__titulo { color: #b45309; }
 .popup--aviso form { margin-top: 8px; }
+
+/* vídeos da galeria (cadastrados no painel), acima das fotos */
+.galeria-videos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.galeria-videos figure { margin: 0; }
+.galeria-videos video { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-md); background: #000;
+                        display: block; }
+.galeria-videos figcaption { margin-top: 4px; font-size: .8rem; color: var(--tinta-suave); }

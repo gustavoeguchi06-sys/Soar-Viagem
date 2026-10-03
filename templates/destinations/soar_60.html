@@ -99,6 +99,26 @@ decidiu, aparece o caminho para reservar.
     </div>
 </section>
 
+{# ===== Vídeos (cadastrados no painel, aba Soar 60+) ===== #}
+{% if videos %}
+<section class="secao secao--sem-topo" id="videos">
+    <div class="container">
+        <div class="secao-titulo">
+            <h2>Veja como é viajar com a gente</h2>
+        </div>
+        <div class="p60-videos">
+            {% for v in videos %}
+            <figure>
+                <video src="{{ v.arquivo.url }}" controls playsinline preload="metadata"
+                       {% if v.capa %}poster="{{ v.capa.url }}"{% endif %} aria-label="{{ v.titulo }}"></video>
+                <figcaption>{{ v.titulo }}</figcaption>
+            </figure>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {# ===== Como funciona ===== #}
 <section class="secao" id="como-funciona">
     <div class="container">

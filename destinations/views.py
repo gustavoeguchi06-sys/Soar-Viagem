@@ -13,7 +13,7 @@ from soar.seguranca import LIMITE_INTERESSE, ip_do_cliente
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
-from .models import MESES, Destino, Saida
+from .models import MESES, Destino, Saida, VideoSoar60
 
 log = logging.getLogger('soar.seguranca')
 
@@ -106,6 +106,7 @@ def soar_60(request):
     return render(request, 'destinations/soar_60.html', {
         'viagens': viagens[:POR_PAGINA],
         'escolhidas': escolhidas,
+        'videos': VideoSoar60.objects.filter(ativo=True),
     })
 
 
@@ -116,7 +117,7 @@ def detalhe_destino(request, slug):
     de cliente no site, não tem mais formulário de avaliar aqui.
     """
     destino = get_object_or_404(
-        Destino.objects.prefetch_related('imagens', 'hospedagens'),
+        Destino.objects.prefetch_related('imagens', 'hospedagens', 'videos'),
         slug=slug,
     )
     return pagina_da_viagem(request, destino, enviado=request.GET.get('enviado') == '1')

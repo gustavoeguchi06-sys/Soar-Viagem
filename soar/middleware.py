@@ -71,6 +71,11 @@ class LimiteDeEnvioMiddleware:
         except ValueError:
             tamanho = 0
         limite = settings.TAMANHO_MAXIMO_ENVIO
+        # Vídeo só entra pelo painel, e só da equipe logada. Quem não está
+        # logado continua com o teto pequeno mesmo no endereço do painel.
+        if (tamanho > limite and request.path.startswith('/painel/')
+                and request.user.is_authenticated and request.user.is_staff):
+            limite = settings.TAMANHO_MAXIMO_ENVIO_PAINEL
         if tamanho > limite:
             logging.getLogger('soar.seguranca').warning(
                 'envio recusado por tamanho: %d bytes (limite %d) caminho=%s',
