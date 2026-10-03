@@ -1,3 +1,5 @@
+import re
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -553,3 +555,90 @@ def _atualizar_a_partir_de(sender, instance, **kwargs):
 
 models.signals.post_save.connect(_atualizar_a_partir_de, sender=PrecoQuarto)
 models.signals.post_delete.connect(_atualizar_a_partir_de, sender=PrecoQuarto)
+
+
+class PaginaSobre(models.Model):
+    """A página "Sobre a Soar" (/sobre/). Existe uma só: o painel abre direto nela."""
+
+    titulo = models.CharField('Título da capa', max_length=80, default='Sobre a Soar')
+    subtitulo = models.CharField(
+        'Frase da capa', max_length=200, blank=True,
+        default='Viagens em grupo pelo Brasil, para quem quer ir além do óbvio.')
+    capa = models.ImageField('Foto da capa', upload_to='sobre/', blank=True, null=True,
+                             help_text='Foto deitada e grande (1920 x 1080 px). Sem foto, usa '
+                                       'uma ilustração da Soar.')
+    video_capa = models.FileField(
+        'Vídeo da capa (opcional)', upload_to='sobre/videos/', blank=True,
+        validators=[validar_video],
+        help_text=ajuda_video('Toca sem som e em repetição atrás do título; a foto vira a capa.'))
+    historia_titulo = models.CharField('Título do texto principal', max_length=80,
+                                       default='Quem somos')
+    historia = models.TextField(
+        'Texto principal', blank=True,
+        help_text='A história da Soar. Para começar um parágrafo novo, deixe uma linha em branco.')
+    historia_foto = models.ImageField('Foto ao lado do texto', upload_to='sobre/', blank=True,
+                                      null=True)
+    diferenciais_titulo = models.CharField('Título dos diferenciais', max_length=80,
+                                           default='Por que viajar com a Soar')
+    atualizado_em = models.DateTimeField('Atualizado em', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Página Sobre a Soar'
+        verbose_name_plural = 'Página Sobre a Soar'
+
+    def __str__(self):
+        return 'Página Sobre a Soar'
+
+    @classmethod
+    def atual(cls):
+        return cls.objects.first() or cls.objects.create()
+
+    @property
+    def paragrafos(self):
+        return [p.strip() for p in re.split(r'\n\s*\n', self.historia or '') if p.strip()]
+
+
+class DiferencialSobre(models.Model):
+    pagina = models.ForeignKey(PaginaSobre, on_delete=models.CASCADE, related_name='diferenciais')
+    icone = models.CharField('Ícone', max_length=30, choices=ICONES, default='ic-check')
+    titulo = models.CharField('Título', max_length=60)
+    texto = models.TextField('Texto', max_length=300, blank=True)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'diferencial'
+        verbose_name_plural = 'Diferenciais'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.titulo
+
+
+class NumeroSobre(models.Model):
+    pagina = models.ForeignKey(PaginaSobre, on_delete=models.CASCADE, related_name='numeros')
+    valor = models.CharField('Número', max_length=20, help_text='Ex.: +2.000')
+    legenda = models.CharField('Legenda', max_length=60, help_text='Ex.: viajantes levados')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'número'
+        verbose_name_plural = 'Números da Soar (opcional; sem nenhum, a faixa não aparece)'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return '{} {}'.format(self.valor, self.legenda)
+
+
+class FotoSobre(models.Model):
+    pagina = models.ForeignKey(PaginaSobre, on_delete=models.CASCADE, related_name='fotos')
+    imagem = models.ImageField('Foto', upload_to='sobre/galeria/')
+    legenda = models.CharField('Legenda', max_length=120, blank=True)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'foto'
+        verbose_name_plural = 'Fotos (opcional; sem nenhuma, a galeria não aparece)'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.legenda or 'Foto {}'.format(self.pk)

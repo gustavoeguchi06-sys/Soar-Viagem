@@ -22,8 +22,9 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     ImagemHospedagem, Interessado, PerguntaFrequente, PrecoQuarto, Saida,
-                     ServicoViagem, SlideInicio, VideoDestino, VideoSoar60)
+                     DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, NumeroSobre,
+                     PaginaSobre, PerguntaFrequente, PrecoQuarto, Saida, ServicoViagem,
+                     SlideInicio, VideoDestino, VideoSoar60)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -511,3 +512,84 @@ class VideoSoar60Admin(admin.ModelAdmin):
     @admin.display(description='Vídeo enviado')
     def previa(self, video):
         return previa_video(video.arquivo)
+
+
+# --------------------------------------------------------------------------- #
+# Página "Sobre a Soar": uma só, o painel abre direto no formulário dela
+# --------------------------------------------------------------------------- #
+
+class DiferencialSobreInline(admin.StackedInline):
+    model = DiferencialSobre
+    extra = 0
+    fields = ['icone', 'titulo', 'texto', 'ordem']
+    verbose_name_plural = 'Diferenciais (cartões com ícone)'
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'icone':
+            kwargs['widget'] = SeletorDeIcone
+        if db_field.name == 'texto':
+            kwargs['widget'] = forms.Textarea(attrs={'rows': 2})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+class NumeroSobreInline(admin.TabularInline):
+    model = NumeroSobre
+    extra = 0
+    fields = ['valor', 'legenda', 'ordem']
+
+
+class FotoSobreInline(admin.TabularInline):
+    model = FotoSobre
+    extra = 0
+    fields = ['imagem', 'previa', 'legenda', 'ordem']
+    readonly_fields = ['previa']
+
+    @admin.display(description='Prévia')
+    def previa(self, obj):
+        return miniatura(obj.imagem, obj.legenda)
+
+
+@admin.register(PaginaSobre)
+class PaginaSobreAdmin(admin.ModelAdmin):
+    """A página /sobre/. Só existe uma, então não tem lista: a aba abre nela."""
+
+    inlines = [DiferencialSobreInline, NumeroSobreInline, FotoSobreInline]
+    readonly_fields = ['ver_no_site', 'previa_capa', 'previa_video']
+    save_on_top = True
+    fieldsets = [
+        ('Capa', {'fields': ['ver_no_site', 'titulo', 'subtitulo', 'capa', 'previa_capa',
+                             'video_capa', 'previa_video']}),
+        ('Texto principal', {'fields': ['historia_titulo', 'historia', 'historia_foto']}),
+        ('Diferenciais', {'fields': ['diferenciais_titulo'],
+                          'description': 'Os cartões ficam no bloco "Diferenciais", mais abaixo.'}),
+    ]
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        return redirect(reverse('admin:destinations_paginasobre_change',
+                                args=[PaginaSobre.atual().pk]))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='No site')
+    def ver_no_site(self, pagina):
+        from django.urls import reverse
+        return format_html('<a href="{}" target="_blank" rel="noopener">Abrir a página Sobre a '
+                           'Soar &#8599;</a>', reverse('destinations:sobre'))
+
+    @admin.display(description='Como fica a foto')
+    def previa_capa(self, pagina):
+        if not pagina.capa:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto: a página usa uma ilustração da Soar.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">',
+                           pagina.capa.url)
+
+    @admin.display(description='Vídeo enviado')
+    def previa_video(self, pagina):
+        return previa_video(pagina.video_capa)
