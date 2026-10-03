@@ -228,9 +228,15 @@
                     <label class="saida-op{% if s.esgotada %} saida-op--esgotada{% endif %}">
                         <input type="radio" name="saida" value="{{ s.id }}"
                                {% if s.id|stringformat:"s" == saida_marcada and not s.esgotada %}checked{% endif %}{% if s.esgotada %} disabled{% endif %}>
-                        <span class="saida-op__data">{{ s.texto }}</span>
+                        <span class="saida-op__data">{{ s.texto }}
+                            {% if s.quartos and not s.esgotada %}
+                            {# quartos que ainda há nesta data, cadastrados no painel #}
+                            <small class="saida-op__quartos">{% for q in s.quartos %}<span{% if not q.quantidade %} class="saida-op__quarto--zero"{% endif %}>{{ q.nome }}: {% if q.quantidade %}{{ q.quantidade }} quarto{{ q.quantidade|pluralize }}{% else %}esgotado{% endif %}</span>{% endfor %}</small>
+                            {% endif %}
+                        </span>
                         {% if s.esgotada %}
                         <span class="pill-vagas pill-vagas--esgotada">Esgotada</span>
+                        {% elif s.vagas is None and s.quartos %}
                         {% elif s.vagas is None %}
                         <span class="pill-vagas pill-vagas--consulte">Consulte</span>
                         {% else %}

@@ -10,6 +10,8 @@ import re
 
 from django.templatetags.static import static
 
+from .quartos import POR_CHAVE
+
 # --------------------------------------------------------------------------- #
 # Fotos usadas quando o destino ainda não tem imagens cadastradas no admin
 # --------------------------------------------------------------------------- #
@@ -265,30 +267,60 @@ def _moeda(valor):
     return '{:,.0f}'.format(valor).replace(',', '.')
 
 
-def _acomodacoes(preco_base):
-    """Os tipos de quarto e o preço por pessoa de cada um, a partir do casal."""
-    def preco(valor):
-        if preco_base is None:
-            return {'preco': 'Consulte', 'valor': None, 'consulte': True}
-        return {'preco': 'R$ ' + _moeda(valor), 'valor': valor, 'consulte': False}
+def _reais(valor):
+    """3588 -> 'R$ 3.588'; 3588.5 -> 'R$ 3.588,50'"""
+    if valor == int(valor):
+        return 'R$ ' + _moeda(valor)
+    inteiro, centavos = '{:,.2f}'.format(valor).split('.')
+    return 'R$ {},{}'.format(inteiro.replace(',', '.'), centavos)
 
-    base = preco_base or 0
-    return [
-        {'chave': 'single', 'nome': 'Single', 'pessoas': '1 pessoa', 'padrao': False,
-         **preco(base + 1400)},
-        {'chave': 'casal', 'nome': 'Casal', 'pessoas': '2 pessoas (cama de casal)', 'padrao': True,
-         **preco(base)},
-        {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
-         'padrao': False, **preco(base)},
-        {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas', 'padrao': False,
-         **preco(base - 200)},
-    ]
+
+# Viagem antiga sem a tabela de preços por quarto: os outros quartos saíam do
+# preço de casal. Fica só para não deixar o card vazio enquanto o dono não
+# cadastra os preços (a migração 0020 já converteu as viagens que existiam).
+DIFERENCA_ANTIGA = {'single': 1400, 'casal': 0, 'duplo': 0, 'triplo': -200}
+
+
+def _acomodacoes(destino):
+    """Os tipos de quarto da viagem com o preço por pessoa de cada um.
+
+    Vem da tabela "Preços por quarto" do painel: cada tipo tem o seu valor, e
+    só aparecem os tipos cadastrados. Sem nenhum preço, a página mostra os
+    quartos comuns com "Consulte".
+    """
+    precos = sorted(destino.precos.all(), key=lambda p: p.ordem) if destino.pk else []
+    if precos:
+        lista = [{'chave': p.tipo, 'nome': POR_CHAVE[p.tipo]['nome'],
+                  'pessoas': POR_CHAVE[p.tipo]['pessoas'], 'valor': p.preco,
+                  'preco': _reais(p.preco), 'consulte': False, 'padrao': False}
+                 for p in precos]
+    elif destino.preco_base is not None:
+        base = destino.preco_base
+        lista = [{'chave': chave, 'nome': POR_CHAVE[chave]['nome'],
+                  'pessoas': POR_CHAVE[chave]['pessoas'], 'valor': base + diferenca,
+                  'preco': _reais(base + diferenca), 'consulte': False, 'padrao': False}
+                 for chave, diferenca in DIFERENCA_ANTIGA.items()]
+    else:
+        lista = [{'chave': chave, 'nome': POR_CHAVE[chave]['nome'],
+                  'pessoas': POR_CHAVE[chave]['pessoas'], 'valor': None, 'preco': 'Consulte',
+                  'consulte': True, 'padrao': False}
+                 for chave in DIFERENCA_ANTIGA]
+    # o quarto que já vem marcado: casal, se a viagem tiver; senão o primeiro
+    padrao = next((a for a in lista if a['chave'] == 'casal'), lista[0])
+    padrao['padrao'] = True
+    return lista
 
 
 def tabela_de_precos(destino):
-    """{'casal': 3588, ...}: o preço por adulto de cada acomodação, ou None sem preço."""
-    base = int(destino.preco_base) if destino.preco_base is not None else None
-    return {a['chave']: a['valor'] for a in _acomodacoes(base)}
+    """{'casal': 3588, ...}: o preço por adulto de cada quarto, ou None sem preço."""
+    return {a['chave']: a['valor'] for a in _acomodacoes(destino)}
+
+
+def _servicos(destino):
+    """A faixa de ícones da página: a cadastrada no painel ou a padrão da Soar."""
+    cadastrados = [{'icone': s.icone, 'titulo': s.titulo, 'sub': s.sub}
+                   for s in destino.servicos.all()] if destino.pk else []
+    return cadastrados or SERVICOS
 
 
 def _estrelas(nota):
@@ -407,7 +439,7 @@ def montar_viagem(destino, avaliacoes):
     # texto antigo do destino.
     saidas = [{
         'id': s.pk, 'texto': s.texto, 'vagas': s.vagas, 'esgotada': s.esgotada,
-        'textos': s.textos,
+        'textos': s.textos, 'quartos': s.quartos,
     } for s in destino.saidas_futuras] if destino.pk else []
     livres = [s for s in saidas if not s['esgotada']]
     if livres:
@@ -434,7 +466,7 @@ def montar_viagem(destino, avaliacoes):
         'galeria': fotos,
         # as fotos que não cabem nas miniaturas do topo; o botão leva à galeria
         'mais_fotos': max(len(fotos) - 5, 0),
-        'servicos': SERVICOS,
+        'servicos': _servicos(destino),
         'destaques': destaques,
         'roteiro': roteiro,
         'incluso': destino.linhas('incluso') or INCLUSO,
@@ -449,7 +481,7 @@ def montar_viagem(destino, avaliacoes):
                   else destino.vagas if destino.vagas is not None else cfg.get('vagas', 12)),
         'saidas': saidas,
         'tem_vaga': bool(livres) or not saidas,
-        'acomodacoes': _acomodacoes(preco_base),
+        'acomodacoes': _acomodacoes(destino),
         'hospedagem': {
             'nome': hospedagem_db.nome if hospedagem_db else cfg.get('hospedagem_nome', 'Pousada Soar'),
             'sub': destino.hospedagem_sub or cfg.get('hospedagem_sub', 'Conforto e natureza'),

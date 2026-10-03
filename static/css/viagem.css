@@ -761,3 +761,8 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .galeria-videos video { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-md); background: #000;
                         display: block; }
 .galeria-videos figcaption { margin-top: 4px; font-size: .8rem; color: var(--tinta-suave); }
+
+/* quartos que ainda há em cada data (cadastrados no painel) */
+.saida-op__quartos { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-top: 3px; font-size: .74rem;
+                     font-weight: 500; color: var(--tinta-suave); }
+.saida-op__quarto--zero { text-decoration: line-through; opacity: .7; }

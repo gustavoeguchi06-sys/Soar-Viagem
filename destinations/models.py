@@ -6,6 +6,8 @@ from django.utils.text import slugify
 
 from soar.videos import ajuda as ajuda_video, validar_video
 
+from .quartos import ESCOLHAS as TIPOS_DE_QUARTO, ICONES, ORDEM as ORDEM_DOS_QUARTOS, POR_CHAVE
+
 
 MESES = {
     1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
@@ -103,10 +105,12 @@ class Destino(models.Model):
     proxima_saida = models.CharField('Próxima saída', max_length=120, blank=True,
                                      help_text='Ex.: 16 a 21 de Junho de 2027.')
     vagas = models.PositiveSmallIntegerField('Vagas disponíveis', blank=True, null=True)
-    preco_base = models.DecimalField('Preço da viagem por pessoa (R$)', max_digits=9,
+    # O "a partir de": o menor preço por pessoa entre os quartos (PrecoQuarto).
+    # Atualizado sozinho quando o dono mexe nos preços; não é digitado.
+    preco_base = models.DecimalField('A partir de (R$ por pessoa)', max_digits=9,
                                      decimal_places=2, blank=True, null=True,
-                                     help_text='Valor por pessoa em quarto de casal, que abre o card '
-                                               'de reserva. Sem ele, a página mostra "sob consulta".')
+                                     help_text='O menor preço por pessoa entre os quartos. Sem '
+                                               'preço, a página mostra "sob consulta".')
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,
@@ -335,8 +339,14 @@ class Saida(models.Model):
     data_ida = models.DateField('Ida', help_text='Dia em que o grupo sai.')
     data_volta = models.DateField('Volta', help_text='Dia do retorno.')
     vagas = models.PositiveSmallIntegerField(
-        'Vagas', blank=True, null=True,
+        'Vagas (pessoas)', blank=True, null=True,
         help_text='Em branco, o site mostra "consulte". Com 0, aparece como esgotada.')
+    # Quantos quartos de cada tipo ainda há nesta data. Em branco: o tipo não
+    # aparece na lista de quartos da data.
+    quartos_single = models.PositiveSmallIntegerField('Quartos Single', blank=True, null=True)
+    quartos_casal = models.PositiveSmallIntegerField('Quartos Casal', blank=True, null=True)
+    quartos_duplo = models.PositiveSmallIntegerField('Quartos Duplo', blank=True, null=True)
+    quartos_triplo = models.PositiveSmallIntegerField('Quartos Triplo', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Saída'
@@ -360,8 +370,21 @@ class Saida(models.Model):
         return self.textos.get('proxima_saida', '')
 
     @property
+    def quartos(self):
+        """[{'nome': 'Casal', 'quantidade': 4}, ...] só dos tipos preenchidos."""
+        lista = []
+        for chave, nome in TIPOS_DE_QUARTO:
+            quantidade = getattr(self, 'quartos_' + chave)
+            if quantidade is not None:
+                lista.append({'chave': chave, 'nome': nome, 'quantidade': quantidade})
+        return lista
+
+    @property
     def esgotada(self):
-        return self.vagas == 0
+        # Esgotada quando as vagas zeraram, ou quando todos os quartos
+        # cadastrados para a data acabaram.
+        quartos = self.quartos
+        return self.vagas == 0 or (bool(quartos) and all(q['quantidade'] == 0 for q in quartos))
 
 
 class Interessado(models.Model):
@@ -447,3 +470,86 @@ class VideoSoar60(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
+class PrecoQuarto(models.Model):
+    """O preço por pessoa de um tipo de quarto da viagem.
+
+    Cada tipo tem o seu preço: não é uma conta a partir do casal. O "a partir
+    de" da viagem (Destino.preco_base) é o menor deles, atualizado sozinho
+    quando um preço muda (ver o sinal no fim do arquivo).
+    """
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='precos', verbose_name='Destino')
+    tipo = models.CharField('Quarto', max_length=12, choices=TIPOS_DE_QUARTO)
+    preco = models.DecimalField('Preço por pessoa (R$)', max_digits=9, decimal_places=2)
+
+    class Meta:
+        verbose_name = 'Preço por quarto'
+        verbose_name_plural = 'Preços por quarto'
+        constraints = [models.UniqueConstraint(fields=['destino', 'tipo'],
+                                               name='um_preco_por_tipo_de_quarto')]
+
+    def __str__(self):
+        return '{}: R$ {}'.format(self.get_tipo_display(), self.preco)
+
+    @property
+    def ordem(self):
+        return ORDEM_DOS_QUARTOS.get(self.tipo, 99)
+
+    @property
+    def pessoas(self):
+        return POR_CHAVE[self.tipo]['pessoas']
+
+
+class ServicoViagem(models.Model):
+    """Um item da faixa de serviços da página da viagem (ícone + duas linhas).
+
+    Sem nenhum cadastrado, a página mostra a faixa padrão da Soar.
+    """
+
+    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
+                                related_name='servicos', verbose_name='Destino')
+    icone = models.CharField('Ícone', max_length=30, choices=ICONES, default='ic-onibus')
+    titulo = models.CharField('Primeira linha', max_length=40, help_text='Ex.: Transporte')
+    sub = models.CharField('Segunda linha', max_length=40, blank=True,
+                           help_text='Ex.: confortável')
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Serviço da viagem'
+        verbose_name_plural = 'Serviços da viagem'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return ' '.join(filter(None, [self.titulo, self.sub]))
+
+
+def precos_a_partir_do_casal(destino, casal):
+    """Para os dados de exemplo: monta a tabela de quartos a partir de um preço de casal.
+
+    Só cria o que falta; o que o dono já cadastrou fica como está.
+    """
+    from decimal import Decimal
+
+    diferencas = {'single': 1400, 'casal': 0, 'duplo': 0, 'triplo': -200}
+    existentes = set(destino.precos.values_list('tipo', flat=True))
+    for tipo, diferenca in diferencas.items():
+        if tipo not in existentes:
+            PrecoQuarto.objects.create(destino=destino, tipo=tipo,
+                                       preco=Decimal(casal) + diferenca)
+
+
+def _atualizar_a_partir_de(sender, instance, **kwargs):
+    """Mantém o "a partir de" da viagem igual ao menor preço por pessoa."""
+    destino = Destino.objects.filter(pk=instance.destino_id).first()
+    if destino is None:
+        return
+    menor = destino.precos.aggregate(menor=models.Min('preco'))['menor']
+    if destino.preco_base != menor:
+        Destino.objects.filter(pk=destino.pk).update(preco_base=menor)
+
+
+models.signals.post_save.connect(_atualizar_a_partir_de, sender=PrecoQuarto)
+models.signals.post_delete.connect(_atualizar_a_partir_de, sender=PrecoQuarto)

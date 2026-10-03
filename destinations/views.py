@@ -117,7 +117,7 @@ def detalhe_destino(request, slug):
     de cliente no site, não tem mais formulário de avaliar aqui.
     """
     destino = get_object_or_404(
-        Destino.objects.prefetch_related('imagens', 'hospedagens', 'videos'),
+        Destino.objects.prefetch_related('imagens', 'hospedagens', 'videos', 'precos', 'servicos'),
         slug=slug,
     )
     return pagina_da_viagem(request, destino, enviado=request.GET.get('enviado') == '1')
