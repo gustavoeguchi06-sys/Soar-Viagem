@@ -13,11 +13,13 @@ fim a lista de tabelas (que é o que o admin mostrava sozinho).
 {% block faixa_titulo %}Olá, {% firstof user.first_name user.get_username %}.{% endblock %}
 {% block faixa_sub %}
 <p class="pf__sub">
-    {% if painel.reservas_pendentes %}
-        Há {{ painel.reservas_pendentes }} pedido{{ painel.reservas_pendentes|pluralize }} de reserva
-        esperando sua resposta.
+    {% if painel.interessados_sem_agencia %}
+        Há {{ painel.interessados_sem_agencia }} interessado{{ painel.interessados_sem_agencia|pluralize }}
+        esperando você escolher a agência.
+    {% elif painel.avaliacoes_na_fila %}
+        Há {{ painel.avaliacoes_na_fila }} avaliaç{{ painel.avaliacoes_na_fila|pluralize:"ão,ões" }} esperando moderação.
     {% else %}
-        Nenhum pedido de reserva esperando resposta. Tudo em dia.
+        Nada esperando por você. Tudo em dia.
     {% endif %}
 </p>
 {% endblock %}
@@ -36,12 +38,14 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
 
     {# ---------- Fila de trabalho ---------- #}
     <div class="painel-fila">
-        <a class="ficha {% if painel.reservas_pendentes %}ficha--atencao{% else %}ficha--calma{% endif %}"
-           href="{{ painel.url_reservas_pendentes }}">
-            <span class="ficha__rotulo">Reservas a responder</span>
-            <strong class="ficha__numero">{{ painel.reservas_pendentes }}</strong>
-            <span class="ficha__nota">de {{ painel.reservas_total }} pedido{{ painel.reservas_total|pluralize }} no total</span>
+        {% if user.is_superuser %}
+        <a class="ficha {% if painel.interessados_sem_agencia %}ficha--atencao{% else %}ficha--calma{% endif %}"
+           href="{{ painel.url_interessados_sem_agencia }}">
+            <span class="ficha__rotulo">Interessados sem agência</span>
+            <strong class="ficha__numero">{{ painel.interessados_sem_agencia }}</strong>
+            <span class="ficha__nota">de {{ painel.interessados_total }} pedido{{ painel.interessados_total|pluralize }} de "Saiba mais"</span>
         </a>
+        {% endif %}
 
         <a class="ficha {% if painel.avaliacoes_na_fila %}ficha--atencao{% else %}ficha--calma{% endif %}"
            href="{{ painel.url_avaliacoes_fila }}">
@@ -87,45 +91,78 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
             <span class="atalho__mais" aria-hidden="true">R$</span>
             <span>Mexer nos preços<small>edita na lista, sem abrir um a um</small></span>
         </a>
-        <a class="atalho" href="{{ painel.url_reservas }}">
+        {% if user.is_superuser %}
+        <a class="atalho" href="{{ painel.url_orcamentos }}">
             <span class="atalho__mais" aria-hidden="true">&#9776;</span>
-            <span>Todas as reservas<small>histórico e situação</small></span>
+            <span>Orçamentos das agências<small>histórico e situação</small></span>
         </a>
+        {% endif %}
     </div>
 
-    {# Últimas reservas: largura toda, por ser a tabela mais larga da tela #}
+    {% if user.is_superuser %}
+    {# ---------- Só o dono: quem pediu "Saiba mais" e os orçamentos das agências ---------- #}
     <div class="painel-titulo">
-        <h2>Últimos pedidos de reserva</h2>
-        <a href="{{ painel.url_reservas }}">Ver todas &rarr;</a>
+        <h2>Interessados esperando agência</h2>
+        <a href="{{ painel.url_interessados }}">Ver todos &rarr;</a>
     </div>
     <div class="module tabela-rolagem">
-                <table class="tabela-painel">
-                    <thead>
-                        <tr>
-                            <th scope="col">Código</th>
-                            <th scope="col">Destino</th>
-                            <th scope="col">Cliente</th>
-                            <th scope="col" class="num">Pessoas</th>
-                            <th scope="col" class="num">Estimado</th>
-                            <th scope="col">Situação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for r in painel.ultimas_reservas %}
-                        <tr>
-                            <td><a href="{% url 'admin:reservas_reserva_change' r.pk %}"><strong>{{ r.codigo }}</strong></a></td>
-                            <td>{{ r.destino.nome }}</td>
-                            <td>{% firstof r.usuario.first_name r.usuario.username "Cliente removido" %}</td>
-                            <td class="num">{{ r.pessoas }}</td>
-                            <td class="num">{% if r.total_estimado %}R$ {{ r.total_estimado|floatformat:"2g" }}{% else %}-{% endif %}</td>
-                            <td><span class="etiqueta etiqueta--{{ r.status }}">{{ r.get_status_display }}</span></td>
-                        </tr>
-                    {% empty %}
-                        <tr><td colspan="6" class="vazio">Nenhuma reserva pedida ainda.</td></tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+        <table class="tabela-painel">
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Viagem</th>
+                    <th scope="col">CEP</th>
+                    <th scope="col">Pedido em</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for i in painel.lista_interessados %}
+                <tr>
+                    <td><a href="{% url 'admin:destinations_interessado_change' i.pk %}"><strong>{{ i.nome }}</strong></a></td>
+                    <td>{{ i.destino.nome|default:"-" }}</td>
+                    <td>{{ i.cep }}</td>
+                    <td>{{ i.criado_em|date:"d/m/Y" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="vazio">Todos os interessados já foram mandados para uma agência.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    <div class="painel-titulo">
+        <h2>Últimos orçamentos</h2>
+        <a href="{{ painel.url_orcamentos }}">Ver todos &rarr;</a>
+    </div>
+    <div class="module tabela-rolagem">
+        <table class="tabela-painel">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Agência</th>
+                    <th scope="col">Destino</th>
+                    <th scope="col" class="num">Adultos</th>
+                    <th scope="col" class="num">Valor</th>
+                    <th scope="col">Situação</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for o in painel.ultimos_orcamentos %}
+                <tr>
+                    <td><a href="{% url 'admin:agencia_orcamento_change' o.pk %}"><strong>{{ o.codigo }}</strong></a></td>
+                    <td>{{ o.agencia.razao_social }}</td>
+                    <td>{{ o.destino.nome }}</td>
+                    <td class="num">{{ o.pessoas }}</td>
+                    <td class="num">{% if o.valor is not None %}R$ {{ o.valor|floatformat:"2g" }}{% else %}-{% endif %}</td>
+                    <td><span class="etiqueta etiqueta--{% if o.status == 'aceito' %}confirmada{% elif o.status == 'recusado' %}cancelada{% else %}pendente{% endif %}">{{ o.get_status_display }}</span></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="vazio">Nenhum orçamento feito ainda.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
     {# ---------- As duas pendências, lado a lado ---------- #}
     <div class="painel-colunas">

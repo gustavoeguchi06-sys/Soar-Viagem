@@ -12,15 +12,14 @@ produção, agende uma vez por dia (cron ou Agendador de Tarefas do Windows).
 
 Prazos — os mesmos do aviso de privacidade:
 
-- Reservas: 5 anos após a viagem. A data da viagem é texto livre ("Julho de
-  2026"), então a conta parte do pedido, com 1 ano de folga: 6 anos.
 - IP das avaliações: 6 meses. A avaliação fica; só o IP some.
 - Registro de acessos (logs/seguranca.log.*): 6 meses, o mínimo que o Marco
   Civil da Internet (art. 15) exige guardar — nem mais, nem menos.
 - Orçamentos das agências: 1 ano sem mexer quando não viraram venda
-  (enviado ou recusado); 6 anos quando o cliente aceitou, como as reservas.
+  (enviado ou recusado); 6 anos quando o cliente aceitou (5 anos após a
+  viagem, como pedem a legislação fiscal e o CDC, com 1 ano de folga).
 - Cadastros nunca confirmados: 30 dias. Conta que nunca foi ativada nem usada
-  não tem reserva nem avaliação: é só nome, e-mail e senha de alguém que não
+  não tem orçamento nem avaliação: é só nome, e-mail e senha de alguém que não
   terminou o cadastro — ou de alguém que usou o e-mail de outra pessoa.
 - "Saiba mais" das viagens (Interessado): 1 ano.
 - Newsletter nunca confirmada: 7 dias, a validade do link. Depois disso o
@@ -40,12 +39,11 @@ from django.utils import timezone
 from agencia.models import Orcamento
 from blog.models import Inscricao
 from destinations.models import Interessado
-from reservas.models import Reserva
 from reviews.models import Avaliacao
 
 log = logging.getLogger('soar.seguranca')
 
-PRAZO_RESERVA = timedelta(days=6 * 365)
+PRAZO_ORCAMENTO_ACEITO = timedelta(days=6 * 365)
 PRAZO_IP_AVALIACAO = timedelta(days=183)
 PRAZO_LOG = timedelta(days=183)
 PRAZO_CADASTRO_PENDENTE = timedelta(days=30)
@@ -64,7 +62,6 @@ class Command(BaseCommand):
     def handle(self, *args, simular=False, **options):
         agora = timezone.now()
 
-        reservas = Reserva.objects.filter(criado_em__lt=agora - PRAZO_RESERVA)
         ips = Avaliacao.objects.filter(criado_em__lt=agora - PRAZO_IP_AVALIACAO,
                                        ip__isnull=False)
         # last_login vazio = nunca entrou. Sem isso, uma conta que o dono
@@ -76,7 +73,7 @@ class Command(BaseCommand):
         )
         logs = self._logs_vencidos()
         orcamentos = Orcamento.objects.filter(
-            Q(status='aceito', atualizado_em__lt=agora - PRAZO_RESERVA)
+            Q(status='aceito', atualizado_em__lt=agora - PRAZO_ORCAMENTO_ACEITO)
             | (~Q(status='aceito') & Q(atualizado_em__lt=agora - PRAZO_ORCAMENTO_ABERTO)))
 
         newsletter = Inscricao.objects.filter(
@@ -84,7 +81,6 @@ class Command(BaseCommand):
         interessados = Interessado.objects.filter(criado_em__lt=agora - PRAZO_INTERESSADO)
 
         totais = {
-            'reservas antigas': reservas.count(),
             'IPs de avaliação': ips.count(),
             'cadastros nunca confirmados': pendentes.count(),
             'orçamentos vencidos': orcamentos.count(),
@@ -95,7 +91,6 @@ class Command(BaseCommand):
 
         if not simular:
             with transaction.atomic():
-                reservas.delete()
                 ips.update(ip=None)
                 pendentes.delete()
                 orcamentos.delete()

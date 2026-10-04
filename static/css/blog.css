@@ -27,9 +27,7 @@
 .blog-crumbs a:hover { color: #fff; }
 .blog-crumbs span { margin: 0 8px; opacity: .6; }
 .blog-crumbs .atual { opacity: .9; }
-.blog-tag { display: inline-block; background: var(--verde, #146c43); color: #fff;
-            font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-            padding: 6px 12px; border-radius: 6px; margin-bottom: 16px; }
+
 .blog-hero h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); line-height: 1.12; font-weight: 800;
                 margin: 0 0 16px; max-width: 15ch; color: #fff; }
 .blog-hero__sub { font-size: 1.02rem; color: rgba(255,255,255,.9); max-width: 46ch; margin: 0 0 26px; }
@@ -57,7 +55,6 @@
 .blog-corpo > p { font-size: 1rem; line-height: 1.75; color: var(--body-medium-color, #4a585d); margin: 0 0 18px; }
 .blog-corpo h2 { font-size: 1.45rem; font-weight: 700; margin: 40px 0 14px; color: var(--body-loud-color, #14201b); }
 .blog-foto { border-radius: 16px; height: 300px; margin: 8px 0 28px; }
-.blog-foto--larga { height: 320px; }
 
 .blog-nota { display: flex; gap: 12px; align-items: flex-start; background: var(--verde-claro, #e8f3ec);
              border-left: 4px solid var(--verde, #146c43); border-radius: 12px; padding: 16px 18px; margin: 6px 0 8px; }
@@ -76,14 +73,12 @@
 .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .dot--otima { background: var(--verde, #146c43); }
 .dot--boa { background: #7cc39a; }
-.dot--evite { background: #e2574c; }
 
 .blog-atracoes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0 22px; }
 .blog-atracao { background: #fff; border: 1px solid var(--border-color, #e6eae8); border-radius: 14px; overflow: hidden; }
 .blog-atracao__foto { height: 110px; }
 .blog-atracao b { display: block; font-size: .92rem; padding: 12px 12px 4px; }
 .blog-atracao small { display: block; padding: 0 12px 14px; font-size: .8rem; color: var(--body-quiet-color, #6b7a80); line-height: 1.5; }
-.blog-centro { text-align: center; margin: 8px 0 4px; }
 
 .blog-dicas { list-style: none; padding: 0; margin: 12px 0 8px; display: grid; gap: 12px; }
 .blog-dicas li { display: flex; gap: 12px; align-items: flex-start; font-size: .96rem;

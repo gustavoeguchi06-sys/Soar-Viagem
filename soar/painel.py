@@ -3,9 +3,9 @@
 É o admin do Django, mas com a cara do site e com uma tela inicial que responde
 à pergunta que o dono faz ao abrir o painel: *o que precisa de mim agora?*
 
-O admin padrão abre numa lista de tabelas ("Destinos", "Hospedagens",
-"Reservas"...) — correta e inútil como primeira tela, porque não diz se há
-reserva esperando resposta nem se um destino foi ao ar sem preço. Aqui a
+O admin padrão abre numa lista de tabelas ("Destinos", "Hospedagens"...) —
+correta e inútil como primeira tela, porque não diz se há interessado esperando
+uma agência nem se um destino foi ao ar sem preço. Aqui a
 primeira coisa é a fila de trabalho; a lista de tabelas continua embaixo.
 
 Trocar o admin inteiro por este é feito pelo `SoarAdminConfig` lá no fim do
@@ -35,7 +35,6 @@ ABAS = [
      'destinations.view_slideinicio', None),
     ('Sobre a Soar', 'admin:destinations_paginasobre_changelist',
      'destinations.view_paginasobre', None),
-    ('Reservas', 'admin:reservas_reserva_changelist', 'reservas.view_reserva', 'reservas'),
     # quem pediu "Saiba mais" sem login; o dono manda cada um para a agência certa
     ('Interessados', 'admin:destinations_interessado_changelist', DONO, 'interessados'),
     ('Orçamentos', 'admin:agencia_orcamento_changelist', DONO, None),
@@ -63,11 +62,9 @@ class PainelSoar(AdminSite):
 
     def _abas(self, request):
         from destinations.models import Interessado
-        from reservas.models import Reserva
         from reviews.models import Avaliacao
 
         contadores = {
-            'reservas': lambda: Reserva.objects.filter(status='pendente').count(),
             # ainda não mandados para nenhuma agência
             'interessados': lambda: Interessado.objects.filter(agencias__isnull=True).count(),
             'avaliacoes': lambda: Avaliacao.objects.filter(publicada=False).count(),
@@ -136,12 +133,9 @@ class PainelSoar(AdminSite):
         from blog.models import Artigo
         from django.utils import timezone
 
-        from destinations.models import Destino, Saida
-        from reservas.models import Reserva
+        from agencia.models import Orcamento
+        from destinations.models import Destino, Interessado, Saida
         from reviews.models import Avaliacao
-
-        reservas = Reserva.objects.select_related('destino', 'usuario')
-        pendentes = reservas.filter(status='pendente')
 
         # Um destino no ar sem preço nenhum mostra "sob consulta" no card de
         # reserva. Vale avisar antes de o cliente descobrir.
@@ -149,37 +143,46 @@ class PainelSoar(AdminSite):
 
         fila_avaliacoes = Avaliacao.objects.filter(publicada=False).select_related('destino')
 
+        painel = {
+            'avaliacoes_na_fila': fila_avaliacoes.count(),
+            'destinos_total': Destino.objects.count(),
+            'destinos_sem_preco': sem_preco.count(),
+            'saidas_futuras': Saida.objects.filter(data_ida__gte=timezone.localdate()).count(),
+            'artigos_no_ar': Artigo.objects.no_ar().count(),
+            'artigos_total': Artigo.objects.count(),
+
+            'lista_sem_preco': list(sem_preco[:6]),
+            'lista_avaliacoes': list(fila_avaliacoes[:5]),
+
+            'url_destinos': reverse('admin:destinations_destino_changelist'),
+            'url_destino_novo': reverse('admin:destinations_destino_add'),
+            'url_slides': reverse('admin:destinations_slideinicio_changelist'),
+            'url_artigos': reverse('admin:blog_artigo_changelist'),
+            'url_artigo_novo': reverse('admin:blog_artigo_add'),
+            'url_avaliacoes_fila':
+                reverse('admin:reviews_avaliacao_changelist') + '?publicada__exact=0',
+        }
+        # Interessados e orçamentos trazem dados de cliente: só o dono vê,
+        # como nas listas deles (InteressadoAdmin, OrcamentoAdmin).
+        if request.user.is_superuser:
+            sem_agencia = Interessado.objects.filter(agencias__isnull=True)
+            painel.update({
+                'interessados_sem_agencia': sem_agencia.count(),
+                'interessados_total': Interessado.objects.count(),
+                'lista_interessados': list(sem_agencia.select_related('destino')[:6]),
+                'ultimos_orcamentos': list(
+                    Orcamento.objects.select_related('agencia', 'destino')[:8]),
+                'url_interessados': reverse('admin:destinations_interessado_changelist'),
+                'url_interessados_sem_agencia':
+                    reverse('admin:destinations_interessado_changelist') + '?agencias__isempty=1',
+                'url_orcamentos': reverse('admin:agencia_orcamento_changelist'),
+            })
+
         contexto = {
             **self.each_context(request),
             'title': self.index_title,
             'app_list': self.get_app_list(request),
-            'painel': {
-                'reservas_pendentes': pendentes.count(),
-                'reservas_total': reservas.count(),
-                'avaliacoes_na_fila': fila_avaliacoes.count(),
-                'destinos_total': Destino.objects.count(),
-                'destinos_sem_preco': sem_preco.count(),
-                'saidas_futuras': Saida.objects.filter(
-                    data_ida__gte=timezone.localdate()).count(),
-                'artigos_no_ar': Artigo.objects.no_ar().count(),
-                'artigos_total': Artigo.objects.count(),
-
-                'ultimas_reservas': list(reservas[:8]),
-                'lista_sem_preco': list(sem_preco[:6]),
-                'lista_avaliacoes': list(fila_avaliacoes[:5]),
-
-                'url_reservas': reverse('admin:reservas_reserva_changelist'),
-                'url_reservas_pendentes':
-                    reverse('admin:reservas_reserva_changelist') + '?status__exact=pendente',
-                'url_destinos': reverse('admin:destinations_destino_changelist'),
-                'url_destino_novo': reverse('admin:destinations_destino_add'),
-                'url_slides': reverse('admin:destinations_slideinicio_changelist'),
-                'url_avaliacoes': reverse('admin:reviews_avaliacao_changelist'),
-                'url_artigos': reverse('admin:blog_artigo_changelist'),
-                'url_artigo_novo': reverse('admin:blog_artigo_add'),
-                'url_avaliacoes_fila':
-                    reverse('admin:reviews_avaliacao_changelist') + '?publicada__exact=0',
-            },
+            'painel': painel,
             **(extra_context or {}),
         }
         request.current_app = self.name

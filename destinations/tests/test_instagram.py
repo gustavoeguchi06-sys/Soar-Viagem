@@ -16,8 +16,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from . import instagram
-from .models import TokenInstagram
+from .. import instagram
+from ..models import TokenInstagram
 
 TOKEN = 'IGAA-token-do-env'
 

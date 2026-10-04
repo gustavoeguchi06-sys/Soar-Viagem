@@ -1,7 +1,7 @@
 /* Trava o formulário enquanto ele é enviado.
 
    Sem isso, um clique duplo (ou a pessoa apertando de novo porque a internet
-   está lenta) mandava o mesmo pedido duas vezes: reserva, orçamento ou
+   está lenta) mandava o mesmo pedido duas vezes: orçamento, "Saiba mais" ou
    cadastro repetido. O servidor também se protege, mas o botão travado evita
    que o segundo envio chegue a sair.
 
@@ -11,8 +11,8 @@
    `data-sem-trava`, senão o botão fica travado depois do download.
 
    O ouvinte fica no `document`: ele roda depois dos ouvintes do próprio
-   formulário (como o "Tem certeza?" do cancelar reserva), então quando a
-   pessoa responde "Cancelar" no aviso nada é travado. */
+   formulário, então um ouvinte que cancele o envio (preventDefault) impede
+   também a trava. */
 (function () {
     'use strict';
 

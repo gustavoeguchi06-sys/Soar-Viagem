@@ -9,8 +9,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from .admin import SecaoForm
-from .models import Artigo, Categoria, Secao
+from ..admin import SecaoForm
+from ..models import Artigo, Categoria, Secao
 
 HOJE = timezone.localdate
 

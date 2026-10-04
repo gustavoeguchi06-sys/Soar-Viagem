@@ -13,7 +13,7 @@ from django.utils import timezone
 from contas.models import PerfilAgente
 from destinations.models import Destino, Saida
 
-from .models import Orcamento
+from ..models import Orcamento
 
 SENHA = 'senha-boa-123'
 
@@ -171,7 +171,7 @@ class PainelAgenciaTests(TestCase):
 
     def test_pdf_tem_todas_as_informacoes_do_pacote(self):
         from destinations.conteudo import montar_viagem
-        from .pdf import _estilos, _pacote
+        from ..pdf import _estilos, _pacote
 
         def textos(flowables):
             for f in flowables:
@@ -195,7 +195,7 @@ class PainelAgenciaTests(TestCase):
 
     def test_pdf_formas_de_pagamento_entre_o_total_e_a_validade(self):
         from decimal import Decimal
-        from . import pdf
+        from .. import pdf
 
         capturado = {}
         construir = pdf.SimpleDocTemplate.build
@@ -254,7 +254,7 @@ class PainelAgenciaTests(TestCase):
                                       imagem=jpg('pousada.jpg'))
             self.entrar(self.ag1)
             self.client.post(self.criar, self.dados)
-            from .pdf import gerar_pdf
+            from ..pdf import gerar_pdf
             conteudo = gerar_pdf(Orcamento.objects.get())
         sem_fotos = gerar_pdf(Orcamento.objects.create(
             agencia=self.ag1, destino=self.outro, cliente_nome='Ana', pessoas=2))
@@ -443,3 +443,34 @@ class OrcamentosNoPainelTests(TestCase):
                                                         is_staff=True))
         self.assertEqual(
             self.client.get(reverse('admin:agencia_orcamento_changelist')).status_code, 403)
+
+
+class InicioDoPainelTests(TestCase):
+    """A tela inicial do painel mostra o trabalho de verdade: interessados e orçamentos."""
+
+    _entrar_no_painel = InteressadosTests._entrar_no_painel
+
+    def setUp(self):
+        from destinations.models import Interessado
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        Interessado.objects.create(destino=destino, nome='Ana Souza', email='ana@exemplo.com',
+                                   whatsapp='(11) 98888-7777', cep='01310-100')
+        Orcamento.objects.create(agencia=_agencia('alfa', '11222333000181'), destino=destino,
+                                 cliente_nome='Bruno', valor=6000)
+
+    def test_dono_ve_interessados_e_orcamentos(self):
+        self._entrar_no_painel(User.objects.create_superuser('dono', 'd@x.com', SENHA))
+        resposta = self.client.get(reverse('admin:index'))
+        self.assertContains(resposta, 'Interessados esperando agência')
+        self.assertContains(resposta, 'Ana Souza')
+        self.assertContains(resposta, 'Últimos orçamentos')
+        self.assertContains(resposta, 'Alfa Turismo')
+        self.assertNotContains(resposta, 'reserva')
+
+    def test_equipe_nao_ve_dados_de_cliente(self):
+        self._entrar_no_painel(User.objects.create_user('equipe', 'e@x.com', SENHA,
+                                                        is_staff=True))
+        resposta = self.client.get(reverse('admin:index'))
+        self.assertEqual(resposta.status_code, 200)
+        self.assertNotContains(resposta, 'Ana Souza')
+        self.assertNotContains(resposta, 'Últimos orçamentos')

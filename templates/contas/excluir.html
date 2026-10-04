@@ -12,14 +12,13 @@
         <div class="cartao-form">
             <h1>Excluir minha conta</h1>
             <p class="cartao-form__sub">
-                Apaga seu cadastro, seu telefone e as observações que você escreveu nos
-                pedidos. Não dá para desfazer.
+                Apaga seu cadastro e os dados da sua conta. Não dá para desfazer.
             </p>
 
             <div class="form-nota">
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
-                <span>As reservas em si continuam no sistema da operadora, sem nada que
-                      ligue você a elas. A Soar precisa do histórico por obrigação fiscal.</span>
+                <span>Se a conta é de uma agência parceira, o cadastro da agência e os
+                      orçamentos feitos por ela também são apagados.</span>
             </div>
 
             <form method="post" novalidate>
@@ -40,7 +39,7 @@
                     <a href="{% url 'contas:meus_dados' %}">Baixe uma cópia dos seus dados</a>, porque
                     depois da exclusão não tem como recuperar.</li>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Tem reserva em andamento? Fale com a equipe antes.</li>
+                    Tem viagem em andamento com a Soar? Fale com a equipe antes.</li>
             </ul>
         </aside>
     </div>

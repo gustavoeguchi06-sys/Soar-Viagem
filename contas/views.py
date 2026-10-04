@@ -9,14 +9,14 @@ from urllib.parse import urlencode
 import logging
 
 from django.contrib import messages
-from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
@@ -237,10 +237,8 @@ def sair(request):
 
 @login_required
 def minha_conta(request):
-    """Painel do cliente: dados da conta e as reservas que ele pediu."""
-    return render(request, 'contas/conta.html', {
-        'reservas': request.user.reservas.select_related('destino'),
-    })
+    """A conta de quem entra (agência ou equipe): dados e os direitos da LGPD."""
+    return render(request, 'contas/conta.html')
 
 
 def privacidade(request):
@@ -264,21 +262,23 @@ def meus_dados(request):
             'criada_em': usuario.date_joined.isoformat(),
             'ultimo_acesso': usuario.last_login.isoformat() if usuario.last_login else None,
         },
-        'reservas': [
+        'agencia': _dados_da_agencia(usuario),
+        'orcamentos': [
             {
-                'codigo': r.codigo,
-                'destino': r.destino.nome,
-                'acomodacao': r.get_acomodacao_display(),
-                'pessoas': r.pessoas,
-                'telefone': r.telefone,
-                'observacao': r.observacao,
-                'preco_estimado': str(r.preco_estimado) if r.preco_estimado else None,
-                'saida': r.saida,
-                'agencia_parceira': r.agencia.razao_social if r.agencia else None,
-                'situacao': r.get_status_display(),
-                'pedido_em': r.criado_em.isoformat(),
+                'codigo': o.codigo,
+                'destino': o.destino.nome,
+                'cliente': o.cliente_nome,
+                'cliente_email': o.cliente_email,
+                'cliente_telefone': o.cliente_telefone,
+                'acomodacao': o.get_acomodacao_display(),
+                'adultos': o.pessoas,
+                'criancas': o.idades_criancas,
+                'valor': str(o.valor) if o.valor is not None else None,
+                'situacao': o.get_status_display(),
+                'feito_em': o.criado_em.isoformat(),
             }
-            for r in usuario.reservas.select_related('destino')
+            for o in (usuario.agente.orcamentos.select_related('destino')
+                      if hasattr(usuario, 'agente') else [])
         ],
         'avaliacoes': [
             {
@@ -301,6 +301,20 @@ def meus_dados(request):
     return resposta
 
 
+def _dados_da_agencia(usuario):
+    agente = getattr(usuario, 'agente', None)
+    if agente is None:
+        return None
+    return {
+        'razao_social': agente.razao_social,
+        'cnpj': agente.cnpj_formatado,
+        'cadastur': agente.cadastur,
+        'whatsapp': agente.whatsapp,
+        'aprovada': agente.aprovado,
+        'cadastrada_em': agente.criado_em.isoformat(),
+    }
+
+
 @login_required
 def excluir_conta(request):
     """Apaga a conta e os dados pessoais (LGPD, art. 18, VI)."""
@@ -310,12 +324,8 @@ def excluir_conta(request):
             usuario = request.user
             nome = usuario.get_username()
 
-            # As reservas ficam, porque a operadora precisa do histórico
-            # comercial e fiscal — mas sem nada que ligue a pessoa a elas: o
-            # telefone e as observações saem aqui, e o vínculo com a conta vira
-            # NULL quando ela é apagada (Reserva.usuario é SET_NULL).
-            usuario.reservas.update(telefone='', nota_agencia='',
-                                    observacao='[dados removidos a pedido do cliente]')
+            # O perfil da agência e os orçamentos dela saem junto com a conta
+            # (CASCADE). A avaliação escrita fica, sem o nome.
             usuario.avaliacoes.update(nome_autor='Cliente removido', publicada=False)
 
             logout(request)

@@ -7,9 +7,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from reservas.models import Reserva
 
-from .models import Destino, Saida
+from ..models import Destino, Saida
 
 
 class SaidasTests(TestCase):
@@ -55,7 +54,6 @@ class SaidasTests(TestCase):
         self.assertEqual(self.client.post('/reservar/bonito/', {'acomodacao': 'casal'}).status_code,
                          404)
         self.assertEqual(self.client.post('/reservas/1/cancelar/').status_code, 404)
-        self.assertFalse(Reserva.objects.exists())
 
     def test_saida_esgotada_nao_entra_no_orcamento(self):
         from agencia.forms import OrcamentoViagemForm
@@ -200,7 +198,7 @@ class PaginaInicialTests(TestCase):
         self.assertNotContains(self.client.get('/destinos/?estilo=Cultura'), '/destinos/bonito/')
 
     def test_busca_so_com_destinos_e_meses_que_tem_saida(self):
-        from .models import MESES
+        from ..models import MESES
         Destino.objects.create(nome='Sem Data', slug='sem-data', descricao='x')
         ida = self.s.data_ida
         valor = '{}-{:02d}'.format(ida.year, ida.month)
@@ -256,7 +254,7 @@ class SaibaMaisTests(TestCase):
         self.assertNotContains(resposta, self.MENSAGEM)
 
     def test_enviar_guarda_os_dados_e_mostra_a_mensagem(self):
-        from .models import Interessado
+        from ..models import Interessado
         resposta = self.client.post(self.url, self.dados(), follow=True)
         self.assertContains(resposta, self.MENSAGEM)
         self.assertContains(resposta, 'agência conveniada mais próxima de você')
@@ -269,7 +267,7 @@ class SaibaMaisTests(TestCase):
                          (self.destino, '(11) 98888-7777', '01310-100'))
 
     def test_campo_errado_volta_com_o_erro_e_nao_grava(self):
-        from .models import Interessado
+        from ..models import Interessado
         resposta = self.client.post(self.url, self.dados(cep='123'))
         self.assertContains(resposta, 'O CEP tem 8 números')
         self.assertContains(resposta, '<details class="interesse" open>')
@@ -277,7 +275,7 @@ class SaibaMaisTests(TestCase):
 
     def test_tem_limite_por_hora(self):
         from soar.seguranca import LIMITE_INTERESSE
-        from .models import Interessado
+        from ..models import Interessado
         for _ in range(LIMITE_INTERESSE.tentativas + 2):
             self.client.post(self.url, self.dados())
         self.assertEqual(Interessado.objects.count(), LIMITE_INTERESSE.tentativas)

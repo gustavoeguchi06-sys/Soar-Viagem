@@ -126,7 +126,7 @@
         if (FORMATOS[campo.dataset.mascara]) { aplicar(campo, campo.dataset.mascara); }
     });
 
-    /* Painel do dono: telefone da reserva e do orçamento, WhatsApp e CADASTUR
+    /* Painel do dono: telefone do orçamento, WhatsApp e CADASTUR
        da agência. O CNPJ fica de fora aqui porque o painel guarda só os 14
        números nesse campo. Os blocos de "adicionar outro" também entram. */
     if (document.getElementById('site-name')) {

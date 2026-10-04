@@ -123,7 +123,6 @@ INSTALLED_APPS = [
     'destinations',
     'reviews',
     'contas',
-    'reservas',
     'blog',
     'agencia',
 ]

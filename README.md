@@ -79,15 +79,17 @@ Conta antiga de cliente (de quando o site vendia direto) é recusada ao entrar.
 No card da viagem, a agência escolhe data, quarto, adultos e as idades das
 crianças (CHD, 0 a 8 anos, sob consulta). O pop-up pede o responsável e o
 e-mail; o site calcula o valor pela tabela (preço do quarto × adultos), guarda o
-orçamento com validade de **72 horas** e manda o **PDF** com o pacote completo
-(roteiro, incluso, hospedagem, informações e perguntas). Se o e-mail falhar, o
+orçamento com validade de **72 horas** e manda o **PDF** com o pacote completo:
+foto de capa, formas de pagamento logo abaixo do valor, roteiro, as fotos dos
+lugares que o grupo vai conhecer, incluso e não incluso, hospedagem com foto e
+informações importantes. Se o e-mail falhar, o
 orçamento fica salvo e a agência baixa o PDF. Limite: 30 orçamentos por hora por
 agência (`SOAR_LIMITE_ORCAMENTO`).
 
 ## Colocar no ar
 
 **Passo a passo completo do servidor em [`deploy/DEPLOY.md`](deploy/DEPLOY.md)**
-(Ubuntu + Nginx + Gunicorn + PostgreSQL + Redis + Certbot, com firewall, SSH,
+(Ubuntu 26.04 + Nginx + Gunicorn + PostgreSQL + Redis + Certbot, com firewall, SSH,
 Fail2ban, backup e monitoramento). Os arquivos de configuração estão em `deploy/`.
 
 O padrão de toda variável é o de **produção**, e o Django **se recusa a subir**
@@ -106,6 +108,7 @@ se faltar uma obrigatória. Principais (lista completa e comentada em
 | `SOAR_EMAIL_*` | SMTP (Gmail com senha de app): orçamentos, nova senha, confirmação |
 | `SOAR_R2_*` | fotos e vídeos no **Cloudflare R2** em vez do disco do VPS (opcional) |
 | `SOAR_2FA_EQUIPE` | `1` pede código do celular para entrar no painel |
+| `SOAR_INSTAGRAM_TOKEN` | fotos do @operadorasoar na página inicial (renovado sozinho) |
 | `SOAR_TAMANHO_MAXIMO_*_MB` | teto de envio (10), de cada foto (10) e de cada vídeo (100) |
 
 Antes de publicar: `python manage.py check --deploy` (o único aviso esperado é o
@@ -125,7 +128,7 @@ do HSTS preload, desligado de propósito).
   cabeçalho do arquivo. O teto maior de envio vale só para a equipe em `/painel/`.
   Arquivo trocado ou apagado sai do disco/R2 (`soar/arquivos.py`).
 - **Permissões:** agência só vê e baixa o que é dela; interessados e usuários só
-  o dono. Há uma varredura automática das áreas protegidas (`contas/tests_permissoes.py`).
+  o dono. Há uma varredura automática das áreas protegidas (`contas/tests/test_permissoes.py`).
 - **LGPD:** aviso de privacidade, exportar e excluir os próprios dados, e o
   comando `expurgar_dados`, que apaga o que passou do prazo (agende uma vez por
   dia no servidor; o `rodar.bat` já roda local).
@@ -140,32 +143,59 @@ python manage.py test
 
 Cada correção de segurança e cada regra de negócio tem teste que quebra se
 alguém desfizer (permissões, limites, uploads, preços, orçamento e PDF, e-mail,
-N+1 nas listas).
+Instagram, N+1 nas listas). Os testes de cada módulo ficam em `<módulo>/tests/`,
+um arquivo por assunto (`test_precos.py`, `test_permissoes.py`...).
 
-## Estrutura
+## Arquitetura
+
+Um projeto Django com um módulo (app) por assunto do negócio. Cada módulo tem as
+mesmas camadas, e cada camada tem um papel só:
+
+| Camada | Arquivo | O que faz |
+|---|---|---|
+| Dados | `models.py` | tabelas e regras que valem sempre (validações, cálculos do próprio registro) |
+| Regras de negócio | módulos com nome do assunto: `conteudo.py`, `inicio.py`, `instagram.py`, `pdf.py`... | montam o que as telas mostram; não sabem nada de HTTP |
+| Telas | `views.py` + `urls.py` + `templates/<módulo>/` | recebem o pedido, chamam as regras e devolvem a página |
+| Formulários | `forms.py` | o que o visitante digita e a conferência disso |
+| Painel do dono | `admin.py` | como cada cadastro aparece e quem pode ver e mexer |
+| Rotinas | `management/commands/` | comandos agendados ou de manutenção (`expurgar_dados`, `renovar_token_instagram`...) |
+| Testes | `tests/test_<assunto>.py` | um arquivo por assunto |
+
+O que é de todos os módulos (segurança, CSP, validação de arquivos, o painel)
+fica no núcleo, `soar/`.
 
 ```
-soar/
+soar/                    # raiz do projeto (onde está o manage.py)
 ├── manage.py · requirements.txt · .env.example · rodar.bat
 ├── deploy/              # servidor: DEPLOY.md, nginx, gunicorn, systemd, backup, fail2ban, logrotate
-├── soar/                # configurações
+├── soar/                # núcleo e configurações
 │   ├── settings.py      # tudo por variável de ambiente; padrão = produção
+│   ├── urls.py          # as rotas de cada módulo, juntas
 │   ├── middleware.py    # CSP, Permissions-Policy e teto de envio
 │   ├── seguranca.py     # limites de tentativa e IP do visitante
 │   ├── painel.py        # o painel do dono (abas e tela inicial)
 │   ├── videos.py        # validação de fotos e vídeos enviados
-│   └── arquivos.py      # apaga arquivo que ficou sem uso
+│   ├── arquivos.py      # apaga arquivo que ficou sem uso
+│   ├── mascaras.py      # telefone, CEP, CADASTUR no formato brasileiro
+│   └── limpeza_sw.py    # /sw.js e /favicon.ico
 ├── destinations/        # viagens: destino, preços por quarto, saídas, roteiro, fotos, vídeos,
-│                        # serviços, banner, Soar 60+, Sobre a Soar, "Saiba mais"
+│   │                    # serviços, banner, Soar 60+, Sobre a Soar, "Saiba mais", Instagram
+│   ├── conteudo.py      # monta a página da viagem (o que está no painel ou o texto padrão)
+│   ├── inicio.py        # monta a página inicial
+│   ├── instagram.py     # fotos do @operadorasoar e renovação do token
+│   └── quartos.py       # tipos de quarto e ícones
 ├── agencia/             # orçamento no card da viagem, PDF (pdf.py) e e-mail
-├── contas/              # entrar, B2B (cadastro da agência), 2FA, senha, LGPD
+├── contas/              # entrar, B2B (cadastro da agência), 2FA, Google, senha, LGPD
 ├── blog/                # artigos, categorias e newsletter
 ├── reviews/             # avaliações (cadastradas pelo dono)
-├── reservas/            # histórico dos pedidos de quando o site vendia direto
-├── templates/ · static/ # HTML, CSS, JS, fontes e ícones
-├── media/               # fotos e vídeos enviados (sem R2)
-└── logs/                # log de segurança
+├── templates/           # HTML, numa pasta por módulo (+ base.html, páginas de erro, painel)
+├── static/              # css/ (um por área), js/, fonts/, img/
+├── media/               # fotos e vídeos enviados (sem R2; fora do Git)
+└── logs/                # log de segurança (fora do Git)
 ```
+
+O nome `destinations` (em inglês, ao contrário dos outros) fica: ele está gravado
+nas tabelas do banco e nas migrações, e trocar não vale o risco.
 
 ## Dicas
 
