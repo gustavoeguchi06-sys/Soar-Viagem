@@ -321,3 +321,54 @@ class InteressadosTests(TestCase):
         self.assertContains(self.client.get(lista), 'Ana Souza')
         editar = reverse('admin:destinations_interessado_change', args=[self.pessoa.pk])
         self.assertContains(self.client.get(editar), 'Enviar para as agências')
+
+    def test_aba_interessados_so_para_o_dono_com_contador(self):
+        inicio = reverse('admin:index')
+        lista = reverse('admin:destinations_interessado_changelist')
+        self._entrar_no_painel(User.objects.create_user('equipe', 'e@x.com', SENHA,
+                                                        is_staff=True))
+        self.assertNotContains(self.client.get(inicio), lista)
+
+        self._entrar_no_painel(User.objects.create_superuser('dono', 'd@x.com', SENHA))
+        abas = {a['nome']: a for a in self.client.get(inicio).context['abas_painel']}
+        self.assertEqual(abas['Interessados']['url'], lista)
+        self.assertEqual(abas['Interessados']['contador'], 1)   # ainda não mandado
+        self.pessoa.agencias.add(self.ag1)
+        abas = {a['nome']: a for a in self.client.get(inicio).context['abas_painel']}
+        self.assertEqual(abas['Interessados']['contador'], 0)
+
+
+class OrcamentosNoPainelTests(TestCase):
+    """No painel não se cria nem se altera orçamento: o dono só vê e marca a situação."""
+
+    def setUp(self):
+        self.destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        self.orcamento = Orcamento.objects.create(
+            agencia=_agencia('alfa', '11222333000181'), destino=self.destino,
+            cliente_nome='Ana Souza', cliente_email='ana@exemplo.com', acomodacao='casal',
+            pessoas=2, valor=6000)
+
+    _entrar_no_painel = InteressadosTests._entrar_no_painel
+
+    def test_dono_nao_cria_orcamento(self):
+        self._entrar_no_painel(User.objects.create_superuser('dono', 'd@x.com', SENHA))
+        lista = self.client.get(reverse('admin:agencia_orcamento_changelist'))
+        self.assertContains(lista, 'Ana Souza')
+        self.assertNotContains(lista, reverse('admin:agencia_orcamento_add'))
+        self.assertEqual(self.client.get(reverse('admin:agencia_orcamento_add')).status_code, 403)
+
+    def test_dono_so_muda_a_situacao(self):
+        self._entrar_no_painel(User.objects.create_superuser('dono', 'd@x.com', SENHA))
+        editar = reverse('admin:agencia_orcamento_change', args=[self.orcamento.pk])
+        self.client.post(editar, {'status': 'aceito', 'cliente_nome': 'Outro Nome',
+                                  'valor': '1', 'pessoas': '9'})
+        self.orcamento.refresh_from_db()
+        self.assertEqual(self.orcamento.status, 'aceito')
+        self.assertEqual((self.orcamento.cliente_nome, self.orcamento.valor,
+                          self.orcamento.pessoas), ('Ana Souza', 6000, 2))
+
+    def test_equipe_nao_ve_orcamentos(self):
+        self._entrar_no_painel(User.objects.create_user('equipe', 'e@x.com', SENHA,
+                                                        is_staff=True))
+        self.assertEqual(
+            self.client.get(reverse('admin:agencia_orcamento_changelist')).status_code, 403)
