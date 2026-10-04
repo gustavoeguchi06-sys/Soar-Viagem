@@ -170,8 +170,3 @@ def _usuario_para(email, nome):
     if mudou:
         usuario.save(update_fields=mudou)
     return usuario, False
-
-
-def usuario_entra_pelo_google(usuario):
-    """Conta criada pelo Google não tem senha — algumas telas mudam por isso."""
-    return not usuario.has_usable_password()

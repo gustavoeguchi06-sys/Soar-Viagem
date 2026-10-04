@@ -26,9 +26,9 @@ from django.utils.http import urlsafe_base64_encode
 from blog.models import Inscricao
 from blog.views import SAL_NEWSLETTER
 
-from . import totp
-from .models import DoisFatores
-from .tokens import token_ativacao
+from .. import totp
+from ..models import DoisFatores
+from ..tokens import token_ativacao
 
 SENHA = 'SenhaForte!2026'
 

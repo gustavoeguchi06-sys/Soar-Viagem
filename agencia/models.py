@@ -11,7 +11,15 @@ from django.db import models
 from django.utils import timezone
 
 from destinations.models import Destino, Saida
-from reservas.models import Reserva
+
+# Os mesmos tipos de quarto da página da viagem (destinations/quartos.py), com
+# o rótulo que aparece no orçamento e no PDF.
+ACOMODACOES = [
+    ('single', 'Single: 1 pessoa'),
+    ('casal', 'Casal: 2 pessoas'),
+    ('duplo', 'Duplo (Twin): 2 pessoas'),
+    ('triplo', 'Triplo: 3 pessoas'),
+]
 
 VALIDADE = timedelta(hours=72)
 
@@ -40,7 +48,7 @@ class Orcamento(models.Model):
                               help_text='Em branco, a data fica a combinar.')
     saida_texto = models.CharField('Saída', max_length=120, blank=True, editable=False)
     acomodacao = models.CharField('Acomodação', max_length=20,
-                                  choices=Reserva.ACOMODACOES, default='casal')
+                                  choices=ACOMODACOES, default='casal')
     pessoas = models.PositiveSmallIntegerField('Adultos', default=2)
     # Criança (CHD) não é acomodação: viaja junto com os adultos, no quarto
     # deles, e o preço depende da idade. Guardado como "4, 7".

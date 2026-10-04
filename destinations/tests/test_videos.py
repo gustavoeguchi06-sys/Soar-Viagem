@@ -11,7 +11,7 @@ from django.urls import reverse
 from blog.models import Artigo, Categoria, Secao
 from soar.videos import validar_video
 
-from .models import Destino, SlideInicio, VideoDestino, VideoSoar60
+from ..models import Destino, SlideInicio, VideoDestino, VideoSoar60
 
 PASTA = tempfile.mkdtemp()
 # o começo de um MP4 de verdade: a caixa "ftyp"

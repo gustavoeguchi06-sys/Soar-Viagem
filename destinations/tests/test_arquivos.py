@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
-from .models import Destino, ImagemDestino
+from ..models import Destino, ImagemDestino
 
 PASTA = tempfile.mkdtemp()
 GIF = b'GIF89a\x01\x00\x01\x00\x00\x00\x00;'

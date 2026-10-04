@@ -1,8 +1,8 @@
-"""Formulários de entrada e cadastro do viajante.
+"""Formulários de entrada, cadastro da agência e exclusão da conta.
 
-O site usa o `User` que já vem com o Django — não há model próprio aqui. O que
-estes formulários fazem é falar português com o visitante e guardar o nome e o
-e-mail, que a Soar precisa para tratar a pessoa pelo nome e responder a reserva.
+O site usa o `User` que já vem com o Django; o que é da agência (CNPJ,
+CADASTUR, WhatsApp) fica no PerfilAgente. Estes formulários falam português
+com quem entra e conferem o que foi digitado.
 """
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -53,67 +53,6 @@ class EntrarForm(AuthenticationForm):
         return digitado
 
 
-class CadastroForm(UserCreationForm):
-    """Criação da conta do cliente."""
-
-    first_name = forms.CharField(
-        label='Nome', max_length=60,
-        widget=forms.TextInput(attrs={'placeholder': 'Como podemos te chamar'}),
-    )
-    email = forms.EmailField(
-        label='E-mail',
-        widget=forms.EmailInput(attrs={'placeholder': 'voce@email.com',
-                                       'autocomplete': 'email'}),
-    )
-    aceite_privacidade = forms.BooleanField(
-        required=True,
-        error_messages={'required': 'É preciso aceitar o aviso de privacidade para criar a conta.'},
-    )
-
-    class Meta:
-        model = User
-        fields = ['first_name', 'email', 'username']
-        labels = {'username': 'Nome de usuário'}
-        help_texts = {'username': 'É com ele que você entra. Pode ter letras, números e @ . + - _'}
-        widgets = {'username': forms.TextInput(attrs={'placeholder': 'seu.usuario'})}
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['password1'].label = 'Senha'
-        self.fields['password2'].label = 'Repita a senha'
-        self.fields['password1'].widget.attrs['placeholder'] = 'Mínimo de 8 caracteres'
-        self.fields['password2'].widget.attrs['placeholder'] = 'A mesma senha de novo'
-        # O rótulo é montado aqui, e não no corpo da classe, porque resolver a
-        # URL na hora do import roda antes das rotas existirem.
-        self.fields['aceite_privacidade'].label = mark_safe(
-            'Li e aceito o <a href="{}" target="_blank" rel="noopener">aviso de '
-            'privacidade</a> e autorizo a Soar a usar meus dados para organizar '
-            'a viagem.'.format(reverse('contas:privacidade'))
-        )
-
-    def clean_email(self):
-        """Normaliza o endereço.
-
-        Note o que **não** acontece aqui: o formulário não recusa mais um e-mail
-        já cadastrado. Aquela mensagem confirmava, para qualquer visitante, se
-        um endereço tinha conta no site — bastava um script com uma lista de
-        e-mails para saber quem é cliente da Soar. Quem trata a duplicata agora
-        é a view, avisando por e-mail o dono do endereço, e a resposta na tela é
-        a mesma dos dois jeitos.
-        """
-        return self.cleaned_data['email'].strip().lower()
-
-    def save(self, commit=True):
-        usuario = super().save(commit=False)
-        usuario.email = self.cleaned_data['email']
-        usuario.first_name = self.cleaned_data['first_name'].strip()
-        # Só vira conta de verdade depois de clicar no link do e-mail.
-        usuario.is_active = False
-        if commit:
-            usuario.save()
-        return usuario
-
-
 class ExcluirContaForm(forms.Form):
     """Confirmação da exclusão da própria conta (LGPD, art. 18).
 
@@ -126,7 +65,7 @@ class ExcluirContaForm(forms.Form):
         widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}),
     )
     confirmacao = forms.BooleanField(
-        label='Entendo que meus dados e minhas reservas serão apagados e que não dá para desfazer.',
+        label='Entendo que meus dados serão apagados e que não dá para desfazer.',
         required=True,
     )
 

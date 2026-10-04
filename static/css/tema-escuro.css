@@ -53,17 +53,11 @@ html[data-tema="escuro"] body { background: var(--fundo); color: var(--tinta); }
 
 /* ----- Cartões que tinham fundo branco ----------------------------------- */
 /* style.css */
-html[data-tema="escuro"] .site-header,
 html[data-tema="escuro"] .card,
 html[data-tema="escuro"] .filtro,
-html[data-tema="escuro"] .info-chip,
 html[data-tema="escuro"] .galeria figure,
 html[data-tema="escuro"] .hospedagem,
 html[data-tema="escuro"] .avaliacao,
-html[data-tema="escuro"] .form-card,
-html[data-tema="escuro"] .form-campo input:focus,
-html[data-tema="escuro"] .form-campo select:focus,
-html[data-tema="escuro"] .form-campo textarea:focus,
 html[data-tema="escuro"] .p60-item,
 html[data-tema="escuro"] .p60-passos li,
 html[data-tema="escuro"] .p60-faq__item
@@ -82,7 +76,6 @@ html[data-tema="escuro"] .painel,
 html[data-tema="escuro"] .hosp-legenda,
 html[data-tema="escuro"] .carrossel__setas,
 html[data-tema="escuro"] .depo,
-html[data-tema="escuro"] .form-avaliacao,
 html[data-tema="escuro"] .campo input[type=text],
 html[data-tema="escuro"] .campo input[type=file],
 html[data-tema="escuro"] .campo select,
@@ -101,17 +94,9 @@ html[data-tema="escuro"] .campo input[type="tel"],
 html[data-tema="escuro"] .campo textarea,
 html[data-tema="escuro"] .campo select,
 html[data-tema="escuro"] .btn-google,
-html[data-tema="escuro"] .resumo-viagem,
 html[data-tema="escuro"] .conta-topo,
 html[data-tema="escuro"] .reserva-item,
 html[data-tema="escuro"] .conta-vazio
-    { background-color: var(--cartao); }
-
-/* agencia.css */
-html[data-tema="escuro"] .ag-numero,
-html[data-tema="escuro"] .ag-copiar input,
-html[data-tema="escuro"] .ag-filtros a,
-html[data-tema="escuro"] .ag-form .campo input[type="date"]
     { background-color: var(--cartao); }
 
 /* blog.css */
@@ -133,8 +118,7 @@ html[data-tema="escuro"] .blog-vazio
 html[data-tema="escuro"] .topbar--solido,
 html[data-tema="escuro"] .menu-movel,
 html[data-tema="escuro"] .rodape,
-html[data-tema="escuro"] .conta-lado,
-html[data-tema="escuro"] .site-footer { background: #080d0a; }
+html[data-tema="escuro"] .conta-lado{ background: #080d0a; }
 html[data-tema="escuro"] .hero { background-color: #080d0a; }
 html[data-tema="escuro"] .conta-lado { border: 1px solid var(--linha); }
 /* o topo verde da página inicial (style.css) usava as cores "azul" */
@@ -166,27 +150,19 @@ html[data-tema="escuro"] .busca input { background: var(--cartao); border: 1px s
 /* links verdes: um tom mais claro para dar leitura no fundo escuro */
 html[data-tema="escuro"] .cartao-form__rodape a,
 html[data-tema="escuro"] .texto-legal a,
-html[data-tema="escuro"] .ver-todos,
 html[data-tema="escuro"] .ag-titulo a:not(.btn),
 html[data-tema="escuro"] .ag-contato a:not(.btn),
 html[data-tema="escuro"] .ag-vazio a:not(.btn),
 html[data-tema="escuro"] .dados-agente a,
-html[data-tema="escuro"] .conta-dados a,
-html[data-tema="escuro"] .resumo-viagem__linhas .ic { color: var(--verde-texto); }
+html[data-tema="escuro"] .conta-dados a{ color: var(--verde-texto); }
 
 /* pílulas e etiquetas de situação */
 html[data-tema="escuro"] .pill-vagas { background: #10371f; color: #7fdca7; }
 html[data-tema="escuro"] .pill-vagas--esgotada { background: #3d1310; color: #f0a29b; }
 html[data-tema="escuro"] .pill-vagas--consulte { background: var(--fundo-suave); color: var(--tinta-suave); }
-html[data-tema="escuro"] .selo-status--pendente,
-html[data-tema="escuro"] .ag-selo--enviado { background: #3a2a08; color: #f7c164; }
-html[data-tema="escuro"] .selo-status--confirmada,
-html[data-tema="escuro"] .ag-selo--aceito { background: #10371f; color: #7fdca7; }
-html[data-tema="escuro"] .selo-status--cancelada,
-html[data-tema="escuro"] .ag-selo--recusado { background: #222c27; color: #9fb0aa; }
+
 html[data-tema="escuro"] .form-aviso { background: #3d1310; border-color: #6b221b; color: #f0a29b; }
 html[data-tema="escuro"] .form-nota { color: var(--verde-texto); }
-html[data-tema="escuro"] .ag-indicacao { border-color: #1f4a31; }
 
 /* abas da página da viagem e do painel da agência */
 html[data-tema="escuro"] .abas a[aria-current="true"],

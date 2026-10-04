@@ -121,7 +121,6 @@ body.pagina-viagem {
 .btn--bloco { width: 100%; }
 .btn--sm { padding: 10px 18px; font-size: .74rem; }
 
-.arredondado { border-radius: 50%; }
 .seta {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 6;
     width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
@@ -142,13 +141,6 @@ body.pagina-viagem {
 }
 .hero__conteudo { position: relative; z-index: 5; width: 100%; color: #fff;
                   padding: clamp(86px, 11vw, 96px) 0 clamp(16px, 2.2vw, 22px); }
-
-.migalhas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-            font-size: .8rem; color: rgba(255, 255, 255, .78); margin-bottom: 14px; }
-.migalhas a { color: rgba(255, 255, 255, .78); text-decoration: none; }
-.migalhas a:hover { color: #fff; }
-.migalhas span.sep { opacity: .55; }
-.migalhas .atual { color: #fff; }
 
 .selo-exp {
     display: inline-block; background: var(--verde); color: #fff; font-size: .68rem;
@@ -254,7 +246,7 @@ body.pagina-viagem {
     cursor: pointer; list-style: none;
 }
 .dia > summary::-webkit-details-marker { display: none; }
-.dia__foto { width: 72px; height: 46px; border-radius: 8px; object-fit: cover; flex: none; }
+
 .dia__texto { flex: 1; min-width: 0; }
 .dia__texto b { display: block; font-size: .9rem; font-weight: 700; color: var(--preto); line-height: 1.4; }
 .dia__texto small { display: block; font-size: .8rem; color: var(--tinta-suave); line-height: 1.35; }
@@ -406,8 +398,6 @@ body.pagina-viagem {
 .depoimentos { background: var(--fundo-suave); border-radius: var(--r-lg); padding: 26px 24px; margin-bottom: 34px; }
 .depoimentos__grade { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: center; }
 .depoimentos h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; }
-.depoimentos__link { color: var(--verde); font-size: .88rem; font-weight: 600; text-decoration: none; }
-.depoimentos__link:hover { text-decoration: underline; }
 
 /* min-width: 0 — sem isso o item de grid/flex nao encolhe abaixo do proprio
    conteudo e o trilho de depoimentos estoura a tela no celular */
@@ -429,16 +419,13 @@ body.pagina-viagem {
 .depo .estrelas-ouro .ic-f { width: 13px; height: 13px; }
 .depo .estrelas-ouro .vazia { color: #d8ddda; }
 .depo p { font-size: .82rem; line-height: 1.45; color: var(--tinta-suave); margin-top: 6px; }
-.depo__data { display: block; margin-top: 8px; font-size: .74rem; color: #9aa7ac; }
+
 .depo__foto { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-top: 10px; }
 
 /* Formulário de avaliação */
-.form-avaliacao { background: #fff; border: 1px solid var(--linha); border-radius: var(--r-lg);
-                  padding: 22px; margin-bottom: 34px; }
-.form-avaliacao h3 { font-size: 1.15rem; margin-bottom: 14px; }
-.form-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
 .campo { display: flex; flex-direction: column; gap: 6px; }
-.campo--full { grid-column: 1 / -1; }
+
 .campo label { font-size: .82rem; font-weight: 600; color: var(--tinta); }
 .campo input[type=text], .campo input[type=email], .campo input[type=file], .campo select, .campo textarea {
     font-family: inherit; font-size: .9rem; color: var(--tinta); padding: 11px 13px;
@@ -448,7 +435,6 @@ body.pagina-viagem {
 .campo input:focus, .campo select:focus, .campo textarea:focus {
     outline: none; border-color: var(--verde); box-shadow: 0 0 0 3px rgba(20, 108, 67, .12);
 }
-.campo-erro { font-size: .78rem; color: #b91c1c; }
 
 /* ===== Rodapé ============================================================ */
 .rodape { background: var(--preto); color: rgba(255, 255, 255, .72); padding: 44px 0 26px; }
@@ -472,9 +458,6 @@ body.pagina-viagem {
 .aviso--saindo { opacity: 0; transform: translateX(14px); }
 
 /* ===== Conta no topo (entrar / menu do usuario) ========================== */
-.btn--linha { background: rgba(255, 255, 255, .12); color: #fff;
-              border-color: rgba(255, 255, 255, .30); }
-.btn--linha:hover { background: rgba(255, 255, 255, .22); border-color: rgba(255, 255, 255, .55); }
 
 .conta { position: relative; }
 .conta__botao {
@@ -556,11 +539,11 @@ body.pagina-viagem {
     .depoimentos { padding: 22px 16px; }
     .depoimentos__grade { grid-template-columns: 1fr; }
     .depo { flex: 0 0 84%; }
-    .form-grade { grid-template-columns: 1fr; }
+
     .hosp-mini img { height: 78px; }
-    .painel, .form-avaliacao { padding: 16px; }
+    .painel{ padding: 16px; }
     .dia__corpo { padding: 0 16px 15px 16px; }
-    .dia__foto { width: 62px; height: 44px; }
+
     .servicos { padding: 18px 12px; }
     .reserva { padding: 16px; }
 }
@@ -598,7 +581,7 @@ body.pagina-viagem {
 
 /* ----- dedo em vez de mouse: alvos de toque maiores ----- */
 @media (pointer: coarse) {
-    .migalhas a, .rodape a, .depoimentos__link { min-height: 34px; display: inline-flex; align-items: center; }
+     .rodape a{ min-height: 34px; display: inline-flex; align-items: center; }
     .rodape ul { gap: 2px; }
     .abas a { display: flex; align-items: center; min-height: 52px; }
     .acom, .saida-op { padding: 12px 11px; }
@@ -620,8 +603,6 @@ body.pagina-viagem {
     .galeria-grade a:hover img { transform: none; }
 }
 
-/* ===== Ajustes das páginas antigas (home / lista) ======================== */
-.hero-antigo, .site-header { display: initial; }
 /* O .hero da pagina de viagem e uma capa com foto, de 430-540px de altura.
    Na home ele e so o titulo e a busca, entao aqui vira um bloco baixo, sem a
    altura minima nem o degrade escuro por cima. */
@@ -690,8 +671,7 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 }
 
 /* Orçamento da agência direto no card da viagem */
-.orc-cliente { margin: 14px 0 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px; }
-.orc-cliente legend { padding: 0; margin-bottom: 8px; font-size: 1rem; font-weight: 700; color: var(--preto); }
+
 .orc-campo { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; font-weight: 600;
              color: var(--tinta-suave); }
 .orc-campo input { width: 100%; padding: 9px 11px; font: inherit; font-size: .92rem; font-weight: 400;

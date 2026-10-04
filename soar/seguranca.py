@@ -94,10 +94,6 @@ class Limite:
         if identificador:
             cache.delete(self._chave_id(identificador))
 
-    def segundos_restantes(self, request, identificador=None):
-        """Quanto falta para liberar — só para a mensagem ao usuário."""
-        return self.janela
-
 
 # Limites usados pelas views. Os números vêm do settings para poderem ser
 # ajustados sem mexer no código.

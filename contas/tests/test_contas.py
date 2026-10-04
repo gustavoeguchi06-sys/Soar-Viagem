@@ -20,7 +20,6 @@ from contas.models import PerfilAgente
 from contas.tokens import token_ativacao
 
 from destinations.models import Destino
-from reservas.models import Reserva
 from reviews.models import Avaliacao
 
 GOOGLE = override_settings(GOOGLE_CLIENT_ID='id-de-teste', GOOGLE_CLIENT_SECRET='segredo-de-teste')
@@ -142,23 +141,40 @@ class ConfirmacaoDeEmailTests(TestCase):
 
 
 class ExclusaoDeContaTests(TestCase):
-    """N9 — excluir a conta anonimiza as reservas em vez de apagá-las."""
+    """N9 — excluir a conta da agência leva junto o cadastro e os orçamentos dela."""
 
-    def test_reserva_fica_sem_dados_pessoais(self):
-        usuario = User.objects.create_user('cliente', 'cliente@exemplo.com', 'senha-boa-123')
+    def test_agencia_apaga_conta_perfil_e_orcamentos(self):
+        from agencia.models import Orcamento
+        usuario = User.objects.create_user('agencia', 'ag@exemplo.com', 'senha-boa-123')
+        agente = PerfilAgente.objects.create(usuario=usuario, razao_social='Alfa Turismo',
+                                             cnpj='11222333000181', cadastur='123',
+                                             whatsapp='(11) 98888-7777', aprovado=True)
         destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.')
-        reserva = Reserva.objects.create(usuario=usuario, destino=destino,
-                                         telefone='11999999999', observacao='sou alérgica a camarão')
+        Orcamento.objects.create(agencia=agente, destino=destino, cliente_nome='Ana',
+                                 cliente_telefone='11999999999')
         self.client.force_login(usuario)
 
         self.client.post(reverse('contas:excluir_conta'),
                          {'senha': 'senha-boa-123', 'confirmacao': 'on'})
 
         self.assertFalse(User.objects.filter(pk=usuario.pk).exists())
-        reserva.refresh_from_db()                                 # a reserva continua...
-        self.assertIsNone(reserva.usuario)                        # ...sem dono,
-        self.assertEqual(reserva.telefone, '')                    # sem telefone
-        self.assertNotIn('camarão', reserva.observacao)           # e sem a observação
+        self.assertFalse(PerfilAgente.objects.exists())
+        self.assertFalse(Orcamento.objects.exists())
+
+    def test_meus_dados_traz_a_agencia_e_os_orcamentos(self):
+        from agencia.models import Orcamento
+        usuario = User.objects.create_user('agencia', 'ag@exemplo.com', 'senha-boa-123')
+        agente = PerfilAgente.objects.create(usuario=usuario, razao_social='Alfa Turismo',
+                                             cnpj='11222333000181', cadastur='123',
+                                             whatsapp='(11) 98888-7777', aprovado=True)
+        destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.')
+        Orcamento.objects.create(agencia=agente, destino=destino, cliente_nome='Ana')
+        self.client.force_login(usuario)
+
+        dados = self.client.get(reverse('contas:meus_dados')).json()
+        self.assertEqual(dados['agencia']['razao_social'], 'Alfa Turismo')
+        self.assertEqual([o['cliente'] for o in dados['orcamentos']], ['Ana'])
+        self.assertNotIn('reservas', dados)
 
 
 class ExpurgoTests(TestCase):
@@ -181,9 +197,16 @@ class ExpurgoTests(TestCase):
         desativada = self._usuario('desativada', dias=400, ja_entrou=True)
         cliente = self._usuario('cliente', dias=3000, ativo=True, ja_entrou=True)
 
-        velha = Reserva.objects.create(usuario=cliente, destino=self.destino)
-        nova = Reserva.objects.create(usuario=cliente, destino=self.destino)
-        Reserva.objects.filter(pk=velha.pk).update(criado_em=self.agora - timedelta(days=7 * 365))
+        from agencia.models import Orcamento
+        agente = PerfilAgente.objects.create(usuario=cliente, razao_social='Alfa Turismo',
+                                             cnpj='11222333000181', cadastur='123',
+                                             whatsapp='(11) 98888-7777', aprovado=True)
+        velho = Orcamento.objects.create(agencia=agente, destino=self.destino,
+                                         cliente_nome='A', status='aceito')
+        novo = Orcamento.objects.create(agencia=agente, destino=self.destino,
+                                        cliente_nome='B', status='aceito')
+        Orcamento.objects.filter(pk=velho.pk).update(
+            atualizado_em=self.agora - timedelta(days=7 * 365))
 
         antiga = Avaliacao.objects.create(destino=self.destino, autor=cliente, nome_autor='C',
                                           comentario='Muito bom mesmo.', ip='200.1.2.3')
@@ -198,8 +221,8 @@ class ExpurgoTests(TestCase):
         self.assertFalse(existe(abandonada))       # 40 dias sem confirmar: sai
         self.assertTrue(existe(recente))           # 10 dias: ainda tem prazo
         self.assertTrue(existe(desativada))        # desligada no painel: não é cadastro abandonado
-        self.assertFalse(Reserva.objects.filter(pk=velha.pk).exists())
-        self.assertTrue(Reserva.objects.filter(pk=nova.pk).exists())
+        self.assertFalse(Orcamento.objects.filter(pk=velho.pk).exists())   # aceito há 7 anos
+        self.assertTrue(Orcamento.objects.filter(pk=novo.pk).exists())
         antiga.refresh_from_db()
         fresca.refresh_from_db()
         self.assertIsNone(antiga.ip)               # a avaliação fica, o IP não

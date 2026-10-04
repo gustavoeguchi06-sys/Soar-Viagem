@@ -7,8 +7,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .conteudo import tabela_de_precos
-from .models import Destino, PrecoQuarto, Saida, ServicoViagem
+from ..conteudo import tabela_de_precos
+from ..models import Destino, PrecoQuarto, Saida, ServicoViagem
 
 
 class PrecosPorQuartoTests(TestCase):

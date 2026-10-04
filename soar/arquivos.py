@@ -18,7 +18,7 @@ from django.db import models, transaction
 
 log = logging.getLogger('soar.arquivos')
 
-APPS = ('destinations', 'blog', 'reviews', 'agencia', 'contas', 'reservas')
+APPS = ('destinations', 'blog', 'reviews', 'agencia', 'contas')
 
 
 def _campos(modelo):

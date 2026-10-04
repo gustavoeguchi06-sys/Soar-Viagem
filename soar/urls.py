@@ -13,7 +13,7 @@ urlpatterns = [
     path('favicon.ico', favicon),
 
     # O painel do dono do site: cadastrar destinos, fotos, roteiro, hospedagens
-    # e acompanhar as reservas. Só entra quem tem conta de equipe (is_staff).
+    # e acompanhar interessados e orçamentos. Só entra quem tem conta de equipe (is_staff).
     #
     # Não existe mais rota em /admin/: ela redirecionava para cá e entregava o
     # painel ao primeiro scanner que batesse no endereço padrão, o que anulava
