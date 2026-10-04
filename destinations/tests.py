@@ -1,4 +1,5 @@
 """Várias datas de saída por destino."""
+import re
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -302,3 +303,27 @@ class InclusoTests(TestCase):
         resposta = self.client.get(destino.get_absolute_url())
         self.assertContains(resposta, 'id="incluso"')
         self.assertNotContains(resposta, 'id="nao-incluso"')
+
+
+class InclusoNoPainelTests(TestCase):
+    """No painel, "Incluso e não incluso" fica entre o roteiro e as perguntas frequentes."""
+
+    def test_bloco_entre_roteiro_e_perguntas(self):
+        from contas.dois_fatores import CHAVE_OK
+        dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(dono)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = dono.pk
+        sessao.save()
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        html = self.client.get(reverse('admin:destinations_destino_change',
+                                       args=[destino.pk])).content.decode()
+        # os títulos vêm com espaços e quebras de linha em volta
+        html = re.sub(r'>\s+|\s+<', lambda m: m.group().strip(), html)
+        self.assertEqual(html.count('>Incluso e não incluso<'), 1)
+        self.assertEqual(html.count('name="nao_incluso"'), 1)
+        roteiro = html.index('>Roteiro dia a dia<')
+        incluso = html.index('>Incluso e não incluso<')
+        perguntas = html.index('>Perguntas frequentes<')
+        self.assertLess(roteiro, incluso)
+        self.assertLess(incluso, perguntas)

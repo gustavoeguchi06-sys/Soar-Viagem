@@ -142,6 +142,9 @@ class PerguntaFrequenteInline(admin.TabularInline):
     verbose_name = 'pergunta'
     verbose_name_plural = 'Perguntas frequentes'
     classes = ['collapse']
+    # o bloco "Incluso e não incluso" aparece logo antes deste, depois do roteiro
+    # (templates/admin/destinations/destino/change_form.html)
+    incluso_antes = True
 
 
 class HospedagemInline(admin.StackedInline):
@@ -281,8 +284,10 @@ class DestinoAdmin(admin.ModelAdmin):
             'fields': ['selo', 'subtitulo', 'estado'],
             'description': 'Tudo opcional. Em branco, a página usa o texto padrão da Soar.',
         }),
+        # Mostrado entre o roteiro e as perguntas frequentes, e não aqui em cima
+        # (templates/admin/destinations/destino/change_form.html).
         ('Incluso e não incluso', {
-            'classes': ['collapse'],
+            'classes': ['collapse', 'bloco-incluso'],
             'fields': ['incluso', 'nao_incluso'],
             'description': 'Cada um vira um bloco separado na página da viagem. Escreva um '
                            'item por linha. "Não incluso" em branco: o bloco não aparece.',
