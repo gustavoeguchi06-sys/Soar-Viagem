@@ -123,3 +123,51 @@ class SoFotosDoDonoTests(TestCase):
         self.assertEqual(resposta.context['viagem']['galeria'], [])
         # a hospedagem também não completa com desenhos de quarto
         self.assertNotContains(resposta, 'class="hosp-mini"')
+
+
+class DestinoNovoPeloPainelTests(TestCase):
+    """O dono cria o destino no painel, com preços e datas com quartos, e a página já mostra tudo."""
+
+    BLOCOS = ['precos', 'saidas', 'servicos', 'hospedagens', 'imagens', 'videos',
+              'destaques_viagem', 'roteiro', 'perguntas']
+
+    def setUp(self):
+        from contas.dois_fatores import CHAVE_OK
+        dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(dono)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = dono.pk
+        sessao.save()
+
+    def test_quartos_de_cada_data_aparecem_no_destino_novo(self):
+        ida = timezone.localdate() + timedelta(days=120)
+        dados = {'nome': 'Chapada dos Veadeiros/GO', 'slug': 'chapada-dos-veadeiros',
+                 'regiao': 'Centro-Oeste', 'descricao': 'Cachoeiras no cerrado.'}
+        for bloco in self.BLOCOS:
+            dados.update({bloco + '-TOTAL_FORMS': '0', bloco + '-INITIAL_FORMS': '0',
+                          bloco + '-MIN_NUM_FORMS': '0', bloco + '-MAX_NUM_FORMS': '1000'})
+        for n, (tipo, preco) in enumerate([('single', '4.200,00'), ('casal', '2.900,00'),
+                                           ('duplo', '2.900,00'), ('triplo', '2.700,00')]):
+            dados.update({'precos-{}-tipo'.format(n): tipo, 'precos-{}-preco'.format(n): preco})
+        dados['precos-TOTAL_FORMS'] = '4'
+        for n, quartos in enumerate([(2, 4, 1, 1), (1, 2, 0, 1)]):
+            dados.update({'saidas-{}-data_ida'.format(n): (ida + timedelta(days=30 * n)).isoformat(),
+                          'saidas-{}-data_volta'.format(n): (ida + timedelta(days=30 * n + 4)).isoformat(),
+                          'saidas-{}-vagas'.format(n): '14'})
+            for tipo, quantidade in zip(['single', 'casal', 'duplo', 'triplo'], quartos):
+                dados['saidas-{}-quartos_{}'.format(n, tipo)] = str(quantidade)
+        dados['saidas-TOTAL_FORMS'] = '2'
+
+        resposta = self.client.post(reverse('admin:destinations_destino_add'), dados)
+
+        self.assertEqual(resposta.status_code, 302)
+        destino = Destino.objects.get(slug='chapada-dos-veadeiros')
+        self.assertEqual(destino.preco_base, Decimal('2700'))   # o menor preço, sozinho
+        pagina = self.client.get(destino.get_absolute_url())
+        primeira, segunda = destino.saidas.order_by('data_ida')
+        html = pagina.content.decode()
+        for saida, quartos in [(primeira, 'single:2,casal:4,duplo:1,triplo:1'),
+                               (segunda, 'single:1,casal:2,duplo:0,triplo:1')]:
+            self.assertRegex(html, r'value="{}"\s+data-quartos="{}"'.format(saida.pk, quartos))
+        self.assertContains(pagina, 'data-vagas-quarto', count=4)   # onde cada quarto mostra o número
+        self.assertContains(pagina, 'R$ 4.200')
