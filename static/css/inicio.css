@@ -73,6 +73,8 @@
                       letter-spacing: .04em; color: var(--tinta-suave); }
 .in-titulo a { font-size: .74rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--verde); }
 .in-titulo a:hover { text-decoration: underline; }
+/* o @ do Instagram é título, não link pequeno: herda o h2 e fica em minúsculas, como no perfil */
+.in-titulo h2 .in-titulo__perfil { font: inherit; letter-spacing: inherit; text-transform: none; color: inherit; }
 .in-vazio { padding: 22px 0; color: var(--tinta-suave); }
 
 /* ----- Carrossel de cartões ---------------------------------------------- */
@@ -269,6 +271,7 @@ html[data-tema="escuro"] .in-btn-mini,
 html[data-tema="escuro"] .in-carrossel__seta,
 html[data-tema="escuro"] .in-artigo { background-color: var(--cartao); }
 html[data-tema="escuro"] .in-motivos { background: var(--cartao); }
+html[data-tema="escuro"] .in-titulo h2 .in-titulo__perfil { color: inherit; }
 html[data-tema="escuro"] .in-motivo .ic { color: var(--verde-texto); }
 html[data-tema="escuro"] .in-titulo a { color: var(--verde-texto); }
 html[data-tema="escuro"] .in-busca { box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }

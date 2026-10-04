@@ -184,7 +184,7 @@ class PaginaInicialTests(TestCase):
         self.assertEqual(r.status_code, 200)
         for texto in ['O Brasil começa onde termina o óbvio.', 'Encontre a viagem perfeita',
                       'Próximas experiências', 'Destinos mais amados', 'Por que viajar com a Soar?',
-                      'Viajar não tem idade.', '#ViajantesSoar', 'Pronto para sua próxima aventura?',
+                      'Viajar não tem idade.', '@operadorasoar</a></h2>', 'Pronto para sua próxima aventura?',
                       'Últimas vagas', 'R$ 3.690', 'Natureza']:
             self.assertContains(r, texto)
 
@@ -260,6 +260,8 @@ class SaibaMaisTests(TestCase):
         self.assertContains(resposta, self.MENSAGEM)
         self.assertContains(resposta, 'agência conveniada mais próxima de você')
         self.assertContains(resposta, 'Seja muito bem-vindo(a) à Operadora Soar!')
+        # aparece como pop-up, que abre sozinho ao carregar a página
+        self.assertContains(resposta, 'id="interessePopup" data-popup data-abrir-ja open')
         self.assertNotContains(resposta, 'Saiba mais</summary>')
         pedido = Interessado.objects.get()
         self.assertEqual((pedido.destino, pedido.whatsapp, pedido.cep),

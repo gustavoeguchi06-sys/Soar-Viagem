@@ -206,3 +206,7 @@ html[data-tema="escuro"] .calendario__data { color: var(--verde-texto); }
 
 /* Não incluso: o vermelho de fundo claro some no escuro */
 html[data-tema="escuro"] .destaque-item--nao .ic { color: #f0a29b; }
+
+/* Aviso depois do "Saiba mais" (pop-up verde): o verde escuro some no fundo escuro */
+html[data-tema="escuro"] .popup--ok .popup__titulo,
+html[data-tema="escuro"] .interesse__recebido { color: var(--verde-texto); }

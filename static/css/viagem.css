@@ -280,13 +280,9 @@ body.pagina-viagem {
 .interesse__form { display: flex; flex-direction: column; gap: 12px; }
 .interesse__lgpd { font-size: .76rem; color: var(--tinta-suave); line-height: 1.4; }
 .interesse__lgpd a { color: var(--verde); }
-.interesse__ok {
-    margin-top: 16px; display: flex; gap: 10px; align-items: flex-start;
-    padding: 14px; border-radius: var(--r-md); background: var(--verde-claro);
-    color: var(--preto); font-size: .9rem; line-height: 1.45;
-}
-.interesse__ok .ic { width: 20px; height: 20px; color: var(--verde); flex: none; margin-top: 1px; }
-.interesse__ok p + p { margin-top: 8px; }
+.interesse__recebido { margin-top: 16px; display: flex; gap: 8px; align-items: center;
+                       font-size: .9rem; font-weight: 600; color: var(--verde); }
+.interesse__recebido .ic { width: 20px; height: 20px; flex: none; }
 .campo__erro { font-size: .78rem; font-weight: 600; color: #b91c1c; }
 .campo--erro input { border-color: #d92d20; }
 
@@ -734,6 +730,9 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .popup--aviso { border-top: 4px solid #d97706; font-size: .92rem; line-height: 1.5; }
 .popup--aviso .popup__titulo { color: #b45309; }
 .popup--aviso form { margin-top: 8px; }
+.popup--ok { border-top: 4px solid var(--verde); font-size: .92rem; line-height: 1.5; }
+.popup--ok .popup__titulo { display: flex; align-items: center; gap: 8px; color: var(--verde); }
+.popup--ok .popup__titulo .ic { width: 22px; height: 22px; flex: none; }
 
 /* vídeos da galeria (cadastrados no painel), acima das fotos */
 .galeria-videos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }

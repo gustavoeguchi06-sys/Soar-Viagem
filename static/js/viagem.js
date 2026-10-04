@@ -204,6 +204,13 @@
             if (ev.target === popup) { popup.close(); }
         });
     });
+    // O aviso do "Saiba mais" vem de ?enviado=1: tira do endereço depois de
+    // mostrar, para não abrir de novo quando a pessoa recarrega a página
+    if (/[?&]enviado=1/.test(location.search) && window.history.replaceState) {
+        var endereco = new URL(location.href);
+        endereco.searchParams.delete('enviado');
+        history.replaceState(null, '', endereco);
+    }
     document.querySelectorAll('[data-abrir-popup]').forEach(function (botao) {
         botao.addEventListener('click', function () {
             var popup = document.getElementById(botao.dataset.abrirPopup);

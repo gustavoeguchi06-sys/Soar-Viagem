@@ -345,17 +345,28 @@
                     As reservas são feitas pelas agências de viagem parceiras da Soar.
                 </p>
                 {% elif interesse_enviado %}
-                <div class="interesse__ok" role="status">
+                <p class="interesse__recebido" role="status">
                     <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
-                    <div>
-                        <p>A Operadora Soar é uma empresa B2B, especializada em atender agências de
-                           viagens e profissionais do turismo.</p>
-                        <p>As informações preenchidas acima serão utilizadas para identificarmos uma
-                           agência conveniada mais próxima de você, facilitando seu atendimento e
-                           proporcionando uma experiência ainda melhor.</p>
-                        <p><b>Seja muito bem-vindo(a) à Operadora Soar! ✈️🌎</b></p>
+                    Recebemos seus dados. Obrigado!
+                </p>
+                {% comment %}Aviso depois do "Saiba mais": abre como pop-up assim que a página
+                carrega (data-abrir-ja). Sem JavaScript, o `open` mostra o aviso no lugar.{% endcomment %}
+                <dialog class="popup popup--ok" id="interessePopup" data-popup data-abrir-ja open
+                        aria-labelledby="interessePopupTitulo">
+                    <p class="popup__titulo" id="interessePopupTitulo">
+                        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                        Recebemos seus dados!
+                    </p>
+                    <p>A Operadora Soar é uma empresa B2B, especializada em atender agências de
+                       viagens e profissionais do turismo.</p>
+                    <p>As informações preenchidas serão utilizadas para identificarmos uma
+                       agência conveniada mais próxima de você, facilitando seu atendimento e
+                       proporcionando uma experiência ainda melhor.</p>
+                    <p><b>Seja muito bem-vindo(a) à Operadora Soar! ✈️🌎</b></p>
+                    <div class="popup__acoes">
+                        <button type="button" class="btn btn--verde" data-fechar-popup>Entendi</button>
                     </div>
-                </div>
+                </dialog>
                 {% else %}
                 {# Sem login: "Saiba mais" abre o formulário de contato (sem JavaScript) #}
                 <details class="interesse"{% if form_interesse.errors %} open{% endif %}>

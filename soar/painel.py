@@ -21,6 +21,9 @@ from django.shortcuts import render
 from django.urls import NoReverseMatch, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
+# Aba que só o dono (superusuário) vê: dados de cliente de quem não tem login.
+DONO = 'dono'
+
 # As abas da faixa do topo: (nome, rota, permissão para ver, contador).
 # Elas fazem o papel do menu lateral do admin, que fica desligado: o dono
 # chega em qualquer parte com um clique, do mesmo jeito que no painel da
@@ -33,7 +36,9 @@ ABAS = [
     ('Sobre a Soar', 'admin:destinations_paginasobre_changelist',
      'destinations.view_paginasobre', None),
     ('Reservas', 'admin:reservas_reserva_changelist', 'reservas.view_reserva', 'reservas'),
-    ('Orçamentos', 'admin:agencia_orcamento_changelist', 'agencia.view_orcamento', None),
+    # quem pediu "Saiba mais" sem login; o dono manda cada um para a agência certa
+    ('Interessados', 'admin:destinations_interessado_changelist', DONO, 'interessados'),
+    ('Orçamentos', 'admin:agencia_orcamento_changelist', DONO, None),
     ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),
     ('Blog Soar', 'admin:blog_artigo_changelist', 'blog.view_artigo', None),
     ('Soar 60+', 'admin:destinations_videosoar60_changelist', 'destinations.view_videosoar60', None),
@@ -57,17 +62,23 @@ class PainelSoar(AdminSite):
         return contexto
 
     def _abas(self, request):
+        from destinations.models import Interessado
         from reservas.models import Reserva
         from reviews.models import Avaliacao
 
         contadores = {
             'reservas': lambda: Reserva.objects.filter(status='pendente').count(),
+            # ainda não mandados para nenhuma agência
+            'interessados': lambda: Interessado.objects.filter(agencias__isnull=True).count(),
             'avaliacoes': lambda: Avaliacao.objects.filter(publicada=False).count(),
         }
         inicio = reverse('admin:index', current_app=self.name)
         abas = []
         for nome, rota, permissao, contador in ABAS:
-            if permissao and not request.user.has_perm(permissao):
+            if permissao == DONO:
+                if not request.user.is_superuser:
+                    continue
+            elif permissao and not request.user.has_perm(permissao):
                 continue
             try:
                 url = reverse(rota, current_app=self.name)
