@@ -281,11 +281,16 @@ class DestinoAdmin(admin.ModelAdmin):
             'fields': ['selo', 'subtitulo', 'estado'],
             'description': 'Tudo opcional. Em branco, a página usa o texto padrão da Soar.',
         }),
+        ('Incluso e não incluso', {
+            'classes': ['collapse'],
+            'fields': ['incluso', 'nao_incluso'],
+            'description': 'Cada um vira um bloco separado na página da viagem. Escreva um '
+                           'item por linha. "Não incluso" em branco: o bloco não aparece.',
+        }),
         ('Textos da página', {
             'classes': ['collapse'],
-            'fields': ['hospedagem_sub', 'incluso', 'nao_incluso', 'informacoes'],
-            'description': 'Em "incluso", "não incluso" e "informações", escreva um '
-                           'item por linha.',
+            'fields': ['hospedagem_sub', 'informacoes'],
+            'description': 'Em "informações", escreva um item por linha.',
         }),
         ('Registro', {
             'classes': ['collapse'],

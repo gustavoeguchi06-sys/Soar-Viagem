@@ -278,3 +278,25 @@ class SaibaMaisTests(TestCase):
         for _ in range(LIMITE_INTERESSE.tentativas + 2):
             self.client.post(self.url, self.dados())
         self.assertEqual(Interessado.objects.count(), LIMITE_INTERESSE.tentativas)
+
+
+class InclusoTests(TestCase):
+    """Incluso e não incluso em blocos separados na página da viagem."""
+
+    def test_dois_blocos_separados(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                         incluso='Transporte\nHospedagem',
+                                         nao_incluso='Passagem aérea')
+        resposta = self.client.get(destino.get_absolute_url())
+        html = resposta.content.decode()
+        incluso, nao = html.index('id="incluso"'), html.index('id="nao-incluso"')
+        self.assertLess(html.index('Transporte'), nao)
+        self.assertGreater(html.index('Passagem aérea'), nao)
+        self.assertLess(incluso, nao)
+
+    def test_sem_nao_incluso_nao_mostra_o_bloco(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.',
+                                         incluso='Transporte')
+        resposta = self.client.get(destino.get_absolute_url())
+        self.assertContains(resposta, 'id="incluso"')
+        self.assertNotContains(resposta, 'id="nao-incluso"')

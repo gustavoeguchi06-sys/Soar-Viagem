@@ -205,6 +205,4 @@ html[data-tema="escuro"] .calendario__item { background-color: var(--cartao); }
 html[data-tema="escuro"] .calendario__data { color: var(--verde-texto); }
 
 /* Não incluso: o vermelho de fundo claro some no escuro */
-html[data-tema="escuro"] .incl-titulo { color: var(--verde-texto); }
-html[data-tema="escuro"] .incl-titulo--nao,
 html[data-tema="escuro"] .destaque-item--nao .ic { color: #f0a29b; }
