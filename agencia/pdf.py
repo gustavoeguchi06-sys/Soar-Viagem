@@ -3,9 +3,17 @@
 Feito com o ReportLab, em Helvetica: cobre todo o português, mas não símbolos
 como a seta "→" do roteiro. `_texto` troca esses símbolos antes de escrever, em
 vez de deixar um quadradinho preto no PDF.
+
+As fotos são só as que o dono cadastrou no painel (capa e galeria do destino,
+fotos da hospedagem). Entram recortadas e reduzidas, para o PDF não pesar no
+e-mail; foto que não abre fica de fora sem derrubar o orçamento.
 """
+import logging
+from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
+
+from PIL import Image as Foto, ImageOps
 
 from django.conf import settings
 from django.utils import timezone
@@ -22,6 +30,20 @@ from reportlab.platypus import (Image, KeepTogether, Paragraph, SimpleDocTemplat
 from destinations.conteudo import montar_viagem
 
 from .models import AVISO
+
+log = logging.getLogger('soar.arquivos')
+
+# Logo abaixo do valor total, antes da validade.
+FORMAS_DE_PAGAMENTO = [
+    'À vista com 5% de desconto',
+    'Cartão: 1 + 9x sem juros',
+    'Boleto: 1 + X parcelas iguais, com pagamento total até 15 dias antes do embarque '
+    '(pré-pago)',
+]
+DESCONTO_A_VISTA = Decimal('0.05')
+
+LARGURA = A4[0] - 36 * mm      # a área útil da página, entre as margens
+PIXELS_POR_MM = 6              # ~150 dpi: nítido impresso, leve no e-mail
 
 VERDE = colors.HexColor('#146c43')
 CINZA = colors.HexColor('#5b6660')
@@ -70,6 +92,8 @@ def _estilos():
                                leftIndent=8),
         'dia': ParagraphStyle('dia', parent=base['Normal'], fontSize=9.5, leading=13,
                               spaceBefore=6),
+        'legenda': ParagraphStyle('legenda', parent=base['Normal'], fontSize=8, leading=10,
+                                  textColor=CINZA, spaceBefore=2),
     }
 
 
@@ -111,6 +135,10 @@ def gerar_pdf(orcamento):
     else:
         corpo += topo
 
+    capa = _foto(_capa(destino), LARGURA, 62 * mm)
+    if capa:
+        corpo += [Spacer(1, 8), capa]
+
     corpo.append(Paragraph('Viagem', e['secao']))
     preco = orcamento.valor / orcamento.pessoas if orcamento.valor is not None else None
     if orcamento.valor is None:
@@ -129,6 +157,7 @@ def gerar_pdf(orcamento):
         ('Crianças (CHD)', _texto(orcamento.criancas_texto)),
         ('Preço por adulto', _texto(_reais(preco)) if preco is not None else 'Sob consulta'),
         ('Valor total', valor),
+        ('Formas de pagamento', _pagamento(orcamento.valor)),
         ('Válido até', '<b>{}</b>'.format(_texto(
             local(orcamento.valido_ate).strftime('%d/%m/%Y às %H:%M')))),
     ], e))
@@ -181,12 +210,70 @@ def gerar_pdf(orcamento):
     return saida.getvalue()
 
 
+def _pagamento(valor):
+    linhas = [_texto(f) for f in FORMAS_DE_PAGAMENTO]
+    if valor is not None:
+        linhas[0] += ' (<b>{}</b>)'.format(_texto(_reais(valor * (1 - DESCONTO_A_VISTA))))
+    return '<br/>'.join('- ' + linha for linha in linhas)
+
+
+def _capa(destino):
+    if destino.imagem_capa:
+        return destino.imagem_capa
+    primeira = next((i for i in destino.imagens.all() if i.imagem), None)
+    return primeira.imagem if primeira else None
+
+
+def _foto(campo, largura, altura):
+    """A foto recortada no tamanho pedido (em pontos), ou None se não der para abrir."""
+    if not campo:
+        return None
+    try:
+        with campo.open('rb') as arquivo:
+            foto = ImageOps.exif_transpose(Foto.open(arquivo)).convert('RGB')
+        tamanho = (round(largura / mm * PIXELS_POR_MM), round(altura / mm * PIXELS_POR_MM))
+        foto = ImageOps.fit(foto, tamanho, Foto.LANCZOS)
+        saida = BytesIO()
+        foto.save(saida, 'JPEG', quality=82, optimize=True)
+        saida.seek(0)
+    except Exception as erro:     # arquivo sumiu, R2 fora do ar, imagem corrompida
+        log.warning('Foto fora do PDF do orçamento (%s): %s', campo.name, erro)
+        return None
+    return Image(saida, width=largura, height=altura)
+
+
+def _grade(fotos, e, colunas=3, altura=38 * mm):
+    """Fotos lado a lado, cada uma com a legenda embaixo; None se nenhuma abrir."""
+    espaco = 4 * mm
+    largura = (LARGURA - espaco * (colunas - 1)) / colunas
+    celulas = []
+    for campo, legenda in fotos:
+        imagem = _foto(campo, largura, altura)
+        if imagem:
+            celulas.append([imagem] + ([Paragraph(_texto(legenda), e['legenda'])]
+                                       if legenda else []))
+    if not celulas:
+        return None
+    linhas = [celulas[i:i + colunas] for i in range(0, len(celulas), colunas)]
+    linhas[-1] += [''] * (colunas - len(linhas[-1]))
+    # uma coluna vazia e estreita entre as fotos faz o espaçamento
+    dados = [sum(([celula] if i == 0 else ['', celula] for i, celula in enumerate(linha)), [])
+             for linha in linhas]
+    tabela = Table(dados, colWidths=[largura] + [espaco, largura] * (colunas - 1))
+    tabela.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0), ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0), ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    return tabela
+
+
 def _lista(itens, e):
     return [Paragraph('- ' + _texto(item), e['item']) for item in itens if item]
 
 
 def _pacote(destino, viagem, e):
-    """Tudo o que a página da viagem mostra sobre o pacote, menos fotos e avaliações."""
+    """Tudo o que a página da viagem mostra sobre o pacote, menos as avaliações."""
     partes = [Paragraph('Sobre a viagem', e['secao'])]
     # o subtítulo costuma ser o começo da descrição: não repete
     if viagem['subtitulo'] and not (destino.descricao or '').startswith(viagem['subtitulo']):
@@ -202,6 +289,14 @@ def _pacote(destino, viagem, e):
     if destaques:
         partes.append(Paragraph('Destaques da viagem', e['secao']))
         partes += _lista(destaques, e)
+
+    # a capa já está no topo do PDF: aqui entram as outras fotos da galeria
+    capa = _capa(destino)
+    pontos = [(i.imagem, i.legenda) for i in destino.imagens.all()
+              if i.imagem and (not capa or i.imagem.name != capa.name)][:6]
+    grade = _grade(pontos, e)
+    if grade:
+        partes.append(KeepTogether([Paragraph('O que você vai conhecer', e['secao']), grade]))
 
     if viagem['roteiro']:
         dias = []
@@ -222,24 +317,45 @@ def _pacote(destino, viagem, e):
         partes += _lista(viagem['nao_incluso'], e)
 
     hospedagem = viagem['hospedagem']
-    partes.append(Paragraph('Hospedagem', e['secao']))
-    partes.append(Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal']))
+    texto = [Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal'])]
     if hospedagem['sub']:
-        partes.append(Paragraph(_texto(hospedagem['sub']), e['normal']))
+        texto.append(Paragraph(_texto(hospedagem['sub']), e['normal']))
     comodidades = ', '.join(c['nome'] for c in hospedagem['comodidades'])
     if comodidades:
-        partes.append(Paragraph(_texto('Comodidades: ' + comodidades), e['rotulo']))
+        texto += [Spacer(1, 3), Paragraph(_texto('Comodidades: ' + comodidades), e['rotulo'])]
+    fotos_hotel = _fotos_da_hospedagem(destino)
+    principal = _foto(fotos_hotel[0][0], 70 * mm, 48 * mm) if fotos_hotel else None
+    bloco = [Paragraph('Hospedagem', e['secao'])]
+    if principal:
+        # a foto do hotel à esquerda, o nome e as comodidades à direita
+        lado = Table([[principal, texto]], colWidths=[74 * mm, None])
+        lado.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0), ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ]))
+        bloco.append(lado)
+        extras = _grade(fotos_hotel[1:4], e, altura=30 * mm)
+        if extras:
+            bloco += [Spacer(1, 6), extras]
+    else:
+        bloco += texto
+    partes.append(KeepTogether(bloco))
 
     if viagem['informacoes']:
         partes.append(Paragraph('Informações importantes', e['secao']))
         partes += _lista(viagem['informacoes'], e)
-
-    if viagem['faq']:
-        partes += _com_titulo(Paragraph('Perguntas frequentes', e['secao']), [
-            [Paragraph('<b>{}</b>'.format(_texto(item['pergunta'])), e['dia']),
-             Paragraph(_texto(item['resposta']), e['normal'])]
-            for item in viagem['faq']])
     return partes
+
+
+def _fotos_da_hospedagem(destino):
+    """A foto principal da hospedagem do pacote e as da galeria dela."""
+    hospedagem = destino.hospedagens.first()
+    if not hospedagem:
+        return []
+    fotos = [(hospedagem.imagem, '')] if hospedagem.imagem else []
+    fotos += [(i.imagem, i.legenda) for i in hospedagem.imagens.all() if i.imagem]
+    return fotos
 
 
 def _com_titulo(titulo, blocos):

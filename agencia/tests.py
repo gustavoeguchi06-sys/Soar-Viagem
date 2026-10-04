@@ -183,14 +183,85 @@ class PainelAgenciaTests(TestCase):
         viagem = montar_viagem(self.destino, [])
         texto = '\n'.join(textos(_pacote(self.destino, viagem, _estilos())))
         for secao in ('Sobre a viagem', 'Destaques da viagem', 'Roteiro dia a dia',
-                      'O pacote inclui', 'Hospedagem', 'Informações importantes',
-                      'Perguntas frequentes'):
+                      'O pacote inclui', 'Hospedagem', 'Informações importantes'):
             self.assertIn(secao, texto)
         dia = viagem['roteiro'][0]
         self.assertIn(dia['resumo'], texto)
         for topico in dia['topicos']:                 # o roteiro vai completo
             self.assertIn(topico.replace('→', '-'), texto)
-        self.assertIn(viagem['faq'][0]['pergunta'], texto)
+        # as perguntas frequentes ficam só no site
+        self.assertNotIn('Perguntas frequentes', texto)
+        self.assertNotIn(viagem['faq'][0]['pergunta'], texto)
+
+    def test_pdf_formas_de_pagamento_entre_o_total_e_a_validade(self):
+        from decimal import Decimal
+        from . import pdf
+
+        capturado = {}
+        construir = pdf.SimpleDocTemplate.build
+
+        def guardar(doc, corpo, **kwargs):
+            capturado['corpo'] = list(corpo)   # o build esvazia a lista
+            return construir(doc, corpo, **kwargs)
+
+        self.entrar(self.ag1)
+        self.client.post(self.criar, self.dados)
+        orcamento = Orcamento.objects.get()
+        with mock.patch.object(pdf.SimpleDocTemplate, 'build', guardar):
+            pdf.gerar_pdf(orcamento)
+
+        def texto(celula):
+            # depois do build, cada célula vira uma tupla com o Paragraph dentro
+            celula = celula[0] if isinstance(celula, (list, tuple)) and celula else celula
+            return celula.getPlainText() if hasattr(celula, 'getPlainText') else ''
+
+        ficha = next(f for f in capturado['corpo'] if isinstance(f, pdf.Table)
+                     and any(texto(linha[0]) == 'Valor total' for linha in f._cellvalues))
+        rotulos = [texto(linha[0]) for linha in ficha._cellvalues]
+        i = rotulos.index('Formas de pagamento')
+        self.assertEqual(rotulos[i - 1], 'Valor total')
+        self.assertEqual(rotulos[i + 1], 'Válido até')
+        pagamento = texto(ficha._cellvalues[i][1])
+        a_vista = pdf._reais(orcamento.valor * (1 - Decimal('0.05')))
+        self.assertIn('À vista com 5% de desconto ({})'.format(a_vista), pagamento)
+        self.assertIn('Cartão: 1 + 9x sem juros', pagamento)
+        self.assertIn('15 dias antes do embarque', pagamento)
+
+    def test_pdf_com_fotos_do_destino_e_do_hotel(self):
+        import shutil
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image as Foto
+
+        from destinations.models import Hospedagem, ImagemDestino
+
+        def jpg(nome):
+            saida = BytesIO()
+            Foto.new('RGB', (1600, 1000), (30, 120, 80)).save(saida, 'JPEG')
+            return SimpleUploadedFile(nome, saida.getvalue(), content_type='image/jpeg')
+
+        pasta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, pasta, ignore_errors=True)
+        with override_settings(MEDIA_ROOT=pasta):
+            self.destino.imagem_capa = jpg('capa.jpg')
+            self.destino.save()
+            ImagemDestino.objects.create(destino=self.destino, imagem=jpg('rio.jpg'),
+                                         legenda='Rio da Prata')
+            Hospedagem.objects.create(destino=self.destino, nome='Pousada Bonito',
+                                      imagem=jpg('pousada.jpg'))
+            self.entrar(self.ag1)
+            self.client.post(self.criar, self.dados)
+            from .pdf import gerar_pdf
+            conteudo = gerar_pdf(Orcamento.objects.get())
+        sem_fotos = gerar_pdf(Orcamento.objects.create(
+            agencia=self.ag1, destino=self.outro, cliente_nome='Ana', pessoas=2))
+        # capa, a foto da galeria e a do hotel (o resto é o logo, nos dois)
+        self.assertEqual(conteudo.count(b'/Subtype /Image')
+                         - sem_fotos.count(b'/Subtype /Image'), 3)
+        self.assertLess(len(conteudo), 600 * 1024)   # leve para o e-mail
 
     def test_pdf_so_para_a_agencia_dona(self):
         self.entrar(self.ag1)
