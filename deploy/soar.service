@@ -9,7 +9,8 @@
 
 [Unit]
 Description=Soar Operadora (Django + Gunicorn)
-After=network.target postgresql.service redis-server.service
+# redis-server ou valkey-server: o Ubuntu 26.04 pode trazer qualquer um dos dois
+After=network.target postgresql.service redis-server.service valkey-server.service
 Requires=postgresql.service
 
 [Service]
