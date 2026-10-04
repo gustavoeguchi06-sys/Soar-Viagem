@@ -116,8 +116,8 @@ class ArtigoAdmin(admin.ModelAdmin):
         }),
         ('Cartão na página do blog', {
             'classes': ['collapse'],
-            'fields': ['etiqueta', 'cor_etiqueta'],
-            'description': 'A etiqueta colorida que aparece sobre a foto do cartão.',
+            'fields': ['etiqueta'],
+            'description': 'A etiqueta verde que aparece sobre a foto do cartão.',
         }),
         ('Viagem ligada', {
             'classes': ['collapse'],

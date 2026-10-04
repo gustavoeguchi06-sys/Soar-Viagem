@@ -273,7 +273,7 @@
             <a class="in-artigo" href="{{ a.get_absolute_url }}">
                 <div class="in-artigo__foto{% if not a.capa %} in-artigo__foto--vazia{% endif %}">
                     {% if a.capa %}<img src="{{ a.capa.url }}" alt="" loading="lazy">{% endif %}
-                    <span class="in-artigo__tag tag--{{ a.cor_etiqueta }}">{{ a.etiqueta_exibida }}</span>
+                    <span class="in-artigo__tag tag--verde">{{ a.etiqueta_exibida }}</span>
                 </div>
                 <div class="in-artigo__corpo">
                     <h3>{{ a.titulo }}</h3>

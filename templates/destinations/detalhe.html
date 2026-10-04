@@ -91,7 +91,7 @@
     <div class="wrap abas__inner">
         <a href="#sobre" class="ativa">Sobre a viagem</a>
         <a href="#roteiro">Roteiro</a>
-        <a href="#incluso">Incluso / Não incluso</a>
+        <a href="#incluso">{% if viagem.nao_incluso %}Incluso / Não incluso{% else %}Incluso{% endif %}</a>
         <a href="#hospedagem">Hospedagem</a>
         <a href="#informacoes">Informações</a>
         <a href="#faq">FAQ</a>
@@ -379,7 +379,7 @@
                     <b>Dúvidas?</b>
                     <small>Nosso time está pronto para te ajudar!</small>
                 </div>
-                <a class="ajuda__whats" href="https://wa.me/5511999999999" target="_blank" rel="noopener"
+                <a class="ajuda__whats" href="https://wa.me/5511993903366" target="_blank" rel="noopener"
                    aria-label="Falar no WhatsApp">
                     <svg class="ic-f" viewBox="0 0 24 24" style="width:18px;height:18px"><use href="#ic-whats"></use></svg>
                 </a>
@@ -502,43 +502,52 @@
 
     {# ===================== INCLUSO / INFORMAÇÕES / FAQ ===================== #}
     <div class="roteiro bloco">
+        {# Incluso e não incluso em blocos separados, para o cliente não confundir um com o outro #}
         <details class="dia" id="incluso">
             <summary>
                 <span class="dia__texto" style="padding-left:8px">
-                    <b>Incluso / Não incluso</b>
+                    <b>Incluso</b>
                     <small>O que está contemplado no valor da viagem.</small>
                 </span>
                 <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
-                <div class="incl-grade{% if not viagem.nao_incluso %} incl-grade--so{% endif %}">
-                    <div>
-                        <h4 class="incl-titulo">Incluso</h4>
-                        <ul class="incl-lista">
-                            {% for i in viagem.incluso %}
-                            <li class="destaque-item">
-                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
-                                <span>{{ i }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% if viagem.nao_incluso %}
-                    <div>
-                        <h4 class="incl-titulo incl-titulo--nao">Não incluso</h4>
-                        <ul class="incl-lista">
-                            {% for i in viagem.nao_incluso %}
-                            <li class="destaque-item destaque-item--nao">
-                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-x"></use></svg>
-                                <span>{{ i }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
+                <div class="incl-caixa">
+                    <ul class="incl-lista">
+                        {% for i in viagem.incluso %}
+                        <li class="destaque-item">
+                            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                            <span>{{ i }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </details>
+
+        {% if viagem.nao_incluso %}
+        <details class="dia" id="nao-incluso">
+            <summary>
+                <span class="dia__texto" style="padding-left:8px">
+                    <b>Não incluso</b>
+                    <small>O que não está no valor e fica por conta do viajante.</small>
+                </span>
+                <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
+            </summary>
+            <div class="dia__corpo" style="padding-left:22px">
+                <div class="incl-caixa incl-caixa--nao">
+                    <ul class="incl-lista">
+                        {% for i in viagem.nao_incluso %}
+                        <li class="destaque-item destaque-item--nao">
+                            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-x"></use></svg>
+                            <span>{{ i }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </details>
+        {% endif %}
 
         <details class="dia" id="informacoes">
             <summary>

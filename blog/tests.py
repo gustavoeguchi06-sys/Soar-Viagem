@@ -143,7 +143,7 @@ class PainelTests(BlogBase):
         dados = {
             'titulo': 'Chapada dos Veadeiros', 'slug': 'chapada', 'categoria': self.cat.pk,
             'resumo': 'Cachoeiras e cânions.', 'autor': 'Equipe Soar', 'publicado': 'on',
-            'data_publicacao': '2030-01-20', 'cor_etiqueta': 'verde', 'introducao': 'Oi.',
+            'data_publicacao': '2030-01-20', 'introducao': 'Oi.',
             'secoes-TOTAL_FORMS': '1', 'secoes-INITIAL_FORMS': '0',
             'secoes-0-ordem': '1', 'secoes-0-titulo': 'Quando ir', 'secoes-0-icone': 'calendario',
             'secoes-0-melhores_meses': ['5', '6'],

@@ -50,15 +50,6 @@ ICONES = [
     ('ticket', 'Ingresso'),
 ]
 
-CORES = [
-    ('verde', 'Verde'),
-    ('teal', 'Verde-água'),
-    ('azul', 'Azul'),
-    ('roxo', 'Roxo'),
-    ('laranja', 'Laranja'),
-    ('rosa', 'Rosa'),
-]
-
 MESES = [
     (1, 'Jan'), (2, 'Fev'), (3, 'Mar'), (4, 'Abr'), (5, 'Mai'), (6, 'Jun'),
     (7, 'Jul'), (8, 'Ago'), (9, 'Set'), (10, 'Out'), (11, 'Nov'), (12, 'Dez'),
@@ -131,8 +122,6 @@ class Artigo(models.Model):
     etiqueta = models.CharField('Etiqueta do cartão', max_length=40, blank=True,
                                 help_text='Palavra curta sobre a foto do cartão, ex.: "Jalapão". '
                                           'Em branco, usa o nome da categoria.')
-    cor_etiqueta = models.CharField('Cor da etiqueta', max_length=10, choices=CORES,
-                                    default='verde')
 
     introducao = models.TextField(
         'Texto de abertura', blank=True,
