@@ -386,3 +386,46 @@ class BannerAlbumHospedagemTests(TestCase):
         tela = self.client.get(reverse('admin:destinations_destino_change', args=[destino.pk]))
         self.assertContains(tela, 'Adicionar ou ver as fotos da hospedagem')
         self.assertContains(tela, reverse('admin:destinations_hospedagem_change', args=[hospedagem.pk]))
+
+
+class TopicosComTituloTests(TestCase):
+    """Linha terminada em ":" vira título; as de baixo, tópicos dele."""
+
+    TEXTO = ('Transporte:\n- Transfer aeroporto de Palmas x hospedagem\n- Jipes 4x4\n'
+             'REFEIÇÕES:\n• 2 dia Café da manhã, Almoço e Jantar.\n'
+             'Passeios:\nCanyon da Sussuapara;\nLagoa do Japonês;\nPedra Furada;')
+
+    def test_agrupar(self):
+        from ..conteudo import agrupar
+        grupos = agrupar(['Seguro viagem', 'Passeios:', '- Taxa de entrada nos atrativos:',
+                          '- Lagoa do Japonês;', '* Pedra Furada;', 'Hospedagem:'])
+        self.assertEqual(grupos, [
+            {'titulo': '', 'itens': ['Seguro viagem']},
+            {'titulo': 'Passeios', 'itens': ['Taxa de entrada nos atrativos:', 'Lagoa do Japonês;',
+                                             'Pedra Furada;']},
+            {'titulo': 'Hospedagem', 'itens': []},
+        ])
+
+    def test_pagina_mostra_titulos_e_topicos(self):
+        destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.',
+                                         incluso=self.TEXTO, nao_incluso='Bebidas:\nRefrigerante')
+        html = self.client.get(destino.get_absolute_url()).content.decode()
+        self.assertIn('<h4 class="incl-grupo__titulo">Passeios</h4>', html)
+        self.assertIn('<h4 class="incl-grupo__titulo">REFEIÇÕES</h4>', html)
+        self.assertIn('<span>Transfer aeroporto de Palmas x hospedagem</span>', html)
+        self.assertNotIn('<span>- Transfer', html)            # o "-" digitado sai
+        self.assertNotIn('<span>Passeios:</span>', html)      # título não vira tópico
+        self.assertIn('<h4 class="incl-grupo__titulo">Bebidas</h4>', html)
+
+    def test_pdf_do_orcamento_tambem_agrupa(self):
+        from agencia.pdf import _estilos, _pacote
+        from ..conteudo import montar_viagem
+        destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.',
+                                         incluso=self.TEXTO)
+        textos = []
+        for f in _pacote(destino, montar_viagem(destino, []), _estilos()):
+            for parte in getattr(f, '_content', [f]):
+                if hasattr(parte, 'getPlainText'):
+                    textos.append(parte.getPlainText())
+        i = textos.index('Passeios')
+        self.assertEqual(textos[i + 1], '- Canyon da Sussuapara;')

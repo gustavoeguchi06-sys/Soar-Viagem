@@ -373,6 +373,36 @@ def _roteiro_do_banco(destino, cfg):
     return [dict(d) for d in (cfg.get('roteiro') or _roteiro_generico(destino))]
 
 
+# Marcadores que o dono digita ou cola no começo da linha; o site põe o dele.
+MARCADORES = '-•*–—·▪●'
+
+
+def agrupar(linhas):
+    """Lista "um item por linha" em grupos: linha terminada em ":" é título.
+
+        Passeios:            ->  [{'titulo': 'Passeios',
+        - Canyon da Sussuapara;       'itens': ['Canyon da Sussuapara;',
+        • Lagoa do Japonês;                     'Lagoa do Japonês;']}]
+
+    Itens antes do primeiro título ficam num grupo sem título. Um título sem
+    nada embaixo aparece sozinho. Linha que começa com marcador ("- Taxa de
+    entrada nos atrativos:") é sempre tópico, mesmo terminando com ":".
+    """
+    grupos = []
+    for linha in linhas:
+        com_marcador = linha.lstrip()[:1] in MARCADORES
+        texto = linha.lstrip(MARCADORES + ' \t').strip()
+        if not texto:
+            continue
+        if texto.endswith(':') and not com_marcador and len(texto) <= 80:
+            grupos.append({'titulo': texto[:-1].strip(), 'itens': []})
+            continue
+        if not grupos:
+            grupos.append({'titulo': '', 'itens': []})
+        grupos[-1]['itens'].append(texto)
+    return grupos
+
+
 def topicos(texto):
     """O detalhe do dia em tópicos: uma linha por tópico; texto corrido, uma frase por tópico."""
     linhas = [l.strip().lstrip('-•*–').strip() for l in (texto or '').splitlines()]
@@ -482,6 +512,10 @@ def montar_viagem(destino, avaliacoes):
         'incluso': destino.linhas('incluso') or INCLUSO,
         'nao_incluso': destino.linhas('nao_incluso'),
         'informacoes': destino.linhas('informacoes') or INFORMACOES,
+        # os mesmos, com "Título:" separando os tópicos
+        'incluso_grupos': agrupar(destino.linhas('incluso') or INCLUSO),
+        'nao_incluso_grupos': agrupar(destino.linhas('nao_incluso')),
+        'informacoes_grupos': agrupar(destino.linhas('informacoes') or INFORMACOES),
         'faq': faq,
         'preco': _moeda(preco_base) if preco_base is not None else '',
         'preco_num': preco_base,

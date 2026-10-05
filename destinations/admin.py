@@ -304,7 +304,9 @@ class DestinoAdmin(admin.ModelAdmin):
             'classes': ['collapse', 'bloco-incluso'],
             'fields': ['incluso', 'nao_incluso'],
             'description': 'Cada um vira um bloco separado na página da viagem. Escreva um '
-                           'item por linha. "Não incluso" em branco: o bloco não aparece.',
+                           'item por linha; linha que termina com ":" vira título dos tópicos '
+                           'de baixo (ex.: Passeios:). "Não incluso" em branco: o bloco não '
+                           'aparece.',
         }),
         ('Textos da página', {
             'classes': ['collapse'],

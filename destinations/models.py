@@ -116,13 +116,12 @@ class Destino(models.Model):
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,
-                               help_text='Um item por linha.')
+                               help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo.')
     nao_incluso = models.TextField('O que não está incluso', blank=True,
-                                   help_text='Um item por linha. Ex.: Passagem aérea até o '
-                                             'ponto de encontro. Em branco, a página só '
-                                             'mostra o que está incluso.')
+                                   help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo. Em branco, a página só mostra o que está '
+                                             'incluso.')
     informacoes = models.TextField('Informações importantes', blank=True,
-                                   help_text='Um item por linha.')
+                                   help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo.')
 
     class Meta:
         verbose_name = 'Destino'

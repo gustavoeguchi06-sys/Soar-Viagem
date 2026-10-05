@@ -575,14 +575,19 @@
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
                 <div class="incl-caixa">
-                    <ul class="incl-lista">
-                        {% for i in viagem.incluso %}
-                        <li class="destaque-item">
-                            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
-                            <span>{{ i }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                    {% for g in viagem.incluso_grupos %}
+                    <div class="incl-grupo">
+                        {% if g.titulo %}<h4 class="incl-grupo__titulo">{{ g.titulo }}</h4>{% endif %}
+                        <ul class="incl-lista">
+                            {% for i in g.itens %}
+                            <li class="destaque-item">
+                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+                                <span>{{ i }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </details>
@@ -598,14 +603,19 @@
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
                 <div class="incl-caixa incl-caixa--nao">
-                    <ul class="incl-lista">
-                        {% for i in viagem.nao_incluso %}
-                        <li class="destaque-item destaque-item--nao">
-                            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-x"></use></svg>
-                            <span>{{ i }}</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                    {% for g in viagem.nao_incluso_grupos %}
+                    <div class="incl-grupo">
+                        {% if g.titulo %}<h4 class="incl-grupo__titulo">{{ g.titulo }}</h4>{% endif %}
+                        <ul class="incl-lista">
+                            {% for i in g.itens %}
+                            <li class="destaque-item destaque-item--nao">
+                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-x"></use></svg>
+                                <span>{{ i }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </details>
@@ -620,7 +630,10 @@
                 <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
-                {% for i in viagem.informacoes %}<p>• {{ i }}</p>{% endfor %}
+                {% for g in viagem.informacoes_grupos %}
+                {% if g.titulo %}<h4 class="incl-grupo__titulo">{{ g.titulo }}</h4>{% endif %}
+                {% for i in g.itens %}<p>• {{ i }}</p>{% endfor %}
+                {% endfor %}
             </div>
         </details>
 

@@ -781,3 +781,10 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
                                                  align-items: flex-start; gap: 8px; font-size: .85rem; }
 .avaliar-form .campo:has(input[name="site"]) { position: absolute; left: -9999px; width: 1px; height: 1px;
                                                overflow: hidden; }
+
+/* Incluso / não incluso / informações: "Título:" agrupa os tópicos de baixo */
+.incl-grupo + .incl-grupo { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); }
+.incl-grupo__titulo { margin: 0 0 10px; font-size: .82rem; font-weight: 700; letter-spacing: .06em;
+                      text-transform: uppercase; color: var(--verde); }
+.dia__corpo .incl-grupo__titulo { margin-top: 12px; }
+.dia__corpo .incl-grupo__titulo:first-child { margin-top: 0; }
