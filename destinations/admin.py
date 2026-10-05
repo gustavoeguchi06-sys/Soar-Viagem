@@ -24,7 +24,7 @@ from django.utils.html import format_html
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
                      DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, NumeroSobre,
                      PaginaSobre, PerguntaFrequente, PrecoQuarto, Saida, ServicoViagem,
-                     SlideInicio, VideoDestino, VideoSoar60)
+                     SlideInicio, TextoBanner, VideoDestino, VideoSoar60)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
 
@@ -152,13 +152,13 @@ class HospedagemInline(admin.StackedInline):
 
     A Soar não vende hospedagem avulsa, então ela não tem tela própria no
     painel. Nome e foto principal ficam aqui; as fotos extras (os
-    quartos) abrem pelo link "mais fotos" de cada hospedagem.
+    quartos) abrem pelo botão "Adicionar ou ver as fotos da hospedagem".
     """
 
     model = Hospedagem
     extra = 0
-    fields = ['nome', 'imagem', 'previa']
-    readonly_fields = ['previa']
+    fields = ['nome', 'imagem', 'previa', 'mais_fotos']
+    readonly_fields = ['previa', 'mais_fotos']
     show_change_link = True
     verbose_name = 'hospedagem'
     verbose_name_plural = 'Hospedagem do pacote'
@@ -166,6 +166,20 @@ class HospedagemInline(admin.StackedInline):
     @admin.display(description='Foto como fica no site')
     def previa(self, hospedagem):
         return miniatura(hospedagem.imagem, hospedagem.nome)
+
+    @admin.display(description='Mais fotos (quartos, piscina...)')
+    def mais_fotos(self, hospedagem):
+        # As fotos extras têm tela própria (a hospedagem já precisa existir):
+        # o botão fica à vista aqui, no lugar do lápis pequeno do Django.
+        from django.urls import reverse
+        if not hospedagem.pk:
+            return 'Salve o destino primeiro; depois aparece aqui o botão para mais fotos.'
+        total = hospedagem.imagens.count()
+        return format_html(
+            '<a class="button" href="{}">Adicionar ou ver as fotos da hospedagem</a> '
+            '<span class="help">{} foto{} além da principal</span>',
+            reverse('admin:destinations_hospedagem_change', args=[hospedagem.pk]),
+            total, '' if total == 1 else 's')
 
 
 # --------------------------------------------------------------------------- #
@@ -366,7 +380,8 @@ class HospedagemAdmin(admin.ModelAdmin):
     """Tela de uma hospedagem, só para as fotos extras dos quartos.
 
     Não aparece no menu do painel (a hospedagem se cadastra dentro do
-    destino); abre pelo link "mais fotos" na tela do destino.
+    destino); abre pelo botão "Adicionar ou ver as fotos da hospedagem" na
+    tela do destino.
     """
 
     list_display = ['foto', 'nome', 'destino']
@@ -422,9 +437,53 @@ class HospedagemAdmin(admin.ModelAdmin):
 # Fotos do topo da página inicial
 # --------------------------------------------------------------------------- #
 
+@admin.register(TextoBanner)
+class TextoBannerAdmin(admin.ModelAdmin):
+    """Título e frase do banner. Só existe um, então a tela abre direto nele."""
+
+    fields = ['titulo', 'subtitulo', 'fotos_do_banner']
+    readonly_fields = ['fotos_do_banner']
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        return redirect(reverse('admin:destinations_textobanner_change',
+                                args=[TextoBanner.para_editar().pk]))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def response_change(self, request, obj):
+        # depois de salvar, volta para as fotos do banner, que é onde a aba fica
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        if '_continue' in request.POST:
+            return super().response_change(request, obj)
+        messages.success(request, 'Texto do banner salvo.')
+        return redirect(reverse('admin:destinations_slideinicio_changelist'))
+
+    @admin.display(description='Fotos e vídeos')
+    def fotos_do_banner(self, texto):
+        from django.urls import reverse
+        return format_html('<a href="{}">Fotos e vídeos que giram no banner ({} no ar) &rarr;</a>',
+                           reverse('admin:destinations_slideinicio_changelist'),
+                           SlideInicio.objects.filter(ativo=True).count())
+
+
 @admin.register(SlideInicio)
 class SlideInicioAdmin(admin.ModelAdmin):
     """As fotos (e vídeos) que giram no topo da página inicial."""
+
+    # o quadro "Texto do banner" no topo da lista
+    change_list_template = 'admin/destinations/slideinicio/change_list.html'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {**(extra_context or {}), 'texto_banner': TextoBanner.para_editar()}
+        return super().changelist_view(request, extra_context)
 
     list_display = ['foto', 'legenda', 'tem_video', 'ordem', 'ativo']
     list_display_links = ['foto', 'legenda']

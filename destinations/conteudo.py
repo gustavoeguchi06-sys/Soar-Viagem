@@ -341,6 +341,11 @@ def _fotos_do_destino(destino):
     return list(dict.fromkeys(fotos))         # sem repetir a mesma foto
 
 
+def _album(destino, galeria):
+    legendas = {i.imagem.url: i.legenda for i in destino.imagens.all() if i.imagem}
+    return [{'url': url, 'legenda': legendas.get(url) or destino.nome} for url in galeria]
+
+
 def _roteiro_generico(destino):
     nome = destino.nome
     modelos = [
@@ -467,6 +472,8 @@ def montar_viagem(destino, avaliacoes):
         'fotos': fotos,
         'thumbs': (fotos[1:5] if len(fotos) > 4 else fotos) if len(galeria) > 1 else [],
         'galeria': galeria,
+        # o álbum com legenda, para o carrossel que abre ao clicar
+        'album': _album(destino, galeria),
         # as fotos que não cabem nas miniaturas do topo; o botão leva à galeria
         'mais_fotos': max(len(fotos) - 5, 0),
         'servicos': _servicos(destino),

@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+{% comment %}
+Lista das fotos do banner com, no topo, o texto que fica por cima delas: o dono
+acha o título e a frase no mesmo lugar em que troca as fotos.
+{% endcomment %}
+
+{% block search %}
+<div class="module texto-banner">
+    <h2>Texto do banner</h2>
+    <p class="texto-banner__titulo">{{ texto_banner.titulo }}</p>
+    {% if texto_banner.subtitulo %}<p class="texto-banner__sub">{{ texto_banner.subtitulo }}</p>{% endif %}
+    <p><a class="button" href="{% url 'admin:destinations_textobanner_change' texto_banner.pk %}">Editar o texto</a></p>
+</div>
+{{ block.super }}
+{% endblock %}

@@ -458,14 +458,32 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if viagem.galeria %}
+            {% if viagem.album %}
+            {% comment %}Cada foto abre o carrossel (static/js/viagem.js). Sem JavaScript,
+            o link ainda abre a foto sozinha.{% endcomment %}
             <div class="galeria-grade">
-                {% for f in viagem.galeria %}
-                <a href="{{ f }}" target="_blank" rel="noopener">
-                    <img src="{{ f }}" alt="Foto de {{ destino.nome }}">
+                {% for f in viagem.album %}
+                <a href="{{ f.url }}" data-album="{{ forloop.counter0 }}" data-legenda="{{ f.legenda }}">
+                    <img src="{{ f.url }}" alt="{{ f.legenda }}" loading="lazy">
                 </a>
                 {% endfor %}
             </div>
+            <dialog class="album" id="album" aria-label="Fotos de {{ destino.nome }}">
+                <button type="button" class="album__fechar" data-album-fechar aria-label="Fechar">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-x"></use></svg>
+                </button>
+                <figure class="album__figura">
+                    <img class="album__foto" src="" alt="">
+                    <figcaption class="album__legenda"></figcaption>
+                </figure>
+                <button type="button" class="album__seta album__seta--esq" data-album-passo="-1" aria-label="Foto anterior">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                </button>
+                <button type="button" class="album__seta album__seta--dir" data-album-passo="1" aria-label="Próxima foto">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                </button>
+                <span class="album__contador" aria-live="polite"></span>
+            </dialog>
             {% endif %}
         </section>
         {% endif %}
@@ -477,6 +495,9 @@
         <div class="depoimentos__grade">
             <div>
                 <h2>Quem já viajou,<br>recomenda!</h2>
+                <button type="button" class="btn btn--verde btn--sm" data-abrir-popup="avaliarPopup">
+                    Avaliar esta viagem
+                </button>
             </div>
             <div class="carrossel">
                 <button class="carrossel__setas" type="button" data-depo="-1" aria-label="Anterior">
@@ -510,6 +531,36 @@
             </div>
         </div>
     </section>
+
+    {% comment %}Avaliação do visitante (destinations.views.avaliar). Sem JavaScript, os
+    <dialog> com `open` aparecem no lugar; com ele, viram pop-up.{% endcomment %}
+    <dialog class="popup" id="avaliarPopup" data-popup open aria-labelledby="avaliarTitulo"
+            {% if avaliacao_com_erro %}data-abrir-ja{% endif %}>
+        <p class="popup__titulo" id="avaliarTitulo">Avaliar {{ destino.nome }}</p>
+        <p class="popup__sub">A sua avaliação aparece no site depois que a equipe da Soar aprovar.</p>
+        <form method="post" action="{% url 'destinations:avaliar' destino.slug %}"
+              enctype="multipart/form-data" class="avaliar-form" novalidate>
+            {% csrf_token %}
+            {% include 'partials/_campos.html' with form=form_avaliacao %}
+            <div class="popup__acoes">
+                <button type="button" class="btn btn--contorno" data-fechar-popup>Cancelar</button>
+                <button type="submit" class="btn btn--verde">Enviar avaliação</button>
+            </div>
+        </form>
+    </dialog>
+    {% if avaliacao_enviada %}
+    <dialog class="popup popup--ok" id="avaliadoPopup" data-popup data-abrir-ja open
+            aria-labelledby="avaliadoTitulo">
+        <p class="popup__titulo" id="avaliadoTitulo">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-check"></use></svg>
+            Obrigado pela avaliação!
+        </p>
+        <p>Ela foi recebida e vai aparecer no site assim que a equipe da Soar aprovar.</p>
+        <div class="popup__acoes">
+            <button type="button" class="btn btn--verde" data-fechar-popup>Entendi</button>
+        </div>
+    </dialog>
+    {% endif %}
 
     {# ===================== INCLUSO / INFORMAÇÕES / FAQ ===================== #}
     <div class="roteiro bloco">

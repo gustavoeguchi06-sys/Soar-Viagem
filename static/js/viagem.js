@@ -188,6 +188,55 @@
         mostrarQuartos();
     }
 
+    /* ---------- Álbum: as fotos abrem num carrossel ---------- */
+    // Antes cada foto abria numa aba nova. Agora abre por cima da página, com
+    // setas, contador e legenda; teclado (setas e Esc) e arrastar o dedo no
+    // celular também passam as fotos.
+    var album = document.getElementById('album');
+    var fotosAlbum = Array.prototype.slice.call(document.querySelectorAll('[data-album]'));
+    if (album && fotosAlbum.length && typeof album.showModal === 'function') {
+        var fotoAlbum = album.querySelector('.album__foto');
+        var legendaAlbum = album.querySelector('.album__legenda');
+        var contadorAlbum = album.querySelector('.album__contador');
+        var atualAlbum = 0;
+        var sozinha = fotosAlbum.length < 2;
+        album.querySelectorAll('[data-album-passo]').forEach(function (b) { b.hidden = sozinha; });
+
+        var mostrar = function (i) {
+            atualAlbum = (i + fotosAlbum.length) % fotosAlbum.length;
+            var link = fotosAlbum[atualAlbum];
+            fotoAlbum.src = link.getAttribute('href');
+            fotoAlbum.alt = link.dataset.legenda || '';
+            legendaAlbum.textContent = link.dataset.legenda || '';
+            contadorAlbum.textContent = sozinha ? '' : (atualAlbum + 1) + ' de ' + fotosAlbum.length;
+        };
+        fotosAlbum.forEach(function (link, i) {
+            link.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                mostrar(i);
+                album.showModal();
+            });
+        });
+        album.querySelectorAll('[data-album-passo]').forEach(function (b) {
+            b.addEventListener('click', function () { mostrar(atualAlbum + parseInt(b.dataset.albumPasso, 10)); });
+        });
+        album.querySelector('[data-album-fechar]').addEventListener('click', function () { album.close(); });
+        // clicar fora da foto (no fundo escuro) fecha
+        album.addEventListener('click', function (ev) { if (ev.target === album) { album.close(); } });
+        album.addEventListener('keydown', function (ev) {
+            if (ev.key === 'ArrowRight') { mostrar(atualAlbum + 1); }
+            if (ev.key === 'ArrowLeft') { mostrar(atualAlbum - 1); }
+        });
+        var inicioToque = null;
+        album.addEventListener('touchstart', function (ev) { inicioToque = ev.touches[0].clientX; }, { passive: true });
+        album.addEventListener('touchend', function (ev) {
+            if (inicioToque === null) { return; }
+            var distancia = ev.changedTouches[0].clientX - inicioToque;
+            if (Math.abs(distancia) > 40) { mostrar(atualAlbum + (distancia < 0 ? 1 : -1)); }
+            inicioToque = null;
+        });
+    }
+
     /* ---------- Pop-ups do orçamento da agência ---------- */
     // Os <dialog> vêm com `open` para funcionar sem JavaScript (aparecem no
     // lugar). Aqui eles fecham e passam a abrir como pop-up de verdade: o do
@@ -206,9 +255,10 @@
     });
     // O aviso do "Saiba mais" vem de ?enviado=1: tira do endereço depois de
     // mostrar, para não abrir de novo quando a pessoa recarrega a página
-    if (/[?&]enviado=1/.test(location.search) && window.history.replaceState) {
+    if (/[?&](enviado|avaliacao)=1/.test(location.search) && window.history.replaceState) {
         var endereco = new URL(location.href);
         endereco.searchParams.delete('enviado');
+        endereco.searchParams.delete('avaliacao');
         history.replaceState(null, '', endereco);
     }
     document.querySelectorAll('[data-abrir-popup]').forEach(function (botao) {

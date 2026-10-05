@@ -181,7 +181,7 @@ class PaginaInicialTests(TestCase):
     def test_pagina_inicial_mostra_as_secoes(self):
         r = self.client.get('/')
         self.assertEqual(r.status_code, 200)
-        for texto in ['O Brasil começa onde termina o óbvio.', 'Encontre a viagem perfeita',
+        for texto in ['Muito além do destino, uma Experiência', 'Encontre a viagem perfeita',
                       'Próximas experiências', 'Destinos mais amados', 'Por que viajar com a Soar?',
                       'Viajar não tem idade.', '@operadorasoar</a></h2>', 'Pronto para sua próxima aventura?',
                       'Últimas vagas', 'R$ 3.690', 'Natureza']:
@@ -325,3 +325,64 @@ class InclusoNoPainelTests(TestCase):
         perguntas = html.index('>Perguntas frequentes<')
         self.assertLess(roteiro, incluso)
         self.assertLess(incluso, perguntas)
+
+
+class BannerAlbumHospedagemTests(TestCase):
+    """Texto do banner editável, álbum em carrossel e botão das fotos da hospedagem."""
+
+    def setUp(self):
+        from contas.dois_fatores import CHAVE_OK
+        self.dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(self.dono)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = self.dono.pk
+        sessao.save()
+
+    def test_texto_do_banner_vem_do_painel(self):
+        from ..models import TextoBanner
+        self.assertContains(self.client.get('/'), 'Muito além do destino, uma Experiência')
+        texto = TextoBanner.para_editar()
+        resposta = self.client.post(reverse('admin:destinations_textobanner_change', args=[texto.pk]),
+                                    {'titulo': 'Viaje com quem entende', 'subtitulo': ''})
+        self.assertRedirects(resposta, reverse('admin:destinations_slideinicio_changelist'))
+        pagina = self.client.get('/')
+        self.assertContains(pagina, '<h1>Viaje com quem entende</h1>', html=True)
+        lista = self.client.get(reverse('admin:destinations_slideinicio_changelist'))
+        self.assertContains(lista, 'Viaje com quem entende')
+        self.assertContains(lista, 'Editar o texto')
+
+    def test_album_abre_no_carrossel_e_nao_em_outra_aba(self):
+        import shutil
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image as Foto
+
+        from ..models import ImagemDestino
+
+        def jpg(nome):
+            saida = BytesIO()
+            Foto.new('RGB', (40, 30), (30, 120, 80)).save(saida, 'JPEG')
+            return SimpleUploadedFile(nome, saida.getvalue(), content_type='image/jpeg')
+
+        pasta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, pasta, ignore_errors=True)
+        with override_settings(MEDIA_ROOT=pasta):
+            destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+            ImagemDestino.objects.create(destino=destino, imagem=jpg('a.jpg'), legenda='Rio da Prata')
+            ImagemDestino.objects.create(destino=destino, imagem=jpg('b.jpg'), legenda='Gruta')
+            html = self.client.get(destino.get_absolute_url()).content.decode()
+        grade = html[html.index('class="galeria-grade"'):html.index('id="album"')]
+        self.assertNotIn('target="_blank"', grade)
+        self.assertIn('data-legenda="Rio da Prata"', grade)
+        self.assertEqual(grade.count('data-album='), 2)
+        self.assertIn('<dialog class="album" id="album"', html)
+
+    def test_botao_das_fotos_da_hospedagem_no_destino(self):
+        from ..models import Hospedagem
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        hospedagem = Hospedagem.objects.create(destino=destino, nome='Pousada Bonito')
+        tela = self.client.get(reverse('admin:destinations_destino_change', args=[destino.pk]))
+        self.assertContains(tela, 'Adicionar ou ver as fotos da hospedagem')
+        self.assertContains(tela, reverse('admin:destinations_hospedagem_change', args=[hospedagem.pk]))
