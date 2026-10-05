@@ -1586,3 +1586,9 @@ fieldset.module.collapse details[open] > summary { border-bottom: 1px solid var(
 .seletor-icone__op:has(input:checked) { border-color: var(--primary); background: var(--selected-bg);
                                         color: var(--body-fg); font-weight: 600; }
 .seletor-icone__op:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Lista das fotos do banner: o texto que fica por cima delas, no topo */
+.texto-banner { padding: 14px 18px 4px; margin-bottom: 18px; }
+.texto-banner h2 { margin: -14px -18px 12px; }
+.texto-banner__titulo { font-size: 1.15rem; font-weight: 700; margin: 0 0 4px; }
+.texto-banner__sub { margin: 0 0 10px; color: var(--body-quiet-color); }

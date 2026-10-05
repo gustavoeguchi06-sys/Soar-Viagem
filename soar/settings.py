@@ -335,6 +335,7 @@ LIMITE_CADASTRO_POR_HORA = int(os.environ.get('SOAR_LIMITE_CADASTRO', 5))
 LIMITE_SENHA_POR_HORA = int(os.environ.get('SOAR_LIMITE_SENHA', 5))
 LIMITE_NEWSLETTER_POR_HORA = int(os.environ.get('SOAR_LIMITE_NEWSLETTER', 5))
 LIMITE_INTERESSE_POR_HORA = int(os.environ.get('SOAR_LIMITE_INTERESSE', 5))
+LIMITE_AVALIACAO_POR_HORA = int(os.environ.get('SOAR_LIMITE_AVALIACAO', 3))
 LIMITE_ORCAMENTO_POR_HORA = int(os.environ.get('SOAR_LIMITE_ORCAMENTO', 30))
 
 # Verificação em duas etapas para a equipe (contas/dois_fatores.py). Desligada

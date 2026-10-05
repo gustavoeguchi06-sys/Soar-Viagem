@@ -743,3 +743,48 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
 /* hospedagem sem miniaturas: a foto principal ocupa a largura toda */
 .hosp-galeria:not(:has(.hosp-mini)) { grid-template-columns: 1fr; }
 .hosp-galeria:not(:has(.hosp-mini)) .hosp-principal img { min-height: 220px; max-height: 300px; }
+
+/* Álbum da viagem em carrossel (abre ao clicar numa foto da galeria) */
+.galeria-grade a { cursor: zoom-in; }
+.album { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0;
+         border: 0; background: transparent; overflow: hidden; }
+.album::backdrop { background: rgba(8, 12, 10, .92); }
+.album[open] { display: grid; place-items: center; }
+.album__figura { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px;
+                 max-width: calc(100vw - 140px); }
+.album__foto { max-width: 100%; max-height: calc(100vh - 130px); object-fit: contain; border-radius: 10px;
+               box-shadow: 0 10px 40px rgba(0, 0, 0, .45); }
+.album__legenda { color: #fff; font-size: .95rem; text-align: center; }
+.album__contador { position: fixed; top: 20px; left: 24px; color: rgba(255, 255, 255, .8); font-size: .85rem;
+                   font-weight: 600; }
+.album__fechar, .album__seta { position: fixed; display: grid; place-items: center; border: 0; cursor: pointer;
+                               border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; }
+.album__fechar:hover, .album__seta:hover { background: rgba(255, 255, 255, .28); }
+.album__fechar { top: 14px; right: 18px; width: 44px; height: 44px; }
+.album__seta { top: 50%; transform: translateY(-50%); width: 52px; height: 52px; }
+.album__seta--esq { left: 18px; }
+.album__seta--dir { right: 18px; }
+.album__fechar .ic, .album__seta .ic { width: 24px; height: 24px; }
+@media (max-width: 640px) {
+    .album__figura { max-width: calc(100vw - 24px); }
+    .album__seta { top: auto; bottom: 18px; transform: none; width: 46px; height: 46px; }
+    .album__seta--esq { left: calc(50% - 56px); }
+    .album__seta--dir { right: calc(50% - 56px); }
+    .album__foto { max-height: calc(100vh - 170px); }
+}
+
+/* Avaliação do visitante: botão embaixo do título e formulário no pop-up */
+.depoimentos__grade h2 + .btn { margin-top: 4px; }
+.avaliar-form { display: flex; flex-direction: column; gap: 10px; }
+.avaliar-form .campo select, .avaliar-form .campo textarea, .avaliar-form .campo input[type="text"] { width: 100%; }
+.avaliar-form .campo:has(input[name="aceite"]) { flex-direction: row-reverse; justify-content: flex-end;
+                                                 align-items: flex-start; gap: 8px; font-size: .85rem; }
+.avaliar-form .campo:has(input[name="site"]) { position: absolute; left: -9999px; width: 1px; height: 1px;
+                                               overflow: hidden; }
+
+/* Incluso / não incluso / informações: "Título:" agrupa os tópicos de baixo */
+.incl-grupo + .incl-grupo { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); }
+.incl-grupo__titulo { margin: 0 0 10px; font-size: .82rem; font-weight: 700; letter-spacing: .06em;
+                      text-transform: uppercase; color: var(--verde); }
+.dia__corpo .incl-grupo__titulo { margin-top: 12px; }
+.dia__corpo .incl-grupo__titulo:first-child { margin-top: 0; }

@@ -268,6 +268,16 @@ def _grade(fotos, e, colunas=3, altura=38 * mm):
     return tabela
 
 
+def _grupos(grupos, e):
+    """Os tópicos com o título do grupo em negrito em cima ("Passeios", "Refeições"...)."""
+    partes = []
+    for grupo in grupos:
+        if grupo['titulo']:
+            partes.append(Paragraph('<b>{}</b>'.format(_texto(grupo['titulo'])), e['dia']))
+        partes += _lista(grupo['itens'], e)
+    return partes
+
+
 def _lista(itens, e):
     return [Paragraph('- ' + _texto(item), e['item']) for item in itens if item]
 
@@ -311,10 +321,10 @@ def _pacote(destino, viagem, e):
 
     if viagem['incluso']:
         partes.append(Paragraph('O pacote inclui', e['secao']))
-        partes += _lista(viagem['incluso'], e)
+        partes += _grupos(viagem['incluso_grupos'], e)
     if viagem['nao_incluso']:
         partes.append(Paragraph('Não incluso', e['secao']))
-        partes += _lista(viagem['nao_incluso'], e)
+        partes += _grupos(viagem['nao_incluso_grupos'], e)
 
     hospedagem = viagem['hospedagem']
     texto = [Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal'])]
@@ -344,7 +354,7 @@ def _pacote(destino, viagem, e):
 
     if viagem['informacoes']:
         partes.append(Paragraph('Informações importantes', e['secao']))
-        partes += _lista(viagem['informacoes'], e)
+        partes += _grupos(viagem['informacoes_grupos'], e)
     return partes
 
 

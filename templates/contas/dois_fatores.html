@@ -12,6 +12,8 @@
         <div class="cartao-form">
             {% if configurando %}
             <h1>Proteja o painel com o celular</h1>
+            <p class="cartao-form__sub">Este painel dá acesso a tudo do sistema de viagem:
+               destinos, blog, Soar 60+, agências, usuários e os dados dos seus clientes.</p>
             <p class="cartao-form__sub">Além da senha, o painel vai pedir um código de 6 dígitos
                do aplicativo autenticador do seu celular (Google Authenticator, Microsoft
                Authenticator ou Authy). Quem descobrir a senha não entra sem o celular.</p>
@@ -40,6 +42,11 @@
                            autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="7"
                            required autofocus>
                 </div>
+                <label class="dois-fatores__lembrar">
+                    <input type="checkbox" name="lembrar" value="1" checked>
+                    <span>Lembrar este aparelho por 30 dias. Não marque em computador
+                          compartilhado.</span>
+                </label>
                 <button type="submit" class="btn btn--verde btn--bloco">
                     {% if configurando %}Ligar a verificação{% else %}Entrar no painel{% endif %}
                 </button>

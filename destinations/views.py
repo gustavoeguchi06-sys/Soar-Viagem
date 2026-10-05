@@ -8,7 +8,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from urllib.parse import urlencode
 
-from soar.seguranca import LIMITE_INTERESSE, ip_do_cliente
+from reviews.forms import AvaliacaoForm
+from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 
 from .conteudo import montar_viagem
 from .forms import InteresseForm
@@ -132,10 +133,12 @@ def detalhe_destino(request, slug):
         Destino.objects.prefetch_related('imagens', 'hospedagens', 'videos', 'precos', 'servicos'),
         slug=slug,
     )
-    return pagina_da_viagem(request, destino, enviado=request.GET.get('enviado') == '1')
+    return pagina_da_viagem(request, destino, enviado=request.GET.get('enviado') == '1',
+                            avaliacao_enviada=request.GET.get('avaliacao') == '1')
 
 
-def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None, enviado=False):
+def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None, enviado=False,
+                     form_avaliacao=None, avaliacao_enviada=False):
     """Monta a página da viagem.
 
     Para a agência aprovada, o card traz o formulário de orçamento (agencia/views.py
@@ -150,6 +153,10 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         'viagem': viagem,
         'form_interesse': form_interesse or InteresseForm(),
         'interesse_enviado': enviado,
+        # avaliação do visitante: com erro, o pop-up já abre mostrando o que corrigir
+        'form_avaliacao': form_avaliacao or AvaliacaoForm(),
+        'avaliacao_com_erro': form_avaliacao is not None,
+        'avaliacao_enviada': avaliacao_enviada,
         # o que fica marcado no card: o que veio no envio, o link do calendário
         # (?saida=) ou o padrão da viagem
         'saida_marcada': next((str(s['id']) for s in viagem['saidas'] if s.get('padrao')), ''),
@@ -210,6 +217,39 @@ def interesse(request, slug):
     interessado.destino = destino
     interessado.save()
     return redirect(destino.get_absolute_url() + '?enviado=1#reservar')
+
+
+@require_POST
+def avaliar(request, slug):
+    """Recebe a avaliação de um visitante. Entra na fila: o dono aprova no painel.
+
+    Sem conta, qualquer pessoa pode avaliar; por isso o IP fica guardado (6
+    meses, para apurar abuso), cada IP tem um limite por hora e um campo
+    escondido pega robô de spam.
+    """
+    destino = get_object_or_404(Destino, slug=slug)
+    form = AvaliacaoForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return pagina_da_viagem(request, destino, form_avaliacao=form)
+
+    if form.eh_robo():
+        # finge que deu certo: o robô não aprende que foi barrado
+        log.warning('avaliacao de robo descartada: ip=%s', ip_do_cliente(request))
+        return redirect(destino.get_absolute_url() + '?avaliacao=1#avaliacoes')
+    if LIMITE_AVALIACAO.estourou(request):
+        log.warning('avaliacao bloqueada por limite: ip=%s', ip_do_cliente(request))
+        messages.error(request, 'Muitas avaliações daqui agora há pouco. Tente de novo mais tarde.')
+        return redirect(destino.get_absolute_url() + '#avaliacoes')
+    LIMITE_AVALIACAO.registrar(request)
+
+    avaliacao = form.save(commit=False)
+    avaliacao.destino = destino
+    avaliacao.ip = ip_do_cliente(request)
+    avaliacao.publicada = False
+    avaliacao.save()
+    log.info('avaliacao recebida: destino=%s avaliacao=%s ip=%s', destino.slug, avaliacao.pk,
+             ip_do_cliente(request))
+    return redirect(destino.get_absolute_url() + '?avaliacao=1#avaliacoes')
 
 
 def calendario(request):

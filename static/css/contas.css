@@ -210,3 +210,8 @@
     background: rgba(0, 0, 0, .06); font-size: 1.05rem; letter-spacing: .06em;
     word-break: break-all; user-select: all;
 }
+
+/* "Lembrar este aparelho por 30 dias" na tela do código do celular */
+.dois-fatores__lembrar { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0 14px;
+                         font-size: .86rem; color: var(--tinta-suave); cursor: pointer; }
+.dois-fatores__lembrar input { margin-top: 3px; }

@@ -209,6 +209,51 @@ class DoisFatoresTests(Base):
         self.client.post(reverse('contas:dois_fatores'), {'codigo': self._codigo(segredo)})
         self.assertEqual(self.client.get(self.painel).status_code, 200)
 
+    def _lembrar_e_sair(self, segredo):
+        """Entra com o código marcando "lembrar este aparelho" e sai do site."""
+        self._entrar()
+        self.client.post(reverse('contas:dois_fatores'),
+                         {'codigo': self._codigo(segredo), 'lembrar': '1'})
+        self.assertIn('soar_2fa_aparelho', self.client.cookies)
+        self.client.post(reverse('contas:sair'))
+
+    def test_aparelho_lembrado_pula_o_codigo(self):
+        segredo = totp.novo_segredo()
+        DoisFatores.objects.create(usuario=self.dono, segredo=segredo)
+        self._lembrar_e_sair(segredo)
+        self._entrar()
+        self.assertEqual(self.client.get(self.painel).status_code, 200)
+
+    def test_sem_lembrar_pede_o_codigo_de_novo(self):
+        segredo = totp.novo_segredo()
+        DoisFatores.objects.create(usuario=self.dono, segredo=segredo)
+        self._entrar()
+        self.client.post(reverse('contas:dois_fatores'), {'codigo': self._codigo(segredo)})
+        self.assertNotIn('soar_2fa_aparelho', self.client.cookies)
+        self.client.post(reverse('contas:sair'))
+        self._entrar()
+        self.assertEqual(self.client.get(self.painel).status_code, 302)
+
+    def test_trocar_a_senha_esquece_os_aparelhos(self):
+        segredo = totp.novo_segredo()
+        DoisFatores.objects.create(usuario=self.dono, segredo=segredo)
+        self._lembrar_e_sair(segredo)
+        self.dono.set_password('outra-senha-boa-456')
+        self.dono.save()
+        self.client.post(reverse('contas:entrar'),
+                         {'username': 'dono', 'password': 'outra-senha-boa-456'})
+        self.assertEqual(self.client.get(self.painel).status_code, 302)
+
+    def test_aparelho_lembrado_vence_em_30_dias(self):
+        import time
+        segredo = totp.novo_segredo()
+        DoisFatores.objects.create(usuario=self.dono, segredo=segredo)
+        self._lembrar_e_sair(segredo)
+        daqui_31_dias = time.time() + 31 * 86400
+        with mock.patch('django.core.signing.time.time', return_value=daqui_31_dias):
+            self._entrar()
+            self.assertEqual(self.client.get(self.painel).status_code, 302)
+
     def test_mesmo_codigo_nao_entra_duas_vezes(self):
         segredo = totp.novo_segredo()
         DoisFatores.objects.create(usuario=self.dono, segredo=segredo)

@@ -116,13 +116,12 @@ class Destino(models.Model):
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
     incluso = models.TextField('O que está incluso', blank=True,
-                               help_text='Um item por linha.')
+                               help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo.')
     nao_incluso = models.TextField('O que não está incluso', blank=True,
-                                   help_text='Um item por linha. Ex.: Passagem aérea até o '
-                                             'ponto de encontro. Em branco, a página só '
-                                             'mostra o que está incluso.')
+                                   help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo. Em branco, a página só mostra o que está '
+                                             'incluso.')
     informacoes = models.TextField('Informações importantes', blank=True,
-                                   help_text='Um item por linha.')
+                                   help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo.')
 
     class Meta:
         verbose_name = 'Destino'
@@ -420,6 +419,39 @@ class Interessado(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class TextoBanner(models.Model):
+    """O título e a frase grandes do banner da página inicial. Existe um só.
+
+    Ficam por cima de todas as fotos e vídeos que giram no banner, por isso
+    não moram em cada slide.
+    """
+
+    titulo = models.CharField('Título', max_length=80,
+                              default='Muito além do destino, uma Experiência',
+                              help_text='A frase grande, em letras brancas. Curta: até umas 8 palavras.')
+    subtitulo = models.CharField(
+        'Frase embaixo do título', max_length=160, blank=True,
+        default='Descubra viagens em grupo para destinos que você nunca vai esquecer.',
+        help_text='Uma linha que completa o título. Em branco, não aparece.')
+
+    class Meta:
+        verbose_name = 'Texto do banner'
+        verbose_name_plural = 'Texto do banner'
+
+    def __str__(self):
+        return self.titulo
+
+    @classmethod
+    def atual(cls):
+        """O texto em uso; sem nada salvo ainda, o padrão (sem gravar: ver a página não escreve)."""
+        return cls.objects.first() or cls()
+
+    @classmethod
+    def para_editar(cls):
+        """O registro que o painel edita, criado na primeira vez que o dono abre."""
+        return cls.objects.first() or cls.objects.create()
 
 
 class SlideInicio(models.Model):

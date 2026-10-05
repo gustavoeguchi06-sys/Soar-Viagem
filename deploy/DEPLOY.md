@@ -118,7 +118,13 @@ sudo -u soar python3 -m venv /srv/soar/venv
 sudo -u soar /srv/soar/venv/bin/pip install -r /srv/soar/app/requirements.txt
 sudo -u soar mkdir -p /srv/soar/app/media /srv/soar/app/logs
 sudo mkdir -p /var/log/soar && sudo chown soar:soar /var/log/soar
+# o Nginx (usuário www-data) precisa ler o CSS, as imagens e as fotos dentro de
+# /srv/soar, que só o grupo soar abre; .env e .pgpass seguem só do usuário soar (600)
+sudo usermod -aG soar www-data
 ```
+
+Para conferir o que foi baixado, use o usuário do site (o seu não abre a pasta, de
+propósito): `sudo -u soar ls /srv/soar/app`.
 
 **`.env`** (`/srv/soar/app/.env`, só o usuário `soar` lê). Parta do modelo completo:
 
@@ -148,19 +154,21 @@ SOAR_EMAIL_USER=...
 # senha de app do Google
 SOAR_EMAIL_PASSWORD=...
 SOAR_EMAIL_REMETENTE=Soar Operadora <...>
-# recomendado: código do celular para entrar no painel
+# código do celular para entrar no painel (o aparelho pode ser lembrado por 30 dias)
 SOAR_2FA_EQUIPE=1
 # fotos do @operadorasoar na página inicial: copie a linha do .env do seu computador
 SOAR_INSTAGRAM_TOKEN=...
 # R2 (opcional, recomendado para vídeos): SOAR_R2_BUCKET, _ACCOUNT_ID, _ACCESS_KEY, _SECRET_KEY, _DOMINIO
 ```
 
+O seu usuário não entra em `/srv/soar` (só o grupo `soar`), então os comandos do site
+levam o caminho completo do `manage.py`:
+
 ```bash
-cd /srv/soar/app
-sudo -u soar /srv/soar/venv/bin/python manage.py migrate
-sudo -u soar /srv/soar/venv/bin/python manage.py collectstatic --noinput
-sudo -u soar /srv/soar/venv/bin/python manage.py check --deploy
-sudo -u soar /srv/soar/venv/bin/python manage.py criar_dono      # conta do dono (pergunta a senha)
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py migrate
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py collectstatic --noinput
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py check --deploy
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py criar_dono   # conta do dono (pergunta a senha)
 ```
 
 O `check --deploy` deve mostrar só o aviso `security.W021` (HSTS preload), que é de
@@ -305,10 +313,10 @@ passa na frente do que estava guardado no banco.
 ## 11. Atualizar o site depois
 
 ```bash
-cd /srv/soar/app && sudo -u soar git pull
-sudo -u soar /srv/soar/venv/bin/pip install -r requirements.txt
-sudo -u soar /srv/soar/venv/bin/python manage.py migrate
-sudo -u soar /srv/soar/venv/bin/python manage.py collectstatic --noinput
+sudo -u soar git -C /srv/soar/app pull
+sudo -u soar /srv/soar/venv/bin/pip install -r /srv/soar/app/requirements.txt
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py migrate
+sudo -u soar /srv/soar/venv/bin/python /srv/soar/app/manage.py collectstatic --noinput
 sudo systemctl restart soar
 ```
 
