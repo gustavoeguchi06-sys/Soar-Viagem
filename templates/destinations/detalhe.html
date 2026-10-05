@@ -133,6 +133,7 @@
                     {% for dia in viagem.roteiro %}
                     <details class="dia dia--roteiro">
                         <summary>
+                            <span class="dia__num">Dia {{ dia.numero }}</span>
                             <span class="dia__texto">
                                 <b>{{ dia.titulo }}</b>
                                 <small>{{ dia.resumo }}</small>

@@ -788,3 +788,10 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
                       text-transform: uppercase; color: var(--verde); }
 .dia__corpo .incl-grupo__titulo { margin-top: 12px; }
 .dia__corpo .incl-grupo__titulo:first-child { margin-top: 0; }
+
+/* "Dia 1", "Dia 2"... ao lado de cada dia do roteiro, pela ordem */
+.dia__num { flex: none; display: grid; place-items: center; min-width: 58px; padding: 7px 8px;
+            border-radius: 8px; background: var(--verde-claro); color: var(--verde);
+            font-size: .72rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+            white-space: nowrap; }
+.dia[open] .dia__num { background: var(--verde); color: #fff; }

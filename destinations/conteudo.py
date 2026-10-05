@@ -373,6 +373,9 @@ def _roteiro_do_banco(destino, cfg):
     return [dict(d) for d in (cfg.get('roteiro') or _roteiro_generico(destino))]
 
 
+# "Dia 2:", "dia 2 -", "DIA 2." no começo do título do dia do roteiro.
+DIA_NO_TITULO = re.compile(r'^\s*dia\s*\d+\s*[:.\-–—]?\s*', re.IGNORECASE)
+
 # Marcadores que o dono digita ou cola no começo da linha; o site põe o dele.
 MARCADORES = '-•*–—·▪●'
 
@@ -439,8 +442,12 @@ def montar_viagem(destino, avaliacoes):
     total = len(avaliacoes)
 
     roteiro = _roteiro_do_banco(destino, cfg)
-    for dia in roteiro:
+    for numero, dia in enumerate(roteiro, 1):
         dia['topicos'] = topicos(dia.get('detalhe'))
+        # "Dia 1", "Dia 2"... saem da ordem do roteiro; se o título já começa
+        # com "Dia 3:", tira, para não aparecer repetido ao lado do número
+        dia['numero'] = numero
+        dia['titulo'] = DIA_NO_TITULO.sub('', dia.get('titulo') or '') or dia.get('titulo')
 
     hospedagem_db = destino.hospedagens.first()
     fotos_hosp = []

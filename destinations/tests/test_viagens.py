@@ -429,3 +429,20 @@ class TopicosComTituloTests(TestCase):
                     textos.append(parte.getPlainText())
         i = textos.index('Passeios')
         self.assertEqual(textos[i + 1], '- Canyon da Sussuapara;')
+
+
+class NumeroDoDiaTests(TestCase):
+    """Cada dia do roteiro mostra "Dia 1", "Dia 2"... pela ordem, sem repetir o do título."""
+
+    def test_dias_numerados_pela_ordem(self):
+        from ..models import DiaRoteiro
+        destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.')
+        DiaRoteiro.objects.create(destino=destino, ordem=2, titulo='Pedra Furada', resumo='.')
+        DiaRoteiro.objects.create(destino=destino, ordem=1, titulo='Dia 1: Recepção em Palmas',
+                                  resumo='.')
+        html = re.sub(r'\s+', ' ', self.client.get(destino.get_absolute_url()).content.decode())
+        self.assertIn('<span class="dia__num">Dia 1</span> <span class="dia__texto"> '
+                      '<b>Recepção em Palmas</b>', html)
+        self.assertIn('<span class="dia__num">Dia 2</span> <span class="dia__texto"> '
+                      '<b>Pedra Furada</b>', html)
+        self.assertNotIn('Dia 1: Recepção', html)
