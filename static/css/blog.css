@@ -140,7 +140,10 @@
 
 .blog-insta__sub { font-size: .84rem; color: var(--body-quiet-color, #6b7a80); margin: 0 0 12px; line-height: 1.5; }
 .blog-insta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-.blog-insta span { aspect-ratio: 1; border-radius: 8px; }
+.blog-insta a { position: relative; display: block; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--verde-escuro, #0d4f31); }
+/* absoluta: foto em pé do Instagram não estica o quadrado */
+.blog-insta img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.blog-insta a:hover img { transform: scale(1.05); }
 
 /* -------- RESPONSIVO -------- */
 @media (max-width: 980px) {

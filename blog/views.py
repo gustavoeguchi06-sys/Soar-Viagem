@@ -15,6 +15,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from destinations import instagram
+from destinations.models import Destino
 from soar.seguranca import LIMITE_NEWSLETTER, ip_do_cliente
 
 from .models import Artigo, Categoria, Inscricao
@@ -42,6 +44,15 @@ def _lateral():
         'total_no_ar': no_ar.count(),
         'mais_lidos': no_ar.order_by('-leituras', '-data_publicacao')[:5],
     }
+
+
+def _fotos_instagram():
+    """A grade "Siga a Soar no Instagram": as últimas do perfil ou, sem elas, fotos das viagens."""
+    fotos = instagram.ultimas_fotos()[:6]
+    if fotos:
+        return fotos
+    viagens = Destino.objects.prefetch_related('imagens').order_by('-destaque', 'nome')[:6]
+    return [{'foto': v.capa_card, 'link': instagram.PERFIL, 'legenda': ''} for v in viagens]
 
 
 def indice(request):
@@ -108,6 +119,7 @@ def artigo(request, slug):
         'secoes': artigo.secoes.all(),
         'atracoes': artigo.atracoes.all(),
         'viagens': list(artigo.destinos.all()),
+        'fotos_instagram': _fotos_instagram(),
         'previa': previa,
         'anterior': anterior,
         'proximo': proximo,

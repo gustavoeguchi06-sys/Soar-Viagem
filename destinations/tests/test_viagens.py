@@ -92,6 +92,16 @@ class PaginasDeErroTests(TestCase):
         self.assertIn('Algo deu errado aqui', render_to_string('500.html'))
 
 
+class RecomendacoesTests(TestCase):
+    def test_recomendacoes_vem_depois_do_faq(self):
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        html = self.client.get(destino.get_absolute_url()).content.decode()
+        self.assertLess(html.index('id="faq"'), html.index('id="avaliacoes"'))
+        # sem avaliação publicada: o aviso aparece, o carrossel vazio não
+        self.assertIn('ainda não tem avaliações publicadas', html)
+        self.assertNotIn('id="trilhoDepo"', html)
+
+
 class CartaoDestinoTests(TestCase):
     def test_destino_sem_foto_usa_ilustracao(self):
         destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')

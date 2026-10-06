@@ -145,6 +145,19 @@ class ViagensDoArtigoTests(BlogBase):
         self.assertIn('Ver a viagem para Jalapão', html)
         self.assertIn('Ver a viagem para Bonito', html)
 
+    def test_grade_do_instagram_tem_fotos(self):
+        from unittest import mock
+        self.artigo('teste-insta')
+        foto = {'foto': 'https://cdn.exemplo/insta.jpg', 'link': 'https://www.instagram.com/p/x/',
+                'legenda': ''}
+        with mock.patch('destinations.instagram.ultimas_fotos', return_value=[foto] * 9):
+            html = self.client.get('/blog/teste-insta/').content.decode()
+        self.assertEqual(html.count('src="https://cdn.exemplo/insta.jpg"'), 6)
+        # sem Instagram: fotos das viagens no lugar dos quadrados vazios
+        with mock.patch('destinations.instagram.ultimas_fotos', return_value=[]):
+            html = self.client.get('/blog/teste-insta/').content.decode()
+        self.assertNotIn('<span class="ph"></span>', html)
+
     def test_icone_do_carro_4x4(self):
         a = self.artigo('teste-trilha')
         Secao.objects.create(artigo=a, titulo='De 4x4 pelas dunas', icone='4x4')
