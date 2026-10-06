@@ -14,7 +14,7 @@ from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
-from .models import MESES, Destino, PaginaSobre, Saida, VideoSoar60
+from .models import MESES, Destino, PaginaSobre, PaginaSoar60, Saida, VideoSoar60
 
 log = logging.getLogger('soar.seguranca')
 
@@ -104,13 +104,14 @@ def soar_60(request):
 
     O botão da home ia direto para o WhatsApp: a pessoa era jogada numa
     conversa sem ter visto viagem nenhuma, e tinha que perguntar o que existe
-    para só então decidir. Aqui ela conhece o programa e as viagens primeiro; o
-    WhatsApp fica no fim, para quando ela realmente quiser reservar.
+    para só então decidir. Aqui ela conhece o programa e as viagens primeiro, e
+    reserva pela página da viagem que escolher.
 
     Enquanto nenhuma viagem estiver marcada como 60+ no painel, a página mostra
     o catálogo inteiro — melhor do que uma página vazia, e é verdade: toda
     viagem da Soar pode ser feita no ritmo 60+, é só combinar.
     """
+    pagina = PaginaSoar60.atual()
     viagens = Destino.objects.filter(soar_60=True).prefetch_related('imagens', 'avaliacoes')
     escolhidas = viagens.exists()
     if not escolhidas:
@@ -119,6 +120,10 @@ def soar_60(request):
     return render(request, 'destinations/soar_60.html', {
         'viagens': viagens[:POR_PAGINA],
         'escolhidas': escolhidas,
+        'pagina': pagina,
+        'itens': pagina.itens.all(),
+        'passos': pagina.passos.all(),
+        'perguntas': pagina.perguntas.all(),
         'videos': VideoSoar60.objects.filter(ativo=True),
     })
 

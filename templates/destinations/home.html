@@ -196,11 +196,11 @@
 <section class="in-secao in-secao--junta">
     <div class="wrap in-duo">
         <div class="in-60">
-            <img src="{% static 'img/soar-60.svg' %}" alt="" class="in-60__foto">
+            <img src="{{ i.soar60.foto }}" alt="" class="in-60__foto">
             <div class="in-60__texto">
                 <span class="in-60__selo">Soar 60+</span>
-                <h2>Viajar não tem idade.</h2>
-                <p>Viagens pensadas para quem quer conhecer novos lugares com conforto, segurança e companhia.</p>
+                <h2>{{ i.soar60.titulo }}</h2>
+                {% if i.soar60.texto %}<p>{{ i.soar60.texto }}</p>{% endif %}
                 <a class="btn btn--branco btn--sm" href="{% url 'destinations:soar_60' %}">Conheça as viagens 60+</a>
             </div>
         </div>

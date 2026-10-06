@@ -22,8 +22,9 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, NumeroSobre,
-                     PaginaSobre, PerguntaFrequente, PrecoQuarto, Saida, ServicoViagem,
+                     DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, ItemSoar60,
+                     NumeroSobre, PaginaSobre, PaginaSoar60, PassoSoar60, PerguntaFrequente,
+                     PerguntaSoar60, PrecoQuarto, Saida, ServicoViagem,
                      SlideInicio, TextoBanner, VideoDestino, VideoSoar60)
 
 TEXTO_CURTO = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4})}}
@@ -575,6 +576,13 @@ class InteressadoAdmin(admin.ModelAdmin):
 class VideoSoar60Admin(admin.ModelAdmin):
     """Os vídeos da página do Soar 60+ (/soar-60/)."""
 
+    # o caminho de volta para a página Soar 60+ no topo da lista
+    change_list_template = 'admin/destinations/videosoar60/change_list.html'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {**(extra_context or {}), 'pagina_60': PaginaSoar60.atual()}
+        return super().changelist_view(request, extra_context)
+
     list_display = ['titulo', 'ordem', 'ativo']
     list_editable = ['ordem', 'ativo']
     fields = ['titulo', 'arquivo', 'previa', 'capa', 'ordem', 'ativo']
@@ -583,6 +591,102 @@ class VideoSoar60Admin(admin.ModelAdmin):
     @admin.display(description='Vídeo enviado')
     def previa(self, video):
         return previa_video(video.arquivo)
+
+
+# --------------------------------------------------------------------------- #
+# Página Soar 60+: uma só, o painel abre direto no formulário dela
+# --------------------------------------------------------------------------- #
+
+class ItemSoar60Inline(admin.StackedInline):
+    model = ItemSoar60
+    extra = 0
+    fields = ['icone', 'titulo', 'texto', 'ordem']
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'icone':
+            kwargs['widget'] = SeletorDeIcone
+        if db_field.name == 'texto':
+            kwargs['widget'] = forms.Textarea(attrs={'rows': 2})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+class PassoSoar60Inline(admin.StackedInline):
+    model = PassoSoar60
+    extra = 0
+    fields = ['titulo', 'texto', 'ordem']
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'texto':
+            kwargs['widget'] = forms.Textarea(attrs={'rows': 2})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+class PerguntaSoar60Inline(admin.StackedInline):
+    model = PerguntaSoar60
+    extra = 0
+    fields = ['pergunta', 'resposta', 'ordem']
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'resposta':
+            kwargs['widget'] = forms.Textarea(attrs={'rows': 3})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+
+@admin.register(PaginaSoar60)
+class PaginaSoar60Admin(admin.ModelAdmin):
+    """A página /soar-60/. Só existe uma, então não tem lista: a aba abre nela."""
+
+    inlines = [ItemSoar60Inline, PassoSoar60Inline, PerguntaSoar60Inline]
+    readonly_fields = ['ver_no_site', 'previa_foto', 'videos']
+    save_on_top = True
+    fieldsets = [
+        ('Capa', {'fields': ['ver_no_site', 'titulo', 'subtitulo', 'foto', 'previa_foto',
+                             'texto_home']}),
+        ('O que muda numa viagem 60+', {
+            'fields': ['diferenciais_titulo', 'diferenciais_intro'],
+            'description': 'Os cartões ficam no bloco "Cartões de O que muda", mais abaixo.'}),
+        ('Viagens e vídeos', {
+            'fields': ['viagens_titulo', 'videos_titulo', 'videos'],
+            'description': 'As viagens que aparecem são as marcadas como "Soar 60+" em cada '
+                           'destino. Sem nenhuma marcada, aparece o catálogo inteiro.'}),
+        ('Como funciona', {'fields': ['passos_titulo'],
+                           'description': 'Os passos ficam no bloco "Passos", mais abaixo.'}),
+        ('Perguntas', {'fields': ['perguntas_titulo'],
+                       'description': 'As perguntas ficam no bloco "Perguntas", no fim.'}),
+    ]
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        return redirect(reverse('admin:destinations_paginasoar60_change',
+                                args=[PaginaSoar60.atual().pk]))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='No site')
+    def ver_no_site(self, pagina):
+        from django.urls import reverse
+        return format_html('<a href="{}" target="_blank" rel="noopener">Abrir a página Soar 60+ '
+                           '&#8599;</a>', reverse('destinations:soar_60'))
+
+    @admin.display(description='Como fica a foto')
+    def previa_foto(self, pagina):
+        if not pagina.foto:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto: o site usa a ilustração das montanhas.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">',
+                           pagina.foto.url)
+
+    @admin.display(description='Vídeos')
+    def videos(self, pagina):
+        from django.urls import reverse
+        return format_html('<a href="{}">Vídeos da página ({} no ar) &rarr;</a>',
+                           reverse('admin:destinations_videosoar60_changelist'),
+                           VideoSoar60.objects.filter(ativo=True).count())
 
 
 # --------------------------------------------------------------------------- #

@@ -11,7 +11,7 @@ from django.urls import reverse
 from blog.models import Artigo, Categoria, Secao
 from soar.videos import validar_video
 
-from ..models import Destino, SlideInicio, VideoDestino, VideoSoar60
+from ..models import Destino, PaginaSoar60, SlideInicio, VideoDestino, VideoSoar60
 
 PASTA = tempfile.mkdtemp()
 # o começo de um MP4 de verdade: a caixa "ftyp"
@@ -80,6 +80,60 @@ class VideosTests(TestCase):
         self.assertNotContains(resposta, 'Rascunho')
         VideoSoar60.objects.all().delete()
         self.assertNotContains(self.client.get(reverse('destinations:soar_60')), 'id="videos"')
+
+    def test_foto_do_soar_60_na_pagina_e_na_home(self):
+        # sem foto no painel, as duas usam a ilustração
+        self.assertContains(self.client.get(reverse('destinations:soar_60')), 'img/soar-60.svg')
+        self.assertContains(self.client.get(reverse('destinations:home')), 'img/soar-60.svg')
+        pagina = PaginaSoar60.atual()
+        pagina.foto = _foto()
+        pagina.save()
+        for nome in ('destinations:soar_60', 'destinations:home'):
+            resposta = self.client.get(reverse(nome))
+            self.assertContains(resposta, pagina.foto.url)
+            self.assertNotContains(resposta, 'img/soar-60.svg')
+
+    def test_textos_do_soar_60_vem_do_painel(self):
+        url = reverse('destinations:soar_60')
+        # o conteúdo que estava no código veio para o painel
+        resposta = self.client.get(url)
+        self.assertContains(resposta, 'Ritmo sem pressa')
+        self.assertContains(resposta, 'Escolha a viagem')
+        self.assertContains(resposta, 'Como pago?')
+        pagina = PaginaSoar60.atual()
+        pagina.titulo = 'Bora viajar.'
+        pagina.texto_home = 'Frase nova do cartão.'
+        pagina.save()
+        pagina.itens.filter(titulo='Ritmo sem pressa').update(titulo='Sem correria')
+        pagina.passos.all().delete()
+        resposta = self.client.get(url)
+        self.assertContains(resposta, 'Bora viajar.')
+        self.assertContains(resposta, 'Sem correria')
+        # sem passos, o bloco e o botão que leva até ele somem
+        self.assertNotContains(resposta, 'id="como-funciona"')
+        self.assertNotContains(resposta, 'href="#como-funciona"')
+        home = self.client.get(reverse('destinations:home'))
+        self.assertContains(home, 'Bora viajar.')
+        self.assertContains(home, 'Frase nova do cartão.')
+
+    def test_painel_abre_a_pagina_soar_60(self):
+        from contas.dois_fatores import CHAVE_OK
+        dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(dono)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = dono.pk
+        sessao.save()
+        # a aba abre direto no único registro, sem lista nem "adicionar"
+        resposta = self.client.get(reverse('admin:destinations_paginasoar60_changelist'))
+        editar = reverse('admin:destinations_paginasoar60_change',
+                         args=[PaginaSoar60.objects.get().pk])
+        self.assertRedirects(resposta, editar)
+        tela = self.client.get(editar)
+        for campo in ('name="titulo"', 'name="foto"', 'name="texto_home"', 'name="itens-0-titulo"',
+                      'name="passos-0-titulo"', 'name="perguntas-0-pergunta"'):
+            self.assertContains(tela, campo)
+        lista = self.client.get(reverse('admin:destinations_videosoar60_changelist'))
+        self.assertContains(lista, 'Voltar para a página Soar 60+')
 
     def test_painel_tem_os_campos_de_video(self):
         from contas.dois_fatores import CHAVE_OK

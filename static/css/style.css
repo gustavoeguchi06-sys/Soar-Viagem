@@ -287,24 +287,6 @@ img { max-width: 100%; display: block; }
     margin: 0; padding: 0 20px 18px; color: var(--tinta-suave, #6b7a80); line-height: 1.6;
 }
 
-/* fecho */
-.p60-fecho {
-    text-align: center; padding: clamp(30px, 6vw, 52px) clamp(20px, 4vw, 40px);
-    background: var(--verde-escuro, #0d4f31); color: #fff;
-    border-radius: var(--r-lg, 18px);
-}
-.p60-fecho h2 {
-    color: #fff; font-family: 'Sora', 'Inter', sans-serif; font-weight: 800;
-    font-size: clamp(1.4rem, 3.6vw, 2rem); margin: 0 0 10px;
-}
-.p60-fecho > p {
-    max-width: 520px; margin: 0 auto 22px; color: rgba(255, 255, 255, .88);
-    font-size: 1.02rem;
-}
-.p60-fecho__acoes { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-.p60-fecho__acoes .btn { display: inline-flex; align-items: center; gap: 8px; }
-.p60-fecho__nota { margin: 20px 0 0; font-size: .9rem; color: rgba(255, 255, 255, .7); }
-
 @media (max-width: 760px) {
     .p60-capa { min-height: 340px; }
     .p60-capa::after { background: linear-gradient(180deg, rgba(9, 34, 24, .5) 0%,
@@ -312,7 +294,7 @@ img { max-width: 100%; display: block; }
     .p60-capa__conteudo, .p60-capa p { max-width: none; }
 }
 @media (max-width: 480px) {
-    .p60-capa__acoes .btn, .p60-fecho__acoes .btn { width: 100%; justify-content: center; }
+    .p60-capa__acoes .btn { width: 100%; justify-content: center; }
     .p60-passos li { flex-direction: column; gap: 10px; }
 }
 
