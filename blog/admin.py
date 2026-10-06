@@ -80,7 +80,16 @@ class ArtigoForm(forms.ModelForm):
             'data_publicacao': CALENDARIO,
             'introducao': forms.Textarea(attrs={'rows': 6}),
             'resumo': forms.Textarea(attrs={'rows': 2}),
+            # Enter separa o título do subtítulo
+            'titulo': forms.Textarea(attrs={'rows': 2, 'class': 'vLargeTextField'}),
         }
+
+    def clean_titulo(self):
+        # uma linha para o título e, se houver, uma para o subtítulo; linhas em branco somem
+        linhas = [l.strip() for l in self.cleaned_data['titulo'].splitlines() if l.strip()]
+        if not linhas:
+            raise forms.ValidationError('Escreva o título.')
+        return '\n'.join([linhas[0], ' '.join(linhas[1:])]) if len(linhas) > 1 else linhas[0]
 
 
 @admin.register(Artigo)

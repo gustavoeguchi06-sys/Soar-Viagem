@@ -90,12 +90,14 @@
         <h3>Artigos mais lidos</h3>
         <ul class="blog-lidos">
           {% for a in mais_lidos|slice:":3" %}
-          <li><a href="{{ a.get_absolute_url }}"><span class="blog-lidos__thumb {% if a.capa %}tem-foto{% else %}ph{% endif %}">{% if a.capa %}<img src="{{ a.capa.url }}" alt="" loading="lazy">{% endif %}</span><span><b>{{ a.titulo }}</b><small>{{ a.minutos_de_leitura }} min de leitura</small></span></a></li>
+          <li><a href="{{ a.get_absolute_url }}"><span class="blog-lidos__thumb {% if a.capa %}tem-foto{% else %}ph{% endif %}">{% if a.capa %}<img src="{{ a.capa.url }}" alt="" loading="lazy">{% endif %}</span><span><b>{{ a.titulo_principal }}</b><small>{{ a.minutos_de_leitura }} min de leitura</small></span></a></li>
           {% empty %}
           <li><small>Os mais lidos aparecem aqui.</small></li>
           {% endfor %}
         </ul>
       </div>
+
+      {% include 'blog/_instagram.html' %}
     </aside>
   </div>
 

@@ -145,6 +145,21 @@ class ViagensDoArtigoTests(BlogBase):
         self.assertIn('Ver a viagem para Jalapão', html)
         self.assertIn('Ver a viagem para Bonito', html)
 
+    def test_enter_no_titulo_vira_subtitulo(self):
+        from ..admin import ArtigoForm
+        form = ArtigoForm()
+        form.cleaned_data = {'titulo': 'Jalapão\r\n\r\n  guia completo  \r\n'}
+        self.assertEqual(form.clean_titulo(), 'Jalapão\nguia completo')
+
+        a = self.artigo('teste-sub', titulo='Jalapão\nguia completo para sua viagem')
+        html = self.client.get('/blog/teste-sub/').content.decode()
+        self.assertIn('<h1>Jalapão<span class="blog-hero__subtitulo">guia completo para sua viagem'
+                      '</span></h1>', html)
+        self.assertIn('<title>Jalapão: guia completo para sua viagem | Blog Soar</title>', html)
+        # no cartão da lista, só a primeira linha
+        self.assertIn('<h3>Jalapão</h3>', self.client.get('/blog/').content.decode())
+        self.assertEqual(a.slug, 'teste-sub')
+
     def test_grade_do_instagram_tem_fotos(self):
         from unittest import mock
         self.artigo('teste-insta')
@@ -152,6 +167,10 @@ class ViagensDoArtigoTests(BlogBase):
                 'legenda': ''}
         with mock.patch('destinations.instagram.ultimas_fotos', return_value=[foto] * 9):
             html = self.client.get('/blog/teste-insta/').content.decode()
+        self.assertEqual(html.count('src="https://cdn.exemplo/insta.jpg"'), 6)
+        # a lista do blog tem o mesmo quadro
+        with mock.patch('destinations.instagram.ultimas_fotos', return_value=[foto] * 9):
+            html = self.client.get('/blog/').content.decode()
         self.assertEqual(html.count('src="https://cdn.exemplo/insta.jpg"'), 6)
         # sem Instagram: fotos das viagens no lugar dos quadrados vazios
         with mock.patch('destinations.instagram.ultimas_fotos', return_value=[]):
