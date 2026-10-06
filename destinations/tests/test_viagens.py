@@ -92,6 +92,13 @@ class PaginasDeErroTests(TestCase):
         self.assertIn('Algo deu errado aqui', render_to_string('500.html'))
 
 
+class TopoTests(TestCase):
+    def test_visitante_sem_botao_verde_e_sem_comentario_vazando(self):
+        html = self.client.get('/').content.decode()
+        self.assertNotIn('btn--reservar', html)
+        self.assertNotIn('{#', html)
+
+
 class RecomendacoesTests(TestCase):
     def test_recomendacoes_vem_depois_do_faq(self):
         destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
