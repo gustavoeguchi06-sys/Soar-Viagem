@@ -22,7 +22,7 @@ from django.db import models
 from django.utils.html import format_html
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
-                     DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, NumeroSobre,
+                     DiferencialSobre, FotoSobre, FotoSoar60, ImagemHospedagem, Interessado, NumeroSobre,
                      PaginaSobre, PerguntaFrequente, PrecoQuarto, Saida, ServicoViagem,
                      SlideInicio, TextoBanner, VideoDestino, VideoSoar60)
 
@@ -575,6 +575,13 @@ class InteressadoAdmin(admin.ModelAdmin):
 class VideoSoar60Admin(admin.ModelAdmin):
     """Os vídeos da página do Soar 60+ (/soar-60/)."""
 
+    # o quadro "Foto do Soar 60+" no topo da lista
+    change_list_template = 'admin/destinations/videosoar60/change_list.html'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {**(extra_context or {}), 'foto_60': FotoSoar60.para_editar()}
+        return super().changelist_view(request, extra_context)
+
     list_display = ['titulo', 'ordem', 'ativo']
     list_editable = ['ordem', 'ativo']
     fields = ['titulo', 'arquivo', 'previa', 'capa', 'ordem', 'ativo']
@@ -583,6 +590,44 @@ class VideoSoar60Admin(admin.ModelAdmin):
     @admin.display(description='Vídeo enviado')
     def previa(self, video):
         return previa_video(video.arquivo)
+
+
+@admin.register(FotoSoar60)
+class FotoSoar60Admin(admin.ModelAdmin):
+    """A foto da capa do Soar 60+. Só existe uma, então a tela abre direto nela."""
+
+    fields = ['foto', 'previa_foto']
+    readonly_fields = ['previa_foto']
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        return redirect(reverse('admin:destinations_fotosoar60_change',
+                                args=[FotoSoar60.para_editar().pk]))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def response_change(self, request, obj):
+        # depois de salvar, volta para os vídeos do Soar 60+, que é onde a aba fica
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        if '_continue' in request.POST:
+            return super().response_change(request, obj)
+        messages.success(request, 'Foto do Soar 60+ salva.')
+        return redirect(reverse('admin:destinations_videosoar60_changelist'))
+
+    @admin.display(description='Como fica a foto')
+    def previa_foto(self, registro):
+        if not registro.foto:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto: o site usa a ilustração das montanhas.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">',
+                           registro.foto.url)
 
 
 # --------------------------------------------------------------------------- #

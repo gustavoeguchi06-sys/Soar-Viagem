@@ -11,7 +11,7 @@ from django.urls import reverse
 from blog.models import Artigo, Categoria, Secao
 from soar.videos import validar_video
 
-from ..models import Destino, SlideInicio, VideoDestino, VideoSoar60
+from ..models import Destino, FotoSoar60, SlideInicio, VideoDestino, VideoSoar60
 
 PASTA = tempfile.mkdtemp()
 # o começo de um MP4 de verdade: a caixa "ftyp"
@@ -80,6 +80,31 @@ class VideosTests(TestCase):
         self.assertNotContains(resposta, 'Rascunho')
         VideoSoar60.objects.all().delete()
         self.assertNotContains(self.client.get(reverse('destinations:soar_60')), 'id="videos"')
+
+    def test_foto_do_soar_60_na_pagina_e_na_home(self):
+        # sem foto no painel, as duas usam a ilustração
+        self.assertContains(self.client.get(reverse('destinations:soar_60')), 'img/soar-60.svg')
+        self.assertContains(self.client.get(reverse('destinations:home')), 'img/soar-60.svg')
+        registro = FotoSoar60.objects.create(foto=_foto())
+        for pagina in ('destinations:soar_60', 'destinations:home'):
+            resposta = self.client.get(reverse(pagina))
+            self.assertContains(resposta, registro.foto.url)
+            self.assertNotContains(resposta, 'img/soar-60.svg')
+
+    def test_painel_troca_a_foto_do_soar_60(self):
+        from contas.dois_fatores import CHAVE_OK
+        dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
+        self.client.force_login(dono)
+        sessao = self.client.session
+        sessao[CHAVE_OK] = dono.pk
+        sessao.save()
+        lista = self.client.get(reverse('admin:destinations_videosoar60_changelist'))
+        self.assertContains(lista, 'Trocar a foto')
+        # a aba abre direto no único registro, sem lista nem "adicionar"
+        resposta = self.client.get(reverse('admin:destinations_fotosoar60_changelist'))
+        editar = reverse('admin:destinations_fotosoar60_change', args=[FotoSoar60.objects.get().pk])
+        self.assertRedirects(resposta, editar)
+        self.assertContains(self.client.get(editar), 'name="foto"')
 
     def test_painel_tem_os_campos_de_video(self):
         from contas.dois_fatores import CHAVE_OK

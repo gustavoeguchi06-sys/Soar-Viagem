@@ -507,6 +507,35 @@ class VideoSoar60(models.Model):
         return self.titulo
 
 
+class FotoSoar60(models.Model):
+    """A foto do Soar 60+: capa da página /soar-60/ e fundo do cartão 60+ da home. Existe uma só."""
+
+    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='soar60/',
+                             blank=True, null=True,
+                             help_text='Foto deitada e grande (1920 x 1080 px). O texto fica do '
+                                       'lado esquerdo, então o assunto da foto fica melhor à '
+                                       'direita. Sem foto, usa a ilustração das montanhas.')
+
+    class Meta:
+        verbose_name = 'Foto do Soar 60+'
+        verbose_name_plural = 'Foto do Soar 60+'
+
+    def __str__(self):
+        return 'Foto do Soar 60+'
+
+    @classmethod
+    def url_atual(cls):
+        """A foto enviada no painel ou, sem foto, a ilustração padrão."""
+        from django.templatetags.static import static
+        registro = cls.objects.first()
+        return registro.foto.url if registro and registro.foto else static('img/soar-60.svg')
+
+    @classmethod
+    def para_editar(cls):
+        """O registro que o painel edita, criado na primeira vez que o dono abre."""
+        return cls.objects.first() or cls.objects.create()
+
+
 class PrecoQuarto(models.Model):
     """O preço por pessoa de um tipo de quarto da viagem.
 

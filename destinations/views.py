@@ -14,7 +14,7 @@ from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
-from .models import MESES, Destino, PaginaSobre, Saida, VideoSoar60
+from .models import MESES, Destino, FotoSoar60, PaginaSobre, Saida, VideoSoar60
 
 log = logging.getLogger('soar.seguranca')
 
@@ -120,6 +120,7 @@ def soar_60(request):
         'viagens': viagens[:POR_PAGINA],
         'escolhidas': escolhidas,
         'videos': VideoSoar60.objects.filter(ativo=True),
+        'foto_capa': FotoSoar60.url_atual(),
     })
 
 

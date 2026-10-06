@@ -1,0 +1,19 @@
+{% extends "admin/change_list.html" %}
+{% comment %}
+Lista dos vídeos do Soar 60+ com, no topo, a foto da capa: o dono troca a foto
+no mesmo lugar em que cuida do resto do Soar 60+.
+{% endcomment %}
+
+{% block search %}
+<div class="module texto-banner">
+    <h2>Foto do Soar 60+</h2>
+    <p>Aparece no topo da página Soar 60+ e no cartão "Viajar não tem idade" da página inicial.</p>
+    {% if foto_60.foto %}
+    <p><img class="miniatura miniatura--grande" src="{{ foto_60.foto.url }}" alt=""></p>
+    {% else %}
+    <p>Sem foto: o site usa a ilustração das montanhas.</p>
+    {% endif %}
+    <p><a class="button" href="{% url 'admin:destinations_fotosoar60_change' foto_60.pk %}">Trocar a foto</a></p>
+</div>
+{{ block.super }}
+{% endblock %}
