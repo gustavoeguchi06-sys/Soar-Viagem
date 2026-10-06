@@ -155,6 +155,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'contas.context_processors.google_login',
                 'contas.context_processors.sistema_reservas',
+                'contas.context_processors.site_em_andamento',
             ],
         },
     },
@@ -317,6 +318,11 @@ GOOGLE_CLIENT_SECRET = os.environ.get('SOAR_GOOGLE_CLIENT_SECRET', '').strip()
 # ele passar a ter HTTPS, troque o endereço aqui pelo https. Vazio esconde o botão.
 SISTEMA_RESERVAS_URL = os.environ.get('SOAR_RESERVAS_URL',
                                       'http://www.reservassoar.com.br/login').strip()
+
+# Tela "Site em andamento!" por cima de todas as páginas, enquanto o dono
+# termina de arrumar o site. Ele e a equipe (quem entra no painel) não veem.
+# Ligar: SOAR_SITE_EM_ANDAMENTO=1 no .env e reiniciar. Tirar: apagar a linha.
+SITE_EM_ANDAMENTO = _ligado('SOAR_SITE_EM_ANDAMENTO', False)
 
 # --------------------------------------------------------------------------- #
 # Contas
