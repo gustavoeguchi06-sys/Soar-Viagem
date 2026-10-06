@@ -330,16 +330,16 @@ class SoAgenciaEEquipeEntramTests(TestCase):
             self.assertNotContains(resposta, 'Deixe sua avaliação')
 
 
-class SiteEmAndamentoTests(TestCase):
-    """Tela "Site em andamento!" (settings.SITE_EM_ANDAMENTO): todos veem, menos o dono."""
+class SiteEmConstrucaoTests(TestCase):
+    """Tela "Site em Construção" (settings.SITE_EM_CONSTRUCAO): todos veem, menos o dono."""
 
-    TITULO = 'Site em andamento!'
+    TITULO = 'Site em Construção'
 
-    @override_settings(SITE_EM_ANDAMENTO=False)
+    @override_settings(SITE_EM_CONSTRUCAO=False)
     def test_desligada_nao_aparece(self):
         self.assertNotContains(self.client.get('/'), self.TITULO)
 
-    @override_settings(SITE_EM_ANDAMENTO=True)
+    @override_settings(SITE_EM_CONSTRUCAO=True)
     def test_ligada_aparece_para_visitante_e_agencia_com_o_botao_das_reservas(self):
         resposta = self.client.get('/')
         self.assertContains(resposta, self.TITULO)
@@ -348,7 +348,7 @@ class SiteEmAndamentoTests(TestCase):
         self.client.force_login(agente)
         self.assertContains(self.client.get('/blog/'), self.TITULO)
 
-    @override_settings(SITE_EM_ANDAMENTO=True)
+    @override_settings(SITE_EM_CONSTRUCAO=True)
     def test_ligada_o_dono_nao_ve(self):
         dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
         self.client.force_login(dono)
