@@ -96,6 +96,38 @@ def _viagens(hoje):
     return viagens
 
 
+# Quantos cards cabem no carrossel "Próximas experiências".
+MAXIMO_DE_SAIDAS = 24
+
+
+def _por_saida(viagens, hoje):
+    """Um card por saída: o mesmo pacote com 4 datas vira 4 cards, em ordem de data.
+
+    Cada card leva a situação da própria data (disponível, últimas vagas ou
+    esgotado) e o link já com a data marcada na página da viagem. Pacote sem
+    nenhuma data futura entra uma vez só, no fim, como "Em breve".
+    """
+    cards = []
+    for v in viagens:
+        url = v['destino'].get_absolute_url()
+        if not v['destino'].futuras:
+            cards.append({**v, 'link': url})
+            continue
+        for saida in v['destino'].futuras:
+            if saida.esgotada:
+                chave, rotulo = 'esgotado', 'Esgotado'
+            elif saida.vagas is not None and saida.vagas <= 5:
+                chave, rotulo = 'ultimas', 'Últimas vagas'
+            else:
+                chave, rotulo = 'disponivel', 'Disponível'
+            cards.append({**v, 'proxima': saida, 'dias': dias_da_saida(saida),
+                          'situacao': chave, 'situacao_rotulo': rotulo,
+                          'link': '{}?saida={}#reservar'.format(url, saida.pk)})
+    cards.sort(key=lambda c: (c['proxima'] is None,
+                              c['proxima'].data_ida if c['proxima'] else hoje, c['nome']))
+    return cards[:MAXIMO_DE_SAIDAS]
+
+
 def _meses_com_saida(viagens):
     """Os meses do "Quando?": só os que têm saída, com o ano ("Março de 2027").
 
@@ -168,8 +200,7 @@ def montar_inicio():
         slides = [{'url': static(f), 'legenda': legenda} for f, legenda in SLIDES_PADRAO]
 
     viagens = _viagens(hoje)
-    experiencias = sorted(viagens, key=lambda v: (
-        v['proxima'] is None, v['proxima'].data_ida if v['proxima'] else hoje, v['nome']))
+    experiencias = _por_saida(viagens, hoje)
     amados = sorted(viagens, key=lambda v: (-v['n_avaliacoes'], -(v['nota'] or 0),
                                             not v['destaque'], v['nome']))[:6]
 

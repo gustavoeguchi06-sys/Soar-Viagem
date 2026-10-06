@@ -446,3 +446,38 @@ class NumeroDoDiaTests(TestCase):
         self.assertIn('<span class="dia__num">Dia 2</span> <span class="dia__texto"> '
                       '<b>Pedra Furada</b>', html)
         self.assertNotIn('Dia 1: Recepção', html)
+
+
+class UmCardPorSaidaTests(TestCase):
+    """Na página inicial, o mesmo pacote aparece uma vez para cada data de saída."""
+
+    def test_um_card_por_data_em_ordem(self):
+        hoje = timezone.localdate()
+        jalapao = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.')
+        minas = Destino.objects.create(nome='Minas', slug='minas', descricao='Cidades.')
+        breve = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        s1 = Saida.objects.create(destino=jalapao, data_ida=hoje + timedelta(days=60),
+                                  data_volta=hoje + timedelta(days=65), vagas=10)
+        Saida.objects.create(destino=minas, data_ida=hoje + timedelta(days=90),
+                             data_volta=hoje + timedelta(days=93), vagas=3)
+        s3 = Saida.objects.create(destino=jalapao, data_ida=hoje + timedelta(days=120),
+                                  data_volta=hoje + timedelta(days=125), vagas=0)
+        cards = self.client.get('/').context['inicio']['experiencias']
+        self.assertEqual([(c['nome'], c['situacao']) for c in cards],
+                         [('Jalapão', 'disponivel'), ('Minas', 'ultimas'),
+                          ('Jalapão', 'esgotado'), ('Bonito', 'breve')])
+        self.assertEqual(cards[0]['link'], '/destinos/jalapao/?saida={}#reservar'.format(s1.pk))
+        self.assertEqual(cards[2]['proxima'], s3)
+        self.assertEqual(cards[3]['link'], breve.get_absolute_url())
+
+    def test_link_do_card_marca_a_data(self):
+        hoje = timezone.localdate()
+        destino = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='Dunas.')
+        Saida.objects.create(destino=destino, data_ida=hoje + timedelta(days=60),
+                             data_volta=hoje + timedelta(days=65), vagas=10)
+        segunda = Saida.objects.create(destino=destino, data_ida=hoje + timedelta(days=90),
+                                       data_volta=hoje + timedelta(days=95), vagas=10)
+        resposta = self.client.get(destino.get_absolute_url(), {'saida': segunda.pk})
+        self.assertEqual(resposta.context['saida_marcada'], str(segunda.pk))
+        inventada = self.client.get(destino.get_absolute_url(), {'saida': '999'})
+        self.assertNotEqual(inventada.context['saida_marcada'], '999')
