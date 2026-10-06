@@ -348,6 +348,19 @@ class SiteEmConstrucaoTests(TestCase):
         self.client.force_login(agente)
         self.assertContains(self.client.get('/blog/'), self.TITULO)
 
+    @override_settings(SITE_EM_CONSTRUCAO=True, SITE_EM_CONSTRUCAO_ACESSO='codigo-secreto')
+    def test_login_so_aparece_pelo_link_secreto(self):
+        entrar = reverse('contas:entrar')
+        self.assertContains(self.client.get(entrar), self.TITULO)
+        self.assertContains(self.client.get(entrar, {'acesso': 'chute'}), self.TITULO)
+        self.assertNotContains(self.client.get(entrar, {'acesso': 'codigo-secreto'}), self.TITULO)
+        # o código só abre o login, não o resto do site
+        self.assertContains(self.client.get('/', {'acesso': 'codigo-secreto'}), self.TITULO)
+
+    @override_settings(SITE_EM_CONSTRUCAO=True, SITE_EM_CONSTRUCAO_ACESSO='')
+    def test_sem_codigo_configurado_o_login_fica_coberto(self):
+        self.assertContains(self.client.get(reverse('contas:entrar'), {'acesso': ''}), self.TITULO)
+
     @override_settings(SITE_EM_CONSTRUCAO=True)
     def test_ligada_o_dono_nao_ve(self):
         dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
