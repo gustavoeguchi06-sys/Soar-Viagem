@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from . import instagram
-from .models import MESES, Destino, FotoSoar60, ImagemDestino, Saida, SlideInicio, TextoBanner
+from .models import MESES, Destino, ImagemDestino, PaginaSoar60, Saida, SlideInicio, TextoBanner
 
 # Fotos do carrossel enquanto o dono não cadastra as dele no painel.
 SLIDES_PADRAO = [
@@ -190,6 +190,7 @@ def montar_inicio():
 
     hoje = timezone.localdate()
     banner = TextoBanner.atual()
+    pagina_60 = PaginaSoar60.atual()
 
     # 'url' é sempre a foto: com vídeo, ela vira a capa (e segue servindo aos
     # outros blocos da página que usam as fotos do topo)
@@ -226,8 +227,9 @@ def montar_inicio():
         'titulo': banner.titulo,
         'subtitulo': banner.subtitulo,
         'slides': slides,
-        # aba Soar 60+ > Foto do Soar 60+
-        'foto_60': FotoSoar60.url_atual(),
+        # o cartão Soar 60+ (aba Soar 60+ do painel)
+        'soar60': {'titulo': pagina_60.titulo, 'texto': pagina_60.texto_home,
+                   'foto': pagina_60.foto_url},
         'nomes': [v['curto'] for v in sorted(viagens, key=lambda v: (not v['destaque'], v['nome']))][:6],
         'meses': _meses_com_saida(viagens),
         'estilos': estilos,

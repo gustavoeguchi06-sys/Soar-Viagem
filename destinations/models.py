@@ -507,33 +507,105 @@ class VideoSoar60(models.Model):
         return self.titulo
 
 
-class FotoSoar60(models.Model):
-    """A foto do Soar 60+: capa da página /soar-60/ e fundo do cartão 60+ da home. Existe uma só."""
+class PaginaSoar60(models.Model):
+    """A página do Soar 60+ (/soar-60/) e o cartão 60+ da home. Existe uma só: o painel abre direto nela."""
 
-    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='soar60/',
+    titulo = models.CharField('Título da capa', max_length=80, default='Viajar não tem idade.',
+                              help_text='Vale também para o cartão do Soar 60+ na página inicial.')
+    subtitulo = models.TextField(
+        'Frase da capa', max_length=300, blank=True,
+        default='Viagens em grupo com ritmo tranquilo, guia do começo ao fim e hospedagem bem '
+                'localizada, para quem quer conhecer novos lugares com conforto, segurança e '
+                'companhia.')
+    foto = models.ImageField(validators=[validar_foto], verbose_name='Foto da capa', upload_to='soar60/',
                              blank=True, null=True,
                              help_text='Foto deitada e grande (1920 x 1080 px). O texto fica do '
                                        'lado esquerdo, então o assunto da foto fica melhor à '
                                        'direita. Sem foto, usa a ilustração das montanhas.')
+    texto_home = models.CharField(
+        'Frase do cartão na página inicial', max_length=200, blank=True,
+        default='Viagens pensadas para quem quer conhecer novos lugares com conforto, segurança '
+                'e companhia.',
+        help_text='O cartão "Soar 60+" da página inicial usa o título e a foto da capa e esta frase.')
+    diferenciais_titulo = models.CharField('Título', max_length=80,
+                                           default='O que muda numa viagem 60+')
+    diferenciais_intro = models.CharField(
+        'Frase embaixo do título', max_length=300, blank=True,
+        default='É o mesmo destino, organizado de outro jeito. O que a gente faz diferente '
+                'nessas saídas:')
+    viagens_titulo = models.CharField('Título das viagens', max_length=80, default='Viagens 60+')
+    videos_titulo = models.CharField('Título dos vídeos', max_length=80,
+                                     default='Veja como é viajar com a gente')
+    passos_titulo = models.CharField('Título', max_length=80, default='Como funciona')
+    perguntas_titulo = models.CharField('Título', max_length=80,
+                                        default='Perguntas de quem viaja com a gente')
 
     class Meta:
-        verbose_name = 'Foto do Soar 60+'
-        verbose_name_plural = 'Foto do Soar 60+'
+        verbose_name = 'Página Soar 60+'
+        verbose_name_plural = 'Página Soar 60+'
 
     def __str__(self):
-        return 'Foto do Soar 60+'
+        return 'Página Soar 60+'
 
     @classmethod
-    def url_atual(cls):
+    def atual(cls):
+        return cls.objects.first() or cls.objects.create()
+
+    @property
+    def foto_url(self):
         """A foto enviada no painel ou, sem foto, a ilustração padrão."""
         from django.templatetags.static import static
-        registro = cls.objects.first()
-        return registro.foto.url if registro and registro.foto else static('img/soar-60.svg')
+        return self.foto.url if self.foto else static('img/soar-60.svg')
 
-    @classmethod
-    def para_editar(cls):
-        """O registro que o painel edita, criado na primeira vez que o dono abre."""
-        return cls.objects.first() or cls.objects.create()
+
+class ItemSoar60(models.Model):
+    """Um cartão de "O que muda numa viagem 60+"."""
+
+    pagina = models.ForeignKey(PaginaSoar60, on_delete=models.CASCADE, related_name='itens')
+    icone = models.CharField('Ícone', max_length=30, choices=ICONES, default='ic-check')
+    titulo = models.CharField('Título', max_length=60)
+    texto = models.TextField('Texto', max_length=300, blank=True)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Cartão'
+        verbose_name_plural = 'Cartões de "O que muda"'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.titulo
+
+
+class PassoSoar60(models.Model):
+    """Um passo de "Como funciona". O número sai da ordem."""
+
+    pagina = models.ForeignKey(PaginaSoar60, on_delete=models.CASCADE, related_name='passos')
+    titulo = models.CharField('Título', max_length=80)
+    texto = models.TextField('Texto', max_length=400, blank=True)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Passo'
+        verbose_name_plural = 'Passos de "Como funciona"'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.titulo
+
+
+class PerguntaSoar60(models.Model):
+    pagina = models.ForeignKey(PaginaSoar60, on_delete=models.CASCADE, related_name='perguntas')
+    pergunta = models.CharField('Pergunta', max_length=160)
+    resposta = models.TextField('Resposta', max_length=800)
+    ordem = models.PositiveSmallIntegerField('Ordem', default=0)
+
+    class Meta:
+        verbose_name = 'Pergunta'
+        verbose_name_plural = 'Perguntas'
+        ordering = ['ordem', 'id']
+
+    def __str__(self):
+        return self.pergunta
 
 
 class PrecoQuarto(models.Model):
