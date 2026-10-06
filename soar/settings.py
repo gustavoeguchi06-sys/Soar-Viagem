@@ -323,6 +323,9 @@ SISTEMA_RESERVAS_URL = os.environ.get('SOAR_RESERVAS_URL',
 # termina de arrumar o site. Ele e a equipe (quem entra no painel) não veem.
 # Ligar: SOAR_SITE_EM_CONSTRUCAO=1 no .env e reiniciar. Tirar: apagar a linha.
 SITE_EM_CONSTRUCAO = _ligado('SOAR_SITE_EM_CONSTRUCAO', False)
+# Link secreto para o login com a tela ligada: /entrar/?acesso=<este código>.
+# Só quem tem o link vê a página de login (o dono e quem cuida do site).
+SITE_EM_CONSTRUCAO_ACESSO = os.environ.get('SOAR_SITE_EM_CONSTRUCAO_ACESSO', '').strip()
 
 # --------------------------------------------------------------------------- #
 # Contas
