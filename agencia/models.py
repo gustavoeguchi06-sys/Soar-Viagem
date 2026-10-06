@@ -130,12 +130,9 @@ class Orcamento(models.Model):
     @property
     def acomodacao_texto(self):
         """'2 quartos Duplo (Twin), 3 pessoas; 1 quarto Single, 1 pessoa'"""
-        linhas = self.linhas_de_quartos
-        if not linhas:   # orçamento antigo: um tipo só
-            return self.get_acomodacao_display()
-        return '; '.join('{} quarto{} {}, {} pessoa{}'.format(
-            l['quartos'], 's' if l['quartos'] != 1 else '', l['nome'],
-            l['pessoas'], 's' if l['pessoas'] != 1 else '') for l in linhas)
+        from destinations.escolha_quartos import texto_dos_quartos
+        # orçamento antigo (sem a lista de quartos): um tipo só
+        return texto_dos_quartos(self.quartos) or self.get_acomodacao_display()
 
     @property
     def vencido(self):

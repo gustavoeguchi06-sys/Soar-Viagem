@@ -283,6 +283,29 @@ class SaibaMaisTests(TestCase):
         self.assertEqual((pedido.destino, pedido.whatsapp, pedido.cep),
                          (self.destino, '(11) 98888-7777', '01310-100'))
 
+    def test_vai_junto_a_data_e_os_quartos(self):
+        from ..models import Interessado, PrecoQuarto, Saida
+        PrecoQuarto.objects.create(destino=self.destino, tipo='duplo', preco=3000)
+        PrecoQuarto.objects.create(destino=self.destino, tipo='triplo', preco=2800)
+        hoje = timezone.localdate()
+        saida = Saida.objects.create(destino=self.destino, data_ida=hoje + timedelta(days=30),
+                                     data_volta=hoje + timedelta(days=34), quartos_triplo=1)
+        pagina = self.client.get(self.destino.get_absolute_url()).content.decode()
+        self.assertIn('data-quartos-orcamento', pagina)
+        self.assertIn('name="quartos_triplo"', pagina)
+        # passou da lotação: volta com o erro e não grava
+        resposta = self.client.post(self.url, self.dados(saida=saida.pk, quartos_triplo=1,
+                                                         pessoas_triplo=4))
+        self.assertContains(resposta, 'no máximo 3.')
+        self.assertFalse(Interessado.objects.exists())
+        self.client.post(self.url, self.dados(saida=saida.pk, quartos_duplo=2, pessoas_duplo=3,
+                                              quartos_triplo=1, pessoas_triplo=2))
+        pedido = Interessado.objects.get()
+        self.assertEqual(pedido.saida_texto, saida.texto)
+        self.assertEqual(pedido.pessoas, 5)
+        self.assertEqual(pedido.quartos_texto,
+                         '2 quartos Duplo (Twin), 3 pessoas; 1 quarto Triplo, 2 pessoas')
+
     def test_campo_errado_volta_com_o_erro_e_nao_grava(self):
         from ..models import Interessado
         resposta = self.client.post(self.url, self.dados(cep='123'))

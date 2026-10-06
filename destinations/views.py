@@ -156,7 +156,7 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         'hospedagens': destino.hospedagens.all(),
         'avaliacoes': avaliacoes,
         'viagem': viagem,
-        'form_interesse': form_interesse or InteresseForm(),
+        'form_interesse': form_interesse or InteresseForm(destino=destino),
         'interesse_enviado': enviado,
         # avaliação do visitante: com erro, o pop-up já abre mostrando o que corrigir
         'form_avaliacao': form_avaliacao or AvaliacaoForm(),
@@ -179,13 +179,19 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         from agencia.models import AVISO
 
         if form_orcamento is None:
-            inicial = {}
+            inicial, quartos = {}, None
             pk = request.GET.get('interessado', '')
             interessado = agencia.interessados.filter(pk=pk).first() if pk.isdigit() else None
             if interessado:
-                inicial.update(cliente_nome=interessado.nome,
+                # o orçamento já vem com o que a pessoa pediu: data e quartos
+                inicial.update(cliente_nome=interessado.nome, cliente_email=interessado.email,
                                cliente_telefone=interessado.whatsapp)
-            form_orcamento = OrcamentoViagemForm(destino=destino, initial=inicial)
+                quartos = interessado.quartos or None
+                if interessado.saida_id and any(str(s['id']) == str(interessado.saida_id)
+                                                 and not s['esgotada'] for s in viagem['saidas']):
+                    contexto['saida_marcada'] = str(interessado.saida_id)
+            form_orcamento = OrcamentoViagemForm(destino=destino, initial=inicial,
+                                                 quartos_iniciais=quartos)
             saida = request.GET.get('saida', '')
             if saida in dict(form_orcamento.fields['saida'].choices) and saida:
                 contexto['saida_marcada'] = saida
@@ -200,6 +206,12 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
             aviso_orcamento=AVISO,
         )
 
+    # quem escolhe quartos no card: a agência montando orçamento, ou o visitante
+    # (sem login) no "Saiba mais"
+    if contexto.get('form_orcamento') and not contexto.get('orcamento_criado'):
+        contexto['form_quartos'] = contexto['form_orcamento']
+    elif not request.user.is_authenticated and not enviado:
+        contexto['form_quartos'] = contexto['form_interesse']
     return render(request, 'destinations/detalhe.html', contexto)
 
 
@@ -212,7 +224,7 @@ def interesse(request, slug):
     lista com pedido falso.
     """
     destino = get_object_or_404(Destino, slug=slug)
-    form = InteresseForm(request.POST)
+    form = InteresseForm(request.POST, destino=destino)
     if not form.is_valid():
         return pagina_da_viagem(request, destino, form_interesse=form)
 

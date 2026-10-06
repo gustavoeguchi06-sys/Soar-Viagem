@@ -405,6 +405,12 @@ class Interessado(models.Model):
     email = models.EmailField('E-mail')
     whatsapp = models.CharField('WhatsApp', max_length=20)
     cep = models.CharField('CEP', max_length=9)
+    # o que a pessoa marcou no card: a data e os quartos (destinations/escolha_quartos.py)
+    saida = models.ForeignKey('Saida', on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name='interessados', verbose_name='Data de saída')
+    saida_texto = models.CharField('Data escolhida', max_length=120, blank=True)
+    quartos = models.JSONField('Quartos', default=list, blank=True)
+    pessoas = models.PositiveSmallIntegerField('Adultos', null=True, blank=True)
     agencias = models.ManyToManyField(
         'contas.PerfilAgente', blank=True, related_name='interessados',
         verbose_name='Enviar para as agências',
@@ -419,6 +425,18 @@ class Interessado(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def save(self, *args, **kwargs):
+        # a data fica em texto: se a saída for apagada, o pedido continua dizendo qual era
+        if self.saida_id:
+            self.saida_texto = self.saida.texto
+        super().save(*args, **kwargs)
+
+    @property
+    def quartos_texto(self):
+        """'2 quartos Duplo (Twin), 3 pessoas; ...' ou '' (pedido antigo, sem quartos)."""
+        from .escolha_quartos import texto_dos_quartos
+        return texto_dos_quartos(self.quartos)
 
 
 class TextoBanner(models.Model):

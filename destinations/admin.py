@@ -521,14 +521,20 @@ class InteressadoAdmin(admin.ModelAdmin):
     Pessoa física só o dono vê (superusuário), e é ele quem escolhe para quais
     agências mandar cada uma. Outro usuário da equipe não enxerga esta lista.
     """
-    list_display = ['nome', 'destino', 'whatsapp_link', 'email', 'cep', 'enviado_para',
-                    'criado_em']
+    list_display = ['nome', 'destino', 'saida_texto', 'pedido', 'whatsapp_link', 'email', 'cep',
+                    'enviado_para', 'criado_em']
     list_filter = ['destino', ('agencias', admin.EmptyFieldListFilter), 'agencias']
     search_fields = ['nome', 'email', 'whatsapp', 'cep']
     date_hierarchy = 'criado_em'
-    readonly_fields = ['destino', 'nome', 'email', 'whatsapp', 'cep', 'criado_em']
-    fields = ['destino', 'nome', 'email', 'whatsapp', 'cep', 'criado_em', 'agencias']
+    readonly_fields = ['destino', 'saida_texto', 'pedido', 'nome', 'email', 'whatsapp', 'cep',
+                       'criado_em']
+    fields = ['destino', 'saida_texto', 'pedido', 'nome', 'email', 'whatsapp', 'cep', 'criado_em',
+              'agencias']
     list_per_page = 30
+
+    @admin.display(description='Quartos pedidos')
+    def pedido(self, interessado):
+        return interessado.quartos_texto or '-'
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('destino').prefetch_related(
