@@ -184,15 +184,112 @@
         acoms.forEach(function (acom) {
             var radio = acom.querySelector('input');
             var texto = acom.querySelector('[data-vagas-quarto]');
-            var n = quartos[radio.value];
+            var n = quartos[acom.dataset.tipo || radio.value];
             var esgotado = n === 0;
             acom.classList.toggle('acom--esgotada', esgotado);
-            radio.disabled = esgotado;
-            if (esgotado && radio.checked) { radio.checked = false; }
+            if (acom.dataset.tipo) {
+                limitarQuartos(acom, n);
+            } else {
+                radio.disabled = esgotado;
+                if (esgotado && radio.checked) { radio.checked = false; }
+            }
             if (!texto) { return; }
             texto.hidden = n === undefined;
             texto.textContent = n === undefined ? '' : esgotado ? 'Esgotado nesta data'
                 : n === 1 ? 'Último quarto nesta data' : n + ' quartos nesta data';
+        });
+    }
+
+    /* ---------- Orçamento: quartos e pessoas de cada tipo ---------- */
+    // Cada quarto leva de 1 pessoa até a lotação dele (Duplo 2, Triplo 3). Ao
+    // pôr mais um quarto, as pessoas sobem junto, já lotando o quarto novo; dá
+    // para baixar depois. O servidor confere tudo de novo (agencia/forms.py).
+    var MAX_ADULTOS = 60;
+    var caixaQuartos = document.querySelector('[data-quartos-orcamento]');
+
+    function campoDe(acom, papel) {
+        return acom.querySelector('[data-contador="' + papel + '"] input');
+    }
+
+    function numero(campo) {
+        var n = parseInt(campo && campo.value, 10);
+        return isNaN(n) ? 0 : n;
+    }
+
+    // o limite de quartos da data marcada (undefined = sem limite; 0 = esgotado)
+    function limitarQuartos(acom, n) {
+        var q = campoDe(acom, 'quartos');
+        if (!q) { return; }
+        var max = n === undefined ? MAX_ADULTOS : n;
+        q.max = max;
+        q.disabled = max === 0;
+        if (numero(q) > max) { q.value = max; }
+        ajustarPessoas(acom, null);
+    }
+
+    // mantém as pessoas entre 1 por quarto e a lotação; `antes` = quartos antes do clique
+    function ajustarPessoas(acom, antes) {
+        var q = campoDe(acom, 'quartos');
+        var p = campoDe(acom, 'pessoas');
+        var lotacao = parseInt(acom.dataset.lotacao, 10) || 1;
+        var quartos = numero(q);
+        if (!p) { atualizarTotal(); return; }
+        var pessoas = numero(p);
+        if (antes !== null && quartos > antes) { pessoas += (quartos - antes) * lotacao; }
+        pessoas = Math.max(quartos, Math.min(pessoas, quartos * lotacao));
+        p.value = pessoas;
+        p.min = quartos;
+        p.max = quartos * lotacao;
+        p.disabled = quartos === 0;
+        atualizarTotal();
+    }
+
+    function atualizarTotal() {
+        var saida = caixaQuartos && caixaQuartos.querySelector('[data-total-quartos]');
+        if (!saida) { return; }
+        var adultos = 0, valor = 0, consulta = false;
+        caixaQuartos.querySelectorAll('.acom--quartos').forEach(function (acom) {
+            var quartos = numero(campoDe(acom, 'quartos'));
+            if (!quartos) { return; }
+            var pessoas = campoDe(acom, 'pessoas') ? numero(campoDe(acom, 'pessoas')) : quartos;
+            adultos += pessoas;
+            if (acom.dataset.preco) { valor += parseFloat(acom.dataset.preco) * pessoas; }
+            else { consulta = true; }
+        });
+        saida.hidden = adultos === 0;
+        var texto = adultos + (adultos === 1 ? ' adulto' : ' adultos');
+        saida.innerHTML = '';
+        var rotulo = document.createElement('span');
+        rotulo.textContent = 'Total (' + texto + ')';
+        var total = document.createElement('b');
+        total.textContent = consulta ? 'Sob consulta'
+            : valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        saida.appendChild(rotulo);
+        saida.appendChild(total);
+    }
+
+    if (caixaQuartos) {
+        caixaQuartos.querySelectorAll('.acom--quartos').forEach(function (acom) {
+            acom.querySelectorAll('.contador__botao').forEach(function (botao) {
+                botao.addEventListener('click', function () {
+                    var campo = botao.parentNode.querySelector('input');
+                    if (campo.disabled) { return; }
+                    var antes = numero(campoDe(acom, 'quartos'));
+                    var novo = numero(campo) + parseInt(botao.dataset.passo, 10);
+                    var min = parseInt(campo.min, 10) || 0;
+                    var max = campo.max === '' ? MAX_ADULTOS : parseInt(campo.max, 10);
+                    campo.value = Math.max(min, Math.min(novo, max));
+                    ajustarPessoas(acom, campo === campoDe(acom, 'quartos') ? antes : null);
+                });
+            });
+            // digitado à mão: confere quando sai do campo
+            var q = campoDe(acom, 'quartos');
+            var guardado = numero(q);
+            q.addEventListener('focus', function () { guardado = numero(q); });
+            q.addEventListener('change', function () { ajustarPessoas(acom, guardado); guardado = numero(q); });
+            var p = campoDe(acom, 'pessoas');
+            if (p) { p.addEventListener('change', function () { ajustarPessoas(acom, null); }); }
+            ajustarPessoas(acom, null);
         });
     }
 

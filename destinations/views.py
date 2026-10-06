@@ -179,7 +179,7 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         from agencia.models import AVISO
 
         if form_orcamento is None:
-            inicial = {'pessoas': 2}
+            inicial = {}
             pk = request.GET.get('interessado', '')
             interessado = agencia.interessados.filter(pk=pk).first() if pk.isdigit() else None
             if interessado:
@@ -191,7 +191,6 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
                 contexto['saida_marcada'] = saida
         else:
             contexto['saida_marcada'] = form_orcamento.data.get('saida', '')
-            contexto['acomodacao_marcada'] = form_orcamento.data.get('acomodacao', '')
 
         pk = request.GET.get('orcamento', '')
         contexto.update(

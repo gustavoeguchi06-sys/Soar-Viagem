@@ -54,7 +54,7 @@ class PrecosPorQuartoTests(TestCase):
         self.client.force_login(usuario)
         self.client.post(reverse('agencia:orcamento_criar', args=['bonito']), {
             'cliente_nome': 'Bruno', 'cliente_email': 'bruno@gmail.com',
-            'acomodacao': 'triplo', 'pessoas': 3})
+            'quartos_triplo': 1, 'pessoas_triplo': 3})
         self.assertEqual(Orcamento.objects.get().valor, Decimal('9300'))
 
 

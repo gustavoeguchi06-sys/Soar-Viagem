@@ -140,7 +140,16 @@ def gerar_pdf(orcamento):
         corpo += [Spacer(1, 8), capa]
 
     corpo.append(Paragraph('Viagem', e['secao']))
-    preco = orcamento.valor / orcamento.pessoas if orcamento.valor is not None else None
+    linhas = orcamento.linhas_de_quartos
+    if linhas:
+        # um preço por tipo de quarto: "Duplo (Twin): R$ 3.588,00"
+        preco = '<br/>'.join(
+            _texto('{}: {}'.format(l['nome'], _reais(l['preco']) if l['preco'] is not None
+                                   else 'sob consulta')) for l in linhas)
+    elif orcamento.valor is not None:   # orçamento antigo, de um tipo só
+        preco = _texto(_reais(orcamento.valor / orcamento.pessoas))
+    else:
+        preco = 'Sob consulta'
     if orcamento.valor is None:
         valor = 'Sob consulta'
     else:
@@ -152,10 +161,10 @@ def gerar_pdf(orcamento):
             ' - '.join(filter(None, [destino.nome, viagem['estado']]))))),
         ('Saída', _texto(orcamento.saida_texto or 'A combinar')),
         ('Duração', _texto('{} / {}'.format(viagem['dias'], viagem['noites']))),
-        ('Acomodação', _texto(orcamento.get_acomodacao_display())),
+        ('Acomodação', '<br/>'.join(_texto(t) for t in orcamento.acomodacao_texto.split('; '))),
         ('Adultos', _texto(orcamento.pessoas)),
         ('Crianças (CHD)', _texto(orcamento.criancas_texto)),
-        ('Preço por adulto', _texto(_reais(preco)) if preco is not None else 'Sob consulta'),
+        ('Preço por adulto', preco),
         ('Valor total', valor),
         ('Formas de pagamento', _pagamento(orcamento.valor)),
         ('Válido até', '<b>{}</b>'.format(_texto(

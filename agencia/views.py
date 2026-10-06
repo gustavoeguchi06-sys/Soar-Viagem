@@ -8,6 +8,7 @@ Toda consulta daqui passa por `request.agencia`. É isso que impede uma agência
 de ver cliente de outra.
 """
 import logging
+from decimal import Decimal
 from functools import wraps
 
 from django.conf import settings
@@ -20,7 +21,6 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from destinations.conteudo import tabela_de_precos
 from destinations.models import Destino
 from soar.seguranca import LIMITE_ORCAMENTO
 
@@ -67,8 +67,8 @@ def minha_agencia(request):
 def orcamento_criar(request, slug):
     """Recebe o orçamento do card da viagem e volta para a mesma página.
 
-    O valor sai da tabela da viagem: preço por adulto da acomodação escolhida
-    vezes o número de adultos. Criança é sob consulta e fica fora da conta.
+    O valor sai da tabela da viagem: para cada tipo de quarto escolhido, o preço
+    por pessoa dele vezes as pessoas nele. Criança é sob consulta e fica fora da conta.
     """
     from destinations.views import pagina_da_viagem
 
@@ -84,8 +84,11 @@ def orcamento_criar(request, slug):
     orcamento = form.save(commit=False)
     orcamento.agencia = request.agencia
     orcamento.destino = destino
-    preco = tabela_de_precos(destino).get(orcamento.acomodacao)
-    orcamento.valor = preco * orcamento.pessoas if preco is not None else None
+    # tipo sem preço na tabela: o orçamento todo fica "sob consulta"
+    if all(q['preco'] is not None for q in orcamento.quartos):
+        orcamento.valor = sum(Decimal(q['preco']) * q['pessoas'] for q in orcamento.quartos)
+    else:
+        orcamento.valor = None
     orcamento.save()
     LIMITE_ORCAMENTO.registrar(request, request.agencia.pk)
     log.info('orcamento criado: agencia=%s orcamento=%s destino=%s',

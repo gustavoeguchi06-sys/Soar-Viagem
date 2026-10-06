@@ -1,0 +1,10 @@
+{% comment %}Número com − e + (quartos ou pessoas de um tipo de quarto). Sem
+JavaScript, sobra o campo de número, que também funciona.{% endcomment %}
+<div class="contador{% if campo.errors %} contador--erro{% endif %}" data-contador="{{ papel }}">
+    <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    <div class="contador__caixa">
+        <button type="button" class="contador__botao" data-passo="-1" aria-label="Menos">&minus;</button>
+        {{ campo }}
+        <button type="button" class="contador__botao" data-passo="1" aria-label="Mais">+</button>
+    </div>
+</div>

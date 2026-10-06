@@ -290,18 +290,21 @@ def _acomodacoes(destino):
     precos = sorted(destino.precos.all(), key=lambda p: p.ordem) if destino.pk else []
     if precos:
         lista = [{'chave': p.tipo, 'nome': POR_CHAVE[p.tipo]['nome'],
-                  'pessoas': POR_CHAVE[p.tipo]['pessoas'], 'valor': p.preco,
+                  'pessoas': POR_CHAVE[p.tipo]['pessoas'],
+                  'capacidade': POR_CHAVE[p.tipo]['capacidade'], 'valor': p.preco,
                   'preco': _reais(p.preco), 'consulte': False, 'padrao': False}
                  for p in precos]
     elif destino.preco_base is not None:
         base = destino.preco_base
         lista = [{'chave': chave, 'nome': POR_CHAVE[chave]['nome'],
-                  'pessoas': POR_CHAVE[chave]['pessoas'], 'valor': base + diferenca,
+                  'pessoas': POR_CHAVE[chave]['pessoas'],
+                  'capacidade': POR_CHAVE[chave]['capacidade'], 'valor': base + diferenca,
                   'preco': _reais(base + diferenca), 'consulte': False, 'padrao': False}
                  for chave, diferenca in DIFERENCA_ANTIGA.items()]
     else:
         lista = [{'chave': chave, 'nome': POR_CHAVE[chave]['nome'],
-                  'pessoas': POR_CHAVE[chave]['pessoas'], 'valor': None, 'preco': 'Consulte',
+                  'pessoas': POR_CHAVE[chave]['pessoas'],
+                  'capacidade': POR_CHAVE[chave]['capacidade'], 'valor': None, 'preco': 'Consulte',
                   'consulte': True, 'padrao': False}
                  for chave in DIFERENCA_ANTIGA]
     # o quarto que já vem marcado: casal, se a viagem tiver; senão o primeiro

@@ -4,7 +4,7 @@
 
 Orçamento: {{ orcamento.codigo }}
 Saída: {{ orcamento.saida_texto|default:"a combinar" }}
-Acomodação: {{ orcamento.get_acomodacao_display }}
+Acomodação: {{ orcamento.acomodacao_texto }}
 Adultos: {{ orcamento.pessoas }}{% if orcamento.idades_criancas %}
 Crianças (CHD): {{ orcamento.criancas_texto }}{% endif %}
 Valor: {% if orcamento.valor %}R$ {{ orcamento.valor|floatformat:"2g" }}{% if orcamento.idades_criancas %} + crianças sob consulta{% endif %}{% else %}sob consulta{% endif %}

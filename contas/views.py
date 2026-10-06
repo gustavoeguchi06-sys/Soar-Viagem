@@ -270,7 +270,7 @@ def meus_dados(request):
                 'cliente': o.cliente_nome,
                 'cliente_email': o.cliente_email,
                 'cliente_telefone': o.cliente_telefone,
-                'acomodacao': o.get_acomodacao_display(),
+                'acomodacao': o.acomodacao_texto,
                 'adultos': o.pessoas,
                 'criancas': o.idades_criancas,
                 'valor': str(o.valor) if o.valor is not None else None,
