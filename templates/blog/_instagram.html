@@ -1,0 +1,12 @@
+{% comment %}Quadro "Siga a Soar no Instagram" da lateral do blog (lista e artigo).
+As fotos vêm de blog.views._fotos_instagram.{% endcomment %}
+<div class="blog-card">
+  <h3>Siga a Soar no Instagram</h3>
+  <p class="blog-insta__sub">Inspirações diárias de destinos incríveis e experiências inesquecíveis!</p>
+  <div class="blog-insta">
+    {% for f in fotos_instagram %}
+    <a href="{{ f.link }}" target="_blank" rel="noopener" aria-label="{% if f.legenda %}{{ f.legenda }} (Instagram da Soar){% else %}Instagram da Soar{% endif %}"><img src="{{ f.foto }}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
+    {% endfor %}
+  </div>
+  <a class="btn btn--verde btn--bloco" href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">@OperadoraSoar</a>
+</div>

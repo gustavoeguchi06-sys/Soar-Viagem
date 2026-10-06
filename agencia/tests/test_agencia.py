@@ -45,7 +45,7 @@ class PainelAgenciaTests(TestCase):
         self.criar = reverse('agencia:orcamento_criar', args=['bonito'])
         self.dados = {'cliente_nome': 'Bruno', 'cliente_email': 'bruno@gmail.com',
                       'cliente_telefone': '11977776666',
-                      'saida': self.saida.pk, 'acomodacao': 'casal', 'pessoas': 2}
+                      'saida': self.saida.pk, 'quartos_casal': 1, 'pessoas_casal': 2}
 
     def entrar(self, agencia):
         self.client.force_login(agencia.usuario)
@@ -97,7 +97,8 @@ class PainelAgenciaTests(TestCase):
         resposta = self.client.post(self.criar, self.dados)
         self.assertContains(resposta, 'Esse quarto está esgotado nesta data.')
         self.assertFalse(Orcamento.objects.exists())
-        self.client.post(self.criar, {**self.dados, 'acomodacao': 'triplo'})
+        self.client.post(self.criar, {**self.dados, 'quartos_casal': 0, 'pessoas_casal': 0,
+                                      'quartos_triplo': 1, 'pessoas_triplo': 3})
         self.assertTrue(Orcamento.objects.exists())
 
     def test_cria_orcamento_na_viagem_com_72_horas_e_aviso(self):
@@ -302,13 +303,11 @@ class PainelAgenciaTests(TestCase):
         resposta = self.client.post(self.criar, {**self.dados, 'cliente_nome': ''})
         self.assertContains(resposta, 'Informe o nome do responsável.')
         # o que a agência marcou continua marcado
-        self.assertEqual(resposta.context['acomodacao_marcada'], 'casal')
+        self.assertEqual(resposta.context['form_orcamento']['quartos_casal'].value(), '1')
         self.assertFalse(Orcamento.objects.exists())
 
     def test_criancas_vao_como_adicional_dos_adultos(self):
         self.entrar(self.ag1)
-        resposta = self.client.post(self.criar, {**self.dados, 'acomodacao': 'crianca'})
-        self.assertEqual(resposta.status_code, 200)
         resposta = self.client.post(self.criar, {**self.dados, 'idades_criancas': '4, 9'})
         self.assertContains(resposta, 'de 0 a 8 anos')
         self.assertFalse(Orcamento.objects.exists())
@@ -325,8 +324,51 @@ class PainelAgenciaTests(TestCase):
         self.entrar(self.ag1)
         self.client.post(reverse('agencia:orcamento_criar', args=['jalapao']),
                          {'cliente_nome': 'Bruno', 'cliente_email': 'bruno@gmail.com',
-                          'acomodacao': 'casal', 'pessoas': 2})
+                          'quartos_casal': 1, 'pessoas_casal': 2})
         self.assertIsNone(Orcamento.objects.get().valor)
+
+    def test_varios_quartos_e_pessoas_ate_a_lotacao(self):
+        self.entrar(self.ag1)
+        # Bonito: 3.000 por pessoa no casal e no duplo, 2.800 no triplo, 4.400 no single
+        resposta = self.client.post(self.criar, {
+            **self.dados, 'quartos_casal': 0, 'pessoas_casal': 0,
+            'quartos_duplo': 2, 'pessoas_duplo': 3,      # dois duplos, um com 1 pessoa
+            'quartos_triplo': 1, 'pessoas_triplo': 2,    # triplo com 2: pode, é menos
+            'quartos_single': 1})
+        orcamento = Orcamento.objects.get()
+        self.assertEqual(orcamento.pessoas, 6)
+        self.assertEqual(orcamento.valor, Decimal(3 * 3000 + 2 * 2800 + 1 * 4400))
+        self.assertEqual(orcamento.acomodacao_texto,
+                         '1 quarto Single, 1 pessoa; 2 quartos Duplo (Twin), 3 pessoas; '
+                         '1 quarto Triplo, 2 pessoas')
+        pagina = self.client.get(resposta.url)
+        self.assertContains(pagina, '2 quartos Duplo (Twin), 3 pessoas')
+        self.assertTrue(self.client.get(
+            reverse('agencia:orcamento_pdf', args=[orcamento.pk])).content.startswith(b'%PDF'))
+
+    def test_nao_passa_da_lotacao_nem_fica_quarto_vazio(self):
+        self.entrar(self.ag1)
+        resposta = self.client.post(self.criar, {**self.dados, 'pessoas_casal': 3})
+        self.assertContains(resposta, 'no máximo 2.')
+        resposta = self.client.post(self.criar, {**self.dados, 'quartos_triplo': 2,
+                                                 'pessoas_triplo': 7})
+        self.assertContains(resposta, 'no máximo 6.')
+        resposta = self.client.post(self.criar, {**self.dados, 'quartos_duplo': 2,
+                                                 'pessoas_duplo': 1})
+        self.assertContains(resposta, 'no mínimo 2 pessoas')
+        resposta = self.client.post(self.criar, {**self.dados, 'quartos_casal': 0,
+                                                 'pessoas_casal': 0})
+        self.assertContains(resposta, 'Escolha pelo menos um quarto.')
+        self.assertFalse(Orcamento.objects.exists())
+
+    def test_nao_escolhe_mais_quartos_do_que_a_data_tem(self):
+        self.saida.quartos_duplo = 1
+        self.saida.save()
+        self.entrar(self.ag1)
+        resposta = self.client.post(self.criar, {**self.dados, 'quartos_duplo': 2,
+                                                 'pessoas_duplo': 4})
+        self.assertContains(resposta, 'Nesta data há só 1 quarto Duplo (Twin).')
+        self.assertFalse(Orcamento.objects.exists())
 
     def test_cliente_e_agencia_nao_aprovada_nao_orcam(self):
         self.client.force_login(self.cliente)

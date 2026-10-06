@@ -86,6 +86,7 @@ def indice(request):
         'pagina': pagina,
         'busca': busca,
         'categoria_ativa': categoria,
+        'fotos_instagram': _fotos_instagram(),
         **_lateral(),
     })
 

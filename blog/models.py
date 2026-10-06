@@ -94,7 +94,10 @@ class ArtigoQuerySet(models.QuerySet):
 
 
 class Artigo(models.Model):
-    titulo = models.CharField('Título', max_length=160)
+    titulo = models.CharField(
+        'Título', max_length=160,
+        help_text='Para um subtítulo, dê Enter: a segunda linha aparece embaixo do título, '
+                  'em letra menor.')
     slug = models.SlugField('Endereço', max_length=170, unique=True,
                             help_text='Parte final do link do artigo. Preenchido sozinho a partir '
                                       'do título; só mude se souber o que está fazendo, porque '
@@ -143,11 +146,29 @@ class Artigo(models.Model):
         ordering = ['-data_publicacao', 'id']
 
     def __str__(self):
-        return self.titulo
+        return self.titulo_em_linha
+
+    # O título pode ter duas linhas (Enter no painel): a primeira é o título,
+    # a segunda o subtítulo, menor, embaixo dele no topo do artigo.
+    @property
+    def titulo_principal(self):
+        return (self.titulo or '').split('\n', 1)[0].strip()
+
+    @property
+    def subtitulo(self):
+        partes = (self.titulo or '').split('\n', 1)
+        return partes[1].strip() if len(partes) > 1 else ''
+
+    @property
+    def titulo_em_linha(self):
+        """Título e subtítulo numa linha só, para a aba do navegador e o Google."""
+        if self.subtitulo:
+            return '{}: {}'.format(self.titulo_principal, self.subtitulo)
+        return self.titulo_principal
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.titulo)[:170]
+            self.slug = slugify(self.titulo_principal)[:170]
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

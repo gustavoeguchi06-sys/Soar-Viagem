@@ -182,7 +182,7 @@
                     <dl class="orc-ok__dados">
                         <dt>Cliente</dt><dd>{{ o.cliente_nome }}{% if o.cliente_telefone %} · {{ o.cliente_telefone }}{% endif %}</dd>
                         <dt>Saída</dt><dd>{{ o.saida_texto|default:"a combinar" }}</dd>
-                        <dt>Acomodação</dt><dd>{{ o.get_acomodacao_display }}</dd>
+                        <dt>Acomodação</dt><dd>{{ o.acomodacao_texto }}</dd>
                         <dt>Adultos</dt><dd>{{ o.pessoas }}</dd>
                         {% if o.idades_criancas %}<dt>Crianças (CHD)</dt><dd>{{ o.criancas_texto }}</dd>{% endif %}
                         <dt>Valor</dt><dd>{% if o.valor %}R$ {{ o.valor|floatformat:"2g" }}{% if o.idades_criancas %} + crianças sob consulta{% endif %}{% else %}sob consulta{% endif %}</dd>
@@ -267,6 +267,38 @@
                 </div>
                 {% endif %}
 
+                {% if form_orcamento and not orcamento_criado %}
+                {% comment %}Agência montando orçamento: em cada tipo de quarto, quantos
+                quartos e quantas pessoas. Cada quarto leva de 1 até a lotação dele
+                (agencia/forms.py confere); os botões − e + e o total são do viagem.js.{% endcomment %}
+                <div class="acomodacoes" data-quartos-orcamento>
+                    <b>Escolha os quartos</b>
+                    <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por pessoa. Dá para escolher mais de um quarto.</small>
+                    {% for linha in form_orcamento.quartos_campos %}
+                    {% with a=linha.a %}
+                    <div class="acom acom--quartos" data-tipo="{{ a.chave }}" data-lotacao="{{ a.capacidade }}"
+                         data-preco="{% if a.valor is not None %}{{ a.valor|stringformat:'s' }}{% endif %}">
+                        <div class="acom__linha">
+                            <span class="acom__nome"><b>{{ a.nome }}</b><small>{{ a.pessoas }}</small>
+                                <small class="acom__vagas" data-vagas-quarto hidden></small></span>
+                            <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
+                        </div>
+                        <div class="acom__escolha">
+                            {% include 'destinations/_contador.html' with campo=linha.quartos papel='quartos' %}
+                            {% if linha.pessoas %}
+                            {% include 'destinations/_contador.html' with campo=linha.pessoas papel='pessoas' %}
+                            {% endif %}
+                        </div>
+                        {% for e in linha.quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                        {% if linha.pessoas %}{% for e in linha.pessoas.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}{% endif %}
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                    {{ form_orcamento.escolha_quartos }}
+                    {% for e in form_orcamento.escolha_quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                    <p class="acom-total" data-total-quartos hidden></p>
+                </div>
+                {% else %}
                 <div class="acomodacoes">
                     <b>Escolha sua acomodação</b>
                     <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por adulto.</small>
@@ -280,8 +312,8 @@
                         <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
                     </label>
                     {% endfor %}
-                    {% for e in form_orcamento.acomodacao.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
                 </div>
+                {% endif %}
 
                 {% comment %}Criança não é acomodação: é um adicional que viaja com os
                 adultos, no quarto deles. A agência digita as idades, que seguem
@@ -304,13 +336,6 @@
 
                 {% if user.agente.aprovado %}
                 {% if not orcamento_criado %}
-                {% with campo=form_orcamento.pessoas %}
-                <label class="orc-campo orc-campo--adultos{% if campo.errors %} orc-campo--erro{% endif %}" for="{{ campo.id_for_label }}">
-                    <span>{{ campo.label }}</span>
-                    {{ campo }}
-                </label>
-                {% for e in campo.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
-                {% endwith %}
                 <button type="button" class="btn btn--verde btn--bloco reserva__orcamento" data-abrir-popup="orcPopup">
                     <svg class="ic" viewBox="0 0 24 24"><use href="#ic-doc"></use></svg>
                     Criar orçamento

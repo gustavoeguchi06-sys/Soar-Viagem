@@ -22,18 +22,22 @@ class OrcamentoAdmin(admin.ModelAdmin):
     date_hierarchy = 'criado_em'
     # tudo fica só para ver; a única coisa que o dono muda é a situação
     readonly_fields = ['agencia', 'cliente_nome', 'cliente_telefone', 'cliente_email',
-                       'destino', 'saida_texto', 'acomodacao', 'pessoas', 'valor_brl',
+                       'destino', 'saida_texto', 'acomodacao_texto', 'pessoas', 'valor_brl',
                        'valido_ate', 'observacoes', 'criado_em', 'atualizado_em', 'enviado_em']
     list_per_page = 40
 
     fieldsets = [
         ('Agência e situação', {'fields': ['agencia', 'status']}),
         ('Cliente', {'fields': ['cliente_nome', 'cliente_telefone', 'cliente_email']}),
-        ('Viagem', {'fields': ['destino', 'saida_texto', 'acomodacao', 'pessoas',
+        ('Viagem', {'fields': ['destino', 'saida_texto', 'acomodacao_texto', 'pessoas',
                                'valor_brl', 'valido_ate', 'observacoes']}),
         ('Registro', {'classes': ['collapse'], 'fields': ['criado_em', 'atualizado_em',
                                                           'enviado_em']}),
     ]
+
+    @admin.display(description='Acomodação')
+    def acomodacao_texto(self, orcamento):
+        return orcamento.acomodacao_texto
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('agencia', 'destino')

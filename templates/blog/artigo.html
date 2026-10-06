@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ artigo.titulo }} | Blog Soar{% endblock %}
+{% block title %}{{ artigo.titulo_em_linha }} | Blog Soar{% endblock %}
 {% block estilos_extra %}<link rel="stylesheet" href="{% static 'css/blog.css' %}">{% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
     <div class="blog-hero__bg" aria-hidden="true">{% if artigo.capa %}<img src="{{ artigo.capa.url }}" alt="">{% endif %}</div>
     <div class="blog-hero__overlay" aria-hidden="true"></div>
     <div class="wrap blog-hero__inner">
-      <h1>{{ artigo.titulo }}</h1>
+      <h1>{{ artigo.titulo_principal }}{% if artigo.subtitulo %}<span class="blog-hero__subtitulo">{{ artigo.subtitulo }}</span>{% endif %}</h1>
       <p class="blog-hero__sub">{{ artigo.resumo }}</p>
 
       <div class="blog-autor">
@@ -132,13 +132,13 @@
         {% if anterior %}
         <a href="{{ anterior.get_absolute_url }}" class="blog-navpost__item">
           <small>‹ Artigo anterior</small>
-          <b>{{ anterior.titulo }}</b>
+          <b>{{ anterior.titulo_principal }}</b>
         </a>
         {% else %}<span></span>{% endif %}
         {% if proximo %}
         <a href="{{ proximo.get_absolute_url }}" class="blog-navpost__item blog-navpost__item--dir">
           <small>Próximo artigo ›</small>
-          <b>{{ proximo.titulo }}</b>
+          <b>{{ proximo.titulo_principal }}</b>
         </a>
         {% endif %}
       </nav>
@@ -162,7 +162,7 @@
         <h3>Artigos mais lidos</h3>
         <ul class="blog-lidos">
           {% for a in mais_lidos %}
-          <li><a href="{{ a.get_absolute_url }}"><span class="blog-lidos__num ph">{{ forloop.counter }}</span><span><b>{{ a.titulo }}</b><small>{{ a.minutos_de_leitura }} min de leitura</small></span></a></li>
+          <li><a href="{{ a.get_absolute_url }}"><span class="blog-lidos__num ph">{{ forloop.counter }}</span><span><b>{{ a.titulo_principal }}</b><small>{{ a.minutos_de_leitura }} min de leitura</small></span></a></li>
           {% empty %}
           <li><small>Os mais lidos aparecem aqui.</small></li>
           {% endfor %}
@@ -170,16 +170,7 @@
       </div>
 
 
-      <div class="blog-card">
-        <h3>Siga a Soar no Instagram</h3>
-        <p class="blog-insta__sub">Inspirações diárias de destinos incríveis e experiências inesquecíveis!</p>
-        <div class="blog-insta">
-          {% for f in fotos_instagram %}
-          <a href="{{ f.link }}" target="_blank" rel="noopener" aria-label="{% if f.legenda %}{{ f.legenda }} (Instagram da Soar){% else %}Instagram da Soar{% endif %}"><img src="{{ f.foto }}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
-          {% endfor %}
-        </div>
-        <a class="btn btn--verde btn--bloco" href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">@OperadoraSoar</a>
-      </div>
+      {% include 'blog/_instagram.html' %}
     </aside>
   </div>
 </article>

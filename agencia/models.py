@@ -48,8 +48,16 @@ class Orcamento(models.Model):
                               help_text='Em branco, a data fica a combinar.')
     saida_texto = models.CharField('Saída', max_length=120, blank=True, editable=False)
     acomodacao = models.CharField('Acomodação', max_length=20,
-                                  choices=ACOMODACOES, default='casal')
-    pessoas = models.PositiveSmallIntegerField('Adultos', default=2)
+                                  choices=ACOMODACOES, default='casal',
+                                  help_text='O primeiro tipo de quarto escolhido (os outros '
+                                            'estão em "quartos").')
+    pessoas = models.PositiveSmallIntegerField('Adultos', default=2,
+                                               help_text='Soma das pessoas de todos os quartos.')
+    # Os quartos escolhidos: [{"tipo": "duplo", "quartos": 2, "pessoas": 3,
+    # "preco": "3588.00"}, ...]. Cada tipo aceita de 1 pessoa até a lotação do
+    # quarto; o valor é o preço por pessoa do tipo vezes as pessoas nele.
+    # Orçamento antigo (de antes de dar para escolher vários quartos) fica vazio.
+    quartos = models.JSONField('Quartos', default=list, blank=True)
     # Criança (CHD) não é acomodação: viaja junto com os adultos, no quarto
     # deles, e o preço depende da idade. Guardado como "4, 7".
     idades_criancas = models.CharField(
@@ -102,6 +110,32 @@ class Orcamento(models.Model):
         lista = ', '.join(str(i) for i in idades[:-1])
         lista = '{} e {}'.format(lista, idades[-1]) if lista else str(idades[-1])
         return '{} ({} {})'.format(len(idades), lista, 'ano' if idades == [1] else 'anos')
+
+    @property
+    def linhas_de_quartos(self):
+        """[{'nome': 'Duplo (Twin)', 'quartos': 2, 'pessoas': 3, 'preco': Decimal}, ...]"""
+        from decimal import Decimal
+
+        from destinations.quartos import POR_CHAVE
+        linhas = []
+        for q in self.quartos or []:
+            tipo = POR_CHAVE.get(q.get('tipo'))
+            if tipo is None:
+                continue
+            linhas.append({'nome': tipo['nome'], 'quartos': q.get('quartos'),
+                           'pessoas': q.get('pessoas'),
+                           'preco': Decimal(q['preco']) if q.get('preco') else None})
+        return linhas
+
+    @property
+    def acomodacao_texto(self):
+        """'2 quartos Duplo (Twin), 3 pessoas; 1 quarto Single, 1 pessoa'"""
+        linhas = self.linhas_de_quartos
+        if not linhas:   # orçamento antigo: um tipo só
+            return self.get_acomodacao_display()
+        return '; '.join('{} quarto{} {}, {} pessoa{}'.format(
+            l['quartos'], 's' if l['quartos'] != 1 else '', l['nome'],
+            l['pessoas'], 's' if l['pessoas'] != 1 else '') for l in linhas)
 
     @property
     def vencido(self):

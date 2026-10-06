@@ -735,6 +735,25 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 
 /* quantos quartos do tipo há na data marcada; com 0, o tipo fica esgotado */
 .acom__nome small.acom__vagas { margin-top: 2px; font-weight: 600; color: var(--verde-texto); }
+/* orçamento da agência: quartos e pessoas de cada tipo, com − e + */
+.acom--quartos { display: block; cursor: default; }
+.acom--quartos:hover { background: none; }
+.acom__linha { display: flex; align-items: center; gap: 10px; }
+.acom__escolha { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 8px; }
+.contador { display: flex; align-items: center; gap: 8px; }
+.contador label { font-size: .78rem; font-weight: 600; color: var(--tinta-suave); }
+.contador__caixa { display: inline-flex; align-items: center; border: 1px solid #c3ccc7; border-radius: 999px; overflow: hidden; }
+.contador__botao { width: 30px; height: 30px; border: 0; background: none; cursor: pointer;
+                   font-size: 1.05rem; font-weight: 700; color: var(--verde); line-height: 1; }
+.contador__botao:hover { background: var(--fundo-suave); }
+.contador input { width: 34px; height: 30px; border: 0; padding: 0; text-align: center; background: none;
+                  font: inherit; font-size: .9rem; font-weight: 700; color: var(--preto); -moz-appearance: textfield; }
+.contador input::-webkit-outer-spin-button, .contador input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.contador input:disabled { color: var(--tinta-suave); }
+.contador--erro .contador__caixa { border-color: #b42318; }
+.acom-total { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 10px 2px 0;
+              font-size: .86rem; color: var(--tinta-suave); }
+.acom-total b { font-size: 1.02rem; color: var(--preto); }
 .acom--esgotada { cursor: not-allowed; }
 .acom--esgotada:hover { background: none; }
 .acom--esgotada .acom__nome b, .acom--esgotada .acom__preco { color: var(--tinta-suave); text-decoration: line-through; }
