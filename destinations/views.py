@@ -104,8 +104,8 @@ def soar_60(request):
 
     O botão da home ia direto para o WhatsApp: a pessoa era jogada numa
     conversa sem ter visto viagem nenhuma, e tinha que perguntar o que existe
-    para só então decidir. Aqui ela conhece o programa e as viagens primeiro; o
-    WhatsApp fica no fim, para quando ela realmente quiser reservar.
+    para só então decidir. Aqui ela conhece o programa e as viagens primeiro, e
+    reserva pela página da viagem que escolher.
 
     Enquanto nenhuma viagem estiver marcada como 60+ no painel, a página mostra
     o catálogo inteiro — melhor do que uma página vazia, e é verdade: toda
