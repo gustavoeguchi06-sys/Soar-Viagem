@@ -94,7 +94,7 @@ class ArtigoAdmin(admin.ModelAdmin):
     search_fields = ['titulo', 'resumo', 'introducao']
     date_hierarchy = 'data_publicacao'
     prepopulated_fields = {'slug': ['titulo']}
-    autocomplete_fields = ['destino']
+    autocomplete_fields = ['destinos']
     readonly_fields = ['previa_capa', 'tempo_de_leitura', 'leituras', 'criado_em', 'atualizado_em']
     actions = ['publicar', 'voltar_para_rascunho']
     inlines = [SecaoInline, AtracaoInline]
@@ -119,9 +119,9 @@ class ArtigoAdmin(admin.ModelAdmin):
             'fields': ['etiqueta'],
             'description': 'A etiqueta verde que aparece sobre a foto do cartão.',
         }),
-        ('Viagem ligada', {
+        ('Viagens ligadas', {
             'classes': ['collapse'],
-            'fields': ['destino'],
+            'fields': ['destinos'],
         }),
         ('Registro', {
             'classes': ['collapse'],

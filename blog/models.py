@@ -37,6 +37,7 @@ ICONES = [
     ('relogio', 'Relógio'),
     ('camera', 'Câmera'),
     ('onibus', 'Ônibus'),
+    ('4x4', 'Carro 4x4'),
     ('cama', 'Cama'),
     ('hotel', 'Hotel'),
     ('mala', 'Mala'),
@@ -126,10 +127,9 @@ class Artigo(models.Model):
     introducao = models.TextField(
         'Texto de abertura', blank=True,
         help_text='Vem antes das seções. Para começar um parágrafo novo, deixe uma linha em branco.')
-    destino = models.ForeignKey(
-        Destino, on_delete=models.SET_NULL, null=True, blank=True, related_name='artigos',
-        verbose_name='Viagem ligada ao artigo',
-        help_text='Opcional. O final do artigo ganha um botão para a página dessa viagem.')
+    destinos = models.ManyToManyField(
+        Destino, blank=True, related_name='artigos', verbose_name='Viagens ligadas ao artigo',
+        help_text='Opcional. O final do artigo ganha um botão para a página de cada viagem.')
 
     leituras = models.PositiveIntegerField('Leituras', default=0, editable=False)
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)

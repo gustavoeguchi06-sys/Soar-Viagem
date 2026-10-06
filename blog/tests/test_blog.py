@@ -126,6 +126,31 @@ class SegurancaDoTextoTests(BlogBase):
         self.assertIn('&lt;script&gt;', html)
 
 
+class ViagensDoArtigoTests(BlogBase):
+    def test_um_botao_por_viagem_e_sem_whatsapp(self):
+        from destinations.models import Destino
+        a = self.artigo('teste-viagens')
+        html = self.client.get('/blog/teste-viagens/').content.decode()
+        self.assertIn('Pronto para a sua próxima viagem?', html)
+        self.assertNotIn('Falar com a Soar', html)
+
+        jalapao = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='x')
+        a.destinos.add(jalapao)
+        html = self.client.get('/blog/teste-viagens/').content.decode()
+        self.assertIn('Pronto para viver Jalapão?', html)
+
+        a.destinos.add(Destino.objects.create(nome='Bonito', slug='bonito', descricao='x'))
+        html = self.client.get('/blog/teste-viagens/').content.decode()
+        self.assertIn('Pronto para viver uma dessas viagens?', html)
+        self.assertIn('Ver a viagem para Jalapão', html)
+        self.assertIn('Ver a viagem para Bonito', html)
+
+    def test_icone_do_carro_4x4(self):
+        a = self.artigo('teste-trilha')
+        Secao.objects.create(artigo=a, titulo='De 4x4 pelas dunas', icone='4x4')
+        self.assertIn('href="#ic-4x4"', self.client.get('/blog/teste-trilha/').content.decode())
+
+
 # O que se testa aqui é o conteúdo do painel; o código do celular tem os
 # testes dele em contas/tests.py (DoisFatoresTests).
 @override_settings(DOIS_FATORES_EQUIPE=False)

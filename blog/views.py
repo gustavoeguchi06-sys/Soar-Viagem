@@ -81,8 +81,8 @@ def indice(request):
 
 def artigo(request, slug):
     artigo = get_object_or_404(
-        Artigo.objects.select_related('categoria', 'destino')
-                      .prefetch_related('secoes', 'atracoes'),
+        Artigo.objects.select_related('categoria')
+                      .prefetch_related('secoes', 'atracoes', 'destinos'),
         slug=slug)
 
     # Rascunho e agendado só o dono vê, para conferir antes de ir ao ar.
@@ -107,6 +107,7 @@ def artigo(request, slug):
         'artigo': artigo,
         'secoes': artigo.secoes.all(),
         'atracoes': artigo.atracoes.all(),
+        'viagens': list(artigo.destinos.all()),
         'previa': previa,
         'anterior': anterior,
         'proximo': proximo,
