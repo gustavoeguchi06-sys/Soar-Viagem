@@ -206,15 +206,14 @@ def montar_inicio():
                                             not v['destaque'], v['nome']))[:6]
 
     depoimentos = []
-    for i, a in enumerate(Avaliacao.objects.publicadas().select_related('destino')
-                          .order_by('-criado_em')[:6]):
+    for a in (Avaliacao.objects.publicadas().select_related('destino')
+              .order_by('-criado_em')[:6]):
         depoimentos.append({
             'nome': a.nome_autor,
             'destino': a.destino.nome,
             'url': a.destino.get_absolute_url(),
             'texto': a.comentario,
             'nota': a.nota,
-            'avatar': static('img/avatar-{}.svg'.format(i % 3 + 1)),
             'foto': a.foto.url if a.foto else a.destino.capa_card,
         })
 

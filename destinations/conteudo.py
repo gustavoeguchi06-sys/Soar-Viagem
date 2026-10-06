@@ -27,7 +27,6 @@ FOTOS_PADRAO = [
 FOTOS_HOSPEDAGEM = ['img/pousada.svg', 'img/quarto-1.svg', 'img/quarto-2.svg',
                     'img/quarto-3.svg', 'img/quarto-4.svg']
 
-AVATARES = ['img/avatar-1.svg', 'img/avatar-2.svg', 'img/avatar-3.svg']
 
 SERVICOS = [
     {'icone': 'ic-onibus', 'titulo': 'Transporte', 'sub': 'confortável'},
@@ -459,13 +458,12 @@ def montar_viagem(destino, avaliacoes):
     fotos_hosp = list(dict.fromkeys(fotos_hosp)) or [static(FOTOS_HOSPEDAGEM[0])]
 
     depoimentos = []
-    for i, av in enumerate(sorted(avaliacoes, key=lambda a: a.criado_em)[:6]):
+    for av in sorted(avaliacoes, key=lambda a: a.criado_em)[:6]:
         depoimentos.append({
             'nome': av.nome_autor,
             'local': destino.nome,
             'estrelas': _estrelas(av.nota),
             'texto': av.comentario,
-            'avatar': static(AVATARES[i % len(AVATARES)]),
             'foto': av.foto.url if av.foto else '',
             'data': av.criado_em.strftime('%d/%m/%Y'),
         })
