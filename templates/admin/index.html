@@ -111,6 +111,7 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
                 <tr>
                     <th scope="col">Nome</th>
                     <th scope="col">Viagem</th>
+                    <th scope="col">Quartos</th>
                     <th scope="col">CEP</th>
                     <th scope="col">Pedido em</th>
                 </tr>
@@ -119,12 +120,13 @@ ser recolhido); os blocos abaixo se organizam por ela, não pela janela.
             {% for i in painel.lista_interessados %}
                 <tr>
                     <td><a href="{% url 'admin:destinations_interessado_change' i.pk %}"><strong>{{ i.nome }}</strong></a></td>
-                    <td>{{ i.destino.nome|default:"-" }}</td>
+                    <td>{{ i.destino.nome|default:"-" }}{% if i.saida_texto %}<br><small>{{ i.saida_texto }}</small>{% endif %}</td>
+                    <td>{{ i.quartos_texto|default:"-" }}</td>
                     <td>{{ i.cep }}</td>
                     <td>{{ i.criado_em|date:"d/m/Y" }}</td>
                 </tr>
             {% empty %}
-                <tr><td colspan="4" class="vazio">Todos os interessados já foram mandados para uma agência.</td></tr>
+                <tr><td colspan="5" class="vazio">Todos os interessados já foram mandados para uma agência.</td></tr>
             {% endfor %}
             </tbody>
         </table>

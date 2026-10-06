@@ -35,6 +35,8 @@
 
             <dl class="reserva-item__dados">
                 <div><dt>Viagem</dt><dd>{{ i.destino.nome|default:"viagem removida" }}</dd></div>
+                {% if i.saida_texto %}<div><dt>Data</dt><dd>{{ i.saida_texto }}</dd></div>{% endif %}
+                {% if i.quartos_texto %}<div><dt>Quartos</dt><dd>{{ i.quartos_texto }}</dd></div>{% endif %}
                 <div><dt>CEP</dt><dd>{{ i.cep }}</dd></div>
             </dl>
 

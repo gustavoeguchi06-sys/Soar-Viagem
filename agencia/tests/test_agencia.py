@@ -411,6 +411,15 @@ class InteressadosTests(TestCase):
         form = self.client.get(pagina, {'interessado': self.pessoa.pk}).context['form_orcamento']
         self.assertEqual(form.initial['cliente_nome'], 'Ana Souza')
 
+        # os quartos que a pessoa pediu já vêm no orçamento
+        self.pessoa.quartos = [{'tipo': 'triplo', 'quartos': 1, 'pessoas': 2, 'preco': None}]
+        self.pessoa.save()
+        resposta = self.client.get(reverse('agencia:painel'))
+        self.assertContains(resposta, '1 quarto Triplo, 2 pessoas')
+        form = self.client.get(pagina, {'interessado': self.pessoa.pk}).context['form_orcamento']
+        self.assertEqual((form['quartos_triplo'].value(), form['pessoas_triplo'].value(),
+                          form['quartos_casal'].value()), (1, 2, 0))
+
         self.client.force_login(self.ag2.usuario)
         self.assertNotContains(self.client.get(reverse('agencia:painel')), 'Ana Souza')
         form = self.client.get(pagina, {'interessado': self.pessoa.pk}).context['form_orcamento']

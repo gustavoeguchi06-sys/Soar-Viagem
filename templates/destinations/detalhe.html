@@ -215,6 +215,9 @@
                 <form method="post" action="{% url 'agencia:orcamento_criar' destino.slug %}" class="reserva__form" novalidate>
                     {% csrf_token %}
                 {% endif %}
+                {% elif form_quartos %}
+                <form method="post" action="{% url 'destinations:interesse' destino.slug %}" class="reserva__form" novalidate>
+                    {% csrf_token %}
                 {% else %}
                 <div class="reserva__form">
                 {% endif %}
@@ -267,14 +270,15 @@
                 </div>
                 {% endif %}
 
-                {% if form_orcamento and not orcamento_criado %}
-                {% comment %}Agência montando orçamento: em cada tipo de quarto, quantos
-                quartos e quantas pessoas. Cada quarto leva de 1 até a lotação dele
-                (agencia/forms.py confere); os botões − e + e o total são do viagem.js.{% endcomment %}
+                {% if form_quartos %}
+                {% comment %}Agência montando orçamento ou visitante pedindo "Saiba mais": em
+                cada tipo de quarto, quantos quartos e quantas pessoas. Cada quarto leva de 1
+                até a lotação dele (destinations/escolha_quartos.py confere); os botões − e +
+                e o total são do viagem.js.{% endcomment %}
                 <div class="acomodacoes" data-quartos-orcamento>
                     <b>Escolha os quartos</b>
                     <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por pessoa. Dá para escolher mais de um quarto.</small>
-                    {% for linha in form_orcamento.quartos_campos %}
+                    {% for linha in form_quartos.quartos_campos %}
                     {% with a=linha.a %}
                     <div class="acom acom--quartos" data-tipo="{{ a.chave }}" data-lotacao="{{ a.capacidade }}"
                          data-preco="{% if a.valor is not None %}{{ a.valor|stringformat:'s' }}{% endif %}">
@@ -294,8 +298,8 @@
                     </div>
                     {% endwith %}
                     {% endfor %}
-                    {{ form_orcamento.escolha_quartos }}
-                    {% for e in form_orcamento.escolha_quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                    {{ form_quartos.escolha_quartos }}
+                    {% for e in form_quartos.escolha_quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
                     <p class="acom-total" data-total-quartos hidden></p>
                 </div>
                 {% else %}
@@ -364,6 +368,24 @@
                 </dialog>
                 </form>
                 {% endif %}
+                {% elif form_quartos %}
+                {# Sem login: "Saiba mais" abre os campos de contato (sem JavaScript) #}
+                <details class="interesse"{% if form_interesse.erro_no_contato %} open{% endif %}>
+                    <summary class="btn btn--verde btn--bloco">Saiba mais</summary>
+                    <div class="interesse__form">
+                        {% for campo in form_interesse.campos_de_contato %}
+                        <div class="campo {% if campo.errors %}campo--erro{% endif %}">
+                            {{ campo.label_tag }}
+                            {{ campo }}
+                            {% for erro in campo.errors %}<small class="campo__erro">{{ erro }}</small>{% endfor %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn--verde btn--bloco">Enviar</button>
+                        <small class="interesse__lgpd">Usamos seus dados só para falar com você
+                            sobre esta viagem. <a href="{% url 'contas:privacidade' %}">Privacidade</a></small>
+                    </div>
+                </details>
+                </form>
                 {% else %}
                 </div>
                 {% if user.is_authenticated %}
@@ -393,19 +415,6 @@
                         <button type="button" class="btn btn--verde" data-fechar-popup>Entendi</button>
                     </div>
                 </dialog>
-                {% else %}
-                {# Sem login: "Saiba mais" abre o formulário de contato (sem JavaScript) #}
-                <details class="interesse"{% if form_interesse.errors %} open{% endif %}>
-                    <summary class="btn btn--verde btn--bloco">Saiba mais</summary>
-                    <form method="post" action="{% url 'destinations:interesse' destino.slug %}"
-                          class="interesse__form" novalidate>
-                        {% csrf_token %}
-                        {% include 'partials/_campos.html' with form=form_interesse %}
-                        <button type="submit" class="btn btn--verde btn--bloco">Enviar</button>
-                        <small class="interesse__lgpd">Usamos seus dados só para falar com você
-                            sobre esta viagem. <a href="{% url 'contas:privacidade' %}">Privacidade</a></small>
-                    </form>
-                </details>
                 {% endif %}
                 {% endif %}
             </div>
