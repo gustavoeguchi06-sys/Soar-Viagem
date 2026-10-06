@@ -311,7 +311,8 @@ def _pacote(destino, viagem, e):
     if viagem['roteiro']:
         dias = []
         for dia in viagem['roteiro']:
-            bloco = [Paragraph('<b>{}</b>'.format(_texto(dia.get('titulo'))), e['dia'])]
+            bloco = [Paragraph('<b>{}</b>'.format(_texto('Dia {} - {}'.format(
+                dia.get('numero'), dia.get('titulo')))), e['dia'])]
             if dia.get('resumo'):
                 bloco.append(Paragraph(_texto(dia['resumo']), e['normal']))
             topicos = dia.get('topicos') or ([dia['detalhe']] if dia.get('detalhe') else [])

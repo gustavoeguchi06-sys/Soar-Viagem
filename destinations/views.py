@@ -163,6 +163,11 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         'acomodacao_marcada': 'casal',
     }
 
+    # veio de um card de saída da página inicial ou do calendário (?saida=12)
+    pedida = request.GET.get('saida', '')
+    if any(str(s['id']) == pedida and not s['esgotada'] for s in viagem['saidas']):
+        contexto['saida_marcada'] = pedida
+
     agencia = getattr(request.user, 'agente', None)
     if agencia is not None and agencia.aprovado:
         from agencia.forms import OrcamentoViagemForm

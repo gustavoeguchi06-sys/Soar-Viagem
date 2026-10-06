@@ -109,12 +109,12 @@
             <div class="in-trilho">
                 {% for v in i.experiencias %}
                 <article class="in-exp">
-                    <a class="in-exp__foto" href="{{ v.destino.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+                    <a class="in-exp__foto" href="{{ v.link }}" tabindex="-1" aria-hidden="true">
                         <img src="{{ v.foto }}" alt="" loading="lazy">
                         <span class="in-tag in-tag--{{ v.situacao }}">{{ v.situacao_rotulo }}</span>
                     </a>
                     <div class="in-exp__corpo">
-                        <h3><a href="{{ v.destino.get_absolute_url }}">{{ v.rotulo }}</a></h3>
+                        <h3><a href="{{ v.link }}">{{ v.rotulo }}</a></h3>
                         <div class="in-exp__linha">
                             <span>{% if v.proxima %}{{ v.proxima.texto }}{% else %}Datas em breve{% endif %}</span>
                             {% if v.n_avaliacoes %}
@@ -130,7 +130,7 @@
                                 <small>A partir de</small>
                                 <b>{% if v.preco %}R$ {{ v.preco|floatformat:"0g" }}{% else %}Consulte{% endif %}</b>
                             </div>
-                            <a class="in-btn-mini" href="{{ v.destino.get_absolute_url }}">{% if v.situacao == 'breve' %}Saiba mais{% else %}Ver viagem{% endif %}</a>
+                            <a class="in-btn-mini" href="{{ v.link }}">{% if v.situacao == 'breve' %}Saiba mais{% else %}Ver viagem{% endif %}</a>
                         </div>
                     </div>
                 </article>

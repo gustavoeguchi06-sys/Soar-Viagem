@@ -188,3 +188,5 @@ html[data-tema="escuro"] .popup--ok .popup__titulo,
 html[data-tema="escuro"] .interesse__recebido { color: var(--verde-texto); }
 
 html[data-tema="escuro"] .incl-grupo__titulo { color: var(--verde-texto); }
+html[data-tema="escuro"] .dia__num { background: #10371f; color: var(--verde-texto); }
+html[data-tema="escuro"] .dia[open] .dia__num { background: var(--verde); color: #fff; }
