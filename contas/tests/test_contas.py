@@ -335,6 +335,7 @@ class SiteEmAndamentoTests(TestCase):
 
     TITULO = 'Site em andamento!'
 
+    @override_settings(SITE_EM_ANDAMENTO=False)
     def test_desligada_nao_aparece(self):
         self.assertNotContains(self.client.get('/'), self.TITULO)
 
