@@ -253,7 +253,11 @@ sudo systemctl restart fail2ban
 sudo fail2ban-client status        # deve listar sshd e nginx-limit-req
 ```
 
-## 8. Fotos e vídeos no Cloudflare R2 (checklist 4) — opcional, recomendado
+## 8. Fotos e vídeos no Cloudflare R2 (checklist 4) — opcional
+
+> Hoje desligado, por decisão do dono (sem custo): as fotos e vídeos ficam no disco da VPS
+> e vão para o Google Drive no backup (passo 9). Os passos abaixo valem se um dia quiserem
+> ligar; o R2 cobra se passar de 10 GB por mês.
 
 1. Cloudflare → R2 → **Criar bucket** (`soar-midia`).
 2. No bucket → **Configurações → Domínio personalizado**: `midia.operadorasoar.com.br`.
@@ -268,16 +272,40 @@ Não marque "acesso público via r2.dev"; o público entra só pelo domínio per
 
 ## 9. Backup (checklist 3 e 18)
 
+O banco vai todo dia para `/srv/soar/backups` (14 dias) e, com o rclone configurado, para o
+**Google Drive** da Soar (60 dias), junto com as fotos e vídeos espelhados. Sem custo.
+
 ```bash
 sudo cp /srv/soar/app/deploy/backup.sh /usr/local/bin/soar-backup
 sudo chown root:soar /usr/local/bin/soar-backup && sudo chmod 750 /usr/local/bin/soar-backup
-sudo apt install -y rclone && sudo -u soar rclone config      # remoto "r2backup" -> bucket de backup
-sudo -u soar /usr/local/bin/soar-backup                       # roda uma vez à mão para conferir
-sudo crontab -u soar -e     # 15 3 * * * /usr/local/bin/soar-backup >> /var/log/soar/backup.log 2>&1
+sudo -u soar /usr/local/bin/soar-backup        # roda uma vez à mão para conferir
+sudo ls -lh /srv/soar/backups                  # deve aparecer banco-AAAA-MM-DD.sql.gz
 ```
 
-- Retenção: 14 dias no VPS (no script) e uma regra de ciclo de vida no bucket de backup
-  (ex.: apagar depois de 90 dias).
+**Agendar** o backup (todo dia às 3h15) e a renovação do token do Instagram (4h30), sem abrir
+editor:
+
+```bash
+printf '15 3 * * * /usr/local/bin/soar-backup >> /var/log/soar/backup.log 2>&1
+30 4 * * * /srv/soar/venv/bin/python /srv/soar/app/manage.py renovar_token_instagram >> /var/log/soar/instagram.log 2>&1
+' | sudo crontab -u soar -
+sudo crontab -u soar -l                        # confere as duas linhas
+```
+
+**Cópia no Google Drive** (fora do VPS). O servidor não tem navegador, então a autorização
+do Google é feita uma vez no seu computador:
+
+1. No Windows, baixe o rclone em https://rclone.org/downloads/ (Windows, Intel/AMD 64 bits),
+   descompacte e, no CMD, dentro da pasta descompactada: `rclone authorize "drive"`. O
+   navegador abre: entre com a conta Google da Soar e permita. O CMD mostra um texto entre
+   `--->` e `<---End paste`: copie esse texto (o token).
+2. No servidor: `sudo apt install -y rclone && sudo -u soar rclone config` e responda:
+   `n` (novo remoto) · nome `backup` · tipo `drive` · client_id e client_secret em branco ·
+   scope `1` (acesso total) · service_account_file em branco · editar config avançada `n` ·
+   usar navegador automático `n` · cole o token · shared drive `n` · confirmar `y` · sair `q`.
+3. Teste: `sudo -u soar /usr/local/bin/soar-backup` deve terminar com "backup ok" e criar a
+   pasta `soar-backups` no Google Drive.
+
 - **Teste de restauração obrigatório** antes de entregar:
 
 ```bash
@@ -290,12 +318,8 @@ sudo -u postgres dropdb soar_restauracao
 ### Fotos do Instagram (@operadorasoar)
 
 A linha `SOAR_INSTAGRAM_TOKEN=` já entrou no `.env` no passo 4. O token vence em 60 dias; o
-site renova sozinho a cada 7 dias quando busca as fotos, e o cron abaixo garante a
-renovação mesmo numa semana sem visitas:
-
-```bash
-sudo crontab -u soar -e     # 30 4 * * * cd /srv/soar/app && /srv/soar/venv/bin/python manage.py renovar_token_instagram >> /var/log/soar/instagram.log 2>&1
-```
+site renova sozinho a cada 7 dias quando busca as fotos, e o agendamento das 4h30
+(passo 9, acima) garante a renovação mesmo numa semana sem visitas.
 
 Se o token vencer ou for revogado, gere outro no painel da Meta e troque no `.env`; o novo
 passa na frente do que estava guardado no banco.
