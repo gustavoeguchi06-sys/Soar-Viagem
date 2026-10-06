@@ -10,3 +10,9 @@ def google_login(request):
 
 def sistema_reservas(request):
     return {'sistema_reservas_url': settings.SISTEMA_RESERVAS_URL}
+
+
+def site_em_construcao(request):
+    """A tela "Site em Construção" aparece para todo mundo, menos o dono e a equipe."""
+    equipe = request.user.is_authenticated and request.user.is_staff
+    return {'site_em_construcao': settings.SITE_EM_CONSTRUCAO and not equipe}
