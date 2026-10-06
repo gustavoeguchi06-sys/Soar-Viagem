@@ -198,7 +198,7 @@ class PaginaInicialTests(TestCase):
     def test_pagina_inicial_mostra_as_secoes(self):
         r = self.client.get('/')
         self.assertEqual(r.status_code, 200)
-        for texto in ['Muito além do destino, uma Experiência', 'Encontre a viagem perfeita',
+        for texto in ['Muito além do destino, uma Experiência!', 'Encontre a viagem perfeita',
                       'Próximas experiências', 'Destinos mais amados', 'Por que viajar com a Soar?',
                       'Viajar não tem idade.', '@operadorasoar</a></h2>', 'Pronto para sua próxima aventura?',
                       'Últimas vagas', 'R$ 3.690', 'Natureza']:
@@ -357,7 +357,7 @@ class BannerAlbumHospedagemTests(TestCase):
 
     def test_texto_do_banner_vem_do_painel(self):
         from ..models import TextoBanner
-        self.assertContains(self.client.get('/'), 'Muito além do destino, uma Experiência')
+        self.assertContains(self.client.get('/'), 'Muito além do destino, uma Experiência!')
         texto = TextoBanner.para_editar()
         resposta = self.client.post(reverse('admin:destinations_textobanner_change', args=[texto.pk]),
                                     {'titulo': 'Viaje com quem entende', 'subtitulo': ''})
