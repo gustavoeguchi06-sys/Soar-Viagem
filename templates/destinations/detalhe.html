@@ -640,7 +640,9 @@
                             <svg class="ic-f {% if not cheia %}vazia{% endif %}" viewBox="0 0 24 24"><use href="#ic-estrela"></use></svg>
                             {% endfor %}
                         </span>
-                        <p>“{{ d.texto }}”</p>
+                        <p class="depo__texto">“{{ d.texto }}”</p>
+                        {# aparece só quando o texto passa das 4 linhas (viagem.js) #}
+                        <button type="button" class="depo__mais" hidden aria-expanded="false">Ler tudo</button>
                         {% if d.foto %}<img class="depo__foto" src="{{ d.foto }}" alt="Foto da viagem">{% endif %}
                     </article>
                     {% endfor %}

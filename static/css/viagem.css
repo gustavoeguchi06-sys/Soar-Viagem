@@ -419,6 +419,13 @@ body.pagina-viagem {
 .depo .estrelas-ouro .ic-f { width: 13px; height: 13px; }
 .depo .estrelas-ouro .vazia { color: #d8ddda; }
 .depo p { font-size: .82rem; line-height: 1.45; color: var(--tinta-suave); margin-top: 6px; }
+/* avaliação comprida: 4 linhas e o botão "Ler tudo" */
+.depo__texto { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.depo.aberto .depo__texto { display: block; overflow: visible; }
+.depo__mais { display: block; margin-top: 4px; padding: 0; border: 0; background: none; cursor: pointer;
+              color: var(--verde); font-size: .8rem; font-weight: 700; }
+.depo__mais:hover { text-decoration: underline; }
+.depo__mais[hidden] { display: none; }
 
 .depo__foto { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-top: 10px; }
 
