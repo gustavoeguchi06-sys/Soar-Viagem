@@ -64,13 +64,10 @@
             {% endif %}
 
             {# Só agências e a equipe têm login; quem reserva é a agência parceira. #}
+            {# Visitante não tem botão aqui: as viagens já estão no menu (pedido do dono). #}
             {% if user.agente.aprovado %}
             <a class="btn btn--verde btn--reservar" href="{% block orcamento_href %}{% url 'destinations:calendario' %}{% endblock %}">
                 <span class="btn__resto">Criar</span> <span>orçamento</span>
-            </a>
-            {% else %}
-            <a class="btn btn--verde btn--reservar" href="{% url 'destinations:calendario' %}">
-                <span class="btn__resto">Ver</span> <span>viagens</span>
             </a>
             {% endif %}
             <button class="menu-botao" type="button" id="menuBotao"

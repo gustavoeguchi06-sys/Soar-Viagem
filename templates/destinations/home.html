@@ -222,7 +222,6 @@
                             <span class="in-estrelas in-estrelas--grande" aria-label="Nota {{ d.nota }} de 5">{% for n in "12345" %}{% if forloop.counter <= d.nota %}★{% else %}<span class="vazia">★</span>{% endif %}{% endfor %}</span>
                             <p>“{{ d.texto|truncatechars:220 }}”</p>
                             <div class="in-depo__autor">
-                                <img src="{{ d.avatar }}" alt="">
                                 <div><b>{{ d.nome }}</b><small>{{ d.destino }}</small></div>
                             </div>
                         </div>

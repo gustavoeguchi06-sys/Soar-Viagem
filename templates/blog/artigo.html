@@ -101,28 +101,31 @@
       {% endif %}
       {% endfor %}
 
-      <div class="blog-cta">
-        <div class="blog-cta__foto {% if artigo.destino.imagem_capa %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if artigo.destino.imagem_capa %}<img src="{{ artigo.destino.imagem_capa.url }}" alt="" loading="lazy">{% endif %}</div>
+      {% with primeira=viagens.0 %}
+      <div class="blog-cta" id="viagens-do-artigo">
+        <div class="blog-cta__foto {% if primeira.imagem_capa %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if primeira.imagem_capa %}<img src="{{ primeira.imagem_capa.url }}" alt="" loading="lazy">{% endif %}</div>
         <div class="blog-cta__texto">
-          {% if artigo.destino %}
-          <b>Pronto para viver {{ artigo.destino.nome }}?</b>
-          <p>Viaje com a Soar e conheça {{ artigo.destino.nome }} com conforto, segurança
+          {% if viagens|length == 1 %}
+          <b>Pronto para viver {{ primeira.nome }}?</b>
+          <p>Viaje com a Soar e conheça {{ primeira.nome }} com conforto, segurança
              e experiências incríveis.</p>
+          {% elif viagens %}
+          <b>Pronto para viver uma dessas viagens?</b>
+          <p>Viaje com a Soar com conforto, segurança e experiências incríveis.</p>
           {% else %}
           <b>Pronto para a sua próxima viagem?</b>
           <p>Viaje com a Soar e conheça o Brasil com conforto, segurança e experiências incríveis.</p>
           {% endif %}
           <div class="blog-cta__acoes">
-            {% if artigo.destino %}
-            <a class="btn btn--verde" href="{{ artigo.destino.get_absolute_url }}">Ver a viagem para {{ artigo.destino.nome }}</a>
-            {% else %}
+            {% for viagem in viagens %}
+            <a class="btn btn--verde" href="{{ viagem.get_absolute_url }}">Ver a viagem para {{ viagem.nome }}</a>
+            {% empty %}
             <a class="btn btn--verde" href="{% url 'destinations:lista' %}">Ver viagens</a>
-            {% endif %}
-            <a class="btn btn--contorno" href="https://wa.me/5511993903366" target="_blank" rel="noopener">
-              <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>Falar com a Soar</a>
+            {% endfor %}
           </div>
         </div>
       </div>
+      {% endwith %}
 
       {% if anterior or proximo %}
       <nav class="blog-navpost">
@@ -150,8 +153,8 @@
         <div class="blog-proxima__bg ph" aria-hidden="true"></div>
         <div class="blog-proxima__texto">
           <b>Sua próxima aventura começa aqui!</b>
-          <p>{% if artigo.destino %}Conheça a viagem para {{ artigo.destino.nome }} e viva dias inesquecíveis.{% else %}Conheça as próximas saídas e viva dias inesquecíveis.{% endif %}</p>
-          <a class="btn btn--branco" href="{% if artigo.destino %}{{ artigo.destino.get_absolute_url }}{% else %}{% url 'destinations:lista' %}{% endif %}">Ver viagens</a>
+          <p>{% if viagens|length == 1 %}Conheça a viagem para {{ viagens.0.nome }} e viva dias inesquecíveis.{% elif viagens %}Conheça as viagens deste artigo e viva dias inesquecíveis.{% else %}Conheça as próximas saídas e viva dias inesquecíveis.{% endif %}</p>
+          <a class="btn btn--branco" href="{% if viagens|length == 1 %}{{ viagens.0.get_absolute_url }}{% elif viagens %}#viagens-do-artigo{% else %}{% url 'destinations:lista' %}{% endif %}">Ver viagens</a>
         </div>
       </div>
 
@@ -166,25 +169,14 @@
         </ul>
       </div>
 
-      <div class="blog-news">
-        <h3>Receba dicas e novidades da Soar</h3>
-        <p>Cadastre-se e receba conteúdos exclusivos para transformar suas viagens.</p>
-        <form class="blog-news__form" method="post" action="{% url 'blog:inscrever' %}">
-          {% csrf_token %}
-          <input type="hidden" name="voltar" value="{{ request.get_full_path }}">
-          <input type="email" name="email" required maxlength="254" autocomplete="email" placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail">
-          <button type="submit" class="btn btn--verde btn--bloco">Cadastrar</button>
-        </form>
-        <small>Ao se cadastrar, você concorda com nossa
-          <a href="{% url 'contas:privacidade' %}">Política de Privacidade</a>.</small>
-      </div>
 
       <div class="blog-card">
         <h3>Siga a Soar no Instagram</h3>
         <p class="blog-insta__sub">Inspirações diárias de destinos incríveis e experiências inesquecíveis!</p>
         <div class="blog-insta">
-          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
-          <span class="ph"></span><span class="ph"></span><span class="ph"></span>
+          {% for f in fotos_instagram %}
+          <a href="{{ f.link }}" target="_blank" rel="noopener" aria-label="{% if f.legenda %}{{ f.legenda }} (Instagram da Soar){% else %}Instagram da Soar{% endif %}"><img src="{{ f.foto }}" alt="" loading="lazy" referrerpolicy="no-referrer"></a>
+          {% endfor %}
         </div>
         <a class="btn btn--verde btn--bloco" href="https://instagram.com/operadorasoar" target="_blank" rel="noopener">@OperadoraSoar</a>
       </div>

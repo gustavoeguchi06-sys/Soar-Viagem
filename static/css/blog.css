@@ -21,7 +21,7 @@
 /* Só em cima e embaixo: "padding: 90px 0 40px" zerava a margem lateral do .wrap
    e, no celular, o título encostava na borda. Embaixo, sobra mais que os 44px
    que o quadro "Neste artigo" sobe por cima do topo, senão ele cobre a data. */
-.blog-hero__inner { position: relative; padding-top: 90px; padding-bottom: 76px; }
+.blog-hero__inner { position: relative; width: 100%; padding-top: 90px; padding-bottom: 76px; }
 .blog-crumbs { font-size: .82rem; color: rgba(255,255,255,.8); margin-bottom: 22px; }
 .blog-crumbs a { color: rgba(255,255,255,.8); text-decoration: none; }
 .blog-crumbs a:hover { color: #fff; }
@@ -140,7 +140,10 @@
 
 .blog-insta__sub { font-size: .84rem; color: var(--body-quiet-color, #6b7a80); margin: 0 0 12px; line-height: 1.5; }
 .blog-insta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-.blog-insta span { aspect-ratio: 1; border-radius: 8px; }
+.blog-insta a { position: relative; display: block; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--verde-escuro, #0d4f31); }
+/* absoluta: foto em pé do Instagram não estica o quadrado */
+.blog-insta img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.blog-insta a:hover img { transform: scale(1.05); }
 
 /* -------- RESPONSIVO -------- */
 @media (max-width: 980px) {
@@ -170,8 +173,10 @@
                  background: linear-gradient(135deg, #0e3b30 0%, #1c6b52 45%, #2f9c7e 100%); }
 .blog-capa__overlay { position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(10,30,24,.82) 0%, rgba(10,30,24,.55) 45%, rgba(10,30,24,.15) 100%); }
-.blog-capa__inner { position: relative; padding-top: 40px; padding-bottom: 40px; }
-.blog-capa h1 { font-size: clamp(2.1rem, 4.5vw, 3rem); font-weight: 800; margin: 12px 0 10px; color: #fff; }
+/* width: 100%: dentro do flex, o .wrap encolhia e ia para o meio; assim o texto
+   fica à esquerda, alinhado com o logo, como na capa da página inicial */
+.blog-capa__inner { position: relative; width: 100%; padding-top: 40px; padding-bottom: 40px; }
+.blog-capa h1 { font-size: clamp(2.1rem, 4.6vw, 3.6rem); font-weight: 800; line-height: 1.08; margin: 12px 0 14px; color: #fff; }
 .blog-capa__sub { font-size: 1.02rem; color: rgba(255,255,255,.92); margin: 0 0 22px; line-height: 1.5; }
 .blog-busca { display: flex; max-width: 480px; background: #fff; border-radius: 12px;
               padding: 6px; box-shadow: 0 14px 34px -18px rgba(0,0,0,.5); }

@@ -429,7 +429,7 @@ class TextoBanner(models.Model):
     """
 
     titulo = models.CharField('Título', max_length=80,
-                              default='Muito além do destino, uma Experiência',
+                              default='Muito além do destino, uma Experiência!',
                               help_text='A frase grande, em letras brancas. Curta: até umas 8 palavras.')
     subtitulo = models.CharField(
         'Frase embaixo do título', max_length=160, blank=True,
