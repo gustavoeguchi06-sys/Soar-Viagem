@@ -222,6 +222,20 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# No ar, o collectstatic grava cada arquivo também com um código no nome
+# (blog.css -> blog.3f9a2c1b.css) e o {% static %} aponta para esse. O Nginx
+# manda o navegador guardar CSS e JS por 30 dias; sem o código, quem já tinha
+# visitado o site ficava com o CSS velho mesmo depois de uma atualização. Com
+# ele, arquivo mudado = endereço novo = o navegador busca na hora.
+# Nos testes não há collectstatic, então fica o armazenamento simples.
+STATICFILES_BACKEND = ('django.contrib.staticfiles.storage.StaticFilesStorage'
+                       if sys.argv[1:2] == ['test']
+                       else 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage')
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': STATICFILES_BACKEND},
+}
+
 # Arquivos enviados pelos usuários (fotos dos destinos, hospedagens, avaliações)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -269,7 +283,7 @@ if R2_BUCKET:
                 'object_parameters': {'CacheControl': 'public, max-age=2592000'},
             },
         },
-        'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+        'staticfiles': {'BACKEND': STATICFILES_BACKEND},
     }
     MEDIA_URL = 'https://{}/'.format(R2_DOMINIO)
 
