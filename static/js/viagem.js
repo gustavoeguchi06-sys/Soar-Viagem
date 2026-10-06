@@ -76,6 +76,19 @@
 
     /* ---------- Carrossel de depoimentos ---------- */
     var trilho = document.getElementById('trilhoDepo');
+
+    /* avaliação maior que 4 linhas: mostra o "Ler tudo" */
+    document.querySelectorAll('.depo').forEach(function (depo) {
+        var texto = depo.querySelector('.depo__texto');
+        var mais = depo.querySelector('.depo__mais');
+        if (!texto || !mais || texto.scrollHeight <= texto.clientHeight + 2) { return; }
+        mais.hidden = false;
+        mais.addEventListener('click', function () {
+            var aberto = depo.classList.toggle('aberto');
+            mais.textContent = aberto ? 'Mostrar menos' : 'Ler tudo';
+            mais.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        });
+    });
     document.querySelectorAll('[data-depo]').forEach(function (botao) {
         botao.addEventListener('click', function () {
             if (!trilho) { return; }
