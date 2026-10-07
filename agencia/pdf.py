@@ -336,31 +336,24 @@ def _pacote(destino, viagem, e):
         partes.append(Paragraph('Não incluso', e['secao']))
         partes += _grupos(viagem['nao_incluso_grupos'], e)
 
+    # Todas as hospedagens da viagem, cada uma com as fotos dela: a principal
+    # ao lado do nome e até 3 da galeria embaixo. Antes ia só a primeira (em
+    # ordem alfabética), e a viagem cujo hotel com foto não era o primeiro
+    # chegava ao cliente sem nenhuma foto de hotel.
     hospedagem = viagem['hospedagem']
-    texto = [Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal'])]
-    if hospedagem['sub']:
-        texto.append(Paragraph(_texto(hospedagem['sub']), e['normal']))
     comodidades = ', '.join(c['nome'] for c in hospedagem['comodidades'])
+    hoteis = list(destino.hospedagens.prefetch_related('imagens'))
+    titulo = 'Hospedagens' if len(hoteis) > 1 else 'Hospedagem'
+    blocos = [_bloco_do_hotel(h, hospedagem['sub'] if i == 0 else '', e)
+              for i, h in enumerate(hoteis)]
+    if not blocos:   # viagem sem hospedagem cadastrada: o texto padrão da página
+        blocos = [[Paragraph('<b>{}</b>'.format(_texto(hospedagem['nome'])), e['normal'])]
+                  + ([Paragraph(_texto(hospedagem['sub']), e['normal'])] if hospedagem['sub'] else [])]
     if comodidades:
-        texto += [Spacer(1, 3), Paragraph(_texto('Comodidades: ' + comodidades), e['rotulo'])]
-    fotos_hotel = _fotos_da_hospedagem(destino)
-    principal = _foto(fotos_hotel[0][0], 70 * mm, 48 * mm) if fotos_hotel else None
-    bloco = [Paragraph('Hospedagem', e['secao'])]
-    if principal:
-        # a foto do hotel à esquerda, o nome e as comodidades à direita
-        lado = Table([[principal, texto]], colWidths=[74 * mm, None])
-        lado.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 0), ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-            ('TOPPADDING', (0, 0), (-1, -1), 0),
-        ]))
-        bloco.append(lado)
-        extras = _grade(fotos_hotel[1:4], e, altura=30 * mm)
-        if extras:
-            bloco += [Spacer(1, 6), extras]
-    else:
-        bloco += texto
-    partes.append(KeepTogether(bloco))
+        blocos[-1] += [Spacer(1, 4), Paragraph(_texto('Comodidades: ' + comodidades), e['rotulo'])]
+    partes.append(KeepTogether([Paragraph(titulo, e['secao'])] + blocos[0]))
+    for bloco in blocos[1:]:
+        partes.append(KeepTogether([Spacer(1, 10)] + bloco))
 
     if viagem['informacoes']:
         partes.append(Paragraph('Informações importantes', e['secao']))
@@ -368,14 +361,30 @@ def _pacote(destino, viagem, e):
     return partes
 
 
-def _fotos_da_hospedagem(destino):
-    """A foto principal da hospedagem do pacote e as da galeria dela."""
-    hospedagem = destino.hospedagens.first()
-    if not hospedagem:
-        return []
-    fotos = [(hospedagem.imagem, '')] if hospedagem.imagem else []
-    fotos += [(i.imagem, i.legenda) for i in hospedagem.imagens.all() if i.imagem]
-    return fotos
+def _bloco_do_hotel(hotel, sub, e):
+    """Nome (e endereço) do hotel com a foto principal ao lado e até 3 da galeria embaixo."""
+    texto = [Paragraph('<b>{}</b>'.format(_texto(hotel.nome)), e['normal'])]
+    if sub:
+        texto.append(Paragraph(_texto(sub), e['normal']))
+    if hotel.endereco:
+        texto.append(Paragraph(_texto(hotel.endereco), e['rotulo']))
+    fotos = [(hotel.imagem, '')] if hotel.imagem else []
+    fotos += [(i.imagem, i.legenda) for i in hotel.imagens.all() if i.imagem]
+    principal = _foto(fotos[0][0], 70 * mm, 48 * mm) if fotos else None
+    if not principal:
+        return texto
+    # a foto do hotel à esquerda, o nome à direita
+    lado = Table([[principal, texto]], colWidths=[74 * mm, None])
+    lado.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0), ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    bloco = [lado]
+    extras = _grade(fotos[1:4], e, altura=30 * mm)
+    if extras:
+        bloco += [Spacer(1, 6), extras]
+    return bloco
 
 
 def _com_titulo(titulo, blocos):
