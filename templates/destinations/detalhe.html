@@ -640,7 +640,18 @@
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
                 {% for p in viagem.faq %}
-                <p><b style="color:var(--preto)">{{ p.pergunta }}</b><br>{{ p.resposta }}</p>
+                <div class="faq-item">
+                    <b class="faq-item__pergunta">{{ p.pergunta }}</b>
+                    {% for b in p.blocos %}
+                    {% if b.tipo == 'lista' %}
+                    <ul class="faq-item__lista">{% for i in b.itens %}<li>{{ i }}</li>{% endfor %}</ul>
+                    {% elif b.tipo == 'subtitulo' %}
+                    <p class="faq-item__sub">{{ b.texto }}</p>
+                    {% else %}
+                    <p>{{ b.texto }}</p>
+                    {% endif %}
+                    {% endfor %}
+                </div>
                 {% endfor %}
             </div>
         </details>

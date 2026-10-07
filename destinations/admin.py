@@ -139,7 +139,10 @@ class PerguntaFrequenteInline(admin.TabularInline):
     model = PerguntaFrequente
     extra = 0
     fields = ['ordem', 'pergunta', 'resposta']
-    formfield_overrides = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 2})}}
+    # caixa grande: a resposta costuma ter vários tópicos (• no começo da linha)
+    formfield_overrides = {models.TextField: {'widget': forms.Textarea(attrs={
+        'rows': 10, 'class': 'faq-resposta',
+        'placeholder': 'Para um tópico, comece a linha com •  ou  -'})}}
     verbose_name = 'pergunta'
     verbose_name_plural = 'Perguntas frequentes'
     classes = ['collapse']
