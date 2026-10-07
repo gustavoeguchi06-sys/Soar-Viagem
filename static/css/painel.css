@@ -815,6 +815,10 @@ fieldset .description {
     overflow: hidden;
 }
 .inline-group .tabular td.original p { margin: 0; }
+/* FAQ da viagem: a resposta tem tópicos, então a caixa é larga e alta */
+.inline-group .tabular td.field-resposta { width: 60%; }
+.inline-group textarea.faq-resposta { width: 100%; min-width: 360px; min-height: 220px;
+                                      box-sizing: border-box; line-height: 1.55; resize: vertical; }
 .inline-related h3 {
     padding: 9px 16px;
     background: var(--darkened-bg);

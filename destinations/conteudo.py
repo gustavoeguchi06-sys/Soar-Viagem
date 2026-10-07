@@ -382,6 +382,38 @@ DIA_NO_TITULO = re.compile(r'^\s*dia\s*\d+\s*[:.\-–—]?\s*', re.IGNORECASE)
 MARCADORES = '-•*–—·▪●'
 
 
+def blocos_de_texto(texto):
+    """Texto do painel em parágrafos e listas, para a resposta do FAQ.
+
+        Como o clima é quente...      ->  [{'tipo': 'p', 'texto': 'Como o clima...'},
+        Vestuário e Banho                  {'tipo': 'subtitulo', 'texto': 'Vestuário e Banho'},
+        • Roupas leves: shorts...          {'tipo': 'lista', 'itens': ['Roupas leves...',
+        • Roupas de banho: ...                                         'Roupas de banho...']}]
+
+    Linha que começa com marcador (•, -, *...) vira tópico; as seguidas formam
+    uma lista só. As outras linhas são parágrafos, e a curta logo antes de uma
+    lista vira o subtítulo dela; linha em branco é ignorada.
+    """
+    blocos = []
+    for linha in (texto or '').splitlines():
+        com_marcador = linha.lstrip()[:1] in MARCADORES
+        limpo = linha.lstrip(MARCADORES + ' \t').strip() if com_marcador else linha.strip()
+        if not limpo:
+            continue
+        if com_marcador:
+            if not blocos or blocos[-1]['tipo'] != 'lista':
+                blocos.append({'tipo': 'lista', 'itens': []})
+            blocos[-1]['itens'].append(limpo)
+        else:
+            blocos.append({'tipo': 'p', 'texto': limpo})
+    # linha curta logo antes de uma lista ("Calçados") é o subtítulo dela
+    for bloco, seguinte in zip(blocos, blocos[1:]):
+        if (bloco['tipo'] == 'p' and seguinte['tipo'] == 'lista' and len(bloco['texto']) <= 60
+                and bloco['texto'][-1] not in '.!?'):
+            bloco['tipo'] = 'subtitulo'
+    return blocos
+
+
 def agrupar(linhas):
     """Lista "um item por linha" em grupos: linha terminada em ":" é título.
 
@@ -477,6 +509,8 @@ def montar_viagem(destino, avaliacoes):
     ]
 
     faq = [{'pergunta': p.pergunta, 'resposta': p.resposta} for p in destino.perguntas.all()] or FAQ
+    # a resposta respeita as linhas do painel: tópico com • vira lista
+    faq = [{**p, 'blocos': blocos_de_texto(p['resposta'])} for p in faq]
 
     curto = destino.nome.split('/')[0]
 

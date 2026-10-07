@@ -521,3 +521,24 @@ class UmCardPorSaidaTests(TestCase):
         self.assertEqual(resposta.context['saida_marcada'], str(segunda.pk))
         inventada = self.client.get(destino.get_absolute_url(), {'saida': '999'})
         self.assertNotEqual(inventada.context['saida_marcada'], '999')
+
+
+class FaqComTopicosTests(TestCase):
+    def test_linha_com_marcador_vira_topico(self):
+        from ..conteudo import blocos_de_texto
+        from ..models import PerguntaFrequente
+        texto = ('Como o clima é quente, roupas leves:\n\nVestuário e Banho\n'
+                 '• Roupas leves: shorts\n- Roupas de banho: 3 trocas\n\nCalçados\n• Sapatilha')
+        self.assertEqual(blocos_de_texto(texto), [
+            {'tipo': 'p', 'texto': 'Como o clima é quente, roupas leves:'},
+            {'tipo': 'subtitulo', 'texto': 'Vestuário e Banho'},
+            {'tipo': 'lista', 'itens': ['Roupas leves: shorts', 'Roupas de banho: 3 trocas']},
+            {'tipo': 'subtitulo', 'texto': 'Calçados'},
+            {'tipo': 'lista', 'itens': ['Sapatilha']},
+        ])
+        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
+        PerguntaFrequente.objects.create(destino=destino, pergunta='Que roupa levar?',
+                                         resposta=texto)
+        html = self.client.get(destino.get_absolute_url()).content.decode()
+        self.assertIn('<li>Roupas de banho: 3 trocas</li>', html)
+        self.assertIn('<p class="faq-item__sub">Calçados</p>', html)

@@ -812,6 +812,14 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
 .incl-grupo + .incl-grupo { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); }
 .incl-grupo__titulo { margin: 0 0 10px; font-size: .82rem; font-weight: 700; letter-spacing: .06em;
                       text-transform: uppercase; color: var(--verde); }
+/* FAQ: a resposta com parágrafos e tópicos, como o dono escreveu no painel */
+.faq-item + .faq-item { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--linha); }
+.faq-item__pergunta { display: block; margin-bottom: 4px; color: var(--preto); }
+.faq-item p { margin: 0 0 6px; line-height: 1.55; }
+.faq-item__lista { margin: 2px 0 8px; padding-left: 20px; line-height: 1.55; }
+.faq-item__lista li { margin: 2px 0; }
+.faq-item__lista li::marker { color: var(--verde); }
+.faq-item p.faq-item__sub { margin: 10px 0 2px; font-weight: 700; color: var(--preto); }
 .dia__corpo .incl-grupo__titulo { margin-top: 12px; }
 .dia__corpo .incl-grupo__titulo:first-child { margin-top: 0; }
 
