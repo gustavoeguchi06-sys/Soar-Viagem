@@ -291,7 +291,8 @@ def _acomodacoes(destino):
     if precos:
         lista = [{'chave': p.tipo, 'nome': POR_CHAVE[p.tipo]['nome'],
                   'pessoas': POR_CHAVE[p.tipo]['pessoas'],
-                  'capacidade': POR_CHAVE[p.tipo]['capacidade'], 'valor': p.preco,
+                  'capacidade': POR_CHAVE[p.tipo]['capacidade'],
+                  'sem_quarto': POR_CHAVE[p.tipo].get('sem_quarto', False), 'valor': p.preco,
                   'preco': _reais(p.preco), 'consulte': False, 'padrao': False}
                  for p in precos]
     elif destino.preco_base is not None:

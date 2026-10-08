@@ -34,10 +34,13 @@ def textos_do_periodo(ida, volta):
     mes_ida = MESES[ida.month]
     textos = {
         'dias': f'{total_dias} dia' + ('' if total_dias == 1 else 's'),
-        'noites': f'{noites} noite' + ('' if noites == 1 else 's'),
+        'noites': (f'{noites} noite' + ('' if noites == 1 else 's')) if noites else 'sem pernoite',
         'mes_ano': f'{mes_ida} {ida.year}',
     }
-    if (ida.month, ida.year) == (volta.month, volta.year):
+    if ida == volta:   # passeio de 1 dia
+        textos['periodo'] = f'{ida.day}'
+        textos['proxima_saida'] = f'{ida.day} de {mes_ida} de {ida.year}'
+    elif (ida.month, ida.year) == (volta.month, volta.year):
         textos['periodo'] = f'{ida.day} a {volta.day}'
         textos['proxima_saida'] = f'{ida.day} a {volta.day} de {mes_ida} de {ida.year}'
     elif ida.year == volta.year:
@@ -377,7 +380,8 @@ class Saida(models.Model):
         """[{'nome': 'Casal', 'quantidade': 4}, ...] só dos tipos preenchidos."""
         lista = []
         for chave, nome in TIPOS_DE_QUARTO:
-            quantidade = getattr(self, 'quartos_' + chave)
+            # bate-volta não tem quarto, nem campo de quartos na data
+            quantidade = getattr(self, 'quartos_' + chave, None)
             if quantidade is not None:
                 lista.append({'chave': chave, 'nome': nome, 'quantidade': quantidade})
         return lista
