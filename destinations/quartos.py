@@ -2,7 +2,8 @@
 
 Os tipos de quarto são fixos (o orçamento da agência e a página da viagem
 precisam saber quantas pessoas cabem em cada um); o preço por pessoa e quantos
-quartos há em cada data são do dono.
+quartos há em cada data são do dono. O "Bate-volta" é o passeio de 1 dia sem
+hospedagem: preço por pessoa, sem quarto (sem_quarto).
 """
 
 TIPOS = [
@@ -11,6 +12,9 @@ TIPOS = [
     {'chave': 'duplo', 'nome': 'Duplo (Twin)', 'pessoas': '2 pessoas (camas separadas)',
      'capacidade': 2},
     {'chave': 'triplo', 'nome': 'Triplo', 'pessoas': '3 pessoas', 'capacidade': 3},
+    # Passeio de 1 dia, sem hospedagem: não tem quarto, só quantas pessoas vão.
+    {'chave': 'bate_volta', 'nome': 'Bate-volta (1 dia)', 'pessoas': 'Por pessoa, sem hospedagem',
+     'capacidade': 0, 'sem_quarto': True},
 ]
 POR_CHAVE = {t['chave']: t for t in TIPOS}
 ORDEM = {t['chave']: i for i, t in enumerate(TIPOS)}

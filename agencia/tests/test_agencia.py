@@ -361,6 +361,27 @@ class PainelAgenciaTests(TestCase):
         self.assertContains(resposta, 'Escolha pelo menos um quarto.')
         self.assertFalse(Orcamento.objects.exists())
 
+    def test_bate_volta_so_conta_pessoas(self):
+        from destinations.models import PrecoQuarto
+        hoje = timezone.localdate()
+        passeio = Destino.objects.create(nome='Gruta', slug='gruta', descricao='Passeio.')
+        PrecoQuarto.objects.create(destino=passeio, tipo='bate_volta', preco=Decimal('250'))
+        dia = Saida.objects.create(destino=passeio, vagas=20, data_ida=hoje + timedelta(days=10),
+                                   data_volta=hoje + timedelta(days=10))
+        self.entrar(self.ag1)
+        pagina = self.client.get(passeio.get_absolute_url()).content.decode()
+        self.assertIn('name="pessoas_bate_volta"', pagina)
+        self.assertNotIn('name="quartos_bate_volta"', pagina)
+        self.assertIn(dia.texto, pagina)
+        self.client.post(reverse('agencia:orcamento_criar', args=['gruta']), {
+            'cliente_nome': 'Bruno', 'cliente_email': 'bruno@gmail.com', 'saida': dia.pk,
+            'pessoas_bate_volta': 4})
+        orcamento = Orcamento.objects.get()
+        self.assertEqual((orcamento.pessoas, orcamento.valor), (4, Decimal('1000')))
+        self.assertEqual(orcamento.acomodacao_texto, 'Bate-volta (1 dia), 4 pessoas')
+        self.assertTrue(self.client.get(
+            reverse('agencia:orcamento_pdf', args=[orcamento.pk])).content.startswith(b'%PDF'))
+
     def test_nao_escolhe_mais_quartos_do_que_a_data_tem(self):
         self.saida.quartos_duplo = 1
         self.saida.save()

@@ -30,6 +30,16 @@ class EscolhaDeQuartos:
         # iniciais: a escolha que já existe (ex.: a do visitante, no orçamento da agência)
         marcados = {q['tipo']: q for q in iniciais or []}
         for a in self._acomodacoes:
+            if a.get('sem_quarto'):
+                # bate-volta: só quantas pessoas
+                pessoas = marcados.get(a['chave'], {}).get('pessoas', 0) if marcados else \
+                    (1 if a['padrao'] else 0)
+                self.fields['pessoas_' + a['chave']] = forms.IntegerField(
+                    label='Pessoas', required=False, min_value=0, max_value=MAX_ADULTOS,
+                    initial=pessoas,
+                    widget=forms.NumberInput(attrs={'min': 0, 'max': MAX_ADULTOS,
+                                                    'inputmode': 'numeric'}))
+                continue
             if marcados:
                 q = marcados.get(a['chave'], {})
                 um_quarto, pessoas = q.get('quartos', 0), q.get('pessoas', 0)
@@ -52,8 +62,10 @@ class EscolhaDeQuartos:
     @property
     def quartos_campos(self):
         """Uma linha por tipo de quarto da viagem, com os campos de quartos e pessoas."""
-        return [{'a': a, 'quartos': self['quartos_' + a['chave']],
-                 'pessoas': self['pessoas_' + a['chave']] if a['capacidade'] > 1 else None}
+        return [{'a': a,
+                 'quartos': None if a.get('sem_quarto') else self['quartos_' + a['chave']],
+                 'pessoas': self['pessoas_' + a['chave']]
+                 if a.get('sem_quarto') or a['capacidade'] > 1 else None}
                 for a in self._acomodacoes]
 
     def conferir_quartos(self, dados, saida=None, obrigatorio=True):
@@ -65,6 +77,13 @@ class EscolhaDeQuartos:
         escolhidos = []
         for a in self._acomodacoes:
             chave, lotacao, nome = a['chave'], a['capacidade'], a['nome']
+            preco = str(a['valor']) if a['valor'] is not None else None
+            if a.get('sem_quarto'):
+                pessoas = dados.get('pessoas_' + chave) or 0
+                if pessoas:
+                    escolhidos.append({'tipo': chave, 'quartos': 0, 'pessoas': pessoas,
+                                       'preco': preco})
+                continue
             quartos = dados.get('quartos_' + chave) or 0
             # Single: uma pessoa por quarto, sem campo de pessoas
             pessoas = (dados.get('pessoas_' + chave) or 0) if lotacao > 1 else quartos
@@ -101,12 +120,19 @@ class EscolhaDeQuartos:
 
 
 def texto_dos_quartos(quartos):
-    """[{"tipo": "duplo", "quartos": 2, "pessoas": 3}] -> '2 quartos Duplo (Twin), 3 pessoas'"""
+    """[{"tipo": "duplo", "quartos": 2, "pessoas": 3}] -> '2 quartos Duplo (Twin), 3 pessoas'
+
+    Bate-volta (sem quarto): 'Bate-volta (1 dia), 3 pessoas'.
+    """
     from .quartos import POR_CHAVE
     partes = []
     for q in quartos or []:
         tipo = POR_CHAVE.get(q.get('tipo'))
         if tipo is None:
+            continue
+        if tipo.get('sem_quarto'):
+            partes.append('{}, {} pessoa{}'.format(tipo['nome'], q['pessoas'],
+                                                   's' if q['pessoas'] != 1 else ''))
             continue
         partes.append('{} quarto{} {}, {} pessoa{}'.format(
             q['quartos'], 's' if q['quartos'] != 1 else '', tipo['nome'],

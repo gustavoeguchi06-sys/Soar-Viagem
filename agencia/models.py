@@ -19,6 +19,7 @@ ACOMODACOES = [
     ('casal', 'Casal: 2 pessoas'),
     ('duplo', 'Duplo (Twin): 2 pessoas'),
     ('triplo', 'Triplo: 3 pessoas'),
+    ('bate_volta', 'Bate-volta (1 dia, sem hospedagem)'),
 ]
 
 VALIDADE = timedelta(hours=72)

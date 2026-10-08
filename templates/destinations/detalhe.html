@@ -288,12 +288,14 @@
                             <span class="acom__preco {% if a.consulte %}consulte{% endif %}">{{ a.preco }}</span>
                         </div>
                         <div class="acom__escolha">
+                            {% if linha.quartos %}
                             {% include 'destinations/_contador.html' with campo=linha.quartos papel='quartos' %}
+                            {% endif %}
                             {% if linha.pessoas %}
                             {% include 'destinations/_contador.html' with campo=linha.pessoas papel='pessoas' %}
                             {% endif %}
                         </div>
-                        {% for e in linha.quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}
+                        {% if linha.quartos %}{% for e in linha.quartos.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}{% endif %}
                         {% if linha.pessoas %}{% for e in linha.pessoas.errors %}<small class="orc-erro">{{ e }}</small>{% endfor %}{% endif %}
                     </div>
                     {% endwith %}

@@ -542,3 +542,13 @@ class FaqComTopicosTests(TestCase):
         html = self.client.get(destino.get_absolute_url()).content.decode()
         self.assertIn('<li>Roupas de banho: 3 trocas</li>', html)
         self.assertIn('<p class="faq-item__sub">Calçados</p>', html)
+
+
+class SaidaDeUmDiaTests(TestCase):
+    def test_ida_e_volta_no_mesmo_dia(self):
+        from datetime import date
+        from ..models import textos_do_periodo
+        textos = textos_do_periodo(date(2027, 6, 16), date(2027, 6, 16))
+        self.assertEqual(textos['proxima_saida'], '16 de Junho de 2027')
+        self.assertEqual((textos['dias'], textos['noites']), ('1 dia', 'sem pernoite'))
+        self.assertEqual(textos_do_periodo(date(2027, 6, 16), date(2027, 6, 17))['noites'], '1 noite')
