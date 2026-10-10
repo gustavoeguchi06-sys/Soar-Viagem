@@ -145,6 +145,23 @@ class ViagensDoArtigoTests(BlogBase):
         self.assertIn('Ver a viagem para Jalapão', html)
         self.assertIn('Ver a viagem para Bonito', html)
 
+    def test_painel_mostra_as_viagens_em_caixinhas_sem_o_mais(self):
+        from destinations.models import Destino
+        a = self.artigo('teste-painel')
+        jalapao = Destino.objects.create(nome='Jalapão', slug='jalapao', descricao='x')
+        Destino.objects.create(nome='Bonito', slug='bonito', descricao='x')
+        a.destinos.add(jalapao)
+        self.client.force_login(self.dono())
+        html = self.client.get(reverse('admin:blog_artigo_change', args=[a.pk])).content.decode()
+        campo = html[html.index('class="form-row field-destinos'):]
+        campo = campo[:campo.index('</fieldset>')]
+        self.assertIn('class="viagens-escolha"', campo)
+        self.assertEqual(campo.count('type="checkbox" name="destinos"'), 2)
+        self.assertIn('checked', campo)
+        self.assertNotIn('add_id_destinos', campo)
+        self.assertNotIn('collapse', html[html.rindex('<fieldset', 0, html.index('field-destinos')):
+                                          html.index('field-destinos')])
+
     def test_enter_no_titulo_vira_subtitulo(self):
         from ..admin import ArtigoForm
         form = ArtigoForm()
@@ -223,3 +240,22 @@ class PainelTests(BlogBase):
         html = self.client.get('/painel/').content.decode()
         self.assertIn('Blog Soar', html)
         self.assertIn('Novo artigo no blog', html)
+
+
+class AtracaoComRelatoTests(BlogBase):
+    def test_ler_mais_abre_o_relato_inteiro(self):
+        from ..models import Atracao
+        a = self.artigo('teste-atracoes')
+        Secao.objects.create(artigo=a, titulo='O que levar', mostrar_atracoes=True)
+        relato = 'Indispensável para os lagos.\n\nProtege os pés <das pedras>.'
+        Atracao.objects.create(artigo=a, nome='Calçado aquático', descricao=relato, ordem=1)
+        Atracao.objects.create(artigo=a, nome='Toalha', ordem=2)
+        html = self.client.get('/blog/teste-atracoes/').content.decode()
+        # com relato: cartão clicável, "Ler mais" e o texto em parágrafos, escapado
+        self.assertEqual(html.count('data-atracao aria-haspopup'), 1)
+        self.assertIn('Ler mais', html)
+        self.assertIn('<p>Protege os pés &lt;das pedras&gt;.</p>', html)
+        self.assertIn('id="atracaoPopup"', html)
+        self.assertIn('js/blog.js', html)
+        # sem relato: cartão comum, sem botão
+        self.assertIn('<b>Toalha</b>', html)

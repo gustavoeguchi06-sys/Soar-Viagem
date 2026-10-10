@@ -103,6 +103,7 @@ html[data-tema="escuro"] .conta-vazio
 html[data-tema="escuro"] .blog-indice,
 html[data-tema="escuro"] .blog-meses span,
 html[data-tema="escuro"] .blog-atracao,
+html[data-tema="escuro"] .atracao-popup,
 html[data-tema="escuro"] .blog-cta,
 html[data-tema="escuro"] .blog-card,
 html[data-tema="escuro"] .blog-news,
@@ -190,3 +191,8 @@ html[data-tema="escuro"] .interesse__recebido { color: var(--verde-texto); }
 html[data-tema="escuro"] .incl-grupo__titulo { color: var(--verde-texto); }
 html[data-tema="escuro"] .dia__num { background: #10371f; color: var(--verde-texto); }
 html[data-tema="escuro"] .dia[open] .dia__num { background: var(--verde); color: #fff; }
+
+/* Atrações do blog: "Ler mais" e o pop-up com o relato */
+html[data-tema="escuro"] .blog-atracao__mais { color: var(--verde-texto); }
+html[data-tema="escuro"] .atracao-popup { color: var(--tinta); }
+html[data-tema="escuro"] .atracao-popup__relato p { color: var(--tinta-suave); }

@@ -70,11 +70,22 @@
       {% if secao.mostrar_atracoes and atracoes %}
       <div class="blog-atracoes">
         {% for a in atracoes %}
+        {% if a.descricao %}
+        {% comment %}Com relato, o cartão inteiro é um botão: abre o pop-up #atracaoPopup
+        (static/js/blog.js) com a foto grande e o texto completo.{% endcomment %}
+        <button type="button" class="blog-atracao blog-atracao--clica" data-atracao aria-haspopup="dialog">
+          <span class="blog-atracao__foto {% if a.foto %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if a.foto %}<img src="{{ a.foto.url }}" alt="" loading="lazy">{% endif %}</span>
+          <b>{{ a.nome }}</b>
+          <small>{{ a.descricao }}</small>
+          <span class="blog-atracao__mais">Ler mais</span>
+          <span class="blog-atracao__relato" hidden>{{ a.descricao|linebreaks }}</span>
+        </button>
+        {% else %}
         <div class="blog-atracao">
           <div class="blog-atracao__foto {% if a.foto %}tem-foto{% else %}ph{% endif %}" aria-hidden="true">{% if a.foto %}<img src="{{ a.foto.url }}" alt="" loading="lazy">{% endif %}</div>
           <b>{{ a.nome }}</b>
-          {% if a.descricao %}<small>{{ a.descricao }}</small>{% endif %}
         </div>
+        {% endif %}
         {% endfor %}
       </div>
       {% endif %}
@@ -174,4 +185,16 @@
     </aside>
   </div>
 </article>
+{% if atracoes %}
+<dialog class="atracao-popup" id="atracaoPopup" aria-labelledby="atracaoNome">
+  <button type="button" class="atracao-popup__fechar" data-atracao-fechar aria-label="Fechar">&times;</button>
+  <div class="atracao-popup__foto"></div>
+  <div class="atracao-popup__texto">
+    <h3 id="atracaoNome"></h3>
+    <div class="atracao-popup__relato"></div>
+  </div>
+</dialog>
+{% endif %}
 {% endblock %}
+
+{% block scripts %}{% if atracoes %}<script src="{% static 'js/blog.js' %}" defer></script>{% endif %}{% endblock %}

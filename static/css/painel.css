@@ -974,6 +974,10 @@ body.login #content { padding: 12px 0 0; }
 .meses-escolha { display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .meses-escolha > div { margin: 0; }
 .meses-escolha label { display: inline-flex; align-items: center; gap: 4px; font-weight: 400; }
+/* Viagens ligadas ao artigo (blog/admin.py): todas as viagens, uma caixinha cada */
+.viagens-escolha { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px 18px; margin: 0; padding: 0; }
+.viagens-escolha > div { margin: 0; }
+.viagens-escolha label { display: flex; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; padding: 4px 0; }
 
 /* O Django fixa todo <select> em 30px de altura; com a margem interna do
    tema, o texto da opção escolhida ficava cortado (ou sumia). */
