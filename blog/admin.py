@@ -13,6 +13,8 @@ from django.utils.html import format_html
 
 from destinations.admin import miniatura
 
+from destinations.models import Destino
+
 from .models import MESES, Artigo, Atracao, Categoria, Inscricao, Secao
 
 CALENDARIO = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
@@ -103,12 +105,30 @@ class ArtigoAdmin(admin.ModelAdmin):
     search_fields = ['titulo', 'resumo', 'introducao']
     date_hierarchy = 'data_publicacao'
     prepopulated_fields = {'slug': ['titulo']}
-    autocomplete_fields = ['destinos']
     readonly_fields = ['previa_capa', 'tempo_de_leitura', 'leituras', 'criado_em', 'atualizado_em']
     actions = ['publicar', 'voltar_para_rascunho']
     inlines = [SecaoInline, AtracaoInline]
     save_on_top = True
     list_per_page = 30
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        # A busca (autocomplete) dentro de um bloco recolhido abria espremida,
+        # com largura zero. Com poucas viagens, a lista de caixinhas é mais
+        # simples: todas aparecem e é só marcar.
+        if db_field.name == 'destinos':
+            kwargs['queryset'] = Destino.objects.order_by('nome')
+            kwargs['widget'] = forms.CheckboxSelectMultiple(attrs={'class': 'viagens-escolha'})
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        campo = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == 'destinos':
+            # sem o "+" (cadastrar viagem nova daqui) e sem o lápis ao lado
+            campo.widget.can_add_related = False
+            campo.widget.can_change_related = False
+            campo.widget.can_view_related = False
+            campo.widget.can_delete_related = False
+        return campo
 
     fieldsets = [
         ('O artigo', {
@@ -129,7 +149,6 @@ class ArtigoAdmin(admin.ModelAdmin):
             'description': 'A etiqueta verde que aparece sobre a foto do cartão.',
         }),
         ('Viagens ligadas', {
-            'classes': ['collapse'],
             'fields': ['destinos'],
         }),
         ('Registro', {
