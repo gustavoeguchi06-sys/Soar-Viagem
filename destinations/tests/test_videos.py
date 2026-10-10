@@ -171,3 +171,32 @@ class LimiteDeEnvioDeVideoTests(TestCase):
         self.assertEqual(self._postar('/painel/', 6000).status_code, 413)
         # fora do painel vale o teto pequeno, mesmo para a equipe
         self.assertEqual(self._postar('/destinos/', 3000).status_code, 413)
+
+
+@override_settings(MEDIA_ROOT=PASTA)
+class BannerVariasFotosTests(TestCase):
+    def setUp(self):
+        dono = User.objects.create_superuser('dono', 'dono@soar.test', 'senha-teste-123')
+        self.client.force_login(dono)
+
+    def test_envia_varias_fotos_de_uma_vez(self):
+        from io import BytesIO
+
+        from PIL import Image
+
+        def jpg(nome):
+            saida = BytesIO()
+            Image.new('RGB', (40, 30), (30, 120, 80)).save(saida, 'JPEG')
+            return SimpleUploadedFile(nome, saida.getvalue(), content_type='image/jpeg')
+
+        SlideInicio.objects.create(imagem=_foto(), ordem=4)
+        lista = reverse('admin:destinations_slideinicio_changelist')
+        self.assertContains(self.client.get(lista), 'Adicionar várias fotos de uma vez')
+        falsa = SimpleUploadedFile('falsa.jpg', b'nao sou foto', content_type='image/jpeg')
+        resposta = self.client.post(reverse('admin:destinations_slideinicio_varias'),
+                                    {'fotos': [jpg('a.jpg'), jpg('b.jpg'), falsa]}, follow=True)
+        self.assertContains(resposta, '2 fotos adicionadas ao banner.')
+        self.assertContains(resposta, 'falsa.jpg')
+        # as novas entram no fim da fila, na ordem em que foram escolhidas
+        self.assertEqual(list(SlideInicio.objects.order_by('ordem').values_list('ordem', flat=True)),
+                         [4, 5, 6])

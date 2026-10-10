@@ -488,8 +488,54 @@ class SlideInicioAdmin(admin.ModelAdmin):
     change_list_template = 'admin/destinations/slideinicio/change_list.html'
 
     def changelist_view(self, request, extra_context=None):
-        extra_context = {**(extra_context or {}), 'texto_banner': TextoBanner.para_editar()}
+        extra_context = {**(extra_context or {}), 'texto_banner': TextoBanner.para_editar(),
+                         'pode_adicionar': self.has_add_permission(request)}
         return super().changelist_view(request, extra_context)
+
+    def get_urls(self):
+        from django.urls import path
+        return [path('varias/', self.admin_site.admin_view(self.enviar_varias),
+                     name='destinations_slideinicio_varias')] + super().get_urls()
+
+    def enviar_varias(self, request):
+        """Várias fotos de uma vez: cada uma vira uma foto do banner, no fim da fila.
+
+        O "Adicionar" do Django aceita uma foto por vez; aqui o dono escolhe
+        todas no computador e manda juntas. Legenda e vídeo ele põe depois,
+        abrindo a foto, se quiser.
+        """
+        from django.contrib import messages
+        from django.core.exceptions import PermissionDenied
+        from django.db.models import Max
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+        lista = reverse('admin:destinations_slideinicio_changelist')
+        if request.method != 'POST':
+            return redirect(lista)
+        arquivos = request.FILES.getlist('fotos')
+        if not arquivos:
+            messages.warning(request, 'Escolha pelo menos uma foto.')
+            return redirect(lista)
+        FormFoto = forms.modelform_factory(SlideInicio, fields=['imagem'])
+        ordem = (SlideInicio.objects.aggregate(m=Max('ordem'))['m'] or 0) + 1
+        enviadas = 0
+        for arquivo in arquivos:
+            form = FormFoto(files={'imagem': arquivo})
+            if not form.is_valid():
+                erro = ' '.join(form.errors.get('imagem', ['Foto inválida.']))
+                messages.error(request, format_html('<b>{}</b> não entrou: {}', arquivo.name, erro))
+                continue
+            slide = form.save(commit=False)
+            slide.ordem = ordem
+            slide.save()
+            ordem += 1
+            enviadas += 1
+        if enviadas:
+            messages.success(request, '{} foto{} adicionada{} ao banner.'.format(
+                enviadas, 's' if enviadas > 1 else '', 's' if enviadas > 1 else ''))
+        return redirect(lista)
 
     list_display = ['foto', 'legenda', 'tem_video', 'ordem', 'ativo']
     list_display_links = ['foto', 'legenda']
