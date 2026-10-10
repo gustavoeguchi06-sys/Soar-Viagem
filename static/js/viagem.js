@@ -311,6 +311,7 @@
     // setas, contador e legenda; teclado (setas e Esc) e arrastar o dedo no
     // celular também passam as fotos.
     var album = document.getElementById('album');
+    var abrirAlbum = null;
     var fotosAlbum = Array.prototype.slice.call(document.querySelectorAll('[data-album]'));
     if (album && fotosAlbum.length && typeof album.showModal === 'function') {
         var fotoAlbum = album.querySelector('.album__foto');
@@ -352,6 +353,40 @@
             var distancia = ev.changedTouches[0].clientX - inicioToque;
             if (Math.abs(distancia) > 40) { mostrar(atualAlbum + (distancia < 0 ? 1 : -1)); }
             inicioToque = null;
+        });
+        abrirAlbum = function (i) { mostrar(i); album.showModal(); };
+    }
+
+    /* ---------- Galeria: foto grande com setas, como a da hospedagem ---------- */
+    var galFoto = document.getElementById('galFoto');
+    if (galFoto && fotosAlbum.length) {
+        var galImg = galFoto.querySelector('img');
+        var galLegenda = document.getElementById('galLegenda');
+        var galNumero = document.getElementById('galNumero');
+        var galAtual = 0;
+        var galMostrar = function (i) {
+            galAtual = (i + fotosAlbum.length) % fotosAlbum.length;
+            var link = fotosAlbum[galAtual];
+            galFoto.href = link.getAttribute('href');
+            galImg.src = link.getAttribute('href');
+            galImg.alt = link.dataset.legenda || '';
+            galLegenda.textContent = link.dataset.legenda || '';
+            galNumero.textContent = galAtual + 1;
+        };
+        document.querySelectorAll('[data-gal]').forEach(function (b) {
+            b.addEventListener('click', function () { galMostrar(galAtual + parseInt(b.dataset.gal, 10)); });
+        });
+        // a miniatura com "+N" abre o carrossel; as outras trocam a foto grande
+        document.querySelectorAll('[data-gal-ir]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                var i = parseInt(b.dataset.galIr, 10);
+                if (b.querySelector('.gal__mais') && abrirAlbum) { abrirAlbum(i); } else { galMostrar(i); }
+            });
+        });
+        galFoto.addEventListener('click', function (ev) {
+            if (!abrirAlbum) { return; }
+            ev.preventDefault();
+            abrirAlbum(galAtual);
         });
     }
 

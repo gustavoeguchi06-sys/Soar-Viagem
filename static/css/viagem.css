@@ -255,7 +255,7 @@ body.pagina-viagem {
 .dia__texto b { display: block; font-size: .9rem; font-weight: 700; color: var(--preto); line-height: 1.4; }
 .dia__texto small { display: block; font-size: .8rem; color: var(--tinta-suave); line-height: 1.35; }
 .dia .chev { color: var(--tinta-suave); transition: transform .2s; }
-.dia[open] .chev { transform: rotate(180deg); }
+.dia[open] > summary .chev { transform: rotate(180deg); }
 .dia__corpo { padding: 0 18px 16px 102px; font-size: .9rem; color: var(--tinta-suave); }
 
 /* dias do roteiro: sem foto, o texto começa na borda e o detalhe vem em tópicos */
@@ -364,7 +364,7 @@ body.pagina-viagem {
                 display: grid; place-items: center; background: var(--whats); color: #fff; }
 
 /* ===== Hospedagem + galeria ============================================== */
-.duo { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; margin: 8px 0 34px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 8px 0 34px; }
 
 .painel { background: #fff; border: 1px solid var(--linha); border-radius: var(--r-lg); padding: 18px; }
 .painel__titulo { display: flex; align-items: center; gap: 9px; font-size: 1.15rem; font-weight: 700;
@@ -387,6 +387,27 @@ body.pagina-viagem {
                         border-color: rgba(255, 255, 255, .9); }
 .hosp-principal .seta--esq { left: 10px; }
 .hosp-principal .seta--dir { right: 10px; }
+
+/* Galeria no mesmo desenho da hospedagem: foto grande + miniaturas */
+.gal { display: grid; grid-template-columns: 1.35fr 1fr; gap: 8px; }
+.gal--sozinha { grid-template-columns: 1fr; }
+.gal__principal { position: relative; border-radius: var(--r-md); overflow: hidden; min-height: 190px; }
+/* a foto não manda na altura (foto em pé esticava o quadro): quem manda são as miniaturas */
+.gal__principal > a { position: absolute; inset: 0; cursor: zoom-in; }
+.gal__principal img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gal--sozinha .gal__principal { min-height: 260px; }
+.gal__principal .seta { width: 34px; height: 34px; background: rgba(255, 255, 255, .85); color: var(--preto);
+                        border-color: rgba(255, 255, 255, .9); }
+.gal__principal .seta--esq { left: 10px; }
+.gal__principal .seta--dir { right: 10px; }
+.gal__principal .hosp-legenda { max-width: calc(100% - 24px); }
+.gal__mini { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gal__mini button { position: relative; padding: 0; border: 0; background: none; cursor: pointer;
+                    border-radius: var(--r-md); overflow: hidden; display: block; }
+.gal__mini img { width: 100%; height: 91px; object-fit: cover; display: block; }
+.gal__mini button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.gal__mais { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(9, 18, 14, .55);
+             color: #fff; font-weight: 700; font-size: 1.05rem; }
 
 .comodidades { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 14px; padding-top: 4px; }
 .comodidade { display: flex; align-items: center; gap: 8px; font-size: .84rem; color: var(--tinta-suave); }
@@ -539,8 +560,8 @@ body.pagina-viagem {
 
 @media (max-width: 900px) {
     .destaques { grid-template-columns: 1fr 1fr; }
-    .hosp-galeria { grid-template-columns: 1fr; }
-    .hosp-mini img { height: 92px; }
+    .hosp-galeria, .gal { grid-template-columns: 1fr; }
+    .hosp-mini img, .gal__mini img { height: 92px; }
     .rodape__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
     .galeria-grade img { height: 140px; }
 }
@@ -551,7 +572,7 @@ body.pagina-viagem {
     .depoimentos__grade { grid-template-columns: 1fr; }
     .depo { flex: 0 0 84%; }
 
-    .hosp-mini img { height: 78px; }
+    .hosp-mini img, .gal__mini img { height: 78px; }
     .painel{ padding: 16px; }
     .dia__corpo { padding: 0 16px 15px 16px; }
 
@@ -728,6 +749,7 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 /* vídeos da galeria (cadastrados no painel), acima das fotos */
 .galeria-videos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
 .galeria-videos figure { margin: 0; }
+.gal ~ .galeria-videos { margin: 10px 0 0; }
 .galeria-videos video { width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-md); background: #000;
                         display: block; }
 .galeria-videos figcaption { margin-top: 4px; font-size: .8rem; color: var(--tinta-suave); }
@@ -817,8 +839,15 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
 .incl-grupo__titulo { margin: 0 0 10px; font-size: .82rem; font-weight: 700; letter-spacing: .06em;
                       text-transform: uppercase; color: var(--verde); }
 /* FAQ: a resposta com parágrafos e tópicos, como o dono escreveu no painel */
-.faq-item + .faq-item { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--linha); }
-.faq-item__pergunta { display: block; margin-bottom: 4px; color: var(--preto); }
+.faq-item + .faq-item { border-top: 1px solid var(--linha); }
+.faq-item > summary { list-style: none; }
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-item__pergunta { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+                      padding: 12px 0; font-weight: 700; color: var(--preto); cursor: pointer; }
+.faq-item__pergunta:hover { color: var(--verde); }
+.faq-item__pergunta .chev { flex: none; width: 18px; height: 18px; color: var(--tinta-suave); transition: transform .2s; }
+.faq-item[open] > .faq-item__pergunta .chev { transform: rotate(180deg); }
+.faq-item__resposta { padding-bottom: 12px; }
 .faq-item p { margin: 0 0 6px; line-height: 1.55; }
 .faq-item__lista { margin: 2px 0 8px; padding-left: 20px; line-height: 1.55; }
 .faq-item__lista li { margin: 2px 0; }

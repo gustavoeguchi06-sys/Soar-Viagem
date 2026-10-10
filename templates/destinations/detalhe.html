@@ -483,26 +483,45 @@
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-imagem"></use></svg>
                 Galeria
             </h3>
-            {% if videos %}
-            <div class="galeria-videos">
-                {% for v in videos %}
-                <figure>
-                    <video src="{{ v.arquivo.url }}" controls playsinline preload="metadata"
-                           {% if v.capa %}poster="{{ v.capa.url }}"{% endif %}
-                           aria-label="{{ v.legenda|default:destino.nome }}"></video>
-                    {% if v.legenda %}<figcaption>{{ v.legenda }}</figcaption>{% endif %}
-                </figure>
-                {% endfor %}
-            </div>
-            {% endif %}
             {% if viagem.album %}
-            {% comment %}Cada foto abre o carrossel (static/js/viagem.js). Sem JavaScript,
-            o link ainda abre a foto sozinha.{% endcomment %}
-            <div class="galeria-grade">
+            {% comment %}Mesmo desenho da hospedagem: foto grande com setas e legenda, e
+            até 4 miniaturas ao lado. Clicar na foto grande abre o carrossel
+            (static/js/viagem.js); sem JavaScript, o link abre a foto sozinha.
+            Todas as fotos ficam na .galeria-grade, que é a lista do carrossel.{% endcomment %}
+            {% with primeira=viagem.album.0 total=viagem.album|length %}
+            <div class="gal{% if total < 2 %} gal--sozinha{% endif %}">
+                <div class="gal__principal">
+                    <a href="{{ primeira.url }}" id="galFoto" data-gal-abrir="0">
+                        <img src="{{ primeira.url }}" alt="{{ primeira.legenda }}">
+                    </a>
+                    {% if total > 1 %}
+                    <button class="seta seta--esq" type="button" data-gal="-1" aria-label="Foto anterior">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                    </button>
+                    <button class="seta seta--dir" type="button" data-gal="1" aria-label="Próxima foto">
+                        <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                    </button>
+                    {% endif %}
+                    <div class="hosp-legenda">
+                        <b id="galLegenda">{{ primeira.legenda }}</b>
+                        <small><span id="galNumero">1</span> de {{ total }} foto{{ total|pluralize }}</small>
+                    </div>
+                </div>
+                {% if total > 1 %}
+                <div class="gal__mini">
+                    {% for f in viagem.album|slice:"1:5" %}
+                    <button type="button" data-gal-ir="{{ forloop.counter }}" aria-label="Ver {{ f.legenda }}">
+                        <img src="{{ f.url }}" alt="" loading="lazy">
+                        {% if forloop.last and total > 5 %}<span class="gal__mais">+{{ total|add:"-5" }}</span>{% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endwith %}
+            <div class="galeria-grade" hidden>
                 {% for f in viagem.album %}
-                <a href="{{ f.url }}" data-album="{{ forloop.counter0 }}" data-legenda="{{ f.legenda }}">
-                    <img src="{{ f.url }}" alt="{{ f.legenda }}" loading="lazy">
-                </a>
+                <a href="{{ f.url }}" data-album="{{ forloop.counter0 }}" data-legenda="{{ f.legenda }}"></a>
                 {% endfor %}
             </div>
             <dialog class="album" id="album" aria-label="Fotos de {{ destino.nome }}">
@@ -521,6 +540,18 @@
                 </button>
                 <span class="album__contador" aria-live="polite"></span>
             </dialog>
+            {% endif %}
+            {% if videos %}
+            <div class="galeria-videos">
+                {% for v in videos %}
+                <figure>
+                    <video src="{{ v.arquivo.url }}" controls playsinline preload="metadata"
+                           {% if v.capa %}poster="{{ v.capa.url }}"{% endif %}
+                           aria-label="{{ v.legenda|default:destino.nome }}"></video>
+                    {% if v.legenda %}<figcaption>{{ v.legenda }}</figcaption>{% endif %}
+                </figure>
+                {% endfor %}
+            </div>
             {% endif %}
         </section>
         {% endif %}
@@ -641,9 +672,14 @@
                 <svg class="ic chev" viewBox="0 0 24 24"><use href="#ic-chevron"></use></svg>
             </summary>
             <div class="dia__corpo" style="padding-left:22px">
+                {% comment %}Só a pergunta aparece; a resposta abre ao clicar.{% endcomment %}
                 {% for p in viagem.faq %}
-                <div class="faq-item">
-                    <b class="faq-item__pergunta">{{ p.pergunta }}</b>
+                <details class="faq-item">
+                    <summary class="faq-item__pergunta">
+                        <span>{{ p.pergunta }}</span>
+                        <svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-chevron"></use></svg>
+                    </summary>
+                    <div class="faq-item__resposta">
                     {% for b in p.blocos %}
                     {% if b.tipo == 'lista' %}
                     <ul class="faq-item__lista">{% for i in b.itens %}<li>{{ i }}</li>{% endfor %}</ul>
@@ -653,7 +689,8 @@
                     <p>{{ b.texto }}</p>
                     {% endif %}
                     {% endfor %}
-                </div>
+                    </div>
+                </details>
                 {% endfor %}
             </div>
         </details>

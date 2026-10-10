@@ -418,6 +418,10 @@ class BannerAlbumHospedagemTests(TestCase):
         self.assertIn('data-legenda="Rio da Prata"', grade)
         self.assertEqual(grade.count('data-album='), 2)
         self.assertIn('<dialog class="album" id="album"', html)
+        # mesmo desenho da hospedagem: foto grande com setas e a legenda dela
+        self.assertIn('id="galFoto"', html)
+        self.assertIn('data-gal="1"', html)
+        self.assertIn('<b id="galLegenda">Rio da Prata</b>', html)
 
     def test_botao_das_fotos_da_hospedagem_no_destino(self):
         from ..models import Hospedagem
@@ -542,6 +546,9 @@ class FaqComTopicosTests(TestCase):
         html = self.client.get(destino.get_absolute_url()).content.decode()
         self.assertIn('<li>Roupas de banho: 3 trocas</li>', html)
         self.assertIn('<p class="faq-item__sub">Calçados</p>', html)
+        # só a pergunta aparece; a resposta abre ao clicar
+        self.assertIn('<details class="faq-item">', html)
+        self.assertIn('<span>Que roupa levar?</span>', html)
 
 
 class SaidaDeUmDiaTests(TestCase):
