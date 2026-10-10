@@ -200,7 +200,9 @@ img { max-width: 100%; display: block; }
 .p60-capa {
     position: relative; overflow: hidden;
     background: var(--verde-escuro, #0d4f31); color: #fff;
-    min-height: 420px; display: flex; align-items: center;
+    /* mesma regra do topo da viagem (viagem.css): com 420px fixos a foto 16:9
+       virava uma faixa de 4,5:1 em tela grande e aparecia só um terço dela */
+    min-height: max(420px, min(46vw, 680px, 78vh)); display: flex; align-items: center;
     padding: clamp(36px, 7vw, 76px) 0;
 }
 .p60-capa__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }

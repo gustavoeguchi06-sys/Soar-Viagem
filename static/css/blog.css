@@ -13,7 +13,8 @@
 
 /* -------- HERO -------- */
 .blog-hero { position: relative; color: #fff; overflow: hidden;
-             min-height: 460px; display: flex; align-items: flex-end; }
+             /* mesma regra do topo da viagem: 460px fixos cortavam 2/3 da foto */
+             min-height: max(460px, min(46vw, 680px, 78vh)); display: flex; align-items: flex-end; }
 .blog-hero__bg { position: absolute; inset: 0;
                  background: linear-gradient(135deg, #0e3b30 0%, #1c6b52 45%, #2f9c7e 100%); }
 .blog-hero__overlay { position: absolute; inset: 0;
