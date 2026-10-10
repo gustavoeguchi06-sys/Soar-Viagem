@@ -240,3 +240,22 @@ class PainelTests(BlogBase):
         html = self.client.get('/painel/').content.decode()
         self.assertIn('Blog Soar', html)
         self.assertIn('Novo artigo no blog', html)
+
+
+class AtracaoComRelatoTests(BlogBase):
+    def test_ler_mais_abre_o_relato_inteiro(self):
+        from ..models import Atracao
+        a = self.artigo('teste-atracoes')
+        Secao.objects.create(artigo=a, titulo='O que levar', mostrar_atracoes=True)
+        relato = 'Indispensável para os lagos.\n\nProtege os pés <das pedras>.'
+        Atracao.objects.create(artigo=a, nome='Calçado aquático', descricao=relato, ordem=1)
+        Atracao.objects.create(artigo=a, nome='Toalha', ordem=2)
+        html = self.client.get('/blog/teste-atracoes/').content.decode()
+        # com relato: cartão clicável, "Ler mais" e o texto em parágrafos, escapado
+        self.assertEqual(html.count('data-atracao aria-haspopup'), 1)
+        self.assertIn('Ler mais', html)
+        self.assertIn('<p>Protege os pés &lt;das pedras&gt;.</p>', html)
+        self.assertIn('id="atracaoPopup"', html)
+        self.assertIn('js/blog.js', html)
+        # sem relato: cartão comum, sem botão
+        self.assertIn('<b>Toalha</b>', html)

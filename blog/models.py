@@ -269,7 +269,11 @@ class Atracao(models.Model):
     artigo = models.ForeignKey(Artigo, on_delete=models.CASCADE, related_name='atracoes')
     ordem = models.PositiveSmallIntegerField('Ordem', default=0)
     nome = models.CharField('Nome', max_length=80)
-    descricao = models.CharField('Frase curta', max_length=140, blank=True)
+    # Era a "Frase curta" (140 letras). Virou um relato: o cartão mostra o
+    # começo e o "Ler mais" abre o texto inteiro num pop-up (static/js/blog.js).
+    descricao = models.TextField(
+        'Breve relato', max_length=1500, blank=True,
+        help_text='O cartão mostra o começo; o texto inteiro abre ao clicar em "Ler mais".')
     foto = models.ImageField(validators=[validar_foto], verbose_name='Foto', upload_to='blog/atracoes/', blank=True, null=True)
 
     class Meta:

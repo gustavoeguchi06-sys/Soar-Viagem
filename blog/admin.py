@@ -7,6 +7,7 @@ do artigo e o tempo de leitura se preenchem sozinhos.
 """
 from django import forms
 from django.contrib import admin, messages
+from django.db import models
 from django.db.models import Count
 from django.utils import formats
 from django.utils.html import format_html
@@ -69,9 +70,10 @@ class AtracaoInline(admin.TabularInline):
     model = Atracao
     extra = 0
     fields = ['ordem', 'nome', 'descricao', 'foto']
+    formfield_overrides = {models.TextField: {'widget': forms.Textarea(attrs={'rows': 4, 'cols': 48})}}
     verbose_name = 'atração'
-    verbose_name_plural = ('Atrações: grade de fotos com nome e frase. Aparece na seção marcada '
-                           'com "Mostrar as atrações aqui"')
+    verbose_name_plural = ('Atrações: grade de fotos com nome e breve relato. Aparece na seção '
+                           'marcada com "Mostrar as atrações aqui"; clicando, o relato abre inteiro')
 
 
 class ArtigoForm(forms.ModelForm):

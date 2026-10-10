@@ -83,6 +83,33 @@
 .blog-atracao__foto { height: 110px; }
 .blog-atracao b { display: block; font-size: .92rem; padding: 12px 12px 4px; }
 .blog-atracao small { display: block; padding: 0 12px 14px; font-size: .8rem; color: var(--body-quiet-color, #6b7a80); line-height: 1.5; }
+.blog-atracao__foto { display: block; }
+
+/* Atração com relato: o cartão inteiro é um botão que abre o pop-up */
+.blog-atracao--clica { display: flex; flex-direction: column; width: 100%; padding: 0; text-align: left;
+                       font: inherit; color: inherit; cursor: pointer;
+                       transition: transform .18s, box-shadow .18s; }
+.blog-atracao--clica:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -18px rgba(0,0,0,.35); }
+.blog-atracao--clica:focus-visible { outline: 2px solid var(--verde, #146c43); outline-offset: 2px; }
+/* só o começo do relato (3 linhas); o resto fica para o pop-up */
+.blog-atracao--clica small { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+                             overflow: hidden; padding-bottom: 0; margin-bottom: 8px; }
+.blog-atracao__mais { margin-top: auto; padding: 0 12px 14px; font-size: .8rem; font-weight: 700;
+                      color: var(--verde, #146c43); }
+.blog-atracao__mais::after { content: ' \203A'; }
+
+.atracao-popup { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0;
+                 margin: auto; /* o reset do site zerava a margem e o pop-up ia para o canto */
+                 border: 0; border-radius: 16px; overflow: auto; background: #fff; color: #1d2a24;
+                 box-shadow: 0 30px 70px -20px rgba(0,0,0,.5); }
+.atracao-popup::backdrop { background: rgba(9, 18, 14, .6); }
+.atracao-popup__foto img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.atracao-popup__texto { padding: 20px 24px 24px; }
+.atracao-popup__texto h3 { margin: 0 0 10px; font-size: 1.25rem; font-weight: 800; }
+.atracao-popup__relato p { margin: 0 0 10px; line-height: 1.65; color: var(--body-medium-color, #4a585d); }
+.atracao-popup__fechar { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px;
+                         border: 0; border-radius: 50%; background: rgba(255,255,255,.92); color: #1d2a24;
+                         font-size: 1.5rem; line-height: 1; cursor: pointer; box-shadow: 0 4px 12px -4px rgba(0,0,0,.3); }
 
 .blog-dicas { list-style: none; padding: 0; margin: 12px 0 8px; display: grid; gap: 12px; }
 .blog-dicas li { display: flex; gap: 12px; align-items: flex-start; font-size: .96rem;
