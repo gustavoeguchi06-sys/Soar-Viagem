@@ -1,13 +1,14 @@
 {% extends "admin/change_form.html" %}
 {% comment %}
-Formulário do destino no painel. Igual ao padrão, só que o bloco "Incluso e não
-incluso" sai do meio dos campos de cima e vai para entre o "Roteiro dia a dia" e
-as "Perguntas frequentes", que é onde ele fica na página da viagem.
+Formulário do destino no painel. Igual ao padrão, só que dois blocos de campos
+saem do meio dos campos de cima e vão para o lugar em que aparecem na página
+da viagem: "Hospedagem do pacote" fica logo antes das fotos da galeria, e
+"Incluso e não incluso" entre o "Roteiro dia a dia" e as "Perguntas frequentes".
 {% endcomment %}
 
 {% block field_sets %}
 {% for fieldset in adminform %}
-  {% if 'bloco-incluso' not in fieldset.classes %}
+  {% if 'bloco-incluso' not in fieldset.classes and 'bloco-hospedagem' not in fieldset.classes %}
   {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
   {% endif %}
 {% endfor %}
@@ -15,6 +16,13 @@ as "Perguntas frequentes", que é onde ele fica na página da viagem.
 
 {% block inline_field_sets %}
 {% for inline_admin_formset in inline_admin_formsets %}
+    {% if inline_admin_formset.opts.hospedagem_antes %}
+    {% for fieldset in adminform %}
+      {% if 'bloco-hospedagem' in fieldset.classes %}
+      {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+      {% endif %}
+    {% endfor %}
+    {% endif %}
     {% if inline_admin_formset.opts.incluso_antes %}
     {% for fieldset in adminform %}
       {% if 'bloco-incluso' in fieldset.classes %}

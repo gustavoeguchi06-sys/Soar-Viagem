@@ -39,6 +39,9 @@ ABAS = [
     ('Interessados', 'admin:destinations_interessado_changelist', DONO, 'interessados'),
     ('Orçamentos', 'admin:agencia_orcamento_changelist', DONO, None),
     ('Destinos', 'admin:destinations_destino_changelist', 'destinations.view_destino', None),
+    # o banco de hotéis com as fotos: o destino só escolhe quais usa
+    ('Hospedagens', 'admin:destinations_hospedagem_changelist', 'destinations.view_hospedagem',
+     None),
     ('Blog Soar', 'admin:blog_artigo_changelist', 'blog.view_artigo', None),
     ('Soar 60+', 'admin:destinations_paginasoar60_changelist', 'destinations.view_paginasoar60',
      None),

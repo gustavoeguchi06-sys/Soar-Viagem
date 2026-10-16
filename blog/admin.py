@@ -16,7 +16,7 @@ from destinations.admin import miniatura
 
 from destinations.models import Destino
 
-from .models import MESES, Artigo, Atracao, Categoria, Inscricao, Secao
+from .models import MESES, Artigo, Atracao, CapaBlog, Categoria, Inscricao, Secao
 
 CALENDARIO = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
 
@@ -99,6 +99,13 @@ class ArtigoForm(forms.ModelForm):
 @admin.register(Artigo)
 class ArtigoAdmin(admin.ModelAdmin):
     form = ArtigoForm
+    # o quadro "Capa da página do blog" no topo da lista
+    change_list_template = 'admin/blog/artigo/change_list.html'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {**(extra_context or {}), 'capa_blog': CapaBlog.para_editar()}
+        return super().changelist_view(request, extra_context)
+
     list_display = ['foto', 'titulo', 'categoria', 'data', 'situacao_etiqueta', 'destaque',
                     'leituras', 'no_site']
     list_display_links = ['titulo']
@@ -258,3 +265,39 @@ class InscricaoAdmin(admin.ModelAdmin):
         for inscricao in queryset.filter(confirmada_em__isnull=False):
             escritor.writerow([inscricao.email, inscricao.criado_em.strftime('%d/%m/%Y %H:%M')])
         return resposta
+
+
+@admin.register(CapaBlog)
+class CapaBlogAdmin(admin.ModelAdmin):
+    """O topo da página do blog. Só existe uma, então a tela abre direto nela."""
+
+    fields = ['foto', 'previa', 'titulo', 'subtitulo']
+    readonly_fields = ['previa']
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        return redirect(reverse('admin:blog_capablog_change', args=[CapaBlog.para_editar().pk]))
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def response_change(self, request, obj):
+        # depois de salvar, volta para os artigos, que é onde a aba do blog fica
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        if '_continue' in request.POST:
+            return super().response_change(request, obj)
+        messages.success(request, 'Capa da página do blog salva.')
+        return redirect(reverse('admin:blog_artigo_changelist'))
+
+    @admin.display(description='Como fica')
+    def previa(self, capa):
+        if not capa.foto:
+            return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
+                               'Sem foto: o topo fica verde.</span>')
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">',
+                           capa.foto.url)

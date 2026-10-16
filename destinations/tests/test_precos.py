@@ -128,7 +128,7 @@ class SoFotosDoDonoTests(TestCase):
 class DestinoNovoPeloPainelTests(TestCase):
     """O dono cria o destino no painel, com preços e datas com quartos, e a página já mostra tudo."""
 
-    BLOCOS = ['precos', 'saidas', 'servicos', 'hospedagens', 'imagens', 'videos',
+    BLOCOS = ['precos', 'saidas', 'servicos', 'imagens', 'videos',
               'destaques_viagem', 'roteiro', 'perguntas']
 
     def setUp(self):

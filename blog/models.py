@@ -311,3 +311,37 @@ class Inscricao(models.Model):
     @property
     def confirmada(self):
         return self.confirmada_em is not None
+
+
+class CapaBlog(models.Model):
+    """O topo da página do blog (/blog/): foto, título e frase. Existe uma só.
+
+    Sem foto, o topo fica no fundo verde de sempre.
+    """
+
+    foto = models.ImageField(
+        validators=[validar_foto], verbose_name='Foto do topo', upload_to='blog/capa/',
+        blank=True, null=True,
+        help_text='Deitada, 1920 x 1080 px. O título e a busca ficam à esquerda, então o '
+                  'assunto da foto fica melhor à direita. Sem foto, o topo fica verde.')
+    titulo = models.CharField('Título', max_length=60, default='Blog da Soar')
+    subtitulo = models.CharField(
+        'Frase embaixo do título', max_length=160, blank=True,
+        default='Dicas, roteiros e inspirações para você viajar mais e melhor.')
+
+    class Meta:
+        verbose_name = 'Capa da página do blog'
+        verbose_name_plural = 'Capa da página do blog'
+
+    def __str__(self):
+        return 'Capa da página do blog'
+
+    @classmethod
+    def atual(cls):
+        """A capa em uso; sem nada salvo ainda, a padrão (sem gravar: ver a página não escreve)."""
+        return cls.objects.first() or cls()
+
+    @classmethod
+    def para_editar(cls):
+        """O registro que o painel edita, criado na primeira vez que o dono abre."""
+        return cls.objects.first() or cls.objects.create()

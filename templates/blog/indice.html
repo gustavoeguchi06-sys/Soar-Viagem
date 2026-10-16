@@ -8,8 +8,9 @@
 <div class="blog blog-index">
 
   {# ===================== HERO ===================== #}
-  <header class="blog-capa">
-    <div class="blog-capa__bg ph" aria-hidden="true"></div>
+  {# foto, título e frase vêm do painel (Blog Soar > Capa da página do blog) #}
+  <header class="blog-capa{% if capa.foto %} blog-capa--foto{% endif %}">
+    <div class="blog-capa__bg{% if not capa.foto %} ph{% endif %}" aria-hidden="true">{% if capa.foto %}<img src="{{ capa.foto.url }}" alt="">{% endif %}</div>
     <div class="blog-capa__overlay" aria-hidden="true"></div>
     <div class="wrap blog-capa__inner">
       <nav class="blog-crumbs" aria-label="Você está aqui">
@@ -17,8 +18,8 @@
         <a href="{% url 'blog:indice' %}">Blog Soar</a><span>›</span>
         <span class="atual">{% if categoria_ativa %}{{ categoria_ativa.nome }}{% else %}Blog{% endif %}</span>
       </nav>
-      <h1>Blog da Soar</h1>
-      <p class="blog-capa__sub">Dicas, roteiros e inspirações para<br>você viajar mais e melhor.</p>
+      <h1>{{ capa.titulo }}</h1>
+      {% if capa.subtitulo %}<p class="blog-capa__sub">{{ capa.subtitulo }}</p>{% endif %}
       <form class="blog-busca" role="search" method="get" action="{% url 'blog:indice' %}">
         <input type="search" name="q" value="{{ busca }}" maxlength="80" placeholder="Buscar artigos..." aria-label="Buscar artigos">
         <button type="submit" aria-label="Buscar">

@@ -118,6 +118,13 @@ class Destino(models.Model):
                                                'preço, a página mostra "sob consulta".')
     hospedagem_sub = models.CharField('Chamada da hospedagem', max_length=120, blank=True,
                                       help_text='Ex.: A duas quadras da Ilha do Amor.')
+    # As hospedagens são um cadastro próprio (aba Hospedagens do painel): o
+    # mesmo hotel, com as fotos, serve para vários roteiros sem cadastrar de
+    # novo. Antes cada hospedagem pertencia a um destino só.
+    hospedagens = models.ManyToManyField(
+        'Hospedagem', blank=True, related_name='destinos', verbose_name='Hospedagens do pacote',
+        help_text='Escolha nas hospedagens já cadastradas (com as fotos). Não achou? '
+                  'O "+" cadastra uma nova sem sair daqui.')
     incluso = models.TextField('O que está incluso', blank=True,
                                help_text='Um item por linha. Linha que termina com ":" vira título, e as linhas de baixo ficam como tópicos dele (ex.: Passeios:). Não precisa pôr - ou • no começo.')
     nao_incluso = models.TextField('O que não está incluso', blank=True,
@@ -239,8 +246,8 @@ class VideoDestino(models.Model):
 
 
 class Hospedagem(models.Model):
-    destino = models.ForeignKey(Destino, on_delete=models.CASCADE,
-                                related_name='hospedagens', verbose_name='Destino')
+    """Um hotel ou pousada, cadastrado uma vez e usado em quantos roteiros quiser."""
+
     nome = models.CharField('Nome', max_length=120)
     endereco = models.CharField('Endereço', max_length=200, blank=True,
                                 help_text='Onde a hospedagem fica.')

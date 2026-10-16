@@ -259,3 +259,40 @@ class AtracaoComRelatoTests(BlogBase):
         self.assertIn('js/blog.js', html)
         # sem relato: cartão comum, sem botão
         self.assertIn('<b>Toalha</b>', html)
+
+
+class CapaDoBlogTests(BlogBase):
+    def test_foto_e_texto_do_topo_vem_do_painel(self):
+        import shutil
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        from ..models import CapaBlog
+
+        # sem nada salvo: o topo verde de sempre, com o texto padrão
+        html = self.client.get('/blog/').content.decode()
+        self.assertIn('<h1>Blog da Soar</h1>', html)
+        self.assertIn('blog-capa__bg ph', html)
+
+        self.client.force_login(self.dono())
+        lista = self.client.get(reverse('admin:blog_artigo_changelist'))
+        self.assertContains(lista, 'Capa da página do blog')
+        capa = CapaBlog.objects.get()
+        saida = BytesIO()
+        Image.new('RGB', (64, 36), (30, 120, 80)).save(saida, 'JPEG')
+        pasta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, pasta, ignore_errors=True)
+        with override_settings(MEDIA_ROOT=pasta):
+            resposta = self.client.post(
+                reverse('admin:blog_capablog_change', args=[capa.pk]),
+                {'titulo': 'Histórias de viagem', 'subtitulo': 'Do Jalapão ao Caraça.',
+                 'foto': SimpleUploadedFile('topo.jpg', saida.getvalue(), content_type='image/jpeg')})
+            self.assertRedirects(resposta, reverse('admin:blog_artigo_changelist'))
+            html = self.client.get('/blog/').content.decode()
+        self.assertIn('<h1>Histórias de viagem</h1>', html)
+        self.assertIn('Do Jalapão ao Caraça.', html)
+        self.assertIn('blog-capa--foto', html)
+        self.assertIn('/media/blog/capa/topo', html)
