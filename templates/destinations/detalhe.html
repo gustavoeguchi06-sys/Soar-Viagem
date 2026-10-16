@@ -466,6 +466,7 @@
                 </div>
                 {% endif %}
             </div>
+            {% if viagem.hospedagem.comodidades %}
             <div class="comodidades">
                 {% for c in viagem.hospedagem.comodidades %}
                 <span class="comodidade">
@@ -474,6 +475,7 @@
                 </span>
                 {% endfor %}
             </div>
+            {% endif %}
         </section>
 
         {% with videos=destino.videos.all %}
