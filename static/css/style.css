@@ -365,7 +365,10 @@ form[aria-busy="true"] input[type="submit"]:disabled {
 .sobre-historia { display: grid; gap: 28px; align-items: center; }
 .sobre-historia--foto { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
 .sobre-historia p { font-size: 1.04rem; line-height: 1.7; color: var(--tinta, #2b3a33); margin: 0 0 14px;
-                    max-width: 68ch; }
+                    max-width: 68ch;
+                    /* justificado, a pedido do dono; a hifenização (lang pt-br) evita os
+                       buracos grandes entre as palavras, principalmente no celular */
+                    text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
 .sobre-historia__foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-lg, 18px); }
 .sobre-numeros { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
                  text-align: center; }

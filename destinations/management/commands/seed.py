@@ -86,7 +86,7 @@ class Command(BaseCommand):
                 continue
 
             for nome, tipo, preco, desc in hospedagens:
-                Hospedagem.objects.create(destino=destino, nome=nome)
+                destino.hospedagens.add(Hospedagem.objects.get_or_create(nome=nome)[0])
             for autor, nota, comentario in avaliacoes:
                 Avaliacao.objects.create(destino=destino, nome_autor=autor,
                                          nota=nota, comentario=comentario)

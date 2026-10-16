@@ -19,7 +19,7 @@ from destinations import instagram
 from destinations.models import Destino
 from soar.seguranca import LIMITE_NEWSLETTER, ip_do_cliente
 
-from .models import Artigo, Categoria, Inscricao
+from .models import Artigo, CapaBlog, Categoria, Inscricao
 
 log = logging.getLogger('soar.seguranca')
 
@@ -82,6 +82,7 @@ def indice(request):
     pagina = Paginator(artigos, POR_PAGINA).get_page(numero)
 
     return render(request, 'blog/indice.html', {
+        'capa': CapaBlog.atual(),
         'destaque': destaque,
         'pagina': pagina,
         'busca': busca,

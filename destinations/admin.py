@@ -19,7 +19,7 @@ from django import forms
 from django.contrib import admin
 from django.core.validators import DecimalValidator
 from django.db import models
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
                      DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, ItemSoar60,
@@ -98,6 +98,9 @@ class ImagemDestinoInline(admin.TabularInline):
     readonly_fields = ['previa']
     verbose_name = 'foto'
     verbose_name_plural = 'Fotos da galeria'
+    # o bloco "Hospedagem do pacote" (campo do destino) aparece logo antes
+    # (templates/admin/destinations/destino/change_form.html)
+    hospedagem_antes = True
 
     @admin.display(description='Prévia')
     def previa(self, obj):
@@ -149,41 +152,6 @@ class PerguntaFrequenteInline(admin.TabularInline):
     # o bloco "Incluso e não incluso" aparece logo antes deste, depois do roteiro
     # (templates/admin/destinations/destino/change_form.html)
     incluso_antes = True
-
-
-class HospedagemInline(admin.StackedInline):
-    """A hospedagem é parte do pacote: cadastra-se dentro do destino.
-
-    A Soar não vende hospedagem avulsa, então ela não tem tela própria no
-    painel. Nome e foto principal ficam aqui; as fotos extras (os
-    quartos) abrem pelo botão "Adicionar ou ver as fotos da hospedagem".
-    """
-
-    model = Hospedagem
-    extra = 0
-    fields = ['nome', 'imagem', 'previa', 'mais_fotos']
-    readonly_fields = ['previa', 'mais_fotos']
-    show_change_link = True
-    verbose_name = 'hospedagem'
-    verbose_name_plural = 'Hospedagem do pacote'
-
-    @admin.display(description='Foto como fica no site')
-    def previa(self, hospedagem):
-        return miniatura(hospedagem.imagem, hospedagem.nome)
-
-    @admin.display(description='Mais fotos (quartos, piscina...)')
-    def mais_fotos(self, hospedagem):
-        # As fotos extras têm tela própria (a hospedagem já precisa existir):
-        # o botão fica à vista aqui, no lugar do lápis pequeno do Django.
-        from django.urls import reverse
-        if not hospedagem.pk:
-            return 'Salve o destino primeiro; depois aparece aqui o botão para mais fotos.'
-        total = hospedagem.imagens.count()
-        return format_html(
-            '<a class="button" href="{}">Adicionar ou ver as fotos da hospedagem</a> '
-            '<span class="help">{} foto{} além da principal</span>',
-            reverse('admin:destinations_hospedagem_change', args=[hospedagem.pk]),
-            total, '' if total == 1 else 's')
 
 
 # --------------------------------------------------------------------------- #
@@ -279,8 +247,9 @@ class DestinoAdmin(admin.ModelAdmin):
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
     list_per_page = 30
-    readonly_fields = ['previa_capa', 'criado_em', 'a_partir_de']
-    inlines = [PrecoQuartoInline, SaidaInline, ServicoViagemInline, HospedagemInline, ImagemDestinoInline, VideoDestinoInline,
+    readonly_fields = ['previa_capa', 'criado_em', 'a_partir_de', 'hospedagens_escolhidas']
+    autocomplete_fields = ['hospedagens']
+    inlines = [PrecoQuartoInline, SaidaInline, ServicoViagemInline, ImagemDestinoInline, VideoDestinoInline,
                DestaqueViagemInline, DiaRoteiroInline, PerguntaFrequenteInline]
 
     fieldsets = [
@@ -296,6 +265,15 @@ class DestinoAdmin(admin.ModelAdmin):
             'description': 'Os preços ficam no bloco <b>Preços por quarto</b>, mais abaixo: um '
                            'valor por pessoa para cada tipo de quarto. O "a partir de" do site é '
                            'o menor deles e se atualiza sozinho ao salvar.',
+        }),
+        # Mostrado logo antes das fotos da galeria, onde ficava o cadastro da
+        # hospedagem (templates/admin/destinations/destino/change_form.html).
+        ('Hospedagem do pacote', {
+            'classes': ['bloco-hospedagem'],
+            'fields': ['hospedagens', 'hospedagens_escolhidas'],
+            'description': 'As hospedagens ficam na aba <b>Hospedagens</b>, com as fotos: '
+                           'cadastre uma vez e use em quantos roteiros quiser. Clique na caixa '
+                           'para ver a lista e escolher.',
         }),
         ('Capa da página de viagem', {
             'classes': ['collapse'],
@@ -322,6 +300,18 @@ class DestinoAdmin(admin.ModelAdmin):
             'fields': ['criado_em'],
         }),
     ]
+
+    @admin.display(description='Como fica')
+    def hospedagens_escolhidas(self, destino):
+        from django.urls import reverse
+        hoteis = list(destino.hospedagens.all()) if destino.pk else []
+        if not hoteis:
+            return 'Nenhuma escolhida ainda. Sem hospedagem, a página mostra uma ilustração.'
+        return format_html_join(
+            '', '<div class="hosp-escolhida">{}<b>{}</b> <a href="{}" target="_blank" '
+            'rel="noopener">editar fotos e dados &#8599;</a></div>',
+            ((miniatura(h.imagem, h.nome), h.nome,
+              reverse('admin:destinations_hospedagem_change', args=[h.pk])) for h in hoteis))
 
     @admin.display(description='')
     def capa(self, destino):
@@ -383,48 +373,39 @@ class ImagemHospedagemInline(admin.TabularInline):
 
 @admin.register(Hospedagem)
 class HospedagemAdmin(admin.ModelAdmin):
-    """Tela de uma hospedagem, só para as fotos extras dos quartos.
+    """O banco de hospedagens: cada hotel com as fotos, cadastrado uma vez.
 
-    Não aparece no menu do painel (a hospedagem se cadastra dentro do
-    destino); abre pelo botão "Adicionar ou ver as fotos da hospedagem" na
-    tela do destino.
+    Na tela do destino, o dono só escolhe quais destas entram no pacote.
     """
 
-    list_display = ['foto', 'nome', 'destino']
-    list_display_links = ['nome']
-    list_filter = ['destino']
-    search_fields = ['nome', 'destino__nome']
-    autocomplete_fields = ['destino']
+    list_display = ['foto', 'nome', 'endereco', 'usada_em']
+    list_display_links = ['foto', 'nome']
+    search_fields = ['nome', 'endereco']
     formfield_overrides = {**TEXTO_CURTO, **PRECO_BRL}
     save_on_top = True
     list_per_page = 30
-    readonly_fields = ['previa_imagem']
+    readonly_fields = ['previa_imagem', 'usada_em']
     inlines = [ImagemHospedagemInline]
 
     fieldsets = [
         ('A hospedagem', {
-            'fields': ['destino', 'nome'],
+            'fields': ['nome', 'endereco', 'usada_em'],
         }),
-        ('Foto', {
+        ('Foto principal', {
             'fields': ['imagem', 'previa_imagem'],
+            'description': 'Deitada, 1600 x 1067 px. Aparece grande na página da viagem e no '
+                           'PDF do orçamento. Quartos, piscina e café vão em "Fotos da '
+                           'hospedagem", abaixo.',
         }),
     ]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('destino')
+        return super().get_queryset(request).prefetch_related('destinos')
 
-    def has_module_permission(self, request):
-        return False
-
-    def response_change(self, request, obj):
-        """Salvou as fotos: volta para o destino, onde a hospedagem mora."""
-        if '_continue' not in request.POST and '_addanother' not in request.POST:
-            from django.http import HttpResponseRedirect
-            from django.urls import reverse
-            self.message_user(request, 'Fotos da hospedagem salvas.')
-            return HttpResponseRedirect(reverse('admin:destinations_destino_change',
-                                                args=[obj.destino_id]))
-        return super().response_change(request, obj)
+    @admin.display(description='Usada nos roteiros')
+    def usada_em(self, hospedagem):
+        nomes = [d.nome for d in hospedagem.destinos.all()] if hospedagem.pk else []
+        return ', '.join(nomes) or 'nenhum ainda'
 
     @admin.display(description='')
     def foto(self, hospedagem):

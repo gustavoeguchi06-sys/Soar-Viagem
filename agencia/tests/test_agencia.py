@@ -251,8 +251,8 @@ class PainelAgenciaTests(TestCase):
             self.destino.save()
             ImagemDestino.objects.create(destino=self.destino, imagem=jpg('rio.jpg'),
                                          legenda='Rio da Prata')
-            Hospedagem.objects.create(destino=self.destino, nome='Pousada Bonito',
-                                      imagem=jpg('pousada.jpg'))
+            self.destino.hospedagens.add(Hospedagem.objects.create(
+                nome='Pousada Bonito', imagem=jpg('pousada.jpg')))
             self.entrar(self.ag1)
             self.client.post(self.criar, self.dados)
             from ..pdf import gerar_pdf

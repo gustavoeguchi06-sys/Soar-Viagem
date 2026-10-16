@@ -238,14 +238,15 @@ class SemPrecoTests(TestCase):
         self.assertContains(r, 'Sob consulta')
         self.assertNotContains(r, '3.588')
 
-    def test_hospedagem_fora_do_menu_e_dentro_do_destino(self):
+    def test_hospedagem_tem_aba_propria_e_bloco_no_destino(self):
         from django.contrib.auth.models import User
         dono = User.objects.create_superuser('dono', 'd@x.com', 'senha-boa-123')
         self.client.force_login(dono)
         d = Destino.objects.create(nome='Caraça', slug='caraca', descricao='Santuário.')
         tela = self.client.get(f'/painel/destinations/destino/{d.pk}/change/')
         self.assertContains(tela, 'Hospedagem do pacote')
-        self.assertNotContains(self.client.get('/painel/'), '/painel/destinations/hospedagem/')
+        # o banco de hospedagens agora tem aba na faixa do painel
+        self.assertContains(self.client.get('/painel/'), '/painel/destinations/hospedagem/')
 
 
 class SaibaMaisTests(TestCase):
@@ -423,13 +424,27 @@ class BannerAlbumHospedagemTests(TestCase):
         self.assertIn('data-gal="1"', html)
         self.assertIn('<b id="galLegenda">Rio da Prata</b>', html)
 
-    def test_botao_das_fotos_da_hospedagem_no_destino(self):
+    def test_hospedagem_cadastrada_uma_vez_serve_para_varios_roteiros(self):
         from ..models import Hospedagem
-        destino = Destino.objects.create(nome='Bonito', slug='bonito', descricao='Rios.')
-        hospedagem = Hospedagem.objects.create(destino=destino, nome='Pousada Bonito')
-        tela = self.client.get(reverse('admin:destinations_destino_change', args=[destino.pk]))
-        self.assertContains(tela, 'Adicionar ou ver as fotos da hospedagem')
-        self.assertContains(tela, reverse('admin:destinations_hospedagem_change', args=[hospedagem.pk]))
+        hotel = Hospedagem.objects.create(nome='Pousada Bonito', endereco='Centro')
+        primeiro = Destino.objects.create(nome='Bonito 2026', slug='bonito-2026', descricao='Rios.')
+        segundo = Destino.objects.create(nome='Bonito 2027', slug='bonito-2027', descricao='Rios.')
+        primeiro.hospedagens.add(hotel)
+        segundo.hospedagens.add(hotel)
+        # as duas páginas mostram o mesmo hotel, sem cadastrar de novo
+        for destino in (primeiro, segundo):
+            self.assertContains(self.client.get(destino.get_absolute_url()), 'Pousada Bonito')
+        # no destino, o bloco de escolha e o atalho para as fotos do hotel
+        tela = self.client.get(reverse('admin:destinations_destino_change', args=[primeiro.pk]))
+        self.assertContains(tela, 'Hospedagem do pacote')
+        self.assertContains(tela, 'name="hospedagens"')
+        self.assertContains(tela, reverse('admin:destinations_hospedagem_change', args=[hotel.pk]))
+        # a lista de hospedagens diz onde cada uma é usada
+        lista = self.client.get(reverse('admin:destinations_hospedagem_changelist'))
+        self.assertContains(lista, 'Bonito 2026, Bonito 2027')
+        # apagar um roteiro não apaga o hotel
+        primeiro.delete()
+        self.assertTrue(Hospedagem.objects.filter(pk=hotel.pk).exists())
 
 
 class TopicosComTituloTests(TestCase):

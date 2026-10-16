@@ -1,0 +1,17 @@
+{% extends "admin/change_list.html" %}
+{% comment %}
+Lista dos artigos com, no topo, a capa da página /blog/ (foto, título e frase):
+o dono acha o topo do blog no mesmo lugar em que cuida dos artigos.
+{% endcomment %}
+
+{% block search %}
+<div class="module texto-banner">
+    <h2>Capa da página do blog</h2>
+    {% if capa_blog.foto %}<p><img class="miniatura miniatura--grande" src="{{ capa_blog.foto.url }}" alt=""></p>
+    {% else %}<p>Sem foto: o topo da página do blog está no fundo verde.</p>{% endif %}
+    <p class="texto-banner__titulo">{{ capa_blog.titulo }}</p>
+    {% if capa_blog.subtitulo %}<p class="texto-banner__sub">{{ capa_blog.subtitulo }}</p>{% endif %}
+    <p><a class="button" href="{% url 'admin:blog_capablog_change' capa_blog.pk %}">Trocar a foto e o texto</a></p>
+</div>
+{{ block.super }}
+{% endblock %}

@@ -85,7 +85,8 @@ class Command(BaseCommand):
             for ida, volta, vagas in ex['saidas']:
                 Saida.objects.create(destino=destino, data_ida=date(*ida),
                                      data_volta=date(*volta), vagas=vagas)
-            Hospedagem.objects.create(destino=destino, nome=ex['hospedagem'], pacote_completo=True)
+            hospedagem, _ = Hospedagem.objects.get_or_create(nome=ex['hospedagem'])
+            destino.hospedagens.add(hospedagem)
             criados += 1
             self.stdout.write('{}: criado ({}).'.format(ex['nome'], ex['regiao']))
 
