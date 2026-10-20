@@ -974,10 +974,35 @@ body.login #content { padding: 12px 0 0; }
 .meses-escolha { display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .meses-escolha > div { margin: 0; }
 .meses-escolha label { display: inline-flex; align-items: center; gap: 4px; font-weight: 400; }
-/* Viagens ligadas ao artigo (blog/admin.py): todas as viagens, uma caixinha cada */
-.viagens-escolha { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 6px 18px; margin: 0; padding: 0; }
-.viagens-escolha > div { margin: 0; }
-.viagens-escolha label { display: flex; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; padding: 4px 0; }
+/* Viagens ligadas ao artigo (blog/admin.py, EscolhaSuspensa): um campo do
+   tamanho de um select que, clicado, abre a lista de caixinhas com busca. */
+.escolha-suspensa { position: relative; display: inline-block; width: 100%; max-width: 460px; vertical-align: top; }
+.escolha-suspensa__botao { display: flex; align-items: center; justify-content: space-between; min-height: 38px;
+    padding: 8px 36px 8px 12px; border: 1px solid var(--border-color, #d0d5dd); border-radius: 8px;
+    background: var(--body-bg, #fff); color: var(--body-quiet-color, #667085); cursor: pointer;
+    list-style: none; position: relative; user-select: none; }
+.escolha-suspensa__botao::-webkit-details-marker { display: none; }
+.escolha-suspensa__botao::after { content: ""; position: absolute; right: 14px; top: 50%; width: 7px; height: 7px;
+    margin-top: -6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: rotate(45deg); transition: transform .15s; }
+.escolha-suspensa[open] .escolha-suspensa__botao::after { transform: rotate(-135deg); margin-top: -2px; }
+.escolha-suspensa.tem-escolha .escolha-suspensa__botao { color: var(--body-fg, #101828); }
+.escolha-suspensa__botao:focus-visible { outline: 2px solid #1f7a4d; outline-offset: 1px; }
+.escolha-suspensa__resumo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* aberto, empurra o resto para baixo (e não flutua): o bloco do painel tem
+   cantos arredondados com overflow escondido e cortaria uma lista flutuante */
+.escolha-suspensa__painel { margin-top: 4px;
+    padding: 8px; border: 1px solid var(--border-color, #d0d5dd); border-radius: 8px;
+    background: var(--body-bg, #fff); box-shadow: 0 10px 28px rgba(16, 24, 40, .16); }
+.escolha-suspensa__busca { width: 100%; box-sizing: border-box; min-height: 36px; margin: 0 0 6px; padding: 6px 10px; }
+.escolha-suspensa__lista { max-height: 260px; overflow-y: auto; }
+.escolha-suspensa__lista > div { margin: 0; padding: 0; }
+.escolha-suspensa__lista > div > div { margin: 0; }
+.escolha-suspensa__lista label { display: flex; align-items: center; width: auto; float: none; min-width: 0;
+    padding: 7px 8px; margin: 0; border-radius: 6px; font-weight: 400; cursor: pointer; white-space: normal; }
+.escolha-suspensa__lista label:hover { background: rgba(31, 122, 77, .08); }
+.escolha-suspensa__lista input[type="checkbox"] { margin: 0 10px 0 0; flex: none; }
+.escolha-suspensa__nada { margin: 6px 8px; color: var(--body-quiet-color, #667085); font-size: .85rem; }
 
 /* O Django fixa todo <select> em 30px de altura; com a margem interna do
    tema, o texto da opção escolhida ficava cortado (ou sumia). */
