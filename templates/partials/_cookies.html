@@ -1,0 +1,20 @@
+{% comment %}
+Banner de cookies do Google Analytics (static/js/analytics.js).
+   Só entra no base.html quando o SOAR_GA_ID está configurado. Começa escondido:
+   o JavaScript mostra quando a pessoa ainda não escolheu. "Aceitar" e
+   "Recusar" têm o mesmo peso, como pede a ANPD: recusar não pode ser mais
+   difícil que aceitar.
+{% endcomment %}
+<section id="banner-cookies" class="banner-cookies" role="region" aria-label="Aviso de cookies" hidden>
+    <div class="banner-cookies__caixa">
+        <p class="banner-cookies__texto">
+            Usamos cookies de <strong>estatística</strong> (Google Analytics) para saber quantas
+            pessoas visitam o site e quais viagens interessam mais. Eles só são ligados se você
+            aceitar. Nada de anúncio. <a href="{% url 'contas:privacidade' %}#cookies">Saiba mais</a>.
+        </p>
+        <div class="banner-cookies__acoes">
+            <button type="button" class="btn btn--contorno btn--sm" data-cookies="recusar">Recusar</button>
+            <button type="button" class="btn btn--verde btn--sm" data-cookies="aceitar">Aceitar</button>
+        </div>
+    </div>
+</section>

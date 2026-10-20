@@ -55,13 +55,37 @@
                tentativa que falhou, para detectar invasão. Base legal: legítimo interesse.</p>
         </dl>
 
-        <h2 class="conta-secao">Cookies e serviços de fora</h2>
+        <h2 class="conta-secao" id="cookies">Cookies e serviços de fora</h2>
+        {% if analytics_id %}
+        {# texto com o Google Analytics ligado (SOAR_GA_ID no .env) #}
+        <p>O site usa cookies sem os quais ele não funciona: o que mantém você dentro da
+           conta, o que protege os formulários contra fraude e um que leva os avisos
+           (“orçamento enviado”, “senha incorreta”) de uma página para a outra. Esses não
+           dependem de autorização, porque sem eles o site não funciona.</p>
+        <p><b>Estatística (Google Analytics), só se você aceitar.</b> Para saber quantas
+           pessoas visitam o site, de onde chegam e quais viagens interessam mais, usamos o
+           Google Analytics. Ele grava os cookies <code>_ga</code> e <code>_ga_…</code> no seu
+           navegador e envia ao Google as páginas visitadas, o tipo de aparelho, o navegador e
+           a região aproximada. O Google Analytics 4 não guarda o seu endereço IP, e o site não
+           envia nome, e-mail nem telefone. Base legal: seu consentimento (art. 7º, I). Nada
+           disso é carregado antes de você clicar em <b>Aceitar</b> no aviso de cookies, e
+           quem recusa usa o site normalmente. Os dados ficam guardados no Google por no máximo
+           14 meses e depois são apagados.</p>
+        <p>Você pode mudar de ideia quando quiser:
+           <button type="button" class="link-cookies" data-cookies-preferencias>abrir as
+           preferências de cookies</button>. Ao recusar, os cookies do Google Analytics são
+           apagados do seu navegador.</p>
+        <p>Não há cookie de publicidade, nem Meta Pixel ou outro rastreador de anúncios.
+           Fora o Google Analytics para quem aceitou, as páginas não carregam nada de
+           servidores de fora (nem as fontes das letras).</p>
+        {% else %}
         <p>O site usa só cookies sem os quais ele não funciona: o que mantém você dentro
            da conta, o que protege os formulários contra fraude e um que leva os avisos
            (“orçamento enviado”, “senha incorreta”) de uma página para a outra. Não há cookie de
            publicidade nem de estatística, e nenhum rastreador de terceiros (Google Analytics,
            Meta Pixel e afins). As páginas não carregam nada de servidores de fora (nem as
            fontes das letras), então abrir o site não avisa ninguém além da Soar.</p>
+        {% endif %}
 
         <h2 class="conta-secao">O que <em>não</em> guardamos</h2>
         <p>Nenhum dado de pagamento. O site não cobra nada: o pagamento é combinado
@@ -88,7 +112,8 @@
            e-mails</b> (hoje o Gmail, também do Google), que recebe seu nome, seu e-mail e o
            texto das mensagens de confirmação e de troca de senha. O Google guarda dados
            também fora do Brasil; essa transferência internacional acontece só para essas
-           duas finalidades (art. 33 da LGPD).</p>
+           {% if analytics_id %}finalidades e para as estatísticas do Google Analytics, se você
+           aceitou{% else %}duas finalidades{% endif %} (art. 33 da LGPD).</p>
 
         <h2 class="conta-secao">Seus direitos</h2>
         <p>Você pode, a qualquer momento e sem justificar:</p>
@@ -106,7 +131,7 @@
         <p>Em caso de incidente que possa causar risco a você, comunicamos a ANPD e você
            mesmo, com o que aconteceu e o que fazer, no prazo da lei.</p>
 
-        <p style="margin-top:32px"><small>Última atualização: 4 de outubro de 2026.</small></p>
+        <p style="margin-top:32px"><small>Última atualização: {% if analytics_id %}20 de outubro de 2026{% else %}4 de outubro de 2026{% endif %}.</small></p>
     </div>
 </section>
 {% endblock %}
