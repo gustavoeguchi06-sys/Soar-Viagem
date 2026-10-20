@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'css/viagem.css' %}">
     {% block estilos_extra %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/tema-escuro.css' %}">
+    {% if analytics_id %}<link rel="stylesheet" href="{% static 'css/cookies.css' %}">{% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
 {% include 'partials/_icones.html' %}
@@ -148,6 +149,7 @@
         <div class="rodape__base">
             <span>© {% now "Y" %} Soar Operadora. Todos os direitos reservados.</span>
             <span>CNPJ e Cadastur 19.937.383/0001-57</span>
+            {% if analytics_id %}<button type="button" class="link-cookies" data-cookies-preferencias>Preferências de cookies</button>{% endif %}
         </div>
     </div>
 </footer>
@@ -156,5 +158,10 @@
 <script src="{% static 'js/mascaras.js' %}" defer></script>
 <script src="{% static 'js/envio.js' %}" defer></script>
 {% block scripts %}{% endblock %}
+{% if analytics_id %}
+{% include 'partials/_cookies.html' %}
+{# o GA só é baixado depois do "Aceitar" no banner — ver static/js/analytics.js #}
+<script src="{% static 'js/analytics.js' %}" data-ga="{{ analytics_id }}" defer></script>
+{% endif %}
 </body>
 </html>

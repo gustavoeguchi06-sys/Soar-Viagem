@@ -25,6 +25,7 @@ caro é subir um servidor achando que ele está protegido, não o contrário.
     SOAR_EMAIL_HOST/PORT/USER/PASSWORD/TLS, SOAR_EMAIL_REMETENTE
     SOAR_GOOGLE_CLIENT_ID/SECRET  liga o botão "Continuar com Google"
     SOAR_RESERVAS_URL   endereço do sistema de reservas das agências (vazio esconde o botão)
+    SOAR_GA_ID          ID de medição do Google Analytics 4 (G-XXXXXXXXXX); vazio desliga
 
 Para desenvolver, copie `.env.example` para `.env` (já vem com SOAR_DEBUG=1):
 
@@ -32,6 +33,7 @@ Para desenvolver, copie `.env.example` para `.env` (já vem com SOAR_DEBUG=1):
     python manage.py runserver
 """
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -156,6 +158,7 @@ TEMPLATES = [
                 'contas.context_processors.google_login',
                 'contas.context_processors.sistema_reservas',
                 'contas.context_processors.site_em_construcao',
+                'contas.context_processors.analytics',
             ],
         },
     },
@@ -419,16 +422,30 @@ CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', False)
 INSTAGRAM_TOKEN = ('' if sys.argv[1:2] == ['test']
                    else os.environ.get('SOAR_INSTAGRAM_TOKEN', '').strip())
 
+# Google Analytics 4 (static/js/analytics.js). Vazio = desligado: nenhum script
+# do Google, nenhum banner de cookies, e a CSP continua sem nenhum endereço de
+# fora. Ligado, o script só é baixado depois que o visitante clica em Aceitar
+# no banner — antes disso o site não fala com o Google (LGPD).
+# Os testes nunca ligam sozinhos; os que precisam usam override_settings.
+_GA_ID = os.environ.get('SOAR_GA_ID', '').strip().upper()
+if _GA_ID and not re.fullmatch(r'G-[A-Z0-9]{4,20}', _GA_ID):
+    raise ImproperlyConfigured('SOAR_GA_ID inválido: use o ID de medição do GA4, '
+                               'que começa com "G-" (ex.: G-AB12CD34EF).')
+GA_ID = '' if sys.argv[1:2] == ['test'] else _GA_ID
+_GA = bool(GA_ID)
+
 CSP_DIRETIVAS = {
     'default-src': "'self'",
-    'script-src': "'self'",
+    'script-src': "'self'" + (' https://www.googletagmanager.com' if _GA else ''),
     'style-src': "'self' 'unsafe-inline'",
     'font-src': "'self'",
     'img-src': "'self' data:" + (' https://' + R2_DOMINIO if R2_DOMINIO else '')
                # fotos do #ViajantesSoar vêm direto do Instagram (destinations/instagram.py)
-               + (' https://*.cdninstagram.com https://*.fbcdn.net' if INSTAGRAM_TOKEN else ''),
+               + (' https://*.cdninstagram.com https://*.fbcdn.net' if INSTAGRAM_TOKEN else '')
+               + (' https://*.google-analytics.com https://www.googletagmanager.com' if _GA else ''),
     'media-src': "'self'" + (' https://' + R2_DOMINIO if R2_DOMINIO else ''),
-    'connect-src': "'self'",
+    'connect-src': "'self'" + (' https://*.google-analytics.com https://*.analytics.google.com'
+                               ' https://www.googletagmanager.com' if _GA else ''),
     'form-action': "'self'",
     'frame-ancestors': "'none'",
     'base-uri': "'self'",
