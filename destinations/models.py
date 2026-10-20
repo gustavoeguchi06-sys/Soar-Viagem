@@ -257,6 +257,11 @@ class Hospedagem(models.Model):
     comodidades = models.JSONField('Comodidades', default=list, blank=True,
                                    help_text='Marque o que o hotel oferece. Nenhuma marcada: a '
                                              'faixa de ícones não aparece.')
+    # o que não está no catálogo: o dono escreve, um por linha, e sai com o check
+    outras_comodidades = models.TextField(
+        'Outras comodidades', blank=True,
+        help_text='Uma por linha, para o que não está na lista acima. Ex.: Lareira, Vista '
+                  'para o mar, Aceita pets. Aparecem depois das marcadas, com um ícone de check.')
     pacote_completo = models.BooleanField('Incluso no pacote completo', default=True,
                                           help_text='A hospedagem já está inclusa no pacote da viagem.')
 

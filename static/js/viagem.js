@@ -42,24 +42,23 @@
     }
 
     /* ---------- Carrossel da hospedagem ---------- */
+    // Todas as fotos do hotel (não só as 4 miniaturas) estão na lista escondida
+    // .hosp-fotos; as setas passam por elas na foto grande.
     var hospFoto = document.getElementById('hospFoto');
-    var hospMinis = Array.prototype.slice.call(document.querySelectorAll('.hosp-mini img'));
-    var hospFotos = hospFoto ? [hospFoto.src].concat(hospMinis.map(function (i) { return i.src; })) : [];
+    var hospLink = document.getElementById('hospAbrir');
+    var hospFotos = Array.prototype.slice.call(document.querySelectorAll('[data-hosp-foto]'))
+        .map(function (a) { return a.getAttribute('href'); });
     var hospAtual = 0;
+    function mostrarHosp(i) {
+        if (!hospFoto || !hospFotos.length) { return; }
+        hospAtual = (i + hospFotos.length) % hospFotos.length;
+        hospFoto.src = hospFotos[hospAtual];
+        if (hospLink) { hospLink.href = hospFotos[hospAtual]; }
+    }
 
     document.querySelectorAll('[data-hosp]').forEach(function (botao) {
         botao.addEventListener('click', function () {
-            if (!hospFotos.length) { return; }
-            hospAtual = (hospAtual + parseInt(botao.dataset.hosp, 10) + hospFotos.length) % hospFotos.length;
-            hospFoto.src = hospFotos[hospAtual];
-        });
-    });
-    hospMinis.forEach(function (img) {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function () {
-            var troca = hospFoto.src;
-            hospFoto.src = img.src;
-            img.src = troca;
+            mostrarHosp(hospAtual + parseInt(botao.dataset.hosp, 10));
         });
     });
 
@@ -310,52 +309,74 @@
     // Antes cada foto abria numa aba nova. Agora abre por cima da página, com
     // setas, contador e legenda; teclado (setas e Esc) e arrastar o dedo no
     // celular também passam as fotos.
-    var album = document.getElementById('album');
-    var abrirAlbum = null;
-    var fotosAlbum = Array.prototype.slice.call(document.querySelectorAll('[data-album]'));
-    if (album && fotosAlbum.length && typeof album.showModal === 'function') {
-        var fotoAlbum = album.querySelector('.album__foto');
-        var legendaAlbum = album.querySelector('.album__legenda');
-        var contadorAlbum = album.querySelector('.album__contador');
-        var atualAlbum = 0;
-        var sozinha = fotosAlbum.length < 2;
+    // A mesma montagem serve para o álbum da galeria e para as fotos do hotel.
+    function montarAlbum(album, fotos) {
+        if (!album || !fotos.length || typeof album.showModal !== 'function') { return null; }
+        var foto = album.querySelector('.album__foto');
+        var legenda = album.querySelector('.album__legenda');
+        var contador = album.querySelector('.album__contador');
+        var atual = 0;
+        var sozinha = fotos.length < 2;
         album.querySelectorAll('[data-album-passo]').forEach(function (b) { b.hidden = sozinha; });
 
         var mostrar = function (i) {
-            atualAlbum = (i + fotosAlbum.length) % fotosAlbum.length;
-            var link = fotosAlbum[atualAlbum];
-            fotoAlbum.src = link.getAttribute('href');
-            fotoAlbum.alt = link.dataset.legenda || '';
-            legendaAlbum.textContent = link.dataset.legenda || '';
-            contadorAlbum.textContent = sozinha ? '' : (atualAlbum + 1) + ' de ' + fotosAlbum.length;
+            atual = (i + fotos.length) % fotos.length;
+            var link = fotos[atual];
+            foto.src = link.getAttribute('href');
+            foto.alt = link.dataset.legenda || '';
+            legenda.textContent = link.dataset.legenda || '';
+            contador.textContent = sozinha ? '' : (atual + 1) + ' de ' + fotos.length;
         };
-        fotosAlbum.forEach(function (link, i) {
-            link.addEventListener('click', function (ev) {
-                ev.preventDefault();
-                mostrar(i);
-                album.showModal();
-            });
-        });
         album.querySelectorAll('[data-album-passo]').forEach(function (b) {
-            b.addEventListener('click', function () { mostrar(atualAlbum + parseInt(b.dataset.albumPasso, 10)); });
+            b.addEventListener('click', function () { mostrar(atual + parseInt(b.dataset.albumPasso, 10)); });
         });
         album.querySelector('[data-album-fechar]').addEventListener('click', function () { album.close(); });
         // clicar fora da foto (no fundo escuro) fecha
         album.addEventListener('click', function (ev) { if (ev.target === album) { album.close(); } });
         album.addEventListener('keydown', function (ev) {
-            if (ev.key === 'ArrowRight') { mostrar(atualAlbum + 1); }
-            if (ev.key === 'ArrowLeft') { mostrar(atualAlbum - 1); }
+            if (ev.key === 'ArrowRight') { mostrar(atual + 1); }
+            if (ev.key === 'ArrowLeft') { mostrar(atual - 1); }
         });
         var inicioToque = null;
         album.addEventListener('touchstart', function (ev) { inicioToque = ev.touches[0].clientX; }, { passive: true });
         album.addEventListener('touchend', function (ev) {
             if (inicioToque === null) { return; }
             var distancia = ev.changedTouches[0].clientX - inicioToque;
-            if (Math.abs(distancia) > 40) { mostrar(atualAlbum + (distancia < 0 ? 1 : -1)); }
+            if (Math.abs(distancia) > 40) { mostrar(atual + (distancia < 0 ? 1 : -1)); }
             inicioToque = null;
         });
-        abrirAlbum = function (i) { mostrar(i); album.showModal(); };
+        return function (i) { mostrar(i); album.showModal(); };
     }
+
+    var fotosAlbum = Array.prototype.slice.call(document.querySelectorAll('[data-album]'));
+    var abrirAlbum = montarAlbum(document.getElementById('album'), fotosAlbum);
+    if (abrirAlbum) {
+        fotosAlbum.forEach(function (link, i) {
+            link.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                abrirAlbum(i);
+            });
+        });
+    }
+
+    /* ---------- Fotos do hotel em pop-up, sem tarja por cima ---------- */
+    // A foto grande e as miniaturas abrem o pop-up na foto clicada; as setas da
+    // foto grande continuam passando as fotos ali mesmo.
+    var abrirHosp = montarAlbum(document.getElementById('albumHosp'),
+        Array.prototype.slice.call(document.querySelectorAll('[data-hosp-foto]')));
+    var hospAbrir = document.getElementById('hospAbrir');
+    if (abrirHosp && hospAbrir) {
+        hospAbrir.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            abrirHosp(hospAtual);
+        });
+    }
+    document.querySelectorAll('[data-hosp-ir]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var i = parseInt(b.dataset.hospIr, 10);
+            if (abrirHosp) { abrirHosp(i); } else { mostrarHosp(i); }
+        });
+    });
 
     /* ---------- Galeria: foto grande com setas, como a da hospedagem ---------- */
     var galFoto = document.getElementById('galFoto');

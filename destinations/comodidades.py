@@ -26,7 +26,18 @@ POR_CHAVE = {chave: {'nome': nome, 'icone': icone} for chave, nome, icone in ESC
 ANTIGAS = ['ar', 'wifi', 'piscina', 'cafe']
 
 
-def da_hospedagem(chaves):
-    """[{'nome', 'icone'}] na ordem do catálogo, ignorando chave que saiu dele."""
+ICONE_OUTRAS = 'ic-check'
+
+
+def da_hospedagem(chaves, outras=''):
+    """[{'nome', 'icone'}]: as marcadas, na ordem do catálogo (ignorando chave que
+    saiu dele), e depois as escritas à mão em "Outras comodidades", uma por linha."""
     marcadas = set(chaves or [])
-    return [POR_CHAVE[c] for c, _, _ in ESCOLHAS if c in marcadas]
+    lista = [POR_CHAVE[c] for c, _, _ in ESCOLHAS if c in marcadas]
+    ja_tem = {c['nome'].casefold() for c in lista}
+    for linha in (outras or '').splitlines():
+        nome = linha.strip().lstrip('-•*').strip()
+        if nome and nome.casefold() not in ja_tem:
+            ja_tem.add(nome.casefold())
+            lista.append({'nome': nome, 'icone': ICONE_OUTRAS})
+    return lista

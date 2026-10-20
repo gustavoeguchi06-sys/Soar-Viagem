@@ -442,9 +442,15 @@
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cama"></use></svg>
                 Hospedagem
             </h3>
+            {% comment %}A foto fica limpa, sem tarja por cima: o nome do hotel vem
+            embaixo. Clicar na foto grande ou numa miniatura abre as fotos do hotel
+            num pop-up (static/js/viagem.js); sem JavaScript, o link abre a foto.{% endcomment %}
             <div class="hosp-galeria">
                 <div class="hosp-principal">
-                    <img id="hospFoto" src="{{ viagem.hospedagem.fotos.0 }}" alt="{{ viagem.hospedagem.nome }}">
+                    <a href="{{ viagem.hospedagem.fotos.0 }}" class="hosp-abrir" id="hospAbrir"
+                       aria-label="Ver as fotos da {{ viagem.hospedagem.nome }}">
+                        <img id="hospFoto" src="{{ viagem.hospedagem.fotos.0 }}" alt="{{ viagem.hospedagem.nome }}">
+                    </a>
                     {% if viagem.hospedagem.fotos|length > 1 %}
                     <button class="seta seta--esq" type="button" data-hosp="-1" aria-label="Foto anterior">
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
@@ -453,19 +459,43 @@
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
                     </button>
                     {% endif %}
-                    <div class="hosp-legenda">
-                        <b>{{ viagem.hospedagem.nome }}</b>
-                        <small>{{ viagem.hospedagem.sub }}</small>
-                    </div>
                 </div>
                 {% if viagem.hospedagem.miniaturas %}
                 <div class="hosp-mini">
                     {% for f in viagem.hospedagem.miniaturas %}
-                    <img src="{{ f }}" alt="Quarto da {{ viagem.hospedagem.nome }}">
+                    <button type="button" data-hosp-ir="{{ forloop.counter }}"
+                            aria-label="Ver a foto {{ forloop.counter|add:1 }} da {{ viagem.hospedagem.nome }}">
+                        <img src="{{ f }}" alt="" loading="lazy">
+                    </button>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
+            <div class="hosp-info">
+                <b>{{ viagem.hospedagem.nome }}</b>
+                {% if viagem.hospedagem.sub %}<small>{{ viagem.hospedagem.sub }}</small>{% endif %}
+            </div>
+            <div class="hosp-fotos" hidden>
+                {% for f in viagem.hospedagem.fotos %}
+                <a href="{{ f }}" data-hosp-foto data-legenda="{{ viagem.hospedagem.nome }}"></a>
+                {% endfor %}
+            </div>
+            <dialog class="album" id="albumHosp" aria-label="Fotos da {{ viagem.hospedagem.nome }}">
+                <button type="button" class="album__fechar" data-album-fechar aria-label="Fechar">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-x"></use></svg>
+                </button>
+                <figure class="album__figura">
+                    <img class="album__foto" src="" alt="">
+                    <figcaption class="album__legenda"></figcaption>
+                </figure>
+                <button type="button" class="album__seta album__seta--esq" data-album-passo="-1" aria-label="Foto anterior">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-esq"></use></svg>
+                </button>
+                <button type="button" class="album__seta album__seta--dir" data-album-passo="1" aria-label="Próxima foto">
+                    <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
+                </button>
+                <span class="album__contador" aria-live="polite"></span>
+            </dialog>
             {% if viagem.hospedagem.comodidades %}
             <div class="comodidades">
                 {% for c in viagem.hospedagem.comodidades %}

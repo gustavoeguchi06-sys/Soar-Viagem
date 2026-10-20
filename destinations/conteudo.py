@@ -569,7 +569,9 @@ def montar_viagem(destino, avaliacoes):
             'fotos': fotos_hosp,
             'miniaturas': fotos_hosp[1:5],
             # as que o dono marcou no hotel; sem hotel cadastrado, nenhuma
-            'comodidades': da_hospedagem(hospedagem_db.comodidades if hospedagem_db else []),
+            'comodidades': (da_hospedagem(hospedagem_db.comodidades,
+                                          hospedagem_db.outras_comodidades)
+                            if hospedagem_db else []),
         },
         'depoimentos': depoimentos,
     }

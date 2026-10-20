@@ -426,7 +426,7 @@ class HospedagemAdmin(admin.ModelAdmin):
             'fields': ['nome', 'endereco', 'usada_em'],
         }),
         ('Comodidades', {
-            'fields': ['comodidades'],
+            'fields': ['comodidades', 'outras_comodidades'],
         }),
         ('Foto principal', {
             'fields': ['imagem', 'previa_imagem'],
