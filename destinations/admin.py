@@ -21,6 +21,7 @@ from django.core.validators import DecimalValidator
 from django.db import models
 from django.utils.html import format_html, format_html_join
 
+from . import comodidades as catalogo_comodidades
 from .models import (Destino, DestaqueViagem, DiaRoteiro, Hospedagem, ImagemDestino,
                      DiferencialSobre, FotoSobre, ImagemHospedagem, Interessado, ItemSoar60,
                      NumeroSobre, PaginaSobre, PaginaSoar60, PassoSoar60, PerguntaFrequente,
@@ -371,6 +372,38 @@ class ImagemHospedagemInline(admin.TabularInline):
         return miniatura(obj.imagem, obj.legenda)
 
 
+class SeletorDeComodidades(forms.CheckboxSelectMultiple):
+    """As comodidades como caixinhas com o desenho do ícone (o mesmo da página)."""
+
+    def render(self, name, value, attrs=None, renderer=None):
+        marcadas = set(value or [])
+        opcoes = []
+        for valor, rotulo in self.choices:
+            id_op = '{}_{}'.format((attrs or {}).get('id', name), valor)
+            opcoes.append(format_html(
+                '<label class="seletor-icone__op" for="{}">'
+                '<input type="checkbox" name="{}" value="{}" id="{}"{}>'
+                '<svg class="ic" aria-hidden="true"><use href="#{}"></use></svg>'
+                '<span>{}</span></label>',
+                id_op, name, valor, id_op,
+                format_html(' checked') if valor in marcadas else '',
+                catalogo_comodidades.POR_CHAVE[valor]['icone'], rotulo))
+        return format_html('<div class="seletor-icone">{}</div>',
+                           format_html(''.join(['{}'] * len(opcoes)), *opcoes))
+
+
+class HospedagemForm(forms.ModelForm):
+    comodidades = forms.MultipleChoiceField(
+        label='Comodidades', required=False, widget=SeletorDeComodidades,
+        choices=[(chave, nome) for chave, nome, _ in catalogo_comodidades.ESCOLHAS],
+        help_text='Clique nas que o hotel oferece (ficam marcadas em verde). Aparecem com o '
+                  'ícone embaixo da foto, na página da viagem, e no PDF do orçamento.')
+
+    class Meta:
+        model = Hospedagem
+        fields = '__all__'
+
+
 @admin.register(Hospedagem)
 class HospedagemAdmin(admin.ModelAdmin):
     """O banco de hospedagens: cada hotel com as fotos, cadastrado uma vez.
@@ -378,6 +411,7 @@ class HospedagemAdmin(admin.ModelAdmin):
     Na tela do destino, o dono só escolhe quais destas entram no pacote.
     """
 
+    form = HospedagemForm
     list_display = ['foto', 'nome', 'endereco', 'usada_em']
     list_display_links = ['foto', 'nome']
     search_fields = ['nome', 'endereco']
@@ -390,6 +424,9 @@ class HospedagemAdmin(admin.ModelAdmin):
     fieldsets = [
         ('A hospedagem', {
             'fields': ['nome', 'endereco', 'usada_em'],
+        }),
+        ('Comodidades', {
+            'fields': ['comodidades', 'outras_comodidades'],
         }),
         ('Foto principal', {
             'fields': ['imagem', 'previa_imagem'],

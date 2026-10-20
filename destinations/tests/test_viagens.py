@@ -442,6 +442,36 @@ class BannerAlbumHospedagemTests(TestCase):
         # a lista de hospedagens diz onde cada uma é usada
         lista = self.client.get(reverse('admin:destinations_hospedagem_changelist'))
         self.assertContains(lista, 'Bonito 2026, Bonito 2027')
+        # comodidades: o dono marca no hotel e a página mostra só essas, com o ícone
+        tela = self.client.get(reverse('admin:destinations_hospedagem_change', args=[hotel.pk]))
+        self.assertContains(tela, 'value="estacionamento"')
+        self.assertContains(tela, '#ic-estacionamento')
+        resposta = self.client.post(reverse('admin:destinations_hospedagem_change', args=[hotel.pk]), {
+            'nome': 'Pousada Bonito', 'endereco': 'Centro', 'comodidades': ['wifi', 'estacionamento'],
+            'outras_comodidades': 'Lareira\n\n- Aceita pets\nwi-fi',
+            'pacote_completo': 'on',
+            'imagens-TOTAL_FORMS': '0', 'imagens-INITIAL_FORMS': '0',
+            'imagens-MIN_NUM_FORMS': '0', 'imagens-MAX_NUM_FORMS': '1000'})
+        self.assertEqual(resposta.status_code, 302)
+        hotel.refresh_from_db()
+        self.assertEqual(hotel.comodidades, ['wifi', 'estacionamento'])
+        pagina = self.client.get(primeiro.get_absolute_url()).content.decode()
+        self.assertIn('#ic-estacionamento', pagina)
+        # as escritas à mão entram depois, sem marcador e sem repetir as marcadas
+        hosp = pagina[pagina.index('id="hospedagem"'):]
+        self.assertIn('Lareira', hosp)
+        self.assertIn('Aceita pets', hosp)
+        self.assertNotIn('- Aceita pets', hosp)
+        self.assertEqual(hosp.count('wi-fi'), 0)
+        # o nome do hotel fica embaixo das fotos, e elas abrem num pop-up
+        self.assertIn('class="hosp-info"', hosp)
+        self.assertIn('id="albumHosp"', hosp)
+        self.assertNotIn('Piscina', pagina[pagina.index('id="hospedagem"'):pagina.index('id="galeria"') if 'id="galeria"' in pagina else None])
+        # nenhuma marcada: a faixa some
+        hotel.comodidades = []
+        hotel.outras_comodidades = ''
+        hotel.save()
+        self.assertNotContains(self.client.get(primeiro.get_absolute_url()), 'class="comodidades"')
         # apagar um roteiro não apaga o hotel
         primeiro.delete()
         self.assertTrue(Hospedagem.objects.filter(pk=hotel.pk).exists())

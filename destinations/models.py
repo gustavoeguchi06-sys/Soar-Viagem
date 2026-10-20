@@ -252,6 +252,16 @@ class Hospedagem(models.Model):
     endereco = models.CharField('Endereço', max_length=200, blank=True,
                                 help_text='Onde a hospedagem fica.')
     imagem = models.ImageField(validators=[validar_foto], verbose_name='Imagem principal', upload_to='hospedagens/', blank=True, null=True)
+    # chaves de destinations/comodidades.py (ar, wifi, piscina...): a faixa de
+    # ícones embaixo da foto na página da viagem e a linha do PDF do orçamento
+    comodidades = models.JSONField('Comodidades', default=list, blank=True,
+                                   help_text='Marque o que o hotel oferece. Nenhuma marcada: a '
+                                             'faixa de ícones não aparece.')
+    # o que não está no catálogo: o dono escreve, um por linha, e sai com o check
+    outras_comodidades = models.TextField(
+        'Outras comodidades', blank=True,
+        help_text='Uma por linha, para o que não está na lista acima. Ex.: Lareira, Vista '
+                  'para o mar, Aceita pets. Aparecem depois das marcadas, com um ícone de check.')
     pacote_completo = models.BooleanField('Incluso no pacote completo', default=True,
                                           help_text='A hospedagem já está inclusa no pacote da viagem.')
 

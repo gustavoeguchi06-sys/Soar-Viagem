@@ -376,6 +376,16 @@ body.pagina-viagem {
 .hosp-principal img { width: 100%; height: 100%; min-height: 190px; object-fit: cover; display: block; }
 .hosp-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .hosp-mini img { width: 100%; height: 91px; object-fit: cover; border-radius: var(--r-md); display: block; }
+/* foto e miniaturas abrem o pop-up das fotos do hotel */
+.hosp-abrir { display: block; height: 100%; cursor: zoom-in; }
+.hosp-mini button { display: block; padding: 0; border: 0; background: none; cursor: zoom-in;
+                    border-radius: var(--r-md); overflow: hidden; }
+.hosp-mini button:hover img, .hosp-abrir:hover img { opacity: .92; }
+.hosp-mini button:focus-visible, .hosp-abrir:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+/* nome do hotel embaixo das fotos, sem cobrir nada */
+.hosp-info { margin-top: 12px; }
+.hosp-info b { display: block; font-size: 1rem; font-weight: 700; color: var(--preto); }
+.hosp-info small { display: block; font-size: .85rem; color: var(--tinta-suave); margin-top: 2px; }
 
 .hosp-legenda {
     position: absolute; left: 12px; bottom: 12px; background: #fff; border-radius: var(--r-sm);
@@ -793,7 +803,7 @@ html[data-tema="escuro"] .acom--esgotada .acom__nome small.acom__vagas { color: 
    inteira, em vez de deixar um buraco ao lado. */
 .galeria-grade a:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .galeria-grade a:last-child:nth-child(odd) img { height: 170px; }
-.hosp-mini img:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.hosp-mini button:last-child:nth-child(odd) { grid-column: 1 / -1; }
 /* hospedagem sem miniaturas: a foto principal ocupa a largura toda */
 .hosp-galeria:not(:has(.hosp-mini)) { grid-template-columns: 1fr; }
 .hosp-galeria:not(:has(.hosp-mini)) .hosp-principal img { min-height: 220px; max-height: 300px; }

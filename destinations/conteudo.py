@@ -10,6 +10,7 @@ import re
 
 from django.templatetags.static import static
 
+from .comodidades import da_hospedagem
 from .quartos import POR_CHAVE
 
 # --------------------------------------------------------------------------- #
@@ -35,13 +36,6 @@ SERVICOS = [
     {'icone': 'ic-escudo', 'titulo': 'Seguro', 'sub': 'viagem'},
     {'icone': 'ic-camera', 'titulo': 'Passeios', 'sub': 'inclusos'},
     {'icone': 'ic-coracao', 'titulo': 'Atendimento', 'sub': 'próximo'},
-]
-
-COMODIDADES = [
-    {'icone': 'ic-ar', 'nome': 'Ar-condicionado'},
-    {'icone': 'ic-wifi', 'nome': 'Wi-Fi'},
-    {'icone': 'ic-piscina', 'nome': 'Piscina'},
-    {'icone': 'ic-cafe', 'nome': 'Café da manhã'},
 ]
 
 INCLUSO = [
@@ -574,7 +568,10 @@ def montar_viagem(destino, avaliacoes):
             'sub': destino.hospedagem_sub or cfg.get('hospedagem_sub', 'Conforto e natureza'),
             'fotos': fotos_hosp,
             'miniaturas': fotos_hosp[1:5],
-            'comodidades': COMODIDADES,
+            # as que o dono marcou no hotel; sem hotel cadastrado, nenhuma
+            'comodidades': (da_hospedagem(hospedagem_db.comodidades,
+                                          hospedagem_db.outras_comodidades)
+                            if hospedagem_db else []),
         },
         'depoimentos': depoimentos,
     }
