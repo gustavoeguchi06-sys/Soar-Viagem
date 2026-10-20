@@ -21,6 +21,47 @@ from .models import MESES, Artigo, Atracao, CapaBlog, Categoria, Inscricao, Seca
 CALENDARIO = forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d')
 
 
+class EscolhaSuspensa(forms.CheckboxSelectMultiple):
+    """Caixinhas de marcar guardadas dentro de um campo que abre e fecha.
+
+    Fechado, o campo ocupa uma linha e mostra o que está marcado ("Jalapão,
+    Alter do Chão" ou "5 viagens escolhidas"). Clicando, abre uma lista com
+    rolagem e uma busca por nome. O <details> abre e fecha sem JavaScript; o
+    escolha-suspensa.js só atualiza o resumo, filtra pela busca e fecha ao
+    clicar fora.
+    """
+
+    VAZIO = 'Nenhuma viagem escolhida'
+
+    class Media:
+        js = ['js/escolha-suspensa.js']
+
+    def render(self, name, value, attrs=None, renderer=None):
+        lista = super().render(name, value, attrs, renderer)
+        marcados = {str(v) for v in (value or [])}
+        # no resumo sai o ", Brasil" do fim: toda viagem é no Brasil e a vírgula
+        # confundia ("Alter do Chão, Brasil, Jalapão, Brasil")
+        nomes = [str(rotulo).removesuffix(', Brasil') for chave, rotulo in self.choices
+                 if str(chave) in marcados]
+        if not nomes:
+            resumo = self.VAZIO
+        elif len(nomes) <= 2:
+            resumo = ' · '.join(nomes)
+        else:
+            resumo = '{} viagens escolhidas'.format(len(nomes))
+        return format_html(
+            '<details class="escolha-suspensa" data-vazio="{}">'
+            '<summary class="escolha-suspensa__botao">'
+            '<span class="escolha-suspensa__resumo">{}</span></summary>'
+            '<div class="escolha-suspensa__painel">'
+            '<input type="search" class="escolha-suspensa__busca" placeholder="Buscar viagem…" '
+            'aria-label="Buscar viagem" autocomplete="off">'
+            '<div class="escolha-suspensa__lista">{}</div>'
+            '<p class="escolha-suspensa__nada" hidden>Nenhuma viagem com esse nome.</p>'
+            '</div></details>',
+            self.VAZIO, resumo, lista)
+
+
 class MesesField(forms.MultipleChoiceField):
     """Caixinhas de Jan a Dez, guardadas no banco como "5,6,7"."""
 
@@ -122,11 +163,11 @@ class ArtigoAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         # A busca (autocomplete) dentro de um bloco recolhido abria espremida,
-        # com largura zero. Com poucas viagens, a lista de caixinhas é mais
-        # simples: todas aparecem e é só marcar.
+        # com largura zero. Por isso são caixinhas de marcar, mas guardadas num
+        # campo que abre e fecha (EscolhaSuspensa), com busca por nome.
         if db_field.name == 'destinos':
             kwargs['queryset'] = Destino.objects.order_by('nome')
-            kwargs['widget'] = forms.CheckboxSelectMultiple(attrs={'class': 'viagens-escolha'})
+            kwargs['widget'] = EscolhaSuspensa(attrs={'class': 'viagens-escolha'})
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
