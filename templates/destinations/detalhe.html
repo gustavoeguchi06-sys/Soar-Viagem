@@ -516,8 +516,8 @@
                 Galeria
             </h3>
             {% if viagem.album %}
-            {% comment %}Mesmo desenho da hospedagem: foto grande com setas e legenda, e
-            até 4 miniaturas ao lado. Clicar na foto grande abre o carrossel
+            {% comment %}Mesmo desenho e mesmo tamanho da hospedagem: foto grande com
+            setas, até 4 miniaturas ao lado e o nome da foto embaixo, sem tarja por cima. Clicar na foto grande abre o carrossel
             (static/js/viagem.js); sem JavaScript, o link abre a foto sozinha.
             Todas as fotos ficam na .galeria-grade, que é a lista do carrossel.{% endcomment %}
             {% with primeira=viagem.album.0 total=viagem.album|length %}
@@ -534,10 +534,6 @@
                         <svg class="ic" viewBox="0 0 24 24"><use href="#ic-dir"></use></svg>
                     </button>
                     {% endif %}
-                    <div class="hosp-legenda">
-                        <b id="galLegenda">{{ primeira.legenda }}</b>
-                        <small><span id="galNumero">1</span> de {{ total }} foto{{ total|pluralize }}</small>
-                    </div>
                 </div>
                 {% if total > 1 %}
                 <div class="gal__mini">
@@ -549,6 +545,10 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+            </div>
+            <div class="hosp-info">
+                <b id="galLegenda">{{ primeira.legenda }}</b>
+                <small><span id="galNumero">1</span> de {{ total }} foto{{ total|pluralize }}</small>
             </div>
             {% endwith %}
             <div class="galeria-grade" hidden>
