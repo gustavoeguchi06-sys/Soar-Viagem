@@ -5,15 +5,18 @@ Banner de cookies do Google Analytics (static/js/analytics.js).
    "Recusar" têm o mesmo peso, como pede a ANPD: recusar não pode ser mais
    difícil que aceitar.
 {% endcomment %}
-<section id="banner-cookies" class="banner-cookies" role="region" aria-label="Aviso de cookies" hidden>
+<section id="banner-cookies" class="banner-cookies" role="region" aria-labelledby="bannerCookiesTitulo" hidden>
     <div class="banner-cookies__caixa">
-        <p class="banner-cookies__titulo">Privacidade e cookies</p>
+        <div class="banner-cookies__topo">
+            <span class="banner-cookies__icone" aria-hidden="true">
+                <svg class="ic" viewBox="0 0 24 24"><use href="#ic-escudo"></use></svg>
+            </span>
+            <p class="banner-cookies__titulo" id="bannerCookiesTitulo">Sua privacidade importa</p>
+        </div>
         <p class="banner-cookies__texto">
-            Utilizamos cookies essenciais, sempre ativos, para garantir a segurança e o
-            funcionamento do site. Com a sua autorização, também usamos cookies de estatística
-            (Google Analytics) para entender como o site é utilizado e aprimorar a sua
-            experiência. Não utilizamos cookies de publicidade.
-            <a href="{% url 'contas:privacidade' %}#cookies">Aviso de privacidade</a>
+            Os cookies essenciais, de segurança e funcionamento, ficam sempre ativos. Com a sua
+            autorização, usamos também o Google Analytics para melhorar o site. Sem publicidade.
+            <a href="{% url 'contas:privacidade' %}#cookies">Saiba mais</a>
         </p>
         <div class="banner-cookies__acoes">
             <button type="button" class="btn btn--contorno btn--sm" data-cookies="recusar">Recusar</button>

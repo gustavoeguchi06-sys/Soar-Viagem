@@ -5,20 +5,29 @@
 .banner-cookies { position: fixed; z-index: 80; top: 88px;
     /* alinhado com a logo: mesma margem esquerda do .wrap do topo */
     left: max(16px, calc((100vw - 1180px) / 2 + 24px));
-    width: min(440px, calc(100vw - 32px)); }
+    width: min(360px, calc(100vw - 32px)); }
 .banner-cookies[hidden] { display: none; }
-.banner-cookies__caixa { padding: 18px 20px; background: var(--cartao, #fff); color: var(--tinta, #1f2a2e);
-    border: 1px solid var(--linha, #e6eae8); border-radius: var(--r-md, 14px);
-    box-shadow: var(--sombra-md, 0 10px 30px rgba(20, 32, 27, .14));
-    animation: banner-cookies-entra .25s ease-out; }
-.banner-cookies__titulo { margin: 0 0 6px; font-weight: 700; font-size: .95rem; color: var(--preto, #14201b); }
-.banner-cookies__texto { margin: 0; font-size: .84rem; line-height: 1.55; color: var(--tinta-suave, #6b7a80); }
-.banner-cookies__texto a { color: var(--verde-texto, #15803d); font-weight: 600; text-decoration: underline;
+.banner-cookies__caixa { position: relative; overflow: hidden; padding: 16px 18px;
+    background: var(--cartao, #fff); color: var(--tinta, #1f2a2e);
+    border: 1px solid rgba(20, 108, 67, .18); border-radius: 16px;
+    box-shadow: 0 18px 44px rgba(9, 18, 14, .32), 0 2px 6px rgba(9, 18, 14, .10);
+    animation: banner-cookies-entra .35s cubic-bezier(.2, .8, .2, 1); }
+/* faixa verde no topo: o aviso se destaca da foto do site */
+.banner-cookies__caixa::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+    background: linear-gradient(90deg, var(--verde, #146c43), #2fa36b 60%, var(--ouro, #f5a623)); }
+.banner-cookies__topo { display: flex; align-items: center; gap: 10px; }
+.banner-cookies__icone { flex: none; display: grid; place-items: center; width: 32px; height: 32px;
+    border-radius: 10px; background: var(--verde-claro, #e8f3ec); color: var(--verde, #146c43); }
+.banner-cookies__icone .ic { width: 18px; height: 18px; }
+.banner-cookies__titulo { margin: 0; font-weight: 800; font-size: .95rem; color: var(--preto, #14201b); }
+.banner-cookies__texto { margin: 10px 0 0; font-size: .8rem; line-height: 1.5; color: var(--tinta-suave, #6b7a80); }
+.banner-cookies__texto a { color: var(--verde-texto, #15803d); font-weight: 700; text-decoration: underline;
     white-space: nowrap; }
-.banner-cookies__acoes { display: flex; gap: 10px; margin-top: 14px; }
-.banner-cookies__acoes .btn { flex: 1; min-height: 44px; justify-content: center; }
+.banner-cookies__acoes { display: flex; gap: 8px; margin-top: 12px; }
+.banner-cookies__acoes .btn { flex: 1; min-height: 40px; padding-top: 8px; padding-bottom: 8px; justify-content: center; }
+.banner-cookies__acoes .btn--verde { box-shadow: 0 5px 14px rgba(20, 108, 67, .32); }
 html[data-tema="escuro"] .banner-cookies__acoes .btn--contorno { background: transparent; }
-@keyframes banner-cookies-entra { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes banner-cookies-entra { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .banner-cookies__caixa { animation: none; } }
 
 /* botão "Preferências de cookies" com cara de link, no rodapé e no aviso */
