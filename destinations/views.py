@@ -2,7 +2,8 @@ import logging
 
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Case, F, Min, Q, When
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -70,6 +71,17 @@ def lista_destinos(request):
     if estilo:
         destinos = destinos.filter(selo__iexact=estilo)
         filtros.append('estilo {}'.format(estilo.lower()))
+
+    # Ordem de quando a viagem acontece, e não de quando foi cadastrada: a
+    # próxima saída que ainda vai acontecer vem primeiro. Destino sem saída
+    # cadastrada usa a data de ida do próprio destino; sem data nenhuma (ou só
+    # com datas que já passaram), vai para o fim, em ordem alfabética.
+    destinos = destinos.annotate(
+        proxima_data=Coalesce(
+            Min('saidas__data_ida', filter=Q(saidas__data_ida__gte=hoje)),
+            Case(When(data_ida__gte=hoje, then=F('data_ida'))),
+        )
+    ).order_by(F('proxima_data').asc(nulls_last=True), 'nome')
 
     # os filtros vão junto nos links de página e de região
     mantidos = {k: v for k, v in (('q', busca), ('mes', mes), ('estilo', estilo)) if v}
