@@ -7,10 +7,13 @@ Banner de cookies do Google Analytics (static/js/analytics.js).
 {% endcomment %}
 <section id="banner-cookies" class="banner-cookies" role="region" aria-label="Aviso de cookies" hidden>
     <div class="banner-cookies__caixa">
+        <p class="banner-cookies__titulo">Privacidade e cookies</p>
         <p class="banner-cookies__texto">
-            Usamos cookies de <strong>estatística</strong> (Google Analytics) para saber quantas
-            pessoas visitam o site e quais viagens interessam mais. Eles só são ligados se você
-            aceitar. Nada de anúncio. <a href="{% url 'contas:privacidade' %}#cookies">Saiba mais</a>.
+            Utilizamos cookies essenciais, sempre ativos, para garantir a segurança e o
+            funcionamento do site. Com a sua autorização, também usamos cookies de estatística
+            (Google Analytics) para entender como o site é utilizado e aprimorar a sua
+            experiência. Não utilizamos cookies de publicidade.
+            <a href="{% url 'contas:privacidade' %}#cookies">Aviso de privacidade</a>
         </p>
         <div class="banner-cookies__acoes">
             <button type="button" class="btn btn--contorno btn--sm" data-cookies="recusar">Recusar</button>
