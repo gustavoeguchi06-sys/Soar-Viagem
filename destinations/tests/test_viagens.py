@@ -604,3 +604,30 @@ class SaidaDeUmDiaTests(TestCase):
         self.assertEqual(textos['proxima_saida'], '16 de Junho de 2027')
         self.assertEqual((textos['dias'], textos['noites']), ('1 dia', 'sem pernoite'))
         self.assertEqual(textos_do_periodo(date(2027, 6, 16), date(2027, 6, 17))['noites'], '1 noite')
+
+
+class OrdemDaListaTests(TestCase):
+    """A página Destinos mostra primeiro a viagem que acontece antes."""
+
+    def test_ordem_pela_proxima_saida(self):
+        hoje = timezone.localdate()
+
+        def destino(nome, *dias):
+            d = Destino.objects.create(nome=nome, slug=nome.lower(), descricao='x', preco_base=1000)
+            for n in dias:
+                Saida.objects.create(destino=d, data_ida=hoje + timedelta(days=n),
+                                     data_volta=hoje + timedelta(days=n + 3))
+            return d
+
+        # cadastrados fora de ordem de propósito
+        destino('Jalapao', 90)
+        destino('Alter', -10, 200)          # a de -10 já passou: vale a de 200
+        destino('Caraca', 15, 300)          # vale a mais próxima, 15
+        destino('Bonito')                   # sem saída nenhuma: vai para o fim
+        destino('Antiga', -40)              # só saída passada: também no fim
+        Destino.objects.create(nome='Inhotim', slug='inhotim', descricao='x', preco_base=1000,
+                               data_ida=hoje + timedelta(days=40))  # sem Saida, data no destino
+
+        resposta = self.client.get(reverse('destinations:lista'))
+        nomes = [d.nome for d in resposta.context['destinos']]
+        self.assertEqual(nomes, ['Caraca', 'Inhotim', 'Jalapao', 'Alter', 'Antiga', 'Bonito'])
