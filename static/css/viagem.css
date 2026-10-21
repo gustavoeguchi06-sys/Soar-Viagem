@@ -419,6 +419,18 @@ body.pagina-viagem {
 .gal__mais { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(9, 18, 14, .55);
              color: #fff; font-weight: 700; font-size: 1.05rem; }
 
+/* Hospedagem e galeria do mesmo tamanho, lado a lado. Antes a altura vinha da
+   foto (uma foto em pé deixava o quadro alto e as miniaturas soltas, com
+   buraco entre elas); agora o quadro tem altura fixa e as miniaturas dividem
+   essa altura em linhas iguais. */
+.duo { --duo-foto: 288px; }
+.hosp-galeria, .gal { height: var(--duo-foto); grid-template-rows: minmax(0, 1fr); }
+.hosp-principal, .gal__principal { height: 100%; min-height: 0; }
+.hosp-principal img, .gal__principal img { height: 100%; min-height: 0; max-height: none; }
+.hosp-mini, .gal__mini { height: 100%; grid-auto-rows: minmax(0, 1fr); }
+.hosp-mini button, .gal__mini button { height: 100%; }
+.hosp-mini img, .gal__mini img { height: 100%; }
+
 .comodidades { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 14px; padding-top: 4px; }
 .comodidade { display: flex; align-items: center; gap: 8px; font-size: .84rem; color: var(--tinta-suave); }
 .comodidade .ic { width: 17px; height: 17px; color: var(--preto); }
@@ -573,6 +585,10 @@ body.pagina-viagem {
 @media (max-width: 900px) {
     .destaques { grid-template-columns: 1fr 1fr; }
     .hosp-galeria, .gal { grid-template-columns: 1fr; }
+    /* uma coluna: foto em cima, miniaturas embaixo, cada parte com a sua altura */
+    .hosp-galeria, .gal { height: auto; grid-template-rows: none; }
+    .hosp-principal, .gal__principal { height: 230px; }
+    .hosp-mini, .gal__mini { height: auto; grid-auto-rows: auto; }
     .hosp-mini img, .gal__mini img { height: 92px; }
     .rodape__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
     .galeria-grade img { height: 140px; }
