@@ -1,26 +1,30 @@
 /* Banner de cookies (templates/partials/_cookies.html). Só carrega quando o
-   Google Analytics está ligado. Não cobre a página nem bloqueia o uso: fica
-   no rodapé da tela até a pessoa escolher. */
-.banner-cookies { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 80;
-    display: flex; justify-content: center; pointer-events: none; }
+   Google Analytics está ligado. Não bloqueia o uso: no computador fica no
+   canto de cima, logo abaixo da logo; no celular, embaixo (em cima taparia o
+   topo e a foto principal na tela pequena). */
+.banner-cookies { position: fixed; z-index: 80; top: 88px;
+    /* alinhado com a logo: mesma margem esquerda do .wrap do topo */
+    left: max(16px, calc((100vw - 1180px) / 2 + 24px));
+    width: min(440px, calc(100vw - 32px)); }
 .banner-cookies[hidden] { display: none; }
-.banner-cookies__caixa { pointer-events: auto; width: 100%; max-width: 760px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px;
-    padding: 16px 20px; background: var(--cartao, #fff); color: var(--tinta, #1f2a2e);
+.banner-cookies__caixa { padding: 18px 20px; background: var(--cartao, #fff); color: var(--tinta, #1f2a2e);
     border: 1px solid var(--linha, #e6eae8); border-radius: var(--r-md, 14px);
-    box-shadow: var(--sombra-md, 0 10px 30px rgba(20, 32, 27, .10)); }
-.banner-cookies__texto { flex: 1 1 320px; margin: 0; font-size: .88rem; line-height: 1.5; }
-.banner-cookies__texto a { color: var(--verde-texto, #15803d); font-weight: 600; text-decoration: underline; }
-.banner-cookies__acoes { display: flex; gap: 10px; flex: none; }
-.banner-cookies__acoes .btn { min-height: 44px; min-width: 112px; justify-content: center; }
+    box-shadow: var(--sombra-md, 0 10px 30px rgba(20, 32, 27, .14));
+    animation: banner-cookies-entra .25s ease-out; }
+.banner-cookies__titulo { margin: 0 0 6px; font-weight: 700; font-size: .95rem; color: var(--preto, #14201b); }
+.banner-cookies__texto { margin: 0; font-size: .84rem; line-height: 1.55; color: var(--tinta-suave, #6b7a80); }
+.banner-cookies__texto a { color: var(--verde-texto, #15803d); font-weight: 600; text-decoration: underline;
+    white-space: nowrap; }
+.banner-cookies__acoes { display: flex; gap: 10px; margin-top: 14px; }
+.banner-cookies__acoes .btn { flex: 1; min-height: 44px; justify-content: center; }
 html[data-tema="escuro"] .banner-cookies__acoes .btn--contorno { background: transparent; }
+@keyframes banner-cookies-entra { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .banner-cookies__caixa { animation: none; } }
 
 /* botão "Preferências de cookies" com cara de link, no rodapé e no aviso */
 .link-cookies { background: none; border: 0; padding: 0; font: inherit; color: inherit;
     text-decoration: underline; cursor: pointer; }
 
 @media (max-width: 560px) {
-    .banner-cookies { left: 10px; right: 10px; bottom: 10px; }
-    .banner-cookies__acoes { width: 100%; }
-    .banner-cookies__acoes .btn { flex: 1; }
+    .banner-cookies { top: auto; bottom: 10px; left: 10px; width: calc(100vw - 20px); }
 }
