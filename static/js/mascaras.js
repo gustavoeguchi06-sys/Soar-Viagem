@@ -1,7 +1,7 @@
-/* Soar Operadora — máscaras de telefone, CEP, CNPJ, CADASTUR e preço em reais.
+/* Soar Operadora — máscaras de telefone, CEP, CPF, CNPJ, CADASTUR e preço em reais.
 
    A pessoa digita só os números; os parênteses, pontos, barra e traço entram
-   sozinhos. Vale para todo campo com data-mascara="telefone|cep|cnpj|cadastur".
+   sozinhos. Vale para todo campo com data-mascara="telefone|cep|cpf|cnpj|cadastur".
    No painel do dono (admin do Django) os campos não têm esse atributo, então
    eles são reconhecidos pelo nome.
 
@@ -27,6 +27,9 @@
         },
         cep: function (v) {
             return juntar(digitos(v).slice(0, 8), [[5, '-'], [3, '']]);
+        },
+        cpf: function (v) {
+            return juntar(digitos(v).slice(0, 11), [[3, '.'], [3, '.'], [3, '-'], [2, '']]);
         },
         cnpj: function (v) {
             var n = digitos(v).slice(0, 14);

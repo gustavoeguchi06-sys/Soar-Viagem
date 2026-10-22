@@ -17,7 +17,7 @@
             {% else %}
             <div class="form-nota">
                 <svg class="ic" viewBox="0 0 24 24"><use href="#ic-cadeado"></use></svg>
-                <span>Cadastro recebido. A Soar está conferindo o CNPJ e o CADASTUR, e
+                <span>Cadastro recebido. A Soar está conferindo o CNPJ da agência, e
                       avisaremos assim que a parceria for aprovada.</span>
             </div>
             {% endif %}
@@ -26,8 +26,8 @@
             <dl class="dados-agente">
                 <dt>Razão social</dt><dd>{{ agente.razao_social }}</dd>
                 <dt>CNPJ</dt><dd>{{ agente.cnpj_formatado }}</dd>
-                <dt>CADASTUR</dt><dd>{{ agente.cadastur }}</dd>
-                <dt>Responsável</dt><dd>{{ request.user.get_full_name|default:request.user.username }}</dd>
+                <dt>CADASTUR</dt><dd>{{ agente.cnpj_formatado }} <small>(o mesmo do CNPJ)</small></dd>
+                <dt>Agente de viagens</dt><dd>{{ request.user.get_full_name|default:request.user.username }}</dd>
                 <dt>E-mail</dt><dd>{{ request.user.email }}</dd>
                 <dt>WhatsApp</dt><dd>{{ agente.whatsapp }}</dd>
             </dl>

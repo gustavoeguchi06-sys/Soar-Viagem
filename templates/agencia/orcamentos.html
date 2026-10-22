@@ -1,0 +1,89 @@
+{% extends 'agencia/_base.html' %}
+{% load agencia %}
+
+{% block titulo %}Orçamentos{% endblock %}
+
+{% block corpo %}
+<dl class="ag-resumo">
+    <div><dt>Orçamentos</dt><dd>{{ resumo.total }}</dd></div>
+    <div><dt>Aguardando o cliente</dt><dd>{{ resumo.aguardando }}</dd></div>
+    <div><dt>Aceitos</dt><dd>{{ resumo.aceitos }}</dd></div>
+    <div><dt>Valor aceito</dt><dd>R$ {{ resumo.valor_aceito|reais|default:"0,00" }}</dd></div>
+</dl>
+
+<section>
+    <div class="ag-titulo">
+        <h2>Orçamentos da agência</h2>
+        <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Fazer novo orçamento</a>
+    </div>
+    <p class="ag-explica">Todo orçamento que a agência emite fica aqui. Quando o cliente responder,
+       marque se ele aceitou ou recusou. O orçamento vale por 72 horas; depois disso aparece como vencido.</p>
+
+    <nav class="ag-filtros" aria-label="Filtrar orçamentos">
+        {% for valor, nome in filtros %}
+        <a href="?situacao={{ valor }}" {% if valor == filtro %}aria-current="true"{% endif %}>{{ nome }}</a>
+        {% endfor %}
+    </nav>
+
+    {% if orcamentos %}
+    <div class="reservas-lista">
+        {% for o in orcamentos %}
+        <article class="reserva-item ag-orc ag-orc--{% if o.vencido %}vencido{% else %}{{ o.status }}{% endif %}">
+            <div class="reserva-item__topo">
+                <div>
+                    <span class="reserva-item__codigo">{{ o.codigo }} · {{ o.criado_em|date:"d/m/Y H:i" }}</span>
+                    <h3>{{ o.cliente_nome }}</h3>
+                </div>
+                <span class="ag-selo ag-selo--{% if o.vencido %}vencido{% else %}{{ o.status }}{% endif %}">
+                    {% if o.vencido %}Vencido{% else %}{{ o.get_status_display }}{% endif %}
+                </span>
+            </div>
+
+            <dl class="reserva-item__dados">
+                <div><dt>Viagem</dt><dd>{{ o.destino.nome }}</dd></div>
+                <div><dt>Saída</dt><dd>{{ o.saida_texto|default:"a combinar" }}</dd></div>
+                <div><dt>Acomodação</dt><dd>{{ o.acomodacao_texto }}</dd></div>
+                <div><dt>Adultos</dt><dd>{{ o.pessoas }}{% if o.idades_criancas %} + {{ o.criancas_texto }} CHD{% endif %}</dd></div>
+                <div><dt>Valor</dt><dd>{% if o.valor %}R$ {{ o.valor|reais }}{% else %}sob consulta{% endif %}</dd></div>
+                <div><dt>Válido até</dt><dd>{{ o.valido_ate|date:"d/m/Y H:i" }}</dd></div>
+                {% if varios_agentes %}<div><dt>Agente</dt><dd>{{ o.agencia.nome_agente }}</dd></div>{% endif %}
+            </dl>
+
+            <div class="ag-contato">
+                {% if o.cliente_email %}<a href="mailto:{{ o.cliente_email }}">{{ o.cliente_email }}</a>{% endif %}
+                {% with link=o.cliente_telefone|whatsapp %}
+                {% if link %}<a class="ag-contato__whats" href="{{ link }}" target="_blank" rel="noopener">
+                    <svg class="ic-f" viewBox="0 0 24 24"><use href="#ic-whats"></use></svg>{{ o.cliente_telefone }}</a>{% endif %}
+                {% endwith %}
+                {% if not o.enviado_em %}<span class="ag-aviso-email">O e-mail para o cliente não saiu: baixe o PDF e envie.</span>{% endif %}
+                <a class="btn btn--contorno btn--sm ag-contato__abrir" href="{% url 'agencia:orcamento_pdf' o.pk %}"
+                   target="_blank" rel="noopener">Ver PDF</a>
+            </div>
+
+            {% if o.agencia_id == request.agencia.pk %}
+            <form class="ag-situacao" method="post" action="{% url 'agencia:orcamento_situacao' o.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="voltar" value="{{ filtro }}">
+                <span>O cliente respondeu?</span>
+                {% if o.status != 'aceito' %}<button class="btn btn--verde btn--sm" name="situacao" value="aceito">Aceitou</button>{% endif %}
+                {% if o.status != 'recusado' %}<button class="btn btn--contorno btn--sm" name="situacao" value="recusado">Recusou</button>{% endif %}
+                {% if o.status != 'enviado' %}<button class="ag-link" name="situacao" value="enviado">Voltar para aguardando</button>{% endif %}
+            </form>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="conta-vazio ag-vazio">
+        {% if filtro %}
+        <p>Nenhum orçamento nesta situação.</p>
+        <a href="?situacao=">Ver todos</a>
+        {% else %}
+        <p>A agência ainda não emitiu nenhum orçamento. Abra uma viagem e monte o orçamento no card
+           da direita: ele aparece aqui na hora.</p>
+        <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Ver viagens</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

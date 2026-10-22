@@ -261,7 +261,7 @@ class SaibaMaisTests(TestCase):
         self.url = reverse('destinations:interesse', args=['bonito'])
 
     def dados(self, **extra):
-        return {'nome': 'Ana Souza', 'email': 'ana@exemplo.com',
+        return {'nome': 'Ana Souza', 'cpf': '52998224725', 'email': 'ana@exemplo.com',
                 'whatsapp': '11988887777', 'cep': '01310100', **extra}
 
     def test_sem_login_aparece_saiba_mais(self):

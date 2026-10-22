@@ -11,8 +11,9 @@
     <div class="wrap conta-tela__grade">
         <div class="cartao-form">
             <h1>Cadastrar minha agência</h1>
-            <p class="cartao-form__sub">Preencha os dados da agência. Depois de confirmar o
-               e-mail, a Soar confere o CNPJ e o CADASTUR para liberar a parceria.</p>
+            <p class="cartao-form__sub">Preencha os seus dados e os da agência. Cada agente faz o
+               seu próprio cadastro, com o CNPJ da agência. Depois de confirmar o e-mail, a Soar
+               confere o CNPJ para liberar a parceria.</p>
 
             <form method="post" novalidate>
                 {% csrf_token %}
@@ -30,9 +31,9 @@
             <h2>O que você vai precisar</h2>
             <ul>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Razão social e CNPJ da agência.</li>
+                    Seu nome, como agente de viagens.</li>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
-                    Número do CADASTUR.</li>
+                    Razão social e CNPJ da agência (o CADASTUR da empresa é o mesmo número).</li>
                 <li><svg class="ic" viewBox="0 0 24 24"><use href="#ic-check"></use></svg>
                     WhatsApp e e-mail para contato.</li>
             </ul>

@@ -289,13 +289,14 @@ class MascarasTests(TestCase):
             'first_name': 'Ana', 'email': 'ana@agencia.com', 'username': 'ana_ag',
             'password1': 'Senha-forte-123', 'password2': 'Senha-forte-123',
             'razao_social': 'Ana Turismo', 'cnpj': '11222333000181',
-            'cadastur': '351234561000013', 'whatsapp': '11988887777',
+            'whatsapp': '11988887777',
             'aceite_privacidade': 'on',
         })
         self.assertEqual(resposta.status_code, 200)
         agencia = PerfilAgente.objects.get()
         self.assertEqual(agencia.cnpj, '11222333000181')
-        self.assertEqual(agencia.cadastur, '35.123456.10.0001-3')
+        # o CADASTUR da empresa é o próprio CNPJ
+        self.assertEqual(agencia.cadastur, '11.222.333/0001-81')
         self.assertEqual(agencia.whatsapp, '(11) 98888-7777')
 
 

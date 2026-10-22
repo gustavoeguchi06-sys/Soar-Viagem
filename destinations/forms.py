@@ -1,5 +1,6 @@
 from django import forms
 
+from contas.models import formatar_cpf
 from soar.mascaras import formatar_cep, formatar_telefone
 
 from .escolha_quartos import EscolhaDeQuartos
@@ -18,9 +19,11 @@ class InteresseForm(EscolhaDeQuartos, forms.ModelForm):
 
     class Meta:
         model = Interessado
-        fields = ['nome', 'email', 'whatsapp', 'cep']
+        fields = ['nome', 'cpf', 'email', 'whatsapp', 'cep']
         widgets = {
             'nome': forms.TextInput(attrs={'autocomplete': 'name', 'maxlength': 120}),
+            'cpf': forms.TextInput(attrs={'placeholder': '000.000.000-00', 'inputmode': 'numeric',
+                                          'data-mascara': 'cpf', 'maxlength': 14}),
             'email': forms.EmailInput(attrs={'autocomplete': 'email',
                                              'placeholder': 'voce@email.com'}),
             'whatsapp': forms.TextInput(attrs={'placeholder': '(11) 90000-0000',
@@ -50,7 +53,7 @@ class InteresseForm(EscolhaDeQuartos, forms.ModelForm):
     @property
     def campos_de_contato(self):
         """Os campos que aparecem ao abrir o "Saiba mais" (os quartos ficam no card)."""
-        return [self[nome] for nome in ('nome', 'email', 'whatsapp', 'cep')]
+        return [self[nome] for nome in ('nome', 'cpf', 'email', 'whatsapp', 'cep')]
 
     def clean(self):
         dados = super().clean()
@@ -60,6 +63,9 @@ class InteresseForm(EscolhaDeQuartos, forms.ModelForm):
             self.instance.quartos = self.quartos_escolhidos
             self.instance.pessoas = sum(q['pessoas'] for q in self.quartos_escolhidos)
         return dados
+
+    def clean_cpf(self):
+        return formatar_cpf(self.cleaned_data.get('cpf'))
 
     def clean_whatsapp(self):
         return formatar_telefone(self.cleaned_data.get('whatsapp'))

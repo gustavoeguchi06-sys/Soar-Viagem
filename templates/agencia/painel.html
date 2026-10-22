@@ -15,6 +15,31 @@
     <a class="btn btn--verde btn--sm" href="{% url 'destinations:calendario' %}">Ver viagens</a>
 </section>
 
+<section class="ag-bloco">
+    <div class="ag-titulo">
+        <h2>Últimos orçamentos</h2>
+        {% if total_orcamentos %}<a href="{% url 'agencia:orcamentos' %}">Ver todos ({{ total_orcamentos }})</a>{% endif %}
+    </div>
+    {% if ultimos_orcamentos %}
+    <ul class="ag-ultimos">
+        {% for o in ultimos_orcamentos %}
+        <li>
+            <span class="ag-ultimos__cod">{{ o.codigo }}</span>
+            <span class="ag-ultimos__quem"><b>{{ o.cliente_nome }}</b> · {{ o.destino.nome }}</span>
+            <span class="ag-ultimos__valor">{% if o.valor %}R$ {{ o.valor|reais }}{% else %}sob consulta{% endif %}</span>
+            <span class="ag-selo ag-selo--{% if o.vencido %}vencido{% else %}{{ o.status }}{% endif %}">
+                {% if o.vencido %}Vencido{% else %}{{ o.get_status_display }}{% endif %}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="conta-vazio ag-vazio">
+        <p>Os orçamentos que a agência emitir aparecem aqui e na aba
+           <a href="{% url 'agencia:orcamentos' %}">Orçamentos</a>.</p>
+    </div>
+    {% endif %}
+</section>
+
 <section>
     <div class="ag-titulo">
         <h2>Interessados enviados pela Soar</h2>
