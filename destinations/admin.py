@@ -16,6 +16,7 @@ import re
 from decimal import Decimal
 
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.core.validators import DecimalValidator
 from django.db import models
@@ -587,31 +588,95 @@ class InteressadoAdmin(admin.ModelAdmin):
 
     Pessoa física só o dono vê (superusuário), e é ele quem escolhe para quais
     agências mandar cada uma. Outro usuário da equipe não enxerga esta lista.
+
+    O CPF serve para o dono procurar no sistema de reservas se a pessoa já
+    viajou com a Soar antes de escolher a agência: a busca aceita o CPF com ou
+    sem pontos, e a ficha mostra os outros pedidos do mesmo CPF e o atalho para
+    o sistema de reservas. Ao marcar uma agência, ela recebe um aviso por
+    e-mail (agencia/avisos.py).
     """
-    list_display = ['nome', 'destino', 'saida_texto', 'pedido', 'whatsapp_link', 'email', 'cep',
-                    'enviado_para', 'criado_em']
+    list_display = ['nome', 'cpf', 'destino', 'saida_texto', 'pedido', 'whatsapp_link', 'email',
+                    'cep', 'enviado_para', 'criado_em']
     list_filter = ['destino', ('agencias', admin.EmptyFieldListFilter), 'agencias']
-    search_fields = ['nome', 'email', 'whatsapp', 'cep']
+    search_fields = ['nome', 'cpf', 'email', 'whatsapp', 'cep']
+    search_help_text = 'Busque por nome, CPF (com ou sem pontos), e-mail, WhatsApp ou CEP.'
     date_hierarchy = 'criado_em'
-    readonly_fields = ['destino', 'saida_texto', 'pedido', 'nome', 'email', 'whatsapp', 'cep',
-                       'criado_em']
-    fields = ['destino', 'saida_texto', 'pedido', 'nome', 'email', 'whatsapp', 'cep', 'criado_em',
-              'agencias']
+    readonly_fields = ['destino', 'saida_texto', 'pedido', 'nome', 'cpf', 'historico_cpf',
+                       'email', 'whatsapp', 'cep', 'criado_em']
+    fields = ['destino', 'saida_texto', 'pedido', 'nome', 'cpf', 'historico_cpf', 'email',
+              'whatsapp', 'cep', 'criado_em', 'agencias']
     list_per_page = 30
 
     @admin.display(description='Quartos pedidos')
     def pedido(self, interessado):
         return interessado.quartos_texto or '-'
 
+    def save_related(self, request, form, formsets, change):
+        """Depois de salvar, avisa por e-mail as agências que acabaram de ser marcadas."""
+        from django.contrib import messages
+
+        from agencia.avisos import avisar_agencias
+
+        antes = set(form.instance.agencias.values_list('pk', flat=True)) if change else set()
+        super().save_related(request, form, formsets, change)
+        novas = form.instance.agencias.exclude(pk__in=antes).select_related('usuario')
+        if not novas:
+            return
+        avisadas, sem_email, com_erro = avisar_agencias(form.instance, novas, request)
+        if avisadas:
+            messages.success(request, 'Aviso por e-mail enviado para: {}.'.format(
+                ', '.join(a.nome_agente for a in avisadas)))
+        if sem_email:
+            messages.warning(request, 'Sem e-mail cadastrado, não foi avisado: {}. O cliente '
+                             'aparece no painel da agência mesmo assim.'.format(
+                                 ', '.join(a.nome_agente for a in sem_email)))
+        if com_erro:
+            messages.warning(request, 'O e-mail de aviso não saiu para: {}. O cliente aparece '
+                             'no painel da agência mesmo assim; vale avisar pelo WhatsApp.'.format(
+                                 ', '.join(a.nome_agente for a in com_erro)))
+
+    def get_search_results(self, request, queryset, search_term):
+        # CPF digitado só com números (12345678909) acha o guardado com pontos
+        numeros = re.sub(r'\D', '', search_term or '')
+        if len(numeros) == 11 and not re.search(r'[A-Za-z@]', search_term):
+            cpf = '{}.{}.{}-{}'.format(numeros[:3], numeros[3:6], numeros[6:9], numeros[9:])
+            return queryset.filter(cpf=cpf), False
+        return super().get_search_results(request, queryset, search_term)
+
+    @admin.display(description='Já viajou com a Soar?')
+    def historico_cpf(self, interessado):
+        """Outros pedidos do mesmo CPF aqui no site e o atalho para o sistema de reservas."""
+        if not interessado.cpf:
+            return 'Pedido de antes do campo CPF: sem CPF para procurar.'
+        anteriores = (Interessado.objects.filter(cpf=interessado.cpf)
+                      .exclude(pk=interessado.pk).select_related('destino')
+                      .prefetch_related('agencias')[:10])
+        linhas = format_html_join(
+            '', '<li>{} — {} (enviado para: {})</li>',
+            ((i.criado_em.strftime('%d/%m/%Y'), i.destino.nome if i.destino else 'viagem removida',
+              ', '.join(a.nome_agente for a in i.agencias.all()) or 'ninguém')
+             for i in anteriores))
+        pedidos = (format_html('<p>Outros pedidos deste CPF no site:</p><ul>{}</ul>', linhas)
+                   if anteriores else format_html('<p>Nenhum outro pedido deste CPF no site.</p>'))
+        if settings.SISTEMA_RESERVAS_URL:
+            atalho = format_html(
+                '<p>Para ver as viagens já feitas, procure o CPF <b>{}</b> no '
+                '<a href="{}" target="_blank" rel="noopener">sistema de reservas</a>.</p>',
+                interessado.cpf, settings.SISTEMA_RESERVAS_URL)
+        else:
+            atalho = ''
+        return format_html('{}{}', pedidos, atalho)
+
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('destino').prefetch_related(
-            'agencias')
+            'agencias__usuario')
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == 'agencias':
             from contas.models import PerfilAgente
-            kwargs['queryset'] = PerfilAgente.objects.filter(aprovado=True).order_by(
-                'razao_social')
+            # cada opção mostra o nome do agente: a mesma agência pode ter vários
+            kwargs['queryset'] = PerfilAgente.objects.filter(aprovado=True).select_related(
+                'usuario').order_by('razao_social', 'usuario__first_name')
             kwargs['widget'] = forms.CheckboxSelectMultiple
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
@@ -634,7 +699,7 @@ class InteressadoAdmin(admin.ModelAdmin):
 
     @admin.display(description='Enviado para')
     def enviado_para(self, interessado):
-        nomes = [a.razao_social for a in interessado.agencias.all()]
+        nomes = ['{} ({})'.format(a.nome_agente, a.razao_social) for a in interessado.agencias.all()]
         return ', '.join(nomes) if nomes else format_html(
             '<span class="etiqueta etiqueta--fila">ainda não enviado</span>')
 

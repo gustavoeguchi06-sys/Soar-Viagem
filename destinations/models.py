@@ -423,6 +423,11 @@ class Interessado(models.Model):
     destino = models.ForeignKey(Destino, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='interessados', verbose_name='Viagem')
     nome = models.CharField('Nome', max_length=120)
+    # Para o dono procurar no sistema de reservas se a pessoa já viajou com a
+    # Soar e direcionar o atendimento. Fica só com a Soar: a agência não vê.
+    # Em branco nos pedidos de antes do campo existir.
+    cpf = models.CharField('CPF', max_length=14, blank=True, db_index=True,
+                           help_text='No formato 000.000.000-00.')
     email = models.EmailField('E-mail')
     whatsapp = models.CharField('WhatsApp', max_length=20)
     cep = models.CharField('CEP', max_length=9)

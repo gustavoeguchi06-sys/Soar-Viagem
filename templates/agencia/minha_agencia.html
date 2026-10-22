@@ -9,8 +9,8 @@
         <dl class="dados-agente">
             <dt>Razão social</dt><dd>{{ request.agencia.razao_social }}</dd>
             <dt>CNPJ</dt><dd>{{ request.agencia.cnpj_formatado }}</dd>
-            <dt>CADASTUR</dt><dd>{{ request.agencia.cadastur }}</dd>
-            <dt>Responsável</dt><dd>{{ user.get_full_name|default:user.username }}</dd>
+            <dt>CADASTUR</dt><dd>{{ request.agencia.cnpj_formatado }} <small>(o mesmo do CNPJ)</small></dd>
+            <dt>Agente de viagens</dt><dd>{{ user.get_full_name|default:user.username }}</dd>
             <dt>E-mail</dt><dd>{{ user.email }}</dd>
             <dt>WhatsApp</dt><dd>{{ request.agencia.whatsapp }}</dd>
         </dl>

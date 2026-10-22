@@ -1,8 +1,13 @@
 """Área da agência parceira.
 
-O painel ficou só com a visão geral e os dados da agência. O orçamento é feito
-direto no card da página da viagem (`orcamento_criar`), sem abrir o painel, e
-sai em PDF para o e-mail que a agência digitar no pop-up.
+O painel tem a visão geral, a lista de orçamentos e os dados da agência. O
+orçamento é feito direto no card da página da viagem (`orcamento_criar`), sem
+abrir o painel, sai em PDF para o e-mail que a agência digitar no pop-up e
+fica na aba Orçamentos para acompanhar (aceito, recusado, vencido).
+
+Uma agência (um CNPJ) pode ter vários agentes, cada um com o seu login. A aba
+Orçamentos mostra os de todos os agentes da agência, com o nome de quem fez;
+só quem fez muda a situação do orçamento.
 
 Toda consulta daqui passa por `request.agencia`. É isso que impede uma agência
 de ver cliente de outra.
@@ -17,6 +22,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -47,12 +53,78 @@ def agencia_aprovada(view):
     return envolta
 
 
+def _orcamentos_da_agencia(agencia):
+    """Orçamentos de todos os agentes com o mesmo CNPJ."""
+    return (Orcamento.objects.filter(agencia__cnpj=agencia.cnpj)
+            .select_related('destino', 'agencia__usuario'))
+
+
 @agencia_aprovada
 def painel(request):
+    orcamentos = _orcamentos_da_agencia(request.agencia)
     return render(request, 'agencia/painel.html', {
         'aba': 'painel',
         'interessados': request.agencia.interessados.select_related('destino'),
+        'ultimos_orcamentos': orcamentos[:5],
+        'total_orcamentos': orcamentos.count(),
     })
+
+
+FILTROS_ORCAMENTO = [
+    ('', 'Todos'),
+    ('enviado', 'Aguardando o cliente'),
+    ('aceito', 'Aceitos'),
+    ('recusado', 'Recusados'),
+    ('vencido', 'Vencidos'),
+]
+
+
+@agencia_aprovada
+def orcamentos(request):
+    """Todos os orçamentos da agência, para acompanhar."""
+    todos = _orcamentos_da_agencia(request.agencia)
+    filtro = request.GET.get('situacao', '')
+    agora = timezone.now()
+    lista = todos
+    if filtro == 'vencido':
+        lista = todos.filter(status='enviado', valido_ate__lt=agora)
+    elif filtro == 'enviado':
+        lista = todos.filter(status='enviado').exclude(valido_ate__lt=agora)
+    elif filtro in ('aceito', 'recusado'):
+        lista = todos.filter(status=filtro)
+    else:
+        filtro = ''
+    aceitos = todos.filter(status='aceito')
+    return render(request, 'agencia/orcamentos.html', {
+        'aba': 'orcamentos',
+        'orcamentos': lista[:200],
+        'filtro': filtro,
+        'filtros': FILTROS_ORCAMENTO,
+        'resumo': {
+            'total': todos.count(),
+            'aguardando': todos.filter(status='enviado').exclude(valido_ate__lt=agora).count(),
+            'aceitos': aceitos.count(),
+            'valor_aceito': sum((o.valor or Decimal('0')) for o in aceitos),
+        },
+        'varios_agentes': todos.values('agencia').distinct().count() > 1,
+    })
+
+
+@require_POST
+@agencia_aprovada
+def orcamento_situacao(request, pk):
+    """O agente que fez o orçamento marca se o cliente aceitou ou recusou."""
+    orcamento = get_object_or_404(Orcamento, pk=pk, agencia=request.agencia)
+    nova = request.POST.get('situacao')
+    if nova in dict(Orcamento.STATUS):
+        orcamento.status = nova
+        orcamento.save(update_fields=['status', 'atualizado_em'])
+        messages.success(request, 'Orçamento {} marcado como "{}".'.format(
+            orcamento.codigo, orcamento.get_status_display().lower()))
+    voltar = request.POST.get('voltar', '')
+    if voltar not in dict(FILTROS_ORCAMENTO):
+        voltar = ''
+    return redirect('{}?situacao={}'.format(reverse('agencia:orcamentos'), voltar))
 
 
 @agencia_aprovada
@@ -130,8 +202,9 @@ def _nome_do_pdf(orcamento):
 @agencia_aprovada
 def orcamento_pdf(request, pk):
     """O mesmo PDF do e-mail, para a agência baixar. Só o orçamento dela."""
+    # qualquer agente da mesma agência (mesmo CNPJ) baixa o PDF
     orcamento = get_object_or_404(Orcamento.objects.select_related('destino', 'agencia__usuario'),
-                                  pk=pk, agencia=request.agencia)
+                                  pk=pk, agencia__cnpj=request.agencia.cnpj)
     resposta = HttpResponse(gerar_pdf(orcamento), content_type='application/pdf')
     resposta['Content-Disposition'] = 'inline; filename="{}"'.format(_nome_do_pdf(orcamento))
     return resposta

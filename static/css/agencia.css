@@ -82,3 +82,45 @@
 .ag-como h2 { margin-bottom: 10px; }
 .ag-como ol { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
 .ag-como .ag-explica { margin: 0 0 14px; }
+
+/* ===== Orçamentos (agencia/orcamentos.html e "Últimos orçamentos") ===== */
+.ag-bloco { margin-bottom: 30px; }
+.ag-resumo { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px;
+    margin: 0 0 26px; }
+.ag-resumo > div { background: var(--cartao, #fff); border: 1px solid var(--linha); border-radius: var(--r-md);
+    padding: 14px 16px; }
+.ag-resumo dt { font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--tinta-suave); }
+.ag-resumo dd { margin: 4px 0 0; font-size: 1.45rem; font-weight: 800; color: var(--preto); }
+
+.ag-filtros { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.ag-filtros a { padding: 8px 14px; min-height: 40px; display: inline-flex; align-items: center;
+    border: 1px solid var(--linha); border-radius: 999px; font-size: .84rem; font-weight: 600;
+    color: var(--tinta); background: var(--cartao, #fff); }
+.ag-filtros a[aria-current="true"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+
+.ag-selo { flex: none; padding: 4px 10px; border-radius: 999px; font-size: .7rem; font-weight: 800;
+    letter-spacing: .05em; text-transform: uppercase; }
+.ag-selo--enviado { background: #fef4e2; color: #b54708; }
+.ag-selo--aceito { background: var(--verde-claro); color: var(--verde-texto); }
+.ag-selo--recusado { background: #fdecec; color: #b42318; }
+.ag-selo--vencido { background: #f2f4f7; color: #667085; }
+.ag-orc--aceito { border-left-color: var(--verde); }
+.ag-orc--recusado, .ag-orc--vencido { border-left-color: #d0d5dd; }
+.ag-orc--enviado { border-left-color: var(--ouro); }
+
+.ag-situacao { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px;
+    padding-top: 12px; border-top: 1px solid var(--linha); font-size: .86rem; color: var(--tinta-suave); }
+.ag-situacao span { margin-right: 4px; }
+.ag-link { background: none; border: 0; padding: 0; font: inherit; color: var(--verde); font-weight: 600;
+    text-decoration: underline; cursor: pointer; min-height: 40px; }
+.ag-aviso-email { font-size: .8rem; color: #b54708; }
+
+.ag-ultimos { list-style: none; margin: 0; padding: 0; background: var(--cartao, #fff);
+    border: 1px solid var(--linha); border-radius: var(--r-md); }
+.ag-ultimos li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 12px 16px;
+    font-size: .88rem; }
+.ag-ultimos li + li { border-top: 1px solid var(--linha); }
+.ag-ultimos__cod { font-size: .74rem; font-weight: 700; color: var(--tinta-suave); min-width: 84px; }
+.ag-ultimos__quem { flex: 1 1 220px; color: var(--tinta); }
+.ag-ultimos__valor { font-weight: 700; color: var(--preto); }

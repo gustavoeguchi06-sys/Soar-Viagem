@@ -1,0 +1,17 @@
+{% autoescape off %}Olá, {{ agencia.nome_agente }}!
+
+A Soar indicou um cliente para você atender.
+
+Cliente: {{ interessado.nome }}
+Viagem: {{ interessado.destino.nome|default:"a combinar" }}
+Data: {{ interessado.saida_texto|default:"a combinar" }}{% if interessado.quartos_texto %}
+Quartos: {{ interessado.quartos_texto }}{% endif %}
+Pedido feito no site em {{ interessado.criado_em|date:"d/m/Y" }}
+
+O e-mail e o WhatsApp do cliente estão no seu painel da agência:
+{{ link }}
+
+Fale com ele o quanto antes e monte o orçamento na página da viagem.
+
+Soar Operadora
+{% endautoescape %}

@@ -50,14 +50,15 @@ class PainelAgenciaTests(TestCase):
     def entrar(self, agencia):
         self.client.force_login(agencia.usuario)
 
-    def test_painel_so_tem_visao_geral_e_minha_agencia(self):
+    def test_painel_tem_visao_geral_orcamentos_e_minha_agencia(self):
         self.entrar(self.ag1)
         resposta = self.client.get(reverse('agencia:painel'))
         self.assertContains(resposta, 'Visão geral')
+        self.assertContains(resposta, '>Orçamentos<')
         self.assertContains(resposta, 'Minha agência')
-        for aba in ('Reservas dos clientes', '>Orçamentos<', 'Novo orçamento'):
+        for aba in ('Reservas dos clientes', 'Novo orçamento'):
             self.assertNotContains(resposta, aba)
-        self.assertEqual(self.client.get('/agencia/orcamentos/').status_code, 404)
+        self.assertEqual(self.client.get('/agencia/orcamentos/').status_code, 200)
         self.assertEqual(self.client.get('/agencia/reservas/').status_code, 404)
 
     def test_painel_e_b2b_levam_ao_sistema_de_reservas(self):

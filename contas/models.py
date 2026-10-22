@@ -1,9 +1,14 @@
 """Perfil das agências de viagem (B2B).
 
-O site usa o `User` do Django para todo mundo. Uma agência é um `User` como
-outro qualquer, com um perfil a mais preso a ele: razão social, CNPJ, CADASTUR
-e WhatsApp — os dados que a Soar precisa para conferir a agência e trabalhar a
-comissão. O nome completo e o e-mail ficam no próprio `User`.
+O site usa o `User` do Django para todo mundo. Cada agente de viagens é um
+`User` com um perfil a mais preso a ele: razão social, CNPJ e WhatsApp da
+agência — os dados que a Soar precisa para conferir a agência e trabalhar a
+comissão. O nome do agente e o e-mail ficam no próprio `User`.
+
+Uma mesma agência (o mesmo CNPJ) pode ter vários agentes, cada um com o seu
+login. Por isso o CNPJ se repete, e o que identifica quem atende é o nome do
+agente. O CADASTUR de empresa usa o próprio número do CNPJ: ele é preenchido
+sozinho, igual ao CNPJ.
 """
 import re
 import secrets
@@ -22,6 +27,27 @@ def _digito(base, pesos):
     soma = sum(int(n) * p for n, p in zip(base, pesos))
     resto = soma % 11
     return '0' if resto < 2 else str(11 - resto)
+
+
+def validar_cpf(valor):
+    """Valida um CPF pelos dois dígitos verificadores (com ou sem máscara)."""
+    cpf = so_digitos(valor)
+    if len(cpf) != 11:
+        raise ValidationError('CPF inválido: precisa ter 11 números.')
+    if cpf == cpf[0] * 11:
+        raise ValidationError('CPF inválido.')
+    for tamanho in (9, 10):
+        soma = sum(int(cpf[i]) * (tamanho + 1 - i) for i in range(tamanho))
+        digito = (soma * 10) % 11 % 10
+        if int(cpf[tamanho]) != digito:
+            raise ValidationError('CPF inválido: os dígitos verificadores não conferem.')
+
+
+def formatar_cpf(valor):
+    """'12345678909' -> '123.456.789-09' (depois de validar)."""
+    cpf = so_digitos(valor)
+    validar_cpf(cpf)
+    return '{}.{}.{}-{}'.format(cpf[:3], cpf[3:6], cpf[6:9], cpf[9:])
 
 
 def validar_cnpj(valor):
@@ -51,18 +77,22 @@ def gerar_codigo_indicacao():
 
 
 class PerfilAgente(models.Model):
-    """Dados da agência parceira, presos ao usuário que faz login."""
+    """Um agente de viagens de uma agência parceira, preso ao usuário que faz login."""
 
     usuario = models.OneToOneField(User, on_delete=models.CASCADE,
                                    related_name='agente', verbose_name='Usuário')
     razao_social = models.CharField('Razão social', max_length=160)
-    cnpj = models.CharField('CNPJ', max_length=14, unique=True,
+    # Sem unique: vários agentes da mesma agência se cadastram com o mesmo CNPJ.
+    cnpj = models.CharField('CNPJ', max_length=14, db_index=True,
                             validators=[validar_cnpj],
-                            help_text='14 números, sem pontos nem barra.')
-    cadastur = models.CharField('CADASTUR', max_length=30)
+                            help_text='14 números, sem pontos nem barra. Pode repetir: '
+                                      'cada agente da agência tem o seu cadastro.')
+    cadastur = models.CharField('CADASTUR', max_length=30, blank=True, editable=False,
+                                help_text='O CADASTUR da empresa é o próprio número do CNPJ: '
+                                          'preenchido sozinho.')
     whatsapp = models.CharField('WhatsApp', max_length=20)
     aprovado = models.BooleanField('Aprovado pela Soar', default=False,
-                                   help_text='Marque depois de conferir o CNPJ e o CADASTUR da agência.')
+                                   help_text='Marque depois de conferir o CNPJ da agência.')
     codigo = models.CharField(
         'Código de indicação', max_length=12, unique=True, default=gerar_codigo_indicacao,
         editable=False,
@@ -73,10 +103,20 @@ class PerfilAgente(models.Model):
     class Meta:
         verbose_name = 'Agente B2B'
         verbose_name_plural = 'Agentes B2B'
-        ordering = ['razao_social']
+        ordering = ['razao_social', 'usuario__first_name']
 
     def __str__(self):
-        return '{} ({})'.format(self.razao_social, self.cnpj_formatado)
+        # O nome do agente vem primeiro: a mesma agência pode ter vários, e o
+        # dono precisa saber para quem está mandando o cliente.
+        return '{} — {} ({})'.format(self.nome_agente, self.razao_social, self.cnpj_formatado)
+
+    def save(self, *args, **kwargs):
+        self.cadastur = self.cnpj_formatado
+        super().save(*args, **kwargs)
+
+    @property
+    def nome_agente(self):
+        return self.usuario.get_full_name() or self.usuario.username
 
     @property
     def cnpj_formatado(self):

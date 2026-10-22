@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from soar.mascaras import formatar_cadastur, formatar_telefone
+from soar.mascaras import formatar_telefone
 
 from .models import PerfilAgente, so_digitos, validar_cnpj
 
@@ -92,8 +92,9 @@ class AgenteCadastroForm(UserCreationForm):
     """
 
     first_name = forms.CharField(
-        label='Nome completo', max_length=120,
-        widget=forms.TextInput(attrs={'placeholder': 'Nome do responsável'}),
+        label='Nome do agente de viagens', max_length=120,
+        help_text='Seu nome completo. É por ele que a Soar sabe para quem indicar cada cliente.',
+        widget=forms.TextInput(attrs={'placeholder': 'Seu nome completo', 'autocomplete': 'name'}),
     )
     email = forms.EmailField(
         label='E-mail',
@@ -109,11 +110,6 @@ class AgenteCadastroForm(UserCreationForm):
         widget=forms.TextInput(attrs={'placeholder': '00.000.000/0000-00',
                                       'inputmode': 'numeric', 'data-mascara': 'cnpj'}),
     )
-    cadastur = forms.CharField(
-        label='CADASTUR', max_length=30,
-        widget=forms.TextInput(attrs={'placeholder': '00.000000.00.0000-0',
-                                      'inputmode': 'numeric', 'data-mascara': 'cadastur'}),
-    )
     whatsapp = forms.CharField(
         label='WhatsApp', max_length=20,
         widget=forms.TextInput(attrs={'placeholder': '(11) 99999-9999', 'inputmode': 'tel',
@@ -124,7 +120,7 @@ class AgenteCadastroForm(UserCreationForm):
         error_messages={'required': 'É preciso aceitar o aviso de privacidade para criar a conta.'},
     )
 
-    field_order = ['first_name', 'razao_social', 'cnpj', 'cadastur', 'whatsapp',
+    field_order = ['first_name', 'razao_social', 'cnpj', 'whatsapp',
                    'email', 'username', 'password1', 'password2', 'aceite_privacidade']
 
     class Meta:
@@ -149,17 +145,13 @@ class AgenteCadastroForm(UserCreationForm):
     def clean_email(self):
         return self.cleaned_data['email'].strip().lower()
 
-    def clean_cadastur(self):
-        return formatar_cadastur(self.cleaned_data['cadastur'])
-
     def clean_whatsapp(self):
         return formatar_telefone(self.cleaned_data['whatsapp'])
 
     def clean_cnpj(self):
         cnpj = so_digitos(self.cleaned_data['cnpj'])
         validar_cnpj(cnpj)
-        if PerfilAgente.objects.filter(cnpj=cnpj).exists():
-            raise forms.ValidationError('Já existe uma agência cadastrada com este CNPJ.')
+        # O CNPJ pode repetir: cada agente da mesma agência faz o seu cadastro.
         return cnpj
 
     def save(self, commit=True):
@@ -174,7 +166,6 @@ class AgenteCadastroForm(UserCreationForm):
                 usuario=usuario,
                 razao_social=self.cleaned_data['razao_social'].strip(),
                 cnpj=self.cleaned_data['cnpj'],
-                cadastur=self.cleaned_data['cadastur'].strip(),
                 whatsapp=self.cleaned_data['whatsapp'].strip(),
             )
         return usuario
