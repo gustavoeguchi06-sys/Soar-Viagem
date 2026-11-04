@@ -1,5 +1,6 @@
-{% comment %}Pop-up que o agente vê logo depois de entrar. A arte vem do painel
-(Avisos aos agentes). Fecha no X, no Esc ou clicando fora.{% endcomment %}
+{% comment %}Pop-up de aviso aos agentes. A arte vem do painel (Avisos aos
+agentes). Fecha no X, no Esc ou clicando fora; fechar avisa o servidor
+(agencia:fechar_aviso) para não voltar até o próximo login.{% endcomment %}
 <style>
 .aviso-agente { padding: 0; border: 0; background: transparent; overflow: visible;
                 width: fit-content; max-width: 92vw; max-height: 92vh; }
@@ -18,9 +19,13 @@
 }
 </style>
 <dialog class="aviso-agente" id="avisoAgente" aria-label="{{ aviso_agente.titulo }}">
-    <button type="button" class="aviso-agente__fechar" aria-label="Fechar aviso" autofocus>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-    </button>
+    <form method="post" action="{% url 'agencia:fechar_aviso' %}" class="aviso-agente__form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" class="aviso-agente__fechar" aria-label="Fechar aviso" autofocus>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+    </form>
     {% if aviso_agente.link %}<a href="{{ aviso_agente.link }}" target="_blank" rel="noopener">{% endif %}
     <img src="{{ aviso_agente.imagem.url }}" alt="{{ aviso_agente.titulo }}">
     {% if aviso_agente.link %}</a>{% endif %}
@@ -28,10 +33,18 @@
 <script>
 (function () {
     var d = document.getElementById('avisoAgente');
-    if (!d || typeof d.showModal !== 'function') { if (d) d.setAttribute('open', ''); }
-    else { d.showModal(); }
-    function fechar() { d.close ? d.close() : d.removeAttribute('open'); }
-    d.querySelector('.aviso-agente__fechar').addEventListener('click', fechar);
+    if (!d) return;
+    var form = d.querySelector('.aviso-agente__form'), avisado = false;
+    function avisarServidor() {
+        if (avisado || !window.fetch) return;
+        avisado = true;
+        fetch(form.action, {method: 'POST', body: new FormData(form),
+                            headers: {'X-Requested-With': 'fetch'}, credentials: 'same-origin'});
+    }
+    function fechar() { avisarServidor(); if (d.open) { d.close ? d.close() : d.removeAttribute('open'); } }
+    form.addEventListener('submit', function (e) { if (window.fetch) { e.preventDefault(); fechar(); } });
     d.addEventListener('click', function (e) { if (e.target === d) fechar(); });
+    d.addEventListener('close', avisarServidor);
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
 })();
 </script>
