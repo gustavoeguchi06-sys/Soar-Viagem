@@ -168,7 +168,10 @@ class VariosAgentesPorCnpjTests(TestCase):
         pessoa = Interessado.objects.create(destino=destino, nome='X', cpf=CPF, email='x@x.com',
                                             whatsapp='1', cep='1')
         ficha = self.client.get(reverse('admin:destinations_interessado_change', args=[pessoa.pk]))
-        self.assertContains(ficha, 'Ana Lima — Alfa Turismo')
+        # cada agência é um cartão: nome do agente, razão social e CNPJ
+        self.assertContains(ficha, '<span class="seletor-agencia__nome">Ana Lima</span>', html=False)
+        self.assertContains(ficha, '<span class="seletor-agencia__razao">Alfa Turismo</span>')
+        self.assertContains(ficha, 'CNPJ 11.222.333/0001-81')
 
 
 class OrcamentosNoPainelDaAgenciaTests(TestCase):

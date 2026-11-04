@@ -582,6 +582,46 @@ class SlideInicioAdmin(admin.ModelAdmin):
         return format_html('<img class="miniatura miniatura--grande" src="{}" alt="">', slide.imagem.url)
 
 
+class SeletorDeAgencias(forms.CheckboxSelectMultiple):
+    """As agências do pedido como cartões lado a lado: nome do agente em cima,
+    razão social e CNPJ embaixo. Um campo de busca filtra quando a lista cresce."""
+
+    def render(self, name, value, attrs=None, renderer=None):
+        marcadas = {str(v) for v in (value or [])}
+        base = (attrs or {}).get('id', 'id_' + name)
+        cartoes = []
+        for valor, _rotulo in self.choices:
+            agente = getattr(valor, 'instance', None)
+            if agente is None:
+                continue
+            chave = str(valor)
+            id_op = '{}_{}'.format(base, chave)
+            busca = ' '.join([agente.nome_agente, agente.razao_social, agente.cnpj,
+                              agente.cnpj_formatado]).lower()
+            cartoes.append(format_html(
+                '<label class="seletor-agencia__op" for="{}" data-busca="{}">'
+                '<input type="checkbox" name="{}" value="{}" id="{}"{}>'
+                '<span class="seletor-agencia__nome">{}</span>'
+                '<span class="seletor-agencia__razao">{}</span>'
+                '<span class="seletor-agencia__cnpj">CNPJ {}</span></label>',
+                id_op, busca, name, chave, id_op,
+                format_html(' checked') if chave in marcadas else '',
+                agente.nome_agente, agente.razao_social, agente.cnpj_formatado))
+        if not cartoes:
+            return format_html('<p class="ficha-quieto">Nenhuma agência aprovada ainda.</p>')
+        busca = ''
+        if len(cartoes) > 6:
+            busca = format_html(
+                '<input type="search" class="seletor-agencia__busca" placeholder="Filtrar por '
+                'nome, razão social ou CNPJ" aria-label="Filtrar agências" '
+                'oninput="var t=this.value.toLowerCase();this.parentNode.querySelectorAll('
+                '\'.seletor-agencia__op\').forEach(function(o){{o.hidden=t&&'
+                'o.dataset.busca.indexOf(t)<0&&!o.querySelector(\'input\').checked}})">')
+        return format_html('<div class="seletor-agencia">{}<div class="seletor-agencia__grade">'
+                           '{}</div></div>', busca,
+                           format_html(''.join(['{}'] * len(cartoes)), *cartoes))
+
+
 @admin.register(Interessado)
 class InteressadoAdmin(admin.ModelAdmin):
     """Quem pediu "Saiba mais" numa viagem.
@@ -602,9 +642,26 @@ class InteressadoAdmin(admin.ModelAdmin):
     search_help_text = 'Busque por nome, CPF (com ou sem pontos), e-mail, WhatsApp ou CEP.'
     date_hierarchy = 'criado_em'
     readonly_fields = ['destino', 'saida_texto', 'pedido', 'nome', 'cpf', 'historico_cpf',
-                       'email', 'whatsapp', 'cep', 'criado_em']
-    fields = ['destino', 'saida_texto', 'pedido', 'nome', 'cpf', 'historico_cpf', 'email',
-              'whatsapp', 'cep', 'criado_em', 'agencias']
+                       'email_link', 'whatsapp_link', 'cep', 'criado_em']
+    # a ficha em blocos: o que foi pedido, quem pediu, se já viajou e para quem mandar
+    fieldsets = [
+        ('Pedido', {
+            'classes': ['ficha-bloco'],
+            'fields': [('destino', 'criado_em'), ('saida_texto', 'pedido')],
+        }),
+        ('Cliente', {
+            'classes': ['ficha-bloco'],
+            'fields': [('nome', 'cpf'), ('whatsapp_link', 'email_link'), 'cep'],
+        }),
+        ('Histórico do cliente', {
+            'classes': ['ficha-bloco'],
+            'fields': ['historico_cpf'],
+        }),
+        ('Enviar para as agências', {
+            'classes': ['ficha-bloco'],
+            'fields': ['agencias'],
+        }),
+    ]
     list_per_page = 30
 
     @admin.display(description='Quartos pedidos')
@@ -647,25 +704,41 @@ class InteressadoAdmin(admin.ModelAdmin):
     def historico_cpf(self, interessado):
         """Outros pedidos do mesmo CPF aqui no site e o atalho para o sistema de reservas."""
         if not interessado.cpf:
-            return 'Pedido de antes do campo CPF: sem CPF para procurar.'
-        anteriores = (Interessado.objects.filter(cpf=interessado.cpf)
-                      .exclude(pk=interessado.pk).select_related('destino')
-                      .prefetch_related('agencias')[:10])
-        linhas = format_html_join(
-            '', '<li>{} — {} (enviado para: {})</li>',
-            ((i.criado_em.strftime('%d/%m/%Y'), i.destino.nome if i.destino else 'viagem removida',
-              ', '.join(a.nome_agente for a in i.agencias.all()) or 'ninguém')
-             for i in anteriores))
-        pedidos = (format_html('<p>Outros pedidos deste CPF no site:</p><ul>{}</ul>', linhas)
-                   if anteriores else format_html('<p>Nenhum outro pedido deste CPF no site.</p>'))
+            return format_html('<span class="etiqueta etiqueta--cancelada">sem CPF</span> '
+                               'Pedido de antes do campo CPF: não há o que procurar.')
+        anteriores = list(Interessado.objects.filter(cpf=interessado.cpf)
+                          .exclude(pk=interessado.pk).select_related('destino')
+                          .prefetch_related('agencias__usuario')[:10])
+        if anteriores:
+            etiqueta = format_html(
+                '<span class="etiqueta etiqueta--pendente">{} pedido{} anterior{}</span>',
+                len(anteriores), 's' if len(anteriores) > 1 else '',
+                'es' if len(anteriores) > 1 else '')
+            linhas = format_html_join(
+                '', '<tr><td>{}</td><td>{}</td><td>{}</td></tr>',
+                ((i.criado_em.strftime('%d/%m/%Y'),
+                  i.destino.nome if i.destino else 'viagem removida',
+                  ', '.join(a.nome_agente for a in i.agencias.all()) or 'ninguém')
+                 for i in anteriores))
+            pedidos = format_html(
+                '<table class="ficha-tabela"><thead><tr><th>Data</th><th>Viagem</th>'
+                '<th>Enviado para</th></tr></thead><tbody>{}</tbody></table>', linhas)
+        else:
+            etiqueta = format_html('<span class="etiqueta etiqueta--cancelada">primeiro pedido</span>')
+            pedidos = format_html('<span class="ficha-quieto">Nenhum outro pedido deste CPF '
+                                  'no site.</span>')
         if settings.SISTEMA_RESERVAS_URL:
             atalho = format_html(
-                '<p>Para ver as viagens já feitas, procure o CPF <b>{}</b> no '
-                '<a href="{}" target="_blank" rel="noopener">sistema de reservas</a>.</p>',
+                '<p class="ficha-quieto">Para ver as viagens já feitas, procure o CPF <b>{}</b> '
+                'no <a href="{}" target="_blank" rel="noopener">sistema de reservas</a>.</p>',
                 interessado.cpf, settings.SISTEMA_RESERVAS_URL)
         else:
             atalho = ''
-        return format_html('{}{}', pedidos, atalho)
+        return format_html('<div class="ficha-historico">{} {}{}</div>', etiqueta, pedidos, atalho)
+
+    @admin.display(description='E-mail', ordering='email')
+    def email_link(self, interessado):
+        return format_html('<a href="mailto:{0}">{0}</a>', interessado.email)
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('destino').prefetch_related(
@@ -677,7 +750,7 @@ class InteressadoAdmin(admin.ModelAdmin):
             # cada opção mostra o nome do agente: a mesma agência pode ter vários
             kwargs['queryset'] = PerfilAgente.objects.filter(aprovado=True).select_related(
                 'usuario').order_by('razao_social', 'usuario__first_name')
-            kwargs['widget'] = forms.CheckboxSelectMultiple
+            kwargs['widget'] = SeletorDeAgencias
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     # só o dono
