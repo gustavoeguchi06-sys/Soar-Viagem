@@ -63,10 +63,8 @@ def _proxima_pagina(request):
 
     if equipe:
         return reverse('admin:index')
-    # Agência aprovada vai direto para o painel dela, o lugar onde ela trabalha.
-    agencia = getattr(request.user, 'agente', None) if request.user.is_authenticated else None
-    if agencia is not None and agencia.aprovado:
-        return reverse('agencia:painel')
+    # Agência aprovada também cai na página principal: é lá que abre o pop-up de
+    # aviso aos agentes (agencia/context_processors.py). O painel fica no menu.
     return reverse('destinations:home')
 
 
@@ -373,7 +371,10 @@ def b2b(request):
             usuario = request.user
             messages.success(request, 'Bem-vindo(a), {}!'.format(
                 usuario.first_name or usuario.username))
-            if hasattr(usuario, 'agente'):
+            agente = getattr(usuario, 'agente', None)
+            # aprovada vai para a página principal (pop-up de aviso); em análise,
+            # para a tela de espera
+            if agente is not None and not agente.aprovado:
                 return redirect('contas:agente_area')
             return redirect(_proxima_pagina(request))
 

@@ -416,10 +416,12 @@ class PainelAgenciaTests(TestCase):
         self.assertIn(reverse('contas:entrar'), resposta.url)
         self.assertFalse(Orcamento.objects.exists())
 
-    def test_agencia_aprovada_cai_no_painel_ao_entrar(self):
+    def test_agencia_aprovada_cai_na_pagina_principal_ao_entrar(self):
+        # é lá que abre o pop-up de aviso aos agentes; o painel fica no menu
         resposta = self.client.post(reverse('contas:entrar'),
                                     {'username': 'alfa', 'password': SENHA})
-        self.assertRedirects(resposta, reverse('agencia:painel'), fetch_redirect_response=False)
+        self.assertRedirects(resposta, reverse('destinations:home'),
+                             fetch_redirect_response=False)
 
 
 class InteressadosTests(TestCase):

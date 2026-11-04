@@ -1,7 +1,9 @@
 from django.apps import AppConfig
 
-# Marca na sessão que o agente acabou de entrar: o pop-up de aviso aparece na
-# primeira página que ele abrir e a marca sai (agencia/context_processors.py).
+# Marca na sessão que o agente aprovado acabou de entrar. O pop-up de aviso vai
+# na próxima página que ele abrir, e a marca só sai quando o pop-up chega de
+# fato na tela (agencia/middleware.py): um pedido do navegador que não mostra
+# nada (ícone do site, imagem que não existe) não gasta o aviso.
 AVISO_PENDENTE = 'aviso_agente_pendente'
 
 

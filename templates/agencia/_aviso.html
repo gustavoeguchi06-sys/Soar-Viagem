@@ -1,5 +1,7 @@
-{% comment %}Pop-up que o agente vê logo depois de entrar. A arte vem do painel
-(Avisos aos agentes). Fecha no X, no Esc ou clicando fora.{% endcomment %}
+{% load static %}{% comment %}Pop-up que o agente aprovado vê logo depois de entrar. A arte vem do
+painel (Avisos aos agentes). Fecha no X, no Esc ou clicando fora. O JavaScript
+fica em static/js/aviso-agente.js: a CSP do site bloqueia <script> escrito na
+página.{% endcomment %}
 <style>
 .aviso-agente { padding: 0; border: 0; background: transparent; overflow: visible;
                 width: fit-content; max-width: 92vw; max-height: 92vh; }
@@ -25,13 +27,4 @@
     <img src="{{ aviso_agente.imagem.url }}" alt="{{ aviso_agente.titulo }}">
     {% if aviso_agente.link %}</a>{% endif %}
 </dialog>
-<script>
-(function () {
-    var d = document.getElementById('avisoAgente');
-    if (!d || typeof d.showModal !== 'function') { if (d) d.setAttribute('open', ''); }
-    else { d.showModal(); }
-    function fechar() { d.close ? d.close() : d.removeAttribute('open'); }
-    d.querySelector('.aviso-agente__fechar').addEventListener('click', fechar);
-    d.addEventListener('click', function (e) { if (e.target === d) fechar(); });
-})();
-</script>
+<script src="{% static 'js/aviso-agente.js' %}" defer></script>
