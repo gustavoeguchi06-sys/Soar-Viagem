@@ -1,8 +1,10 @@
 """Painel da agência parceira: cada agência vê só o que é dela."""
 from datetime import timedelta
 from decimal import Decimal
+from email.utils import parseaddr
 from unittest import mock
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.cache import cache
@@ -145,6 +147,13 @@ class PainelAgenciaTests(TestCase):
         self.assertIn(orcamento.codigo, email.subject)
         self.assertIn('Olá, Bruno!', email.body)
         self.assertIn('IMPORTANTE:', email.body)
+        # sai em nome da agência, assinado pelo agente, sem falar da Soar
+        agencia = orcamento.agencia
+        self.assertTrue(email.from_email.startswith(agencia.razao_social))
+        # o endereço continua o da Soar (domínio autorizado a enviar)
+        self.assertIn('<{}>'.format(parseaddr(settings.DEFAULT_FROM_EMAIL)[1]), email.from_email)
+        self.assertIn(agencia.nome_agente, email.body)
+        self.assertNotIn('Soar Operadora', email.body)
         nome, conteudo, tipo = email.attachments[0]
         self.assertEqual((nome, tipo), ('orcamento-{}.pdf'.format(orcamento.codigo),
                                         'application/pdf'))

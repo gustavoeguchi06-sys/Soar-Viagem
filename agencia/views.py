@@ -14,6 +14,7 @@ de ver cliente de outra.
 """
 import logging
 from decimal import Decimal
+from email.utils import formataddr, parseaddr
 from functools import wraps
 
 from django.conf import settings
@@ -178,8 +179,16 @@ def orcamento_criar(request, slug):
     return redirect('{}?orcamento={}#reservar'.format(destino.get_absolute_url(), orcamento.pk))
 
 
+def _remetente_da_agencia(agencia):
+    """O cliente vê o nome da agência como remetente; o endereço continua o da
+    Soar, que é o domínio autorizado a enviar (sem ele o e-mail cai no spam)."""
+    _nome, endereco = parseaddr(settings.DEFAULT_FROM_EMAIL)
+    return formataddr((agencia.razao_social, endereco)) if endereco else settings.DEFAULT_FROM_EMAIL
+
+
 def _enviar_por_email(orcamento):
-    """Manda o PDF para o e-mail do responsável; a resposta cai na agência."""
+    """Manda o PDF para o e-mail do responsável, em nome da agência e assinado
+    pelo agente que fez o orçamento; a resposta cai no e-mail do agente."""
     agencia = orcamento.agencia
     corpo = render_to_string('agencia/email/orcamento.txt', {
         'orcamento': orcamento, 'agencia': agencia, 'aviso': AVISO,
@@ -188,7 +197,7 @@ def _enviar_por_email(orcamento):
     mensagem = EmailMessage(
         'Orçamento {} - {} | {}'.format(orcamento.codigo, orcamento.destino.nome,
                                         agencia.razao_social),
-        corpo, settings.DEFAULT_FROM_EMAIL, [orcamento.cliente_email],
+        corpo, _remetente_da_agencia(agencia), [orcamento.cliente_email],
         reply_to=[agencia.usuario.email] if agencia.usuario.email else None,
     )
     mensagem.attach(_nome_do_pdf(orcamento), gerar_pdf(orcamento), 'application/pdf')
