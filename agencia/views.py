@@ -26,7 +26,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from destinations.models import Destino
@@ -218,22 +217,3 @@ def orcamento_pdf(request, pk):
     resposta = HttpResponse(gerar_pdf(orcamento), content_type='application/pdf')
     resposta['Content-Disposition'] = 'inline; filename="{}"'.format(_nome_do_pdf(orcamento))
     return resposta
-
-
-@require_POST
-def fechar_aviso(request):
-    """O X do pop-up de aviso: não mostra mais este aviso até o próximo login."""
-    from .apps import AVISO_FECHADO
-    from .models import AvisoAgente
-
-    aviso = AvisoAgente.vigente()
-    if aviso is not None and request.user.is_authenticated:
-        request.session[AVISO_FECHADO] = aviso.pk
-    if request.headers.get('x-requested-with') == 'fetch':
-        return HttpResponse(status=204)
-    voltar = request.POST.get('next', '')
-    if not url_has_allowed_host_and_scheme(voltar, allowed_hosts={request.get_host()},
-                                           require_https=request.is_secure()):
-        voltar = reverse('agencia:painel')
-    return redirect(voltar)
-

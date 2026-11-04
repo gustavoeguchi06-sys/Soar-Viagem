@@ -1,7 +1,8 @@
-"""Pop-up de aviso aos agentes: aparece até o agente fechar no X; volta no próximo login."""
+"""Pop-up de aviso aos agentes: aparece só logo depois do login aprovado e fecha no X."""
 import io
 import shutil
 import tempfile
+import re
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -43,49 +44,47 @@ class AvisoAgenteTests(TestCase):
         self.aviso = AvisoAgente.objects.create(titulo='Black do Agente', imagem=_png())
         self.painel = reverse('agencia:painel')
 
-    def test_aparece_ate_fechar_no_x_e_volta_no_proximo_login(self):
+    def test_aparece_so_depois_do_login_pelo_b2b(self):
         _agente('ana')
-        self.client.login(username='ana', password=SENHA)
-        primeira = self.client.get(self.painel)
-        self.assertContains(primeira, 'id="avisoAgente"')
-        self.assertContains(primeira, 'aria-label="Fechar aviso"')
-        self.assertContains(primeira, self.aviso.imagem.url)
-        # sem fechar, continua aparecendo (inclusive em outra página do site)
-        self.assertContains(self.client.get(reverse('destinations:home')), 'id="avisoAgente"')
-        # o X (pelo JavaScript) fecha e não volta mais nesta sessão
-        resposta = self.client.post(reverse('agencia:fechar_aviso'),
-                                    HTTP_X_REQUESTED_WITH='fetch')
-        self.assertEqual(resposta.status_code, 204)
+        resposta = self.client.post(reverse('contas:b2b'),
+                                    {'username': 'ana', 'password': SENHA}, follow=True)
+        self.assertEqual(resposta.request['PATH_INFO'], self.painel)
+        self.assertContains(resposta, 'id="avisoAgente"')
+        self.assertContains(resposta, 'aria-label="Fechar aviso"')
+        self.assertContains(resposta, self.aviso.imagem.url)
+        # nas páginas seguintes não volta; só no próximo login
         self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
-        # no próximo login volta
+        self.assertNotContains(self.client.get(reverse('destinations:home')), 'id="avisoAgente"')
         self.client.logout()
         self.client.login(username='ana', password=SENHA)
         self.assertContains(self.client.get(self.painel), 'id="avisoAgente"')
 
-    def test_agente_que_ja_estava_logado_tambem_ve(self):
+    def test_pedido_que_nao_mostra_a_pagina_nao_gasta_o_aviso(self):
+        # o navegador pede o ícone do site ou uma imagem que não existe logo
+        # depois do login: isso não pode gastar o pop-up
+        _agente('ana')
+        self.client.login(username='ana', password=SENHA)
+        self.client.get('/favicon-que-nao-existe.ico')
+        self.assertContains(self.client.get(self.painel), 'id="avisoAgente"')
+
+    def test_agente_que_ja_estava_logado_nao_ve(self):
         usuario = _agente('ana')
-        self.client.force_login(usuario)
         AvisoAgente.objects.all().delete()
+        self.client.force_login(usuario)
+        self.client.get(self.painel)
+        # o dono liga o aviso depois: só aparece no próximo login
+        AvisoAgente.objects.create(titulo='Black', imagem=_png())
         self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
-        # o dono liga o aviso com o agente já dentro: aparece na próxima página
-        novo = AvisoAgente.objects.create(titulo='Black', imagem=_png())
-        self.assertContains(self.client.get(self.painel), novo.imagem.url)
 
-    def test_x_sem_javascript_volta_para_a_pagina(self):
+    def test_javascript_em_arquivo_por_causa_da_csp(self):
+        # a CSP do site (script-src 'self') bloqueia <script> escrito na página:
+        # foi por isso que o pop-up não abria na primeira versão
         _agente('ana')
         self.client.login(username='ana', password=SENHA)
-        resposta = self.client.post(reverse('agencia:fechar_aviso'), {'next': '/viagens/'})
-        self.assertRedirects(resposta, '/viagens/', fetch_redirect_response=False)
-        resposta = self.client.post(reverse('agencia:fechar_aviso'),
-                                    {'next': 'https://golpe.com/'})
-        self.assertRedirects(resposta, self.painel, fetch_redirect_response=False)
-
-    def test_aviso_novo_aparece_mesmo_depois_de_fechar_o_antigo(self):
-        _agente('ana')
-        self.client.login(username='ana', password=SENHA)
-        self.client.post(reverse('agencia:fechar_aviso'), HTTP_X_REQUESTED_WITH='fetch')
-        novo = AvisoAgente.objects.create(titulo='Natal', imagem=_png())
-        self.assertContains(self.client.get(self.painel), novo.imagem.url)
+        html = self.client.get(self.painel).content.decode()
+        trecho = html[html.index('id="avisoAgente"'):]
+        self.assertIn('js/aviso-agente.js', trecho)
+        self.assertIsNone(re.search(r'<script(?![^>]*\bsrc=)[^>]*>', trecho))
 
     def test_cliente_e_agencia_nao_aprovada_nao_veem(self):
         User.objects.create_user('cliente', 'c@x.com', SENHA)

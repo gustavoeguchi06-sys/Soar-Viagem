@@ -12,6 +12,4 @@ urlpatterns = [
     # O orçamento é feito no card da página da viagem, sem abrir o painel.
     path('orcamentos/criar/<slug:slug>/', views.orcamento_criar, name='orcamento_criar'),
     path('orcamentos/<int:pk>/pdf/', views.orcamento_pdf, name='orcamento_pdf'),
-    # o X do pop-up de aviso aos agentes
-    path('aviso/fechar/', views.fechar_aviso, name='fechar_aviso'),
 ]

@@ -1,23 +1,16 @@
-"""O pop-up de aviso aos agentes.
-
-Aparece para o agente aprovado em qualquer página do site até ele fechar no X
-(que grava na sessão; ver views.fechar_aviso). Ao sair e entrar de novo, a
-sessão é outra e o pop-up volta. Não depende do momento do login: quem já
-estava logado quando o aviso foi ligado também vê.
-"""
-from .apps import AVISO_FECHADO
+"""O pop-up de aviso aos agentes: só logo depois do login (ver agencia/apps.py)."""
+from .apps import AVISO_PENDENTE
 
 
 def aviso_agente(request):
-    usuario = getattr(request, 'user', None)
-    if usuario is None or not usuario.is_authenticated:
-        return {}
-    agencia = getattr(usuario, 'agente', None)
-    if agencia is None or not agencia.aprovado:
+    sessao = getattr(request, 'session', None)
+    if sessao is None or not sessao.get(AVISO_PENDENTE):
         return {}
     from .models import AvisoAgente
 
     aviso = AvisoAgente.vigente()
-    if aviso is None or request.session.get(AVISO_FECHADO) == aviso.pk:
+    if aviso is None:
+        # nada no ar agora: não guarda a marca para um aviso ligado mais tarde
+        del sessao[AVISO_PENDENTE]
         return {}
     return {'aviso_agente': aviso}

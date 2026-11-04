@@ -140,6 +140,8 @@ MIDDLEWARE = [
     # dos de cima lê o corpo do envio, então ele ainda é recusado sem ser lido.
     'soar.middleware.LimiteDeEnvioMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # o pop-up de aviso aos agentes sai da sessão só depois de aparecer na tela
+    'agencia.middleware.AvisoAgenteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
