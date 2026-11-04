@@ -11,6 +11,7 @@ from django.db import models
 from django.utils import timezone
 
 from destinations.models import Destino, Saida
+from soar.videos import validar_foto
 
 # Os mesmos tipos de quarto da página da viagem (destinations/quartos.py), com
 # o rótulo que aparece no orçamento e no PDF.
@@ -139,3 +140,41 @@ class Orcamento(models.Model):
     def vencido(self):
         return (self.status == 'enviado' and self.valido_ate is not None
                 and self.valido_ate < timezone.now())
+
+
+class AvisoAgente(models.Model):
+    """O pop-up que o agente vê logo depois de entrar (ex.: "Black do Agente").
+
+    O dono sobe a arte no painel, liga e, se quiser, põe até quando vale. Aparece
+    uma vez a cada login, para qualquer agente aprovado, e fecha no X. Se houver
+    mais de um ligado e dentro do prazo, vale o mais recente.
+    """
+
+    titulo = models.CharField('Nome da campanha', max_length=120,
+                              help_text='Só para o dono reconhecer e para leitores de tela. '
+                                        'Ex.: Black do Agente – novembro.')
+    imagem = models.ImageField('Arte do pop-up', upload_to='avisos/', validators=[validar_foto],
+                               help_text='A imagem inteira aparece no pop-up. Funciona bem em '
+                                         'pé (formato de story) ou quadrada.')
+    link = models.URLField('Link ao clicar na arte', blank=True,
+                           help_text='Opcional. Ex.: o WhatsApp da Soar ou uma página do site.')
+    ativo = models.BooleanField('Mostrar para os agentes', default=True)
+    mostrar_ate = models.DateField('Mostrar até', null=True, blank=True,
+                                   help_text='Opcional. Depois deste dia o pop-up some sozinho.')
+    criado_em = models.DateTimeField('Criado em', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Aviso aos agentes'
+        verbose_name_plural = 'Avisos aos agentes (pop-up do login)'
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return self.titulo
+
+    @classmethod
+    def vigente(cls):
+        hoje = timezone.localdate()
+        return (cls.objects.filter(ativo=True)
+                .filter(models.Q(mostrar_ate__isnull=True) | models.Q(mostrar_ate__gte=hoje))
+                .first())
+

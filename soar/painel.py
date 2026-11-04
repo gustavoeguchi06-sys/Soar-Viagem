@@ -47,6 +47,8 @@ ABAS = [
      None),
     ('Avaliações', 'admin:reviews_avaliacao_changelist', 'reviews.view_avaliacao', 'avaliacoes'),
     ('Agências', 'admin:contas_perfilagente_changelist', 'contas.view_perfilagente', None),
+    # o pop-up que o agente vê ao entrar (ex.: Black do Agente)
+    ('Aviso aos agentes', 'admin:agencia_avisoagente_changelist', DONO, None),
     ('Usuários', 'admin:auth_user_changelist', 'auth.view_user', None),
 ]
 
