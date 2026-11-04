@@ -1,6 +1,6 @@
 {% autoescape off %}Olá, {{ orcamento.cliente_nome }}!
 
-{{ agencia.razao_social }} preparou um orçamento da viagem {{ orcamento.destino.nome }} para você. Ele segue em PDF, em anexo.
+Aqui é {{ agencia.nome_agente }}, da {{ agencia.razao_social }}. Preparei um orçamento da viagem {{ orcamento.destino.nome }} para você. Ele segue em PDF, em anexo.
 
 Orçamento: {{ orcamento.codigo }}
 Saída: {{ orcamento.saida_texto|default:"a combinar" }}
@@ -13,8 +13,11 @@ Válido até: {{ valido_ate|date:"d/m/Y \à\s H:i" }}
 IMPORTANTE: {{ aviso.0 }}
 {{ aviso.1 }}
 
-Para reservar ou tirar dúvidas, responda este e-mail ou fale com a sua agência:
-{{ agencia.razao_social }}{% if agencia.whatsapp %} - WhatsApp {{ agencia.whatsapp }}{% endif %}
+Para reservar ou tirar dúvidas, é só responder este e-mail ou me chamar no WhatsApp.
 
-Soar Operadora
+Um abraço,
+{{ agencia.nome_agente }}
+{{ agencia.razao_social }}{% if agencia.whatsapp %}
+WhatsApp: {{ agencia.whatsapp }}{% endif %}{% if agencia.usuario.email %}
+E-mail: {{ agencia.usuario.email }}{% endif %}
 {% endautoescape %}
