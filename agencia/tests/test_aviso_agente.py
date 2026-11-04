@@ -1,4 +1,4 @@
-"""Pop-up de aviso aos agentes: aparece só logo depois do login aprovado e fecha no X."""
+"""Pop-up de aviso aos agentes: na página principal, logo depois do login aprovado."""
 import io
 import shutil
 import tempfile
@@ -43,45 +43,58 @@ class AvisoAgenteTests(TestCase):
     def setUp(self):
         self.aviso = AvisoAgente.objects.create(titulo='Black do Agente', imagem=_png())
         self.painel = reverse('agencia:painel')
+        self.home = reverse('destinations:home')
 
-    def test_aparece_so_depois_do_login_pelo_b2b(self):
+    def test_login_pelo_b2b_leva_a_pagina_principal_com_o_pop_up(self):
         _agente('ana')
         resposta = self.client.post(reverse('contas:b2b'),
                                     {'username': 'ana', 'password': SENHA}, follow=True)
-        self.assertEqual(resposta.request['PATH_INFO'], self.painel)
+        self.assertEqual(resposta.request['PATH_INFO'], self.home)
         self.assertContains(resposta, 'id="avisoAgente"')
         self.assertContains(resposta, 'aria-label="Fechar aviso"')
         self.assertContains(resposta, self.aviso.imagem.url)
-        # nas páginas seguintes não volta; só no próximo login
-        self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
-        self.assertNotContains(self.client.get(reverse('destinations:home')), 'id="avisoAgente"')
+        # depois de mostrado não volta, nem na página principal; só no próximo login
+        self.assertNotContains(self.client.get(self.home), 'id="avisoAgente"')
         self.client.logout()
         self.client.login(username='ana', password=SENHA)
-        self.assertContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertContains(self.client.get(self.home), 'id="avisoAgente"')
 
-    def test_pedido_que_nao_mostra_a_pagina_nao_gasta_o_aviso(self):
-        # o navegador pede o ícone do site ou uma imagem que não existe logo
-        # depois do login: isso não pode gastar o pop-up
+    def test_login_pela_tela_entrar_tambem(self):
+        _agente('ana')
+        resposta = self.client.post(reverse('contas:entrar'),
+                                    {'username': 'ana', 'password': SENHA}, follow=True)
+        self.assertEqual(resposta.request['PATH_INFO'], self.home)
+        self.assertContains(resposta, 'id="avisoAgente"')
+
+    def test_so_na_pagina_principal(self):
+        # outras páginas não mostram e não gastam o aviso
         _agente('ana')
         self.client.login(username='ana', password=SENHA)
+        self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
         self.client.get('/favicon-que-nao-existe.ico')
-        self.assertContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertContains(self.client.get(self.home), 'id="avisoAgente"')
 
     def test_agente_que_ja_estava_logado_nao_ve(self):
         usuario = _agente('ana')
         AvisoAgente.objects.all().delete()
         self.client.force_login(usuario)
-        self.client.get(self.painel)
+        self.client.get(self.home)
         # o dono liga o aviso depois: só aparece no próximo login
         AvisoAgente.objects.create(titulo='Black', imagem=_png())
-        self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertNotContains(self.client.get(self.home), 'id="avisoAgente"')
+
+    def test_agencia_em_analise_continua_na_tela_de_espera(self):
+        _agente('bia', aprovado=False)
+        resposta = self.client.post(reverse('contas:b2b'), {'username': 'bia', 'password': SENHA})
+        self.assertRedirects(resposta, reverse('contas:agente_area'),
+                             fetch_redirect_response=False)
 
     def test_javascript_em_arquivo_por_causa_da_csp(self):
         # a CSP do site (script-src 'self') bloqueia <script> escrito na página:
         # foi por isso que o pop-up não abria na primeira versão
         _agente('ana')
         self.client.login(username='ana', password=SENHA)
-        html = self.client.get(self.painel).content.decode()
+        html = self.client.get(self.home).content.decode()
         trecho = html[html.index('id="avisoAgente"'):]
         self.assertIn('js/aviso-agente.js', trecho)
         self.assertIsNone(re.search(r'<script(?![^>]*\bsrc=)[^>]*>', trecho))
@@ -100,17 +113,17 @@ class AvisoAgenteTests(TestCase):
         self.aviso.ativo = False
         self.aviso.save()
         self.client.login(username='ana', password=SENHA)
-        self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertNotContains(self.client.get(self.home), 'id="avisoAgente"')
         self.client.logout()
         self.aviso.ativo = True
         self.aviso.mostrar_ate = timezone.localdate() - timedelta(days=1)
         self.aviso.save()
         self.client.login(username='ana', password=SENHA)
-        self.assertNotContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertNotContains(self.client.get(self.home), 'id="avisoAgente"')
 
     def test_ate_hoje_ainda_aparece(self):
         _agente('ana')
         self.aviso.mostrar_ate = timezone.localdate()
         self.aviso.save()
         self.client.login(username='ana', password=SENHA)
-        self.assertContains(self.client.get(self.painel), 'id="avisoAgente"')
+        self.assertContains(self.client.get(self.home), 'id="avisoAgente"')
