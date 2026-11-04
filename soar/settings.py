@@ -159,6 +159,7 @@ TEMPLATES = [
                 'contas.context_processors.sistema_reservas',
                 'contas.context_processors.site_em_construcao',
                 'contas.context_processors.analytics',
+                'agencia.context_processors.aviso_agente',
             ],
         },
     },

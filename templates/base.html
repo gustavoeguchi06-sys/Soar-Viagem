@@ -158,6 +158,7 @@
 <script src="{% static 'js/mascaras.js' %}" defer></script>
 <script src="{% static 'js/envio.js' %}" defer></script>
 {% block scripts %}{% endblock %}
+{% if aviso_agente %}{% include 'agencia/_aviso.html' %}{% endif %}
 {% if analytics_id %}
 {% include 'partials/_cookies.html' %}
 {# o GA só é baixado depois do "Aceitar" no banner — ver static/js/analytics.js #}

@@ -8,7 +8,7 @@ painel não há como criar nem alterar um orçamento, só ver e marcar a situaç
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Orcamento
+from .models import AvisoAgente, Orcamento
 
 
 @admin.register(Orcamento)
@@ -75,3 +75,50 @@ class OrcamentoAdmin(admin.ModelAdmin):
         cor = {'enviado': 'pendente', 'aceito': 'confirmada', 'recusado': 'cancelada'}
         return format_html('<span class="etiqueta etiqueta--{}">{}</span>',
                            cor.get(orcamento.status, 'pendente'), orcamento.get_status_display())
+
+
+@admin.register(AvisoAgente)
+class AvisoAgenteAdmin(admin.ModelAdmin):
+    """O pop-up que o agente vê ao entrar. Só o dono mexe."""
+    list_display = ['titulo', 'previa_lista', 'no_ar', 'mostrar_ate', 'criado_em']
+    list_display_links = ['titulo']
+    fields = ['titulo', 'imagem', 'previa', 'link', 'ativo', 'mostrar_ate']
+    readonly_fields = ['previa']
+
+    @admin.display(description='Arte')
+    def previa_lista(self, aviso):
+        return format_html('<img class="miniatura" src="{}" alt="">', aviso.imagem.url) if aviso.imagem else '-'
+
+    @admin.display(description='Como fica')
+    def previa(self, aviso):
+        if not aviso.imagem:
+            return 'Escolha a arte e salve para ver aqui.'
+        return format_html('<img src="{}" alt="" style="max-width:260px;border-radius:8px">',
+                           aviso.imagem.url)
+
+    @admin.display(description='Situação')
+    def no_ar(self, aviso):
+        if aviso == AvisoAgente.vigente():
+            return format_html('<span class="etiqueta etiqueta--confirmada">aparecendo no login</span>')
+        if not aviso.ativo:
+            return format_html('<span class="etiqueta etiqueta--cancelada">desligado</span>')
+        return format_html('<span class="etiqueta etiqueta--pendente">fora do prazo ou substituído</span>')
+
+    def _dono(self, request):
+        return request.user.is_active and request.user.is_superuser
+
+    def has_module_permission(self, request):
+        return self._dono(request)
+
+    def has_view_permission(self, request, obj=None):
+        return self._dono(request)
+
+    def has_add_permission(self, request):
+        return self._dono(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self._dono(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return self._dono(request)
+

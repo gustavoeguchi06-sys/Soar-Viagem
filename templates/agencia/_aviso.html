@@ -1,0 +1,37 @@
+{% comment %}Pop-up que o agente vê logo depois de entrar. A arte vem do painel
+(Avisos aos agentes). Fecha no X, no Esc ou clicando fora.{% endcomment %}
+<style>
+.aviso-agente { padding: 0; border: 0; background: transparent; overflow: visible;
+                width: fit-content; max-width: 92vw; max-height: 92vh; }
+.aviso-agente::backdrop { background: rgba(8, 12, 10, .72); }
+.aviso-agente img { display: block; width: auto; height: auto; max-width: min(92vw, 460px); max-height: 88vh;
+                    border-radius: 14px; box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
+.aviso-agente__fechar { position: absolute; top: -14px; right: -14px; z-index: 1; width: 44px; height: 44px;
+                        display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
+                        background: #ffffff; color: #14201b; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); }
+.aviso-agente__fechar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4;
+                            stroke-linecap: round; }
+.aviso-agente__fechar:hover { background: #f5a623; }
+.aviso-agente__fechar:focus-visible { outline: 3px solid #f5a623; outline-offset: 2px; }
+@media (max-width: 520px) {
+    .aviso-agente__fechar { top: 8px; right: 8px; }
+}
+</style>
+<dialog class="aviso-agente" id="avisoAgente" aria-label="{{ aviso_agente.titulo }}">
+    <button type="button" class="aviso-agente__fechar" aria-label="Fechar aviso" autofocus>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    {% if aviso_agente.link %}<a href="{{ aviso_agente.link }}" target="_blank" rel="noopener">{% endif %}
+    <img src="{{ aviso_agente.imagem.url }}" alt="{{ aviso_agente.titulo }}">
+    {% if aviso_agente.link %}</a>{% endif %}
+</dialog>
+<script>
+(function () {
+    var d = document.getElementById('avisoAgente');
+    if (!d || typeof d.showModal !== 'function') { if (d) d.setAttribute('open', ''); }
+    else { d.showModal(); }
+    function fechar() { d.close ? d.close() : d.removeAttribute('open'); }
+    d.querySelector('.aviso-agente__fechar').addEventListener('click', fechar);
+    d.addEventListener('click', function (e) { if (e.target === d) fechar(); });
+})();
+</script>
