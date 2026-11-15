@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Soar Operadora | Viagens em grupo pelo Brasil{% endblock %}</title>
+    {# foto, título e descrição do link no WhatsApp e redes (soar/compartilhar.py) #}
+    {% include 'partials/_compartilhar.html' with c=compartilhar %}
     {# fontes servidas pelo próprio site — ver o comentário em static/css/fontes.css #}
     <link rel="preload" href="{% static 'fonts/inter-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{% static 'fonts/sora-latin.woff2' %}" as="font" type="font/woff2" crossorigin>

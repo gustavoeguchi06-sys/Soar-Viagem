@@ -660,13 +660,14 @@ class InteressadoAdmin(admin.ModelAdmin):
     e-mail (agencia/avisos.py).
     """
     list_display = ['nome', 'cpf', 'destino', 'saida_texto', 'pedido', 'whatsapp_link', 'email',
-                    'cep', 'enviado_para', 'criado_em']
-    list_filter = ['destino', ('agencias', admin.EmptyFieldListFilter), 'agencias']
-    search_fields = ['nome', 'cpf', 'email', 'whatsapp', 'cep']
-    search_help_text = 'Busque por nome, CPF (com ou sem pontos), e-mail, WhatsApp ou CEP.'
+                    'cep_e_cidade', 'enviado_para', 'criado_em']
+    list_filter = ['destino', ('agencias', admin.EmptyFieldListFilter), 'agencias', 'cep_uf']
+    search_fields = ['nome', 'cpf', 'email', 'whatsapp', 'cep', 'cep_cidade', 'cep_bairro']
+    search_help_text = ('Busque por nome, CPF (com ou sem pontos), e-mail, WhatsApp, CEP, '
+                        'cidade ou bairro.')
     date_hierarchy = 'criado_em'
     readonly_fields = ['destino', 'saida_texto', 'pedido', 'nome', 'cpf', 'historico_cpf',
-                       'email_link', 'whatsapp_link', 'cep', 'criado_em']
+                       'email_link', 'whatsapp_link', 'cep', 'endereco_do_cep', 'criado_em']
     # a ficha em blocos: o que foi pedido, quem pediu, se já viajou e para quem mandar
     fieldsets = [
         ('Pedido', {
@@ -675,7 +676,7 @@ class InteressadoAdmin(admin.ModelAdmin):
         }),
         ('Cliente', {
             'classes': ['ficha-bloco'],
-            'fields': [('nome', 'cpf'), ('whatsapp_link', 'email_link'), 'cep'],
+            'fields': [('nome', 'cpf'), ('whatsapp_link', 'email_link'), ('cep', 'endereco_do_cep')],
         }),
         ('Histórico do cliente', {
             'classes': ['ficha-bloco'],
@@ -759,6 +760,29 @@ class InteressadoAdmin(admin.ModelAdmin):
         else:
             atalho = ''
         return format_html('<div class="ficha-historico">{} {}{}</div>', etiqueta, pedidos, atalho)
+
+    @admin.display(description='Endereço do CEP')
+    def endereco_do_cep(self, interessado):
+        """Rua, complemento, bairro, cidade e UF do CEP (ViaCEP). Pedido antigo ou que
+        ficou sem consulta é consultado aqui, ao abrir a ficha."""
+        if interessado.cep_consultado_em is None:
+            from . import cep
+            if not cep.preencher(interessado):
+                return format_html('<span class="ficha-quieto">Não deu para consultar o CEP '
+                                   'agora. Abra a ficha de novo daqui a pouco.</span>')
+        if not interessado.cep_cidade:
+            return format_html('<span class="etiqueta etiqueta--fila">CEP não encontrado</span> '
+                               '<span class="ficha-quieto">Confira com o cliente.</span>')
+        linha1 = ' — '.join(p for p in (interessado.cep_endereco, interessado.cep_bairro) if p)
+        return format_html('{}<span class="ficha-quieto" style="display:block;margin:0">{}/{}</span>',
+                           linha1 or '', interessado.cep_cidade, interessado.cep_uf)
+
+    @admin.display(description='CEP', ordering='cep')
+    def cep_e_cidade(self, interessado):
+        if interessado.cep_cidade:
+            return format_html('{}<br><small class="ficha-quieto">{}/{}</small>', interessado.cep,
+                               interessado.cep_cidade, interessado.cep_uf)
+        return interessado.cep
 
     @admin.display(description='E-mail', ordering='email')
     def email_link(self, interessado):

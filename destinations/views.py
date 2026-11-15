@@ -10,8 +10,10 @@ from django.views.decorators.http import require_POST
 from urllib.parse import urlencode
 
 from reviews.forms import AvaliacaoForm
+from soar import compartilhar
 from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 
+from . import cep
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
@@ -178,6 +180,10 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         # (?saida=) ou o padrão da viagem
         'saida_marcada': next((str(s['id']) for s in viagem['saidas'] if s.get('padrao')), ''),
         'acomodacao_marcada': 'casal',
+        # o link mandado no WhatsApp aparece com a foto grande da viagem
+        'compartilhar': compartilhar.dados(
+            request, '{} | Soar Operadora'.format(destino.nome), viagem.get('subtitulo'),
+            compartilhar.primeira_foto(*viagem.get('fotos', []))),
     }
 
     # veio de um card de saída da página inicial ou do calendário (?saida=12)
@@ -248,6 +254,8 @@ def interesse(request, slug):
 
     interessado = form.save(commit=False)
     interessado.destino = destino
+    # endereço do CEP para o painel do dono; se o ViaCEP falhar, o painel tenta depois
+    cep.preencher(interessado)
     interessado.save()
     return redirect(destino.get_absolute_url() + '?enviado=1#reservar')
 

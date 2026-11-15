@@ -433,6 +433,13 @@ class Interessado(models.Model):
     email = models.EmailField('E-mail')
     whatsapp = models.CharField('WhatsApp', max_length=20)
     cep = models.CharField('CEP', max_length=9)
+    # o endereço do CEP, consultado no ViaCEP (destinations/cep.py); só o dono vê
+    cep_endereco = models.CharField('Rua e complemento', max_length=200, blank=True, editable=False)
+    cep_bairro = models.CharField('Bairro', max_length=100, blank=True, editable=False)
+    cep_cidade = models.CharField('Cidade', max_length=100, blank=True, editable=False)
+    cep_uf = models.CharField('UF', max_length=2, blank=True, editable=False, db_index=True)
+    cep_consultado_em = models.DateTimeField('CEP consultado em', null=True, blank=True,
+                                             editable=False)
     # o que a pessoa marcou no card: a data e os quartos (destinations/escolha_quartos.py)
     saida = models.ForeignKey('Saida', on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='interessados', verbose_name='Data de saída')
