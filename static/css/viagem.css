@@ -810,9 +810,16 @@ html[data-tema="escuro"] .btn-tema__sol { display: block; }
 .contador input::-webkit-outer-spin-button, .contador input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .contador input:disabled { color: var(--tinta-suave); }
 .contador--erro .contador__caixa { border-color: #b42318; }
-.acom-total { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 10px 2px 0;
-              font-size: .86rem; color: var(--tinta-suave); }
-.acom-total b { font-size: 1.02rem; color: var(--preto); }
+/* Preço final do orçamento: em destaque, não pode passar despercebido */
+.acom-total { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+              gap: 4px 12px; margin: 12px 0 0; padding: 12px 14px; border-radius: var(--r-md);
+              background: var(--verde-claro); border: 1px solid rgba(20, 108, 67, .25);
+              font-size: .92rem; font-weight: 600; color: var(--preto); }
+.acom-total b { font-family: 'Sora', sans-serif; font-size: 1.45rem; font-weight: 800;
+                color: var(--verde); line-height: 1.15; }
+html[data-tema="escuro"] .acom-total { background: rgba(127, 220, 167, .12);
+                                       border-color: rgba(127, 220, 167, .35); }
+html[data-tema="escuro"] .acom-total b { color: #7fdca7; }
 .acom--esgotada { cursor: not-allowed; }
 .acom--esgotada:hover { background: none; }
 .acom--esgotada .acom__nome b, .acom--esgotada .acom__preco { color: var(--tinta-suave); text-decoration: line-through; }
