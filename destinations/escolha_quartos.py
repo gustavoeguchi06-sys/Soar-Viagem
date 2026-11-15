@@ -21,7 +21,8 @@ class EscolhaDeQuartos:
     """Mistura para um Form: chame `criar_campos_de_quartos` no __init__ e
     `conferir_quartos` no clean."""
 
-    def criar_campos_de_quartos(self, destino, iniciais=None):
+    def criar_campos_de_quartos(self, destino, iniciais=None, ja_marcado=True):
+        """ja_marcado=False: tudo começa em zero (a agência escolhe quartos e pessoas)."""
         from .conteudo import _acomodacoes
         self._acomodacoes = _acomodacoes(destino)
         self.quartos_escolhidos = []
@@ -33,7 +34,7 @@ class EscolhaDeQuartos:
             if a.get('sem_quarto'):
                 # bate-volta: só quantas pessoas
                 pessoas = marcados.get(a['chave'], {}).get('pessoas', 0) if marcados else \
-                    (1 if a['padrao'] else 0)
+                    (1 if a['padrao'] and ja_marcado else 0)
                 self.fields['pessoas_' + a['chave']] = forms.IntegerField(
                     label='Pessoas', required=False, min_value=0, max_value=MAX_ADULTOS,
                     initial=pessoas,
@@ -45,7 +46,7 @@ class EscolhaDeQuartos:
                 um_quarto, pessoas = q.get('quartos', 0), q.get('pessoas', 0)
             else:
                 # sem nada escolhido ainda, já vem 1 quarto do tipo padrão (casal), lotado
-                um_quarto = 1 if a['padrao'] else 0
+                um_quarto = 1 if a['padrao'] and ja_marcado else 0
                 pessoas = um_quarto * a['capacidade']
             self.fields['quartos_' + a['chave']] = forms.IntegerField(
                 label='Quartos', required=False, min_value=0, max_value=MAX_ADULTOS,

@@ -1686,3 +1686,9 @@ fieldset.ficha-bloco .field-cpf ~ .help { display: none; }
     .ficha-historico { overflow-x: auto; }
     .seletor-agencia .seletor-agencia__op { box-sizing: border-box; }
 }
+
+/* Tamanho da foto na prévia do painel (destinations/admin.py, aviso_resolucao) */
+.resolucao { display: block; margin-top: 6px; font-size: .78rem; max-width: 420px; line-height: 1.35; }
+.resolucao--ok { color: var(--body-quiet-color); }
+.resolucao--pequena { color: #96590b; background: #fef4e2; padding: 6px 8px; border-radius: 6px; }
+html[data-theme="dark"] .resolucao--pequena { background: #3a2a08; color: #f7c164; }

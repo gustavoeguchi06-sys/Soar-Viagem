@@ -85,6 +85,10 @@ class PainelAgenciaTests(TestCase):
         self.assertContains(resposta, 'name="cliente_nome"')
         self.assertContains(resposta, 'name="idades_criancas"')
         self.assertNotContains(resposta, 'Reservar agora')
+        # a agência preenche quartos e pessoas: nada vem marcado
+        form = resposta.context['form_orcamento']
+        self.assertEqual((form['quartos_casal'].value(), form['pessoas_casal'].value()), (0, 0))
+        self.assertContains(resposta, 'data-pessoas-manual')
         # vindo do calendário, a data já vem marcada
         resposta = self.client.get(pagina, {'saida': self.saida.pk})
         self.assertEqual(resposta.context['saida_marcada'], str(self.saida.pk))

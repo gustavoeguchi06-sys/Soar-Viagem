@@ -10,6 +10,9 @@
 {% block content %}
 {# ===================== HERO ===================== #}
 <section class="hero">
+    {# foto pequena para a tela não é esticada: aparece inteira sobre um fundo
+       desfocado dela mesma (viagem.js marca hero__foto--pequena) #}
+    <img class="hero__fundo" id="heroFundo" src="{{ viagem.fotos.0 }}" alt="" aria-hidden="true">
     <img class="hero__foto" id="heroFoto" src="{{ viagem.fotos.0 }}" alt="{{ destino.nome }}">
     {% if viagem.thumbs %}
     <button class="seta seta--esq" type="button" data-hero="-1" aria-label="Foto anterior">
@@ -275,7 +278,7 @@
                 cada tipo de quarto, quantos quartos e quantas pessoas. Cada quarto leva de 1
                 até a lotação dele (destinations/escolha_quartos.py confere); os botões − e +
                 e o total são do viagem.js.{% endcomment %}
-                <div class="acomodacoes" data-quartos-orcamento>
+                <div class="acomodacoes" data-quartos-orcamento{% if form_orcamento %} data-pessoas-manual{% endif %}>
                     <b>Escolha os quartos</b>
                     <small style="display:block;margin:2px 0 6px;font-size:.85em;opacity:.7;font-weight:400">Preços por pessoa. Dá para escolher mais de um quarto.</small>
                     {% for linha in form_quartos.quartos_campos %}
