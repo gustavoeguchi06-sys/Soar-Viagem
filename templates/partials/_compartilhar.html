@@ -1,0 +1,18 @@
+{% load static %}{% comment %}Etiquetas de compartilhamento (soar/compartilhar.py). Sem `c`, o padrão do site.{% endcomment %}
+{% with titulo=c.titulo|default:"Soar Operadora | Viagens em grupo pelo Brasil" descricao=c.descricao|default:"Operadora de viagens em grupo pelo Brasil: ecoturismo e turismo de aventura com transporte, hospedagem e guias." %}
+    <meta name="description" content="{{ descricao }}">
+    <meta property="og:site_name" content="Soar Operadora">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:type" content="{{ c.tipo|default:'website' }}">
+    <meta property="og:title" content="{{ titulo }}">
+    <meta property="og:description" content="{{ descricao }}">
+    <meta property="og:url" content="{% if c.url %}{{ c.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endif %}">
+    {% if c.imagem %}
+    <meta property="og:image" content="{{ c.imagem }}">
+    <meta property="og:image:alt" content="{{ titulo }}">
+    <meta name="twitter:card" content="summary_large_image">
+    {% else %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/logo-soar.png' %}">
+    <meta name="twitter:card" content="summary">
+    {% endif %}
+{% endwith %}

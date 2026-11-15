@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from urllib.parse import urlencode
 
 from reviews.forms import AvaliacaoForm
+from soar import compartilhar
 from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 
 from .conteudo import montar_viagem
@@ -178,6 +179,10 @@ def pagina_da_viagem(request, destino, form_interesse=None, form_orcamento=None,
         # (?saida=) ou o padrão da viagem
         'saida_marcada': next((str(s['id']) for s in viagem['saidas'] if s.get('padrao')), ''),
         'acomodacao_marcada': 'casal',
+        # o link mandado no WhatsApp aparece com a foto grande da viagem
+        'compartilhar': compartilhar.dados(
+            request, '{} | Soar Operadora'.format(destino.nome), viagem.get('subtitulo'),
+            compartilhar.primeira_foto(*viagem.get('fotos', []))),
     }
 
     # veio de um card de saída da página inicial ou do calendário (?saida=12)

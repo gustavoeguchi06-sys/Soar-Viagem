@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from destinations import instagram
 from destinations.models import Destino
+from soar import compartilhar
 from soar.seguranca import LIMITE_NEWSLETTER, ip_do_cliente
 
 from .models import Artigo, CapaBlog, Categoria, Inscricao
@@ -125,6 +126,9 @@ def artigo(request, slug):
         'previa': previa,
         'anterior': anterior,
         'proximo': proximo,
+        'compartilhar': compartilhar.dados(
+            request, artigo.titulo_em_linha, artigo.resumo,
+            compartilhar.primeira_foto(artigo.capa.url if artigo.capa else ''), tipo='article'),
         **_lateral(),
     })
 
