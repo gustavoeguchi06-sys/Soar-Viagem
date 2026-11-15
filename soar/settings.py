@@ -425,6 +425,10 @@ CSP_SOMENTE_RELATORIO = _ligado('SOAR_CSP_SOMENTE_RELATORIO', False)
 INSTAGRAM_TOKEN = ('' if sys.argv[1:2] == ['test']
                    else os.environ.get('SOAR_INSTAGRAM_TOKEN', '').strip())
 
+# Endereço do CEP do "Saiba mais" no painel do dono (destinations/cep.py, ViaCEP).
+# Os testes nunca consultam de verdade: os que precisam ligam e simulam a resposta.
+CEP_CONSULTA_ATIVA = sys.argv[1:2] != ['test']
+
 # Google Analytics 4 (static/js/analytics.js). Vazio = desligado: nenhum script
 # do Google, nenhum banner de cookies, e a CSP continua sem nenhum endereço de
 # fora. Ligado, o script só é baixado depois que o visitante clica em Aceitar

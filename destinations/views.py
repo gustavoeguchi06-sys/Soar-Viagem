@@ -13,6 +13,7 @@ from reviews.forms import AvaliacaoForm
 from soar import compartilhar
 from soar.seguranca import LIMITE_AVALIACAO, LIMITE_INTERESSE, ip_do_cliente
 
+from . import cep
 from .conteudo import montar_viagem
 from .forms import InteresseForm
 from .inicio import montar_inicio
@@ -253,6 +254,8 @@ def interesse(request, slug):
 
     interessado = form.save(commit=False)
     interessado.destino = destino
+    # endereço do CEP para o painel do dono; se o ViaCEP falhar, o painel tenta depois
+    cep.preencher(interessado)
     interessado.save()
     return redirect(destino.get_absolute_url() + '?enviado=1#reservar')
 
