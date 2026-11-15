@@ -65,7 +65,9 @@ class OrcamentoViagemForm(EscolhaDeQuartos, forms.ModelForm):
         self.fields['saida'].choices = [('', 'A combinar')] + [
             (chave, s.texto) for chave, s in self._saidas.items()]
 
-        self.criar_campos_de_quartos(destino, quartos_iniciais)
+        # a agência preenche quartos e pessoas ela mesma: nada vem marcado
+        # (só o que o visitante já pediu, quando o orçamento parte de um "Saiba mais")
+        self.criar_campos_de_quartos(destino, quartos_iniciais, ja_marcado=False)
 
     @property
     def campos_do_popup(self):

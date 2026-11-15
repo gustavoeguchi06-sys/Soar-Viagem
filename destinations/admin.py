@@ -81,6 +81,28 @@ def miniatura(imagem, alt=''):
     return format_html('<img class="miniatura" src="{}" alt="{}">', imagem.url, alt)
 
 
+# A foto da capa e da galeria vira a foto grande do topo da página da viagem,
+# que ocupa a largura da tela. Menor que isto, ela aparece ampliada e borrada.
+LARGURA_BOA_TOPO = 1600
+
+
+def aviso_resolucao(imagem):
+    """O tamanho da foto e, se for pequena para o topo da página, um aviso."""
+    if not imagem:
+        return ''
+    try:
+        largura, altura = imagem.width, imagem.height
+    except Exception:   # arquivo sumiu do armazenamento: a prévia já mostra
+        return ''
+    if largura >= LARGURA_BOA_TOPO:
+        return format_html('<small class="resolucao resolucao--ok">{} × {} px</small>',
+                           largura, altura)
+    return format_html(
+        '<small class="resolucao resolucao--pequena">{} × {} px: pequena para o topo da '
+        'página, vai aparecer menos nítida. Envie com pelo menos {} px de largura '
+        '(ideal 1920 × 1080).</small>', largura, altura, LARGURA_BOA_TOPO)
+
+
 def previa_video(arquivo):
     """O vídeo enviado, pequeno e com os controles, para conferir antes de salvar de novo."""
     if not arquivo:
@@ -106,7 +128,8 @@ class ImagemDestinoInline(admin.TabularInline):
 
     @admin.display(description='Prévia')
     def previa(self, obj):
-        return miniatura(obj.imagem, obj.legenda)
+        return format_html('{}{}', miniatura(obj.imagem, obj.legenda),
+                           aviso_resolucao(obj.imagem))
 
 
 class VideoDestinoInline(admin.TabularInline):
@@ -324,8 +347,9 @@ class DestinoAdmin(admin.ModelAdmin):
         if not destino.imagem_capa:
             return format_html('<span class="miniatura miniatura--grande miniatura--vazia">'
                                'Sem capa: a página usa uma ilustração da Soar.</span>')
-        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">',
-                           destino.imagem_capa.url, destino.nome)
+        return format_html('<img class="miniatura miniatura--grande" src="{}" alt="{}">{}',
+                           destino.imagem_capa.url, destino.nome,
+                           aviso_resolucao(destino.imagem_capa))
 
     @admin.display(description='A partir de', ordering='preco_base')
     def a_partir_de(self, destino):

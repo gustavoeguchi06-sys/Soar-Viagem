@@ -70,7 +70,9 @@ class Destino(models.Model):
                             help_text='Preenchido automaticamente a partir do nome.')
     pais = models.CharField('País', max_length=80, default='Brasil')
     descricao = models.TextField('Descrição')
-    imagem_capa = models.ImageField(validators=[validar_foto], verbose_name='Imagem de capa', upload_to='destinos/', blank=True, null=True)
+    imagem_capa = models.ImageField(validators=[validar_foto], verbose_name='Imagem de capa', upload_to='destinos/', blank=True, null=True,
+                                    help_text='Foto deitada e grande: ideal 1920 x 1080 px, no mínimo 1600 de '
+                                              'largura. Menor que isso fica borrada no topo da página.')
     melhor_epoca = models.CharField('Melhor época para visitar', max_length=120, blank=True)
     destaque = models.BooleanField('Destaque na página inicial', default=False)
     soar_60 = models.BooleanField(

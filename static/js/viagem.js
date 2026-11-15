@@ -8,10 +8,30 @@
     var fotos = thumbs.map(function (b) { return b.dataset.foto; });
     var atual = 0;
 
+    var heroFundo = document.getElementById('heroFundo');
+
+    // Foto menor que a faixa do topo: esticar até cobrir deixaria a imagem
+    // estourada (borrada, pixelada). Acima de 1,25x de ampliação ela aparece
+    // inteira, sem esticar, sobre um fundo desfocado dela mesma.
+    function conferirTamanho() {
+        if (!heroFoto || !heroFoto.naturalWidth) { return; }
+        var caixa = heroFoto.parentNode;
+        var ampliacao = Math.max(caixa.clientWidth / heroFoto.naturalWidth,
+                                 caixa.clientHeight / heroFoto.naturalHeight) *
+                        (window.devicePixelRatio > 1 ? 1.5 : 1);
+        heroFoto.classList.toggle('hero__foto--pequena', ampliacao > 1.25);
+    }
+    if (heroFoto) {
+        heroFoto.addEventListener('load', conferirTamanho);
+        if (heroFoto.complete) { conferirTamanho(); }
+        window.addEventListener('resize', conferirTamanho);
+    }
+
     function mostrarFoto(i) {
         if (!heroFoto || !fotos.length) { return; }
         atual = (i + fotos.length) % fotos.length;
         heroFoto.src = fotos[atual];
+        if (heroFundo) { heroFundo.src = fotos[atual]; }
         thumbs.forEach(function (b, k) { b.classList.toggle('ativo', k === atual); });
     }
 
@@ -239,7 +259,10 @@
         var quartos = numero(q);
         if (!p) { atualizarTotal(); return; }
         var pessoas = numero(p);
-        if (antes !== null && quartos > antes) { pessoas += (quartos - antes) * lotacao; }
+        // no orçamento da agência cada quarto novo entra com 1 pessoa (o mínimo) e
+        // o agente sobe o resto; no "Saiba mais" do visitante, já lota o quarto
+        var porQuarto = caixaQuartos && caixaQuartos.hasAttribute('data-pessoas-manual') ? 1 : lotacao;
+        if (antes !== null && quartos > antes) { pessoas += (quartos - antes) * porQuarto; }
         pessoas = Math.max(quartos, Math.min(pessoas, quartos * lotacao));
         p.value = pessoas;
         p.min = quartos;

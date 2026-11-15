@@ -139,6 +139,11 @@ body.pagina-viagem {
 .hero { position: relative; min-height: max(430px, min(46vw, 680px, 78vh)); display: flex; align-items: flex-end;
         overflow: hidden; background: var(--preto); }
 .hero__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Foto pequena para a tela (viagem.js): inteira, sem esticar, sobre ela mesma desfocada */
+.hero__fundo { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px);
+               max-width: none; object-fit: cover; filter: blur(28px) brightness(.8); display: none; }
+.hero:has(.hero__foto--pequena) .hero__fundo { display: block; }
+.hero__foto--pequena { object-fit: contain; }
 .hero::after {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(9, 18, 14, .55) 0%, rgba(9, 18, 14, .12) 34%, rgba(9, 18, 14, .82) 100%);
