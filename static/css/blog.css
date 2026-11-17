@@ -13,8 +13,8 @@
 
 /* -------- HERO -------- */
 .blog-hero { position: relative; color: #fff; overflow: hidden;
-             /* mesma regra do topo da viagem: 460px fixos cortavam 2/3 da foto */
-             min-height: max(460px, min(46vw, 680px, 78vh)); display: flex; align-items: flex-end; }
+             /* 16:9 como a foto recomendada, até a altura da tela (igual ao topo da viagem) */
+             min-height: max(460px, min(56.25vw, 100vh)); display: flex; align-items: flex-end; }
 .blog-hero__bg { position: absolute; inset: 0;
                  background: linear-gradient(135deg, #0e3b30 0%, #1c6b52 45%, #2f9c7e 100%); }
 .blog-hero__overlay { position: absolute; inset: 0;
@@ -210,7 +210,7 @@
 .blog-capa h1 { font-size: clamp(2.1rem, 4.6vw, 3.6rem); font-weight: 800; line-height: 1.08; margin: 12px 0 14px; color: #fff; }
 .blog-capa__sub { font-size: 1.02rem; color: rgba(255,255,255,.92); margin: 0 0 22px; line-height: 1.5; max-width: 36ch; }
 /* com foto do painel, o topo cresce para a foto aparecer (mesma ideia dos outros banners) */
-.blog-capa--foto { min-height: max(380px, min(40vw, 560px, 70vh)); }
+.blog-capa--foto { min-height: max(380px, min(56.25vw, 100vh)); }
 .blog-busca { display: flex; max-width: 480px; background: #fff; border-radius: 12px;
               padding: 6px; box-shadow: 0 14px 34px -18px rgba(0,0,0,.5); }
 .blog-busca input { flex: 1; border: 0; outline: 0; padding: 12px 14px; font-size: .95rem;
