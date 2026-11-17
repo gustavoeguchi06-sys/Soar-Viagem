@@ -10,9 +10,6 @@
 {% block content %}
 {# ===================== HERO ===================== #}
 <section class="hero">
-    {# foto pequena para a tela não é esticada: aparece inteira sobre um fundo
-       desfocado dela mesma (viagem.js marca hero__foto--pequena) #}
-    <img class="hero__fundo" id="heroFundo" src="{{ viagem.fotos.0 }}" alt="" aria-hidden="true">
     <img class="hero__foto" id="heroFoto" src="{{ viagem.fotos.0 }}" alt="{{ destino.nome }}">
     {% if viagem.thumbs %}
     <button class="seta seta--esq" type="button" data-hero="-1" aria-label="Foto anterior">

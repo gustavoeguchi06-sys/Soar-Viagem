@@ -273,10 +273,13 @@ class SaibaMaisTests(TestCase):
         # o pedido do visitante não é o orçamento da agência: as pessoas sobem sozinhas
         self.assertNotContains(resposta, 'data-pessoas-manual')
 
-    def test_foto_do_topo_tem_o_fundo_para_foto_pequena(self):
+    def test_nenhum_comentario_do_template_vaza_para_a_pagina(self):
+        # {# #} do Django vale só numa linha: um comentário de duas linhas saiu
+        # como texto no topo da viagem e empurrou o título para o meio
         resposta = self.client.get(self.destino.get_absolute_url())
-        self.assertContains(resposta, 'id="heroFundo"')
         self.assertContains(resposta, 'id="heroFoto"')
+        self.assertNotContains(resposta, '{#')
+        self.assertNotContains(resposta, '#}')
 
     def test_enviar_guarda_os_dados_e_mostra_a_mensagem(self):
         from ..models import Interessado
